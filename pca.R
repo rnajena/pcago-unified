@@ -17,7 +17,7 @@ applyPCA <- function(inputdata) {
   }
   
   # Extract the actual data (as the first column are the gene ids)
-  X <- inputdata[, 2:ncol(inputdata)]
+  X <- inputdata[,-1]
   X <- t(X) # We want to do PCA for our conditions
   
   # Extract the genes for later use
@@ -36,7 +36,10 @@ applyPCA <- function(inputdata) {
   transformed <- data.frame("condition" = conditions, result$x)
   rownames(transformed) <- c() # We want an actual column
   
+  variances <- data.frame(var = (result$sdev)^2)
+  rownames(variances) <- names(result$rotation)
+  
   return(list("transformed" = transformed,
-              "var" = (result$sdev)^2,
+              "var" = variances,
               "pc" = result$rotation))
 }

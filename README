@@ -10,5 +10,5 @@ shiny >= 1.0.0
 DT >= 0.2
 shinyBS >= 0.61
 shinyjs >= 0.9
-gglot2 >= 2.2.1
+ggplot2 >= 2.2.1
 matrixStats >= 0.51.0

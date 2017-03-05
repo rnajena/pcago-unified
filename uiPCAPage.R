@@ -34,12 +34,14 @@ uiPCAPage <- function() {
                    tabsetPanel(
                      tabPanel("Transformed conditions", downloadableDataTableOutput("transformedconditions")),
                      tabPanel("Principal components", downloadableDataTableOutput("pca.principalcomponents")),
+                     tabPanel("Principal component variances", downloadableDataTableOutput("pca.var")),
                      tabPanel("Gene variance", downloadableDataTableOutput("genes.variance")),
                      type = "pills"
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
                      tabPanel("Conditions", plotOutput("pca.conditionplot")),
+                     tabPanel("Gene variance", plotOutput("genes.variance.plot")),
                      type = "pills"
                    ))
         )

@@ -82,11 +82,58 @@ shinyServer(function(input, output, session) {
   output$genes.variance <- DT::renderDataTable(annotation()[c("id", "var")], options = list(scrollX = TRUE))
   
   # PCA results
-  output$transformedconditions <- DT::renderDataTable(pca()$transformed, options = list(scrollX = TRUE))
-  output$pca.principalcomponents <- DT::renderDataTable(pca()$pc, options = list(scrollX = TRUE))
+  output$transformedconditions <- DT::renderDataTable({
+    
+      if(is.null(pca())) {
+        return(NULL)
+      }
+      else
+      {
+        return(pca()$transformed)
+      }
+    
+    }, options = list(scrollX = TRUE))
+  output$pca.principalcomponents <- DT::renderDataTable({
+    
+      if(is.null(pca())) {
+        return(NULL)
+      }
+      else
+      {
+        return(pca()$pc)
+      }
+    
+    }, options = list(scrollX = TRUE))
+  
+  output$pca.var <- DT::renderDataTable({
+    
+    if(is.null(pca())) {
+      return(NULL)
+    }
+    else
+    {
+      return(pca()$var)
+    }
+    
+  }, options = list(scrollX = TRUE))
+  
+  # Variance plots
+  output$genes.variance.plot <- renderPlot({
+    if(is.null(annotation())) {
+      return(NULL)
+    }
+    
+    ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
+  })
   
   # PCA plots
   output$pca.conditionplot <- renderPlot({
+    
+    if(is.null(pca())) {
+      return(NULL)
+    }
+    
+    print("render")
     
     dimensions.available <- ncol(pca()$transformed) - 1
     dimensions.requested <- c("PC1", "PC2")

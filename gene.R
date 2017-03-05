@@ -39,10 +39,17 @@ annotateGenes <- function(readcounts) {
 #' @examples
 selectTopVariantGenes <- function(readcounts, annotation, top) {
   
+  if(is.null(readcounts) || is.null(annotation) || top <= 0 || ncol(readcounts) < 2 || nrow(readcounts) == 0) {
+    return(NULL)
+  }
+  
   topgeneids <- annotation[1:top,1]
+  indices <- na.omit(match(topgeneids, readcounts$id))
+  
+  result <- readcounts[indices,]
   
   print(topgeneids)
-  print(which(readcounts$id %in% topgeneids))
+  print(result)
   
-  return(readcounts[which(readcounts$id %in% topgeneids),])
+  return(result)
 }
