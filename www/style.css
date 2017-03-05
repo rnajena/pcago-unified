@@ -1,0 +1,13 @@
+.navbar-brand {
+	padding-top: 5px!important;
+	padding-bottom: 5px!important;
+}
+
+.header-logo {
+	height: 100%;
+}
+
+.nav-pills {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
