@@ -2,7 +2,7 @@ library(shiny)
 source("uiPCADataPanel.R")
 source("uiPCAPlotPanel.R")
 source("uiPCAPCAPanel.R")
-source("uiDownloadableDataTable.R")
+source("widgetDownloadableDataTable.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -24,13 +24,18 @@ uiPCAPage <- function() {
         tabsetPanel(
           tabPanel("Read counts", 
                    tabsetPanel(
-                     tabPanel("Input", downloadableDataTableOutput("readcounts")),
-                     tabPanel("Normalized", downloadableDataTableOutput("readcounts.normalized")),
+                     tabPanel("Input read counts", downloadableDataTableOutput("readcounts")),
+                     tabPanel("Normalized read counts", downloadableDataTableOutput("readcounts.normalized")),
                      type = "pills"
                    )),
-          tabPanel("Annotation",
+          tabPanel("Genes",
                    tabsetPanel(
-                     tabPanel("Gene variance", downloadableDataTableOutput("annotation.var")),
+                     tabPanel("Variance", downloadableDataTableOutput("annotation.var")),
+                     type = "pills"
+                   )),
+          tabPanel("Conditions",
+                   tabsetPanel(
+                     tabPanel("Parameters"),
                      type = "pills"
                    )),
           tabPanel("Result tables",

@@ -4,7 +4,8 @@ library(shinyBS)
 source("readCountImporter.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
-source("uiImporterWidget.R")
+source("widgetGenericImporter.R")
+source("widgetInPlaceHelp.R")
 
 #' Creates the data options panel that allows the user to upload and normalize the data
 #'
@@ -34,7 +35,8 @@ uiPCADataPanel <- function() {
                       radioButtons("pca.data.normalization",
                                    "Apply read count normalization:",
                                    supportedReadcountNormalizationTypes),
-                      helpText("RPKM (Reads per Kilobase per Million mapped reads) is not supported. See the PCAGO help for more information why RPKM is not included."))
+                      helpText("RPKM (Reads per Kilobase per Million mapped reads) is not supported. See the PCAGO help for more information why RPKM is not included.")),
+      bsCollapsePanel("Conditions")
     )
   )
 }

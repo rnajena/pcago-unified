@@ -11,3 +11,16 @@
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
+
+.in-place-help .btn {
+	font-size: 16px;
+	background-color: transparent;
+}
+
+.in-place-help .well {
+	padding: 0;
+}
+
+.in-place-help .help-block {
+	margin-left: 10px;
+}

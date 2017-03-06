@@ -12,3 +12,7 @@ shinyBS >= 0.61
 shinyjs >= 0.9
 ggplot2 >= 2.2.1
 matrixStats >= 0.51.0
+
+2. Credits
+
+Uses code from https://github.com/daattali/advanced-shiny by Dean Attali. Licensed under the MIT license.

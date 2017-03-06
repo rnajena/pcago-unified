@@ -16,8 +16,8 @@ source("annotationImporter.R")
 source("readCountNormalizer.R")
 source("gene.R")
 source("pca.R")
-source("uiImporterWidget.R")
-source("uiDownloadableDataTable.R")
+source("widgetGenericImporter.R")
+source("widgetDownloadableDataTable.R")
 
 options(shiny.usecairo=TRUE)
 
