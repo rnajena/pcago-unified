@@ -5,6 +5,7 @@
 # http://shiny.rstudio.com
 #
 
+library(Cairo)
 library(ggplot2)
 library(DT)
 library(shiny)
@@ -16,42 +17,22 @@ source("readCountNormalizer.R")
 source("gene.R")
 source("pca.R")
 source("uiImporterWidget.R")
+source("uiDownloadableDataTable.R")
 
+options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
-  #
-  # Define reactive values that are used by the plots
-  #
-  calculationdata <- reactiveValues()
-  calculationdata$readcounts <- NULL
-  
-  # 
-  # Define events handled by action buttons
-  #
-  
-  # Handles click on "Submit" and "Reset" in PCA->Data->Read counts
-  observeEvent(input$pca.data.readcounts.submit, {
-    
-    widget.input <- importerWidgetData("pca.data.readcounts", input)
-    con <- widget.input$connection
-    data <- importReadcount(con, widget.input$importer)
-    close(con)
-    
-    calculationdata$readcounts <- data
-  })
-  observeEvent(input$pca.data.readcounts.reset, {
-    reset("pca.data.readcounts.input")
-    reset("pca.data.readcounts.fileinput")
-  })
+  readcounts <- reactive ( { callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount) } )
   
   #
   # Calculations
   #
   
   # The starting values are normalized read counts and the annotation table
-  readcounts.normalized <- reactive({ return(applyReadcountNormalization(calculationdata$readcounts, input$pca.data.normalization)) })
+  readcounts.normalized <- reactive({ return(applyReadcountNormalization(readcounts(), input$pca.data.normalization)) })
   annotation <- reactive( { annotateGenes(readcounts.normalized()) } )
+  annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()[c("id", "var")] } })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.selected <- reactive(
@@ -59,8 +40,11 @@ shinyServer(function(input, output, session) {
       return(selectTopVariantGenes(readcounts.normalized(), annotation(), input$pca.pca.genes.count))
     })
   
-  # pca is applied to the selected genes
+  # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- reactive( { applyPCA(readcounts.selected()) } )
+  pca.transformed <- reactive({ if(is.null(pca())) { NULL } else { pca()$transformed } })
+  pca.pc <- reactive({ if(is.null(pca())) { NULL } else { pca()$pc } })
+  pca.var <- reactive({ if(is.null(pca())) { NULL } else { pca()$var } })
   
   #
   # Update input elements
@@ -76,46 +60,17 @@ shinyServer(function(input, output, session) {
   # Render plots & tables
   #
   
-  # Input
-  output$readcounts <- DT::renderDataTable(calculationdata$readcounts, options = list(scrollX = TRUE))
-  output$readcounts.normalized <- DT::renderDataTable(readcounts.normalized(), options = list(scrollX = TRUE))
-  output$genes.variance <- DT::renderDataTable(annotation()[c("id", "var")], options = list(scrollX = TRUE))
+  # Input tables
+  observeEvent ( readcounts(), { callModule(downloadableDataTable, "readcounts", data = readcounts) })
+  observeEvent ( readcounts.normalized(), { callModule(downloadableDataTable, "readcounts.normalized", data = readcounts.normalized) })
+  
+  # Annotation tables
+  observeEvent ( annotation.var(), { callModule(downloadableDataTable, "annotation.var", data = annotation.var) })
   
   # PCA results
-  output$transformedconditions <- DT::renderDataTable({
-    
-      if(is.null(pca())) {
-        return(NULL)
-      }
-      else
-      {
-        return(pca()$transformed)
-      }
-    
-    }, options = list(scrollX = TRUE))
-  output$pca.principalcomponents <- DT::renderDataTable({
-    
-      if(is.null(pca())) {
-        return(NULL)
-      }
-      else
-      {
-        return(pca()$pc)
-      }
-    
-    }, options = list(scrollX = TRUE))
-  
-  output$pca.var <- DT::renderDataTable({
-    
-    if(is.null(pca())) {
-      return(NULL)
-    }
-    else
-    {
-      return(pca()$var)
-    }
-    
-  }, options = list(scrollX = TRUE))
+  observeEvent ( pca.transformed(), { callModule(downloadableDataTable, "pca.transformed", data = pca.transformed) })
+  observeEvent ( pca.pc(), { callModule(downloadableDataTable, "pca.pc", data = pca.pc) })
+  observeEvent ( pca.var(), { callModule(downloadableDataTable, "pca.var", data = pca.var) })
   
   # Variance plots
   output$genes.variance.plot <- renderPlot({
@@ -126,6 +81,17 @@ shinyServer(function(input, output, session) {
     ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
   })
   
+  output$pca.pca.genes.count.variance.plot <- renderPlot({
+    if(is.null(annotation())) {
+      return(NULL)
+    }
+    
+    p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point() 
+    p <- p + geom_vline(xintercept = input$pca.pca.genes.count, color = "red")
+    
+    return(p)
+  })
+  
   # PCA plots
   output$pca.conditionplot <- renderPlot({
     
@@ -133,16 +99,16 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }
     
-    print("render")
-    
     dimensions.available <- ncol(pca()$transformed) - 1
     dimensions.requested <- c("PC1", "PC2")
     
     dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
     
+    print(dimensions.plot)
+    
     if(dimensions.plot == 1) {
       ggplot(pca()$transformed,
-             aes_string(dimensions.requested[1])) + geom_histogram(binwidth = 1)
+             aes_string(dimensions.requested[1])) + geom_histogram(bins = 500)
     }
     else if(dimensions.plot == 2) {
       ggplot(pca()$transformed, aes_string(x=dimensions.requested[1], y=dimensions.requested[2])) + geom_point(shape = 1)

@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyBS)
 
 #' Creates the plot settings panel that allows the user to select the plotted PCA axes, change colors etc.
 #'
@@ -7,7 +8,15 @@ library(shiny)
 #'
 #' @examples
 uiPCAPlotPanel <- function() {
-  return(bsCollapse(
-    bsCollapsePanel("Axes")
+  return(verticalLayout(
+    conditionalPanel("input['pca.page.resultplots.tab'] == 'conditions'",
+                     bsCollapse(
+                       bsCollapsePanel("Axes"),
+                       bsCollapsePanel("Output settings")
+                     )),
+    conditionalPanel("input['pca.page.resultplots.tab'] == 'variance'",
+                     bsCollapse(
+                       bsCollapsePanel("Output settings")
+                     ))
   ))
 }

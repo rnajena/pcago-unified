@@ -2,7 +2,7 @@ library(shiny)
 source("uiPCADataPanel.R")
 source("uiPCAPlotPanel.R")
 source("uiPCAPCAPanel.R")
-source("uiHelpers.R")
+source("uiDownloadableDataTable.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -21,7 +21,6 @@ uiPCAPage <- function() {
       )
     ),
       mainPanel(
-        bsAlert("pca.alert"),
         tabsetPanel(
           tabPanel("Read counts", 
                    tabsetPanel(
@@ -29,20 +28,24 @@ uiPCAPage <- function() {
                      tabPanel("Normalized", downloadableDataTableOutput("readcounts.normalized")),
                      type = "pills"
                    )),
-          tabPanel("Annotation"),
+          tabPanel("Annotation",
+                   tabsetPanel(
+                     tabPanel("Gene variance", downloadableDataTableOutput("annotation.var")),
+                     type = "pills"
+                   )),
           tabPanel("Result tables",
                    tabsetPanel(
-                     tabPanel("Transformed conditions", downloadableDataTableOutput("transformedconditions")),
-                     tabPanel("Principal components", downloadableDataTableOutput("pca.principalcomponents")),
+                     tabPanel("Transformed conditions", downloadableDataTableOutput("pca.transformed")),
+                     tabPanel("Principal components", downloadableDataTableOutput("pca.pc")),
                      tabPanel("Principal component variances", downloadableDataTableOutput("pca.var")),
-                     tabPanel("Gene variance", downloadableDataTableOutput("genes.variance")),
                      type = "pills"
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
-                     tabPanel("Conditions", plotOutput("pca.conditionplot")),
-                     tabPanel("Gene variance", plotOutput("genes.variance.plot")),
-                     type = "pills"
+                     tabPanel("Conditions", plotOutput("pca.conditionplot"), value = "conditions"),
+                     tabPanel("Gene variance", plotOutput("genes.variance.plot"), value = "variance"),
+                     type = "pills",
+                     id = "pca.page.resultplots.tab"
                    ))
         )
       ))

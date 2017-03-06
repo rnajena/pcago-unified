@@ -21,6 +21,9 @@ supportedReadcountDataTypes <- c("CSV (Comma)" = "csv_comma",
 #' @examples
 importReadcount <- function(filehandle, datatype) {
   
+  
+  print("Importing")
+  
   sep = ","
   
   if(datatype == "csv_whitespace") {

@@ -48,8 +48,5 @@ selectTopVariantGenes <- function(readcounts, annotation, top) {
   
   result <- readcounts[indices,]
   
-  print(topgeneids)
-  print(result)
-  
   return(result)
 }

@@ -15,7 +15,7 @@ source("uiImporterWidget.R")
 uiPCADataPanel <- function() {
   return(bsCollapse(
       bsCollapsePanel("Read counts",
-                      importerWidget("pca.data.readcounts",
+                      genericImporterInput("pca.data.readcounts",
                                      c(
                                        "text/csv",
                                        "text/comma-separated-values,text/plain",
@@ -23,7 +23,7 @@ uiPCADataPanel <- function() {
                                      supportedReadcountDataTypes)
                       ),
       bsCollapsePanel("Annotation",
-                      importerWidget("pca.data.annotation",
+                      genericImporterInput("pca.data.annotation",
                                      c(
                                        "text/plain",
                                        ".gff",
