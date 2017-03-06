@@ -29,7 +29,7 @@ importReadcount <- function(filehandle, datatype) {
     sep = ""
   }
   
-  data <- read.csv(filehandle, sep = sep)
+  data <- read.csv(filehandle, sep = sep, stringsAsFactors = F)
   names(data)[1] <- "id" # First column is always 'id'
   
   return(data)

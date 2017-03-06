@@ -35,7 +35,7 @@ uiPCAPage <- function() {
                    )),
           tabPanel("Conditions",
                    tabsetPanel(
-                     tabPanel("Parameters"),
+                     tabPanel("Parameters", downloadableDataTableOutput("conditions")),
                      type = "pills"
                    )),
           tabPanel("Result tables",
@@ -47,7 +47,7 @@ uiPCAPage <- function() {
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
-                     tabPanel("Conditions", plotOutput("pca.conditionplot"), value = "conditions"),
+                     tabPanel("Cells", plotOutput("pca.cellplot"), value = "cells"),
                      tabPanel("Gene variance", plotOutput("genes.variance.plot"), value = "variance"),
                      type = "pills",
                      id = "pca.page.resultplots.tab"

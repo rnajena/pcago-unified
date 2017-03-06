@@ -1,0 +1,38 @@
+#
+# Functions that provide importing/generating the condition table
+# The condition table tells which conditions apply to which cell
+#
+
+#' Generates a condition table by separating the condition names 
+#'
+#' @param readcounts 
+#' @param sep 
+#'
+#' @return Data table with first column
+#' @export
+#'
+#' @examples
+generateConditionTable <- function(readcounts, sep = "_") {
+  
+  result <- data.frame("cell" = names(readcounts)[-1], stringsAsFactors = F)
+  
+  for(i in 1:nrow(result)) {
+    
+    conditions <- unlist(strsplit(result$cell[i], sep))
+
+    for(cond in conditions) {
+
+      if( ncol(result) == 1 || !(cond %in% names(result)[-1])) {
+
+        result[[cond]] <- rep(F, nrow(result))
+
+      }
+      
+      result[[cond]][i] <- T
+    }
+    
+  }
+  
+  return(result)
+  
+}

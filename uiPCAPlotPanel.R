@@ -9,7 +9,7 @@ library(shinyBS)
 #' @examples
 uiPCAPlotPanel <- function() {
   return(verticalLayout(
-    conditionalPanel("input['pca.page.resultplots.tab'] == 'conditions'",
+    conditionalPanel("input['pca.page.resultplots.tab'] == 'cells'",
                      bsCollapse(
                        bsCollapsePanel("Axes"),
                        bsCollapsePanel("Output settings")

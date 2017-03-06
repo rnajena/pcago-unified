@@ -14,6 +14,7 @@ library(shinyjs)
 source("readCountImporter.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
+source("conditionTable.R")
 source("gene.R")
 source("pca.R")
 source("widgetGenericImporter.R")
@@ -29,10 +30,11 @@ shinyServer(function(input, output, session) {
   # Calculations
   #
   
-  # The starting values are normalized read counts and the annotation table
+  # The starting values are normalized read counts, the annotation table and the condition table
   readcounts.normalized <- reactive({ return(applyReadcountNormalization(readcounts(), input$pca.data.normalization)) })
   annotation <- reactive( { annotateGenes(readcounts.normalized()) } )
   annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()[c("id", "var")] } })
+  conditions <- reactive({ generateConditionTable(readcounts.normalized(), sep = "_") })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.selected <- reactive(
@@ -63,8 +65,7 @@ shinyServer(function(input, output, session) {
   # Input tables
   observeEvent ( readcounts(), { callModule(downloadableDataTable, "readcounts", data = readcounts) })
   observeEvent ( readcounts.normalized(), { callModule(downloadableDataTable, "readcounts.normalized", data = readcounts.normalized) })
-  
-  # Annotation tables
+  observeEvent ( conditions(),  { callModule(downloadableDataTable, "conditions", data = conditions) })
   observeEvent ( annotation.var(), { callModule(downloadableDataTable, "annotation.var", data = annotation.var) })
   
   # PCA results
@@ -93,7 +94,7 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  output$pca.conditionplot <- renderPlot({
+  output$pca.cellplot <- renderPlot({
     
     if(is.null(pca())) {
       return(NULL)
@@ -103,8 +104,6 @@ shinyServer(function(input, output, session) {
     dimensions.requested <- c("PC1", "PC2")
     
     dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
-    
-    print(dimensions.plot)
     
     if(dimensions.plot == 1) {
       ggplot(pca()$transformed,
