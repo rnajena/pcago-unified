@@ -1,3 +1,7 @@
+#
+# Contains the about page (start page)
+#
+
 library(shiny)
 
 #' Creates the about page for the UI

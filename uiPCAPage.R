@@ -1,7 +1,8 @@
 library(shiny)
-source("uiPCADataPanel.R")
+source("readCountImporter.R")
+source("annotationImporter.R")
+source("readCountNormalizer.R")
 source("uiPCAPlotPanel.R")
-source("uiPCAPCAPanel.R")
 source("widgetDownloadableDataTable.R")
 
 #' Creates the PCA analysis page for the UI
@@ -14,8 +15,35 @@ uiPCAPage <- function() {
   return(fillPage(
     sidebarLayout(sidebarPanel(
       tabsetPanel(
-        tabPanel("Data", uiPCADataPanel()),
-        tabPanel("PCA", uiPCAPCAPanel()),
+        tabPanel("Data", bsCollapse(
+          bsCollapsePanel("Read counts",
+                          genericImporterInput("pca.data.readcounts",
+                                               supportedReadcountFileTypes,
+                                               supportedReadcountImporters)
+          ),
+          bsCollapsePanel("Annotation",
+                          genericImporterInput("pca.data.annotation",
+                                               supportedAnnotationFileTypes,
+                                               supportedAnnotationImporters)
+          ),
+          bsCollapsePanel("Normalization",
+                          radioButtons("pca.data.normalization",
+                                       "Apply read count normalization:",
+                                       supportedReadcountNormalizationTypes)),
+          bsCollapsePanel("Conditions")
+        )),
+        tabPanel("PCA", bsCollapse(
+          bsCollapsePanel("Gene set"),
+          bsCollapsePanel("Gene count",
+                          plotOutput("pca.pca.genes.count.variance.plot", height = "120px"),
+                          sliderInput("pca.pca.genes.count", "Gene count", min = 0, max = 0, value = 0, step = 1),
+                          fixedRow(
+                            column(width=3, actionButton("pca.pca.genes.count.lstepdecrease", label = "", icon = icon("fast-backward")) ),
+                            column(width=3, actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")) ),
+                            column(width=3, actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")) ),
+                            column(width=3, actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward")) )
+                          ))
+        )),
         tabPanel("Plot", uiPCAPlotPanel()),
         type = "pills"
       )
@@ -47,7 +75,7 @@ uiPCAPage <- function() {
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
-                     tabPanel("Cells", plotOutput("pca.cellplot"), value = "cells"),
+                     tabPanel("Cells", plotlyOutput("pca.cellplot", width = "auto", height = "auto"), value = "cells"),
                      tabPanel("Gene variance", plotOutput("genes.variance.plot"), value = "variance"),
                      type = "pills",
                      id = "pca.page.resultplots.tab"

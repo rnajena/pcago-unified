@@ -4,7 +4,8 @@
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
-supportedAnnotationDataTypes <- c("GFF v3" = "gff3")
+supportedAnnotationImporters <- c("GFF v3" = "gff3")
+supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 
 #' Imports annotation from filehandle with importer definded by datatype
 #'

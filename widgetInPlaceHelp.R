@@ -5,7 +5,7 @@
 library(shiny)
 library(shinyBS)
 
-inPlaceHelpUI <- function(id, helptext, visible) {
+inPlaceHelpUI <- function(id, helptext = "", visible = F) {
   
   ns <- NS(id)
   
@@ -16,8 +16,8 @@ inPlaceHelpUI <- function(id, helptext, visible) {
                                      style = "help",
                                      size = "small",
                                      type = "toggle",
-                                     value = F),
+                                     value = visible),
                             conditionalPanel(paste0("input['", ns("show"), "'] == true"),
-                                             helpText("Help")))))
+                                             helpText(helptext)))))
  
 }

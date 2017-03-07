@@ -19,10 +19,16 @@ annotateGenes <- function(readcounts) {
   }
   
   # We always have the variance of each gene
-  genetable <- data.frame("id" = readcounts$id,
-                          "var" = rowVars(data.matrix(readcounts[,-1])))
+  geneids <- rownames(readcounts)
+  gene.var <- rowVars(data.matrix(readcounts))
+  gene.var.percentage <- gene.var / sum(gene.var)
+  
+  genetable <- data.frame(var = gene.var,
+                          var.percentage = gene.var.percentage,
+                          row.names = geneids)
+  
   # Sort by variance
-  genetable <- genetable[order(genetable$var, decreasing = T),]
+  genetable <- genetable[order(genetable$var, decreasing = T), , drop = F]
   
   return(genetable)
 }
@@ -43,8 +49,10 @@ selectTopVariantGenes <- function(readcounts, annotation, top) {
     return(NULL)
   }
   
-  topgeneids <- annotation[1:top,1]
-  indices <- na.omit(match(topgeneids, readcounts$id))
+  topgeneids <- rownames(annotation)[1:top]
+  readcounts.geneids <- rownames(readcounts)
+  
+  indices <- na.omit(match(topgeneids, readcounts.geneids))
   
   result <- readcounts[indices,]
   

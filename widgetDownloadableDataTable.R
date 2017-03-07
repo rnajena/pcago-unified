@@ -4,8 +4,6 @@
 
 library(DT)
 library(shiny)
-library(shinyBS)
-library(shinyjs)
 
 #' Creates a UI with a data table output and download buttons
 #'
@@ -21,7 +19,7 @@ downloadableDataTableOutput <- function(id) {
   
   tagList(verticalLayout(
     wellPanel(fluidPage(
-      fluidRow(downloadButton(ns("download"), "Export *.csv")))),
+      fluidRow(downloadButton(ns("export.csv"), "Export *.csv")))),
     DT::dataTableOutput(ns("table"))
   ))
 }
@@ -33,14 +31,24 @@ downloadableDataTableOutput <- function(id) {
 #' @param session 
 #' @param data Data to be displayed. Should be a reactive
 #' @param filename Filename of the downloaded file
+#' @param rownames Export row names, too. Default = TRUE
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadableDataTable <- function(input, output, session, data, filename) {
+downloadableDataTable <- function(input, output, session, data, filename, rownames = T) {
   
   
   output$table <- DT::renderDataTable(data(), options = list(scrollX = TRUE))
+  output$export.csv <- downloadHandler(filename, 
+                                       function(file) {
+                                         
+                                        write.table(data(),
+                                                  file,
+                                                  sep = ",",
+                                                  row.names = rownames)
+                                         
+                                       })
   
 }

@@ -2,12 +2,11 @@
 # Contains methods that will import the read count table
 #
 
-library(shiny)
-
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
-supportedReadcountDataTypes <- c("CSV (Comma)" = "csv_comma",
+supportedReadcountImporters <- c("CSV (Comma)" = "csv_comma",
                                  "CSV (Whitespace/Tab)" = "csv_whitespace")
+supportedReadcountFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 #' Imports readcount from filehandle with importer definded by datatype
 #'
@@ -30,7 +29,8 @@ importReadcount <- function(filehandle, datatype) {
   }
   
   data <- read.csv(filehandle, sep = sep, stringsAsFactors = F)
-  names(data)[1] <- "id" # First column is always 'id'
+  rownames(data) <- data[,1]
+  data <- data[,-1]
   
   return(data)
 }

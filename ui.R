@@ -6,6 +6,7 @@
 #
 
 library(ggplot2)
+library(plotly)
 library(DT)
 library(shiny)
 library(shinyBS)

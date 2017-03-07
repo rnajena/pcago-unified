@@ -14,15 +14,16 @@
 #' @examples
 generateConditionTable <- function(readcounts, sep = "_") {
   
-  result <- data.frame("cell" = names(readcounts)[-1], stringsAsFactors = F)
+  cells <- names(readcounts)
+  result <- data.frame(row.names = cells, stringsAsFactors = F)
   
   for(i in 1:nrow(result)) {
     
-    conditions <- unlist(strsplit(result$cell[i], sep))
+    conditions <- unlist(strsplit(cells[i], sep))
 
     for(cond in conditions) {
 
-      if( ncol(result) == 1 || !(cond %in% names(result)[-1])) {
+      if( ncol(result) == 1 || !(cond %in% names(result))) {
 
         result[[cond]] <- rep(F, nrow(result))
 

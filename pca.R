@@ -12,16 +12,16 @@
 #' @examples
 applyPCA <- function(inputdata) {
   
-  if(is.null(inputdata) || ncol(inputdata) < 1 || nrow(inputdata) < 1) {
+  if(is.null(inputdata) || ncol(inputdata) == 0 || nrow(inputdata) == 0) {
     return(NULL)
   }
   
-  # Extract the actual data (as the first column are the gene ids)
-  X <- inputdata[,-1]
-  X <- t(X) # We want to do PCA for our conditions
+  # Extract the data 
+  X <- inputdata
+  X <- t(X) # We want to do PCA for our cells
   
-  # Extract the genes for later use
-  conditions <- colnames(inputdata)[-1]
+  # Extract the cells for later use
+  cells <- colnames(inputdata)
   
   # PCA works by diagonalizing the covariance matrix by transforming
   # the data with a transform matrix consisting of the eigenvectors (as rows)
@@ -33,13 +33,17 @@ applyPCA <- function(inputdata) {
   
   # Using R's internal function for improved speed (and accuracy as they use SDV)
   result <- prcomp(X)
-  transformed <- data.frame("condition" = conditions, result$x)
-  rownames(transformed) <- c() # We want an actual column
+  transformed <- data.frame(result$x, row.names = cells)
+  pc.names <- names(result$rotation)
   
-  variances <- data.frame(var = (result$sdev)^2)
-  rownames(variances) <- names(result$rotation)
+  # Build the variance table
+  variances <- (result$sdev)^2
+  variances.percent <- variances / sum(variances)
+  variances.table <- data.frame(var = variances, 
+                                percentage = variances.percent, 
+                                row.names = pc.names)
   
   return(list("transformed" = transformed,
-              "var" = variances,
+              "var" = variances.table,
               "pc" = result$rotation))
 }
