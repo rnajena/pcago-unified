@@ -24,3 +24,7 @@
 .in-place-help .help-block {
 	margin-left: 10px;
 }
+
+.color-shape-input .shiny-input-container label {
+	display: none;
+}
