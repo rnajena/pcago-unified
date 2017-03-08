@@ -12,7 +12,7 @@ source("widgetDownloadableDataTable.R")
 #'
 #' @examples
 uiPCAPage <- function() {
-  return(fillPage(
+  return(bootstrapPage(
     sidebarLayout(sidebarPanel(
       tabsetPanel(
         tabPanel("Data", bsCollapse(
@@ -30,7 +30,12 @@ uiPCAPage <- function() {
                           radioButtons("pca.data.normalization",
                                        "Apply read count normalization:",
                                        supportedReadcountNormalizationTypes)),
-          bsCollapsePanel("Conditions")
+          bsCollapsePanel("Conditions",
+                          radioButtons("pca.data.conditions",
+                                       "Source of cell conditions for visualization:",
+                                       c("Column names",
+                                         "Extract from columns",
+                                         "Upload")))
         )),
         tabPanel("PCA", bsCollapse(
           bsCollapsePanel("Gene set"),

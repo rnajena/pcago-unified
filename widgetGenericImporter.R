@@ -5,6 +5,7 @@
 library(shiny)
 library(shinyBS)
 library(shinyjs)
+source("uiHelper.R")
 
 #' Creates a generic import widget UI
 #'
@@ -22,9 +23,15 @@ genericImporterInput <- function(id, filetypes, importers) {
   
   tagList(
     verticalLayout(
-      textAreaInput(ns("input"), "Manual input"),
-      fileInput(ns("fileinput"), "From file"),
-      selectInput(ns("importer"), "Importer", importers),
+      radioButtons(ns("source"), "Load from ...", c("uploaded file" = "upload", "manual input" = "manual", "sample data" = "sample"), selected = "upload"),
+      conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
+                       textAreaInput(ns("input"), "Manual input")),
+      conditionalPanel(conditionalPanel.equals(ns("source"), "'upload'"), 
+                       fileInput(ns("fileinput"), "Upload file")),
+      conditionalPanel(paste(conditionalPanel.equals(ns("source"), "'manual'"), "||", conditionalPanel.equals(ns("source"), "'upload'")), 
+                       selectInput(ns("importer"), "Importer", importers)),
+      conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
+                       selectInput(ns("sample"), "Sample data", c())),
       fluidPage(fluidRow(
         actionButton(ns("submit"), "Submit"),
         actionButton(ns("reset"), "Reset"))                                   
@@ -47,12 +54,12 @@ genericImporter <- function(input, output, session, exprimport) {
   
   data <- eventReactive(input$submit, {
     
-      importer <- input$importer
+    if(input$source == "upload") {
       inFile <- input$fileinput
+      importer <- input$importer
       
-      if(is.null(inFile))
-      {
-        con <- textConnection(input$input)
+      if(!is.null(inFile)) {
+        con <- file(inFile$datapath, "r")
         data <- exprimport(con, importer)
         close(con)
         
@@ -60,12 +67,21 @@ genericImporter <- function(input, output, session, exprimport) {
       }
       else
       {
-        con <- file(inFile$datapath, "r")
-        data <- exprimport(con, importer)
-        close(con)
-        
-        return(data)
+        return(NULL)
       }
+        
+    }
+    else if(input$source == "manual") {
+      importer <- input$importer
+      con <- textConnection(input$input)
+      data <- exprimport(con, importer)
+      close(con)
+      
+      return(data)
+    }
+    else if(input$source == "sample") {
+      return(NULL)  #todo
+    }
 
   })
 

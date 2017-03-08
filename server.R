@@ -20,6 +20,7 @@ source("gene.R")
 source("pca.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
+source("widgetColorShapeInput.R")
 
 options(shiny.usecairo=TRUE)
 
@@ -49,6 +50,74 @@ shinyServer(function(input, output, session) {
   pca.pc <- reactive({ if(is.null(pca())) { NULL } else { pca()$pc } })
   pca.var <- reactive({ if(is.null(pca())) { NULL } else { pca()$var } })
   
+  # Visualizing the data
+  conditions.visuals.table <- reactive({
+    return(data.frame(
+      row.names = c("mono6", "ctr", "n2", "n3", "n5", "n6", "atra"),
+      color = c("", "#FF0000", "", "", "", "", "#00FF00"),
+      shape = c("", "", "", "", "", "", ""),
+      stringsAsFactors = F
+    ))
+  })
+  
+  # Builds color palette from visual definition
+  pca.transformed.visuals.palette <- reactive({
+    
+    if(is.null(conditions.visuals.table())) {
+      return(NULL)
+    }
+    
+    colors <- conditions.visuals.table()$color
+    palette <- c("#000000", colors[grep("#[0-9A-F]{6}", colors, ignore.case = T)])
+    
+    return(palette)
+    
+  })
+  
+  # Build table of cell -> visual parameters that can be used by plots
+  pca.transformed.visuals <- reactive({
+    
+    if(is.null(readcounts.normalized()) || is.null(pca.transformed.visuals.palette())) {
+      return(NULL)
+    }
+    
+    cells <- colnames(readcounts.normalized())
+    cells.conditions <- conditions()
+    conditions.mapping <- conditions.visuals.table()
+    palette <- pca.transformed.visuals.palette()
+    visuals <- data.frame(row.names = cells, 
+                          color = rep(1, length(cells)), 
+                          shape = rep("circle", length(cells)))
+    
+    for(i in 1:nrow(visuals)) {
+      
+      cell.name <- cells[i]
+      cell.conditions <- cells.conditions[cell.name, ]
+      
+      for(condition in colnames(cells.conditions)) {
+        
+        if(cells.conditions[i, condition] == F) {
+          next()
+        }
+        
+        if(!(condition %in% rownames(conditions.mapping))) {
+          next()
+        }
+        
+        mapping.color <- conditions.mapping[condition,"color"]
+        
+        if(mapping.color != "") {
+          visuals[cell.name,"color"] <- match(mapping.color, palette)
+        }
+        
+      }
+      
+    }
+    
+    return(visuals)
+    
+  })
+  
   #
   # Update input elements
   #
@@ -76,6 +145,23 @@ shinyServer(function(input, output, session) {
     genes_max <- nrow(readcounts.normalized())
     
     updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
+  })
+  
+  output$pca.plot.visuals <- renderUI({
+    
+    if(is.null(conditions())) {
+      return(NULL)
+    }
+    
+    cells.conditions <- conditions()
+    ui <- tagList()
+    
+    for(condition in colnames(cells.conditions)) {
+      ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition)))
+    }
+    
+    return(ui)
+    
   })
   
   #
@@ -110,6 +196,7 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, "pca.pca.genes.count", value = current + 1)
     
   })
+  
 
   #
   # Render plots & tables
@@ -149,11 +236,11 @@ shinyServer(function(input, output, session) {
   # PCA plots
   output$pca.cellplot <- renderPlotly({
     
-    if(is.null(pca()) || is.null(input$pca.plot.cells.axes)) {
+    if(is.null(pca.transformed()) || is.null(pca.transformed.visuals()) || is.null(input$pca.plot.cells.axes)) {
       return(NULL)
     }
     
-    dimensions.available <- ncol(pca()$transformed)
+    dimensions.available <- ncol(pca.transformed())
     dimensions.requested <- input$pca.plot.cells.axes
     
     dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
@@ -165,25 +252,31 @@ shinyServer(function(input, output, session) {
       #plot_ly()
       
       plot_ly(type = "histogram",
-             x = pca()$transformed[[dimensions.requested[1]]])
+             x = pca.transformed()[[dimensions.requested[1]]])
       
     }
     else if(dimensions.plot == 2) {
       # ggplot(pca()$transformed, aes_string(x=dimensions.requested[1], y=dimensions.requested[2])) + geom_point(shape = 1)
       
+      print(pca.transformed.visuals.palette())
+      
+      #todo: separate traces here -> for each a legend
+      
       plot_ly(type = "scatter",
               mode = "markers",
-              x = pca()$transformed[[dimensions.requested[1]]],
-              y = pca()$transformed[[dimensions.requested[2]]])
+              x = pca.transformed()[[dimensions.requested[1]]],
+              y = pca.transformed()[[dimensions.requested[2]]],
+              color = pca.transformed.visuals()$color,
+              colors = pca.transformed.visuals.palette())
       
     }
     else if(dimensions.plot == 3) {
       
       plot_ly(type = "scatter3d",
               mode = "markers",
-              x = pca()$transformed[[dimensions.requested[1]]],
-              y = pca()$transformed[[dimensions.requested[2]]],
-              z = pca()$transformed[[dimensions.requested[3]]])
+              x = pca.transformed()[[dimensions.requested[1]]],
+              y = pca.transformed()[[dimensions.requested[2]]],
+              z = pca.transformed()[[dimensions.requested[3]]])
       
     }
     

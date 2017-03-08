@@ -16,7 +16,7 @@ source("uiPCAPage.R")
 source("uiHelpPage.R")
 
 shinyUI(fluidPage(useShinyjs(),
-                  list(tags$head(HTML('<link rel="icon", href="icon.png", 
+                  list(tags$head(HTML('<link rel="icon", href="icon.png",
                                    type="image/png" />'))),
                   div(style="padding: 1px 0px; width: '100%'",
                       titlePanel(
@@ -28,3 +28,4 @@ shinyUI(fluidPage(useShinyjs(),
                    tabPanel("Analyze", uiPCAPage()),
                    tabPanel("Help", uiHelpPage()),
                    theme = "style.css")))
+

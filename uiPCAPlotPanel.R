@@ -21,8 +21,13 @@ uiPCAPlotPanel <- function() {
                                                       options = list(maxItems = 3)),
                                        inPlaceHelpUI("pca.plot.cells.axes.help",
                                                      "You can plot 1, 2 and 3 dimensions.")),
-                       bsCollapsePanel("Shape/Color",
-                                       colorShapeInput("test")),
+                       bsCollapsePanel("Visualization",
+                                       radioButtons("pca.plot.visuals.source",
+                                                    "Shape & color points",
+                                                    c("Show editor" = "editor",
+                                                      "Upload" = "upload")),
+                                       conditionalPanel("input['pca.plot.visuals.source'] == 'editor'", uiOutput("pca.plot.visuals"))
+                                       ),
                        bsCollapsePanel("Output settings")
                      )),
     conditionalPanel("input['pca.page.resultplots.tab'] == 'variance'",

@@ -14,6 +14,10 @@
 #' @examples
 generateConditionTable <- function(readcounts, sep = "_") {
   
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
   cells <- names(readcounts)
   result <- data.frame(row.names = cells, stringsAsFactors = F)
   
