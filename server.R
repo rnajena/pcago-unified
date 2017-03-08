@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
     ui <- tagList()
     
     for(condition in colnames(cells.conditions)) {
-      ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition)))
+      ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition), condition))
     }
     
     return(ui)

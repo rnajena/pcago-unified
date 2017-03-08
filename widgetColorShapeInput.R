@@ -151,13 +151,13 @@ colorShapeInput.symbols <-  c("circle",
                               "line-nw", 
                               "line-nw-open")
 
-colorShapeInput <- function(id) {
+colorShapeInput <- function(id, label) {
   
   ns <- NS(id)
   
   return(fixedRow(
-    column(width = 8, selectizeInput(ns("symbol"), label = id, choices = colorShapeInput.symbols)),
-    column(width = 4, tags$div(class = "color-shape-input-color", colourInput(ns("color"), label = id)))
+    column(width = 8, selectizeInput(ns("symbol"), label = label, choices = colorShapeInput.symbols)),
+    column(width = 4, tags$div(class = "color-shape-input-color", colourInput(ns("color"), label = label, value = "#000000")))
   ))
   
 

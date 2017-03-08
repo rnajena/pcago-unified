@@ -21,18 +21,13 @@ availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv")
 #' @examples
 importReadcount <- function(filehandle, datatype) {
   
-  
-  print("Importing")
-  
   sep = ","
   
   if(datatype == "csv_whitespace") {
     sep = ""
   }
   
-  data <- read.csv(filehandle, sep = sep, stringsAsFactors = F)
-  rownames(data) <- data[,1]
-  data <- data[,-1]
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
   
   return(data)
 }

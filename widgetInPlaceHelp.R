@@ -6,6 +6,27 @@
 library(shiny)
 library(shinyBS)
 
+#' Creates a text element that shows a help tooltip if hovered
+#'
+#' @param text Text to display
+#' @param helptext The content of the help text
+#' @param title The content of the help text
+#'
+#' @return Shiny UI element
+#' @export
+#'
+#' @examples
+helpText <- function(text, helptext, title = "Info") {
+  
+  return(tags$a(href = "#", 
+                "data-toggle"="popover", 
+                "data-trigger" = "hover",
+                title = title,
+                "data-content" = helptext,
+                text))
+  
+}
+
 #' Creates an UI element that shows a help text on hovering the icon
 #'
 #' @param helptext The content of the help text
@@ -17,12 +38,9 @@ library(shinyBS)
 #' @examples
 helpIcon <- function(helptext, title = "Info") {
   
-  return(tags$a(href = "#", 
-                "data-toggle"="popover", 
-                "data-trigger" = "hover",
-                title = title,
-                "data-content" = helptext,
-                icon("info-circle")))
+  return(helpText(icon("info-circle"),
+                  helptext,
+                  title))
  
 }
 
@@ -41,3 +59,5 @@ helpIconText <- function(text, helptext, title = "Info") {
   return(tags$span( tags$span(text), helpIcon(helptext, title) ))
   
 }
+
+

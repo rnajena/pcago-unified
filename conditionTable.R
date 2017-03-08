@@ -19,6 +19,8 @@ generateConditionTable <- function(readcounts, sep = "_") {
     return(NULL)
   }
   
+  print(sep)
+  
   cells <- names(readcounts)
   result <- data.frame(row.names = cells, stringsAsFactors = F)
   
@@ -29,7 +31,7 @@ generateConditionTable <- function(readcounts, sep = "_") {
     
     conditions <- c()
     
-    if(sep == "" || !grepl(cells[i], sep, fixed = T)) {
+    if(sep == "" || !grepl(sep, cells[i], fixed = T)) {
       conditions <- c(cells[i])
     }
     else {

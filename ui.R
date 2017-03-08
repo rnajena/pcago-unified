@@ -15,8 +15,12 @@ source("uiAboutPage.R")
 source("uiPCAPage.R")
 source("uiHelpPage.R")
 
+#' Script that enables all popovers (needed for help texts)
+#' Attach to bottom of body.
 script.enable.popovers <- I("$(document).ready(function(){
-    $('[data-toggle=\"popover\"]').popover();   
+    $('[data-toggle=\"popover\"]').popover({
+      container: 'body'
+    });   
 });")
 
 shinyUI(fluidPage(useShinyjs(),

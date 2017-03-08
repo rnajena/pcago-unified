@@ -21,23 +21,26 @@ uiPCAPage <- function() {
     sidebarLayout(sidebarPanel(
       tabsetPanel(
         tabPanel("Data", bsCollapse(
-          bsCollapsePanel(helpIconText("Read counts", "Test"),
+          bsCollapsePanel("Read counts",
                           value = "readcounts",
-                          helpIcon("Hallo test"),
                           genericImporterInput("pca.data.readcounts",
                                                supportedReadcountFileTypes,
                                                supportedReadcountImporters,
                                                availableReadcountSamples),
                           radioButtons("pca.data.normalization",
-                                       "Apply read count normalization:",
+                                       helpIconText("Apply read count normalization", 
+                                                    "If you already have normalized read counts, set this to 'None'.",
+                                                    "Read count normalization"),
                                        supportedReadcountNormalizationTypes)
           ),
           bsCollapsePanel("Annotation",
+                          value = "annotation",
                           genericImporterInput("pca.data.annotation",
                                                supportedAnnotationFileTypes,
                                                supportedAnnotationImporters)
           ),
           bsCollapsePanel("Conditions",
+                          value = "conditions",
                           radioButtons("pca.data.conditions.mode",
                                        "Source of cell conditions for visualization:",
                                        c("Column names" = "column",

@@ -23,7 +23,7 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
   
   ns <- NS(id)
   
-  tagList(
+  tagList(headerPanel(
     verticalLayout(
       radioButtons(ns("source"), "Load from ...", c("uploaded file" = "upload", "manual input" = "manual", "sample data" = "sample"), selected = "upload"),
       conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
@@ -38,7 +38,7 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
         actionButton(ns("submit"), "Submit"),
         actionButton(ns("reset"), "Reset"))                                   
       ))
-  )
+  , header = "Import"))
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.
