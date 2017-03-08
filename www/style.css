@@ -28,3 +28,13 @@
 .color-shape-input-color label {
 	visibility: hidden;
 }
+
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+
+.popover-title {
+	border-bottom-color: #c5c5c5;
+	font-weight: bold;
+}

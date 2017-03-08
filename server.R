@@ -26,7 +26,7 @@ options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
-  readcounts <- reactive ( { callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount) } )
+  readcounts <- reactive ( { callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample) } )
   
   #
   # Calculations
@@ -36,7 +36,23 @@ shinyServer(function(input, output, session) {
   readcounts.normalized <- reactive({ return(applyReadcountNormalization(readcounts(), input$pca.data.normalization)) })
   annotation <- reactive( { annotateGenes(readcounts.normalized()) } )
   annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()["var"] } })
-  conditions <- reactive({ generateConditionTable(readcounts.normalized(), sep = "_") })
+  conditions <- reactive({ 
+    
+    if(input$pca.data.conditions.mode == "column") {
+      return(generateConditionTable(readcounts.normalized(), sep = ""))
+    }
+    else if(input$pca.data.conditions.mode == "extract") {
+      return(generateConditionTable(readcounts.normalized(), sep = input$pca.data.conditions.separator))
+    }
+    else if(input$pca.data.conditions.mode == "upload") {
+      return(NULL) #todo
+    }
+    else {
+      return(NULL)
+    }
+    
+    
+    })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.selected <- reactive(
@@ -121,6 +137,10 @@ shinyServer(function(input, output, session) {
   #
   # Update input elements
   #
+  
+  observeEvent(input$about.goto.analyze, {
+    updateNavbarPage(session, "navigation", "analyze")
+  })
   
   observeEvent(pca(), {
     

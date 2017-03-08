@@ -1,6 +1,6 @@
-#
-# Contains methods that will import the annotations
-#
+#'
+#' Contains methods that will import the annotations
+#'
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer

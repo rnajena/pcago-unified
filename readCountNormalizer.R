@@ -1,6 +1,6 @@
-#
-# Contains routines to normalize readcounts
-#
+#'
+#' Contains routines to normalize readcounts
+#'
 
 supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "TPM" = "tpm")
 

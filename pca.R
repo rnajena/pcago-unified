@@ -1,6 +1,6 @@
-#
-# This file contains all PCA calculations
-#
+#'
+#' This file contains all PCA calculations
+#'
 
 #' Applies PCA to input data
 #'

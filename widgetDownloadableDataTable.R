@@ -1,6 +1,6 @@
-#
-# Contains a data table widget with download buttons
-#
+#'
+#' Contains a data table widget with download buttons
+#'
 
 library(DT)
 library(shiny)

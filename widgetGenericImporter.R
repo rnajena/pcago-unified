@@ -1,6 +1,7 @@
-#
-# Contains an importer widget and necessary functions
-#
+#'
+#' Contains an importer widget that allows the user to upload a file,
+#' input the data manually or choose a sample data set
+#'
 
 library(shiny)
 library(shinyBS)
@@ -12,12 +13,13 @@ source("uiHelper.R")
 #' @param id Id of the control
 #' @param filetypes Accepted filetypes of fileInput sub-control
 #' @param importers Vector of importer names that will be passed to the import function
+#' @param samples Vector of sample data
 #'
 #' @return Shiny UI controls
 #' @export
 #'
 #' @examples
-genericImporterInput <- function(id, filetypes, importers) {
+genericImporterInput <- function(id, filetypes, importers, samples = c()) {
   
   ns <- NS(id)
   
@@ -31,7 +33,7 @@ genericImporterInput <- function(id, filetypes, importers) {
       conditionalPanel(paste(conditionalPanel.equals(ns("source"), "'manual'"), "||", conditionalPanel.equals(ns("source"), "'upload'")), 
                        selectInput(ns("importer"), "Importer", importers)),
       conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
-                       selectInput(ns("sample"), "Sample data", c())),
+                       selectInput(ns("sample"), "Sample data", samples)),
       fluidPage(fluidRow(
         actionButton(ns("submit"), "Submit"),
         actionButton(ns("reset"), "Reset"))                                   
@@ -50,7 +52,7 @@ genericImporterInput <- function(id, filetypes, importers) {
 #' @export
 #'
 #' @examples
-genericImporter <- function(input, output, session, exprimport) {
+genericImporter <- function(input, output, session, exprimport, exprsample) {
   
   data <- eventReactive(input$submit, {
     
@@ -80,7 +82,10 @@ genericImporter <- function(input, output, session, exprimport) {
       return(data)
     }
     else if(input$source == "sample") {
-      return(NULL)  #todo
+      
+      sample <- input$sample
+      return(exprsample(sample))
+      
     }
 
   })

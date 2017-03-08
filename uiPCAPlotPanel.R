@@ -1,3 +1,7 @@
+#'
+#' User interface definition for the "Plot" sidebar
+#' 
+
 library(shiny)
 library(shinyBS)
 source("widgetInPlaceHelp.R")
@@ -18,9 +22,7 @@ uiPCAPlotPanel <- function() {
                                                       "Visible axes (x, y, z)",
                                                       choices = c(),
                                                       multiple = T,
-                                                      options = list(maxItems = 3)),
-                                       inPlaceHelpUI("pca.plot.cells.axes.help",
-                                                     "You can plot 1, 2 and 3 dimensions.")),
+                                                      options = list(maxItems = 3))),
                        bsCollapsePanel("Visualization",
                                        radioButtons("pca.plot.visuals.source",
                                                     "Shape & color points",

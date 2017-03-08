@@ -1,9 +1,14 @@
+#'
+#' User interface defintion for the PCA page
+#' 
+
 library(shiny)
 source("readCountImporter.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
 source("uiPCAPlotPanel.R")
 source("widgetDownloadableDataTable.R")
+source("uiHelper.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -16,26 +21,37 @@ uiPCAPage <- function() {
     sidebarLayout(sidebarPanel(
       tabsetPanel(
         tabPanel("Data", bsCollapse(
-          bsCollapsePanel("Read counts",
+          bsCollapsePanel(helpIconText("Read counts", "Test"),
+                          value = "readcounts",
+                          helpIcon("Hallo test"),
                           genericImporterInput("pca.data.readcounts",
                                                supportedReadcountFileTypes,
-                                               supportedReadcountImporters)
+                                               supportedReadcountImporters,
+                                               availableReadcountSamples),
+                          radioButtons("pca.data.normalization",
+                                       "Apply read count normalization:",
+                                       supportedReadcountNormalizationTypes)
           ),
           bsCollapsePanel("Annotation",
                           genericImporterInput("pca.data.annotation",
                                                supportedAnnotationFileTypes,
                                                supportedAnnotationImporters)
           ),
-          bsCollapsePanel("Normalization",
-                          radioButtons("pca.data.normalization",
-                                       "Apply read count normalization:",
-                                       supportedReadcountNormalizationTypes)),
           bsCollapsePanel("Conditions",
-                          radioButtons("pca.data.conditions",
+                          radioButtons("pca.data.conditions.mode",
                                        "Source of cell conditions for visualization:",
-                                       c("Column names",
-                                         "Extract from columns",
-                                         "Upload")))
+                                       c("Column names" = "column",
+                                         "Extract from columns" = "extract",
+                                         "Upload" = "upload"),
+                                       selected = "column"),
+                          conditionalPanel(conditionalPanel.equals("pca.data.conditions.mode", "'extract'"),
+                                           selectizeInput("pca.data.conditions.separator",
+                                                          label = "Separator",
+                                                          choices = c("_", ".", ":", "#"),
+                                                          selected = "_",
+                                                          options = list("create" = T))),
+                          conditionalPanel(conditionalPanel.equals("pca.data.conditions.mode", "'upload'"),
+                                           genericImporterInput("pca.data.conditions.upload",filetypes = c("text/csv"), importers = c("Default"))))
         )),
         tabPanel("PCA", bsCollapse(
           bsCollapsePanel("Gene set"),

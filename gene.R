@@ -1,6 +1,10 @@
-#
-# Contains methods that return information about each gene
-#
+#'
+#' Contains methods that return information about each gene
+#' For example: variance of each gene
+#' 
+#' The final output is the gene annotation with different kinds of information
+#' Those will be used for selecting a set of genes to apply PCA for
+#'
 
 library(matrixStats)
 

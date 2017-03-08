@@ -15,6 +15,10 @@ source("uiAboutPage.R")
 source("uiPCAPage.R")
 source("uiHelpPage.R")
 
+script.enable.popovers <- I("$(document).ready(function(){
+    $('[data-toggle=\"popover\"]').popover();   
+});")
+
 shinyUI(fluidPage(useShinyjs(),
                   list(tags$head(HTML('<link rel="icon", href="icon.png",
                                    type="image/png" />'))),
@@ -24,8 +28,10 @@ shinyUI(fluidPage(useShinyjs(),
                       )
                   ),
                  navbarPage(img(src = "logo.svg", class = "header-logo"),
-                   tabPanel("About", uiAboutPage()),
-                   tabPanel("Analyze", uiPCAPage()),
-                   tabPanel("Help", uiHelpPage()),
-                   theme = "style.css")))
+                   tabPanel("About", value = "about", uiAboutPage()),
+                   tabPanel("Analyze", value = "analyze", uiPCAPage()),
+                   tabPanel("Help", value = "help", uiHelpPage()),
+                   id = "navigation",
+                   theme = "style.css"),
+                 tags$script(script.enable.popovers)))
 
