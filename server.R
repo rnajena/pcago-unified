@@ -7,8 +7,9 @@
 
 library(RColorBrewer)
 library(Cairo)
+library(ggvis)
 library(ggplot2)
-library(plotly)
+library(dplyr)
 library(DT)
 library(shiny)
 library(shinyBS)
@@ -175,19 +176,25 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  output$pca.cellplot <- renderPlotly({
+  output$pca.cellplot <- renderImage({
     
     validate(
       need(try(pca()), "No data to plot!"),
       need(try(input$pca.plot.cells.axes), "No axes to draw!")
     )
     
-    # if(is.null(pca.transformed()) || is.null(pca.transformed.visuals()) || is.null(input$pca.plot.cells.axes)) {
-    #   return(NULL)
-    # }
+    # Setup parameters
+    out.width  <- session$clientData$output_pca.cellplot_width
+    out.height <- session$clientData$output_pca.cellplot_height
+    out.dpi <- 96
+    out.file <- tempfile(fileext='.svg')
     
+    # Actual plot
     pca.transformed <- pca()$transformed
     pca.transformed.visuals <- pca.transformed.visuals()$factors
+    
+    pca.transformed$color <- pca.transformed.visuals$color
+    
     palette.colors <- pca.transformed.visuals()$palette.colors
     palette.symbols <- pca.transformed.visuals()$palette.symbols
     
@@ -200,10 +207,12 @@ shinyServer(function(input, output, session) {
       
       x <- list(title = dimensions.requested[1])
     
-      plot_ly(type = "histogram",
-             x = pca.transformed[[dimensions.requested[1]]],
-             color = pca.transformed.visuals$color,
-             colors = palette.colors) %>% layout(xaxis = x)
+      # plot_ly(type = "histogram",
+      #        x = pca.transformed[[dimensions.requested[1]]],
+      #        color = pca.transformed.visuals$color,
+      #        colors = palette.colors) %>% layout(xaxis = x)
+      
+      return(NULL)
       
     }
     else if(dimensions.plot == 2) {
@@ -211,30 +220,43 @@ shinyServer(function(input, output, session) {
       x <- list(title = dimensions.requested[1])
       y <- list(title = dimensions.requested[2])
       
-      p <- plot_ly(type = "scatter",
-              mode = "markers",
-              x = pca.transformed[[dimensions.requested[1]]],
-              y = pca.transformed[[dimensions.requested[2]]],
-              color = pca.transformed.visuals$color,
-              colors = palette.colors) %>% layout(xaxis = x, yaxis = y)
+      # plot_ly(type = "scatter",
+      #         mode = "markers",
+      #         x = pca.transformed[[dimensions.requested[1]]],
+      #         y = pca.transformed[[dimensions.requested[2]]],
+      #         color = pca.transformed.visuals$color,
+      #         colors = palette.colors) %>% layout(xaxis = x, yaxis = y)
+      
+      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
+                                         y = dimensions.requested[2])) + 
+        geom_point(aes(colour = factor(color)))
+      
+      ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
       
     }
     else if(dimensions.plot == 3) {
       
-      x <- list(title = dimensions.requested[1])
-      y <- list(title = dimensions.requested[2])
-      z <- list(title = dimensions.requested[3])
-      
-      plot_ly(type = "scatter3d",
-              mode = "markers",
-              x = pca.transformed[[dimensions.requested[1]]],
-              y = pca.transformed[[dimensions.requested[2]]],
-              z = pca.transformed[[dimensions.requested[3]]],
-              color = pca.transformed.visuals$color,
-              colors = palette.colors) %>% layout(xaxis = x, yaxis = y, zaxis = z)
+      # x <- list(title = dimensions.requested[1])
+      # y <- list(title = dimensions.requested[2])
+      # z <- list(title = dimensions.requested[3])
+      # 
+      # plot_ly(type = "scatter3d",
+      #         mode = "markers",
+      #         x = pca.transformed[[dimensions.requested[1]]],
+      #         y = pca.transformed[[dimensions.requested[2]]],
+      #         z = pca.transformed[[dimensions.requested[3]]],
+      #         color = pca.transformed.visuals$color,
+      #         colors = palette.colors) %>% layout(xaxis = x, yaxis = y, zaxis = z)
+      return(NULL)
       
     }
     
-   
-  })
+    # Send the plot
+    list(src = out.file,
+         width = out.width,
+         height = out.height,
+         download = "pc_plot.svg",
+         alt = "PCA cell plot")
+    
+  }, deleteFile = F)
 })

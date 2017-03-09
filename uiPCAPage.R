@@ -100,7 +100,7 @@ uiPCAPage <- function() {
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
-                     tabPanel("Cells", plotlyOutput("pca.cellplot", width = "auto", height = "auto"), value = "cells"),
+                     tabPanel("Cells", plotOutput("pca.cellplot"), value = "cells"),
                      tabPanel("Gene variance", plotOutput("genes.variance.plot"), value = "variance"),
                      type = "pills",
                      id = "pca.page.resultplots.tab"
