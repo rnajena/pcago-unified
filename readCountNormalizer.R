@@ -14,5 +14,8 @@ supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "
 #'
 #' @examples
 applyReadcountNormalization <- function(rawdata, normalizationtype) {
+  
+  validate(need(rawdata, "No data to normalize!"))
+  
   return(rawdata) # todo
 }

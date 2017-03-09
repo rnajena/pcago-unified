@@ -19,8 +19,6 @@ generateConditionTable <- function(readcounts, sep = "_") {
     return(NULL)
   }
   
-  print(sep)
-  
   cells <- names(readcounts)
   result <- data.frame(row.names = cells, stringsAsFactors = F)
   
@@ -50,6 +48,9 @@ generateConditionTable <- function(readcounts, sep = "_") {
     }
     
   }
+  
+  # Order condition by variance
+  result <- result[,order(colVars(data.matrix(result)), decreasing = T)]
   
   return(result)
   

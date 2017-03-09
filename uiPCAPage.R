@@ -8,6 +8,7 @@ source("annotationImporter.R")
 source("readCountNormalizer.R")
 source("uiPCAPlotPanel.R")
 source("widgetDownloadableDataTable.R")
+source("widgetGenericImporter.R")
 source("uiHelper.R")
 
 #' Creates the PCA analysis page for the UI

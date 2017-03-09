@@ -27,7 +27,7 @@ importReadcount <- function(filehandle, datatype) {
     sep = ""
   }
   
-  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  data <- try(read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F))
   
   return(data)
 }

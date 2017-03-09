@@ -5,6 +5,7 @@
 # http://shiny.rstudio.com
 #
 
+library(RColorBrewer)
 library(Cairo)
 library(ggplot2)
 library(plotly)
@@ -62,75 +63,84 @@ shinyServer(function(input, output, session) {
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- reactive( { applyPCA(readcounts.selected()) } )
-  pca.transformed <- reactive({ if(is.null(pca())) { NULL } else { pca()$transformed } })
-  pca.pc <- reactive({ if(is.null(pca())) { NULL } else { pca()$pc } })
-  pca.var <- reactive({ if(is.null(pca())) { NULL } else { pca()$var } })
   
   # Visualizing the data
   conditions.visuals.table <- reactive({
+    
+    validate(need(conditions(), "Need list of conditions to build visual table"))
+    
+    #todo loading/saving of this table
+    
     return(data.frame(
-      row.names = c("mono6", "ctr", "n2", "n3", "n5", "n6", "atra"),
-      color = c("", "#FF0000", "", "", "", "", "#00FF00"),
-      shape = c("", "", "", "", "", "", ""),
+      row.names = colnames(conditions()),
+      color = colorRampPalette(brewer.pal(9, "Set1"))(ncol(conditions())),
+      symbol = rep("circle", ncol(conditions())),
       stringsAsFactors = F
     ))
-  })
-  
-  # Builds color palette from visual definition
-  pca.transformed.visuals.palette <- reactive({
-    
-    if(is.null(conditions.visuals.table())) {
-      return(NULL)
-    }
-    
-    colors <- conditions.visuals.table()$color
-    palette <- c("#000000", colors[grep("#[0-9A-F]{6}", colors, ignore.case = T)])
-    
-    return(palette)
     
   })
   
-  # Build table of cell -> visual parameters that can be used by plots
+  #' Build a list of all visual parameters
+  #' Return a table with factors for color and symbol for each cell
+  #' Return a palette that correspond to the factors
   pca.transformed.visuals <- reactive({
     
-    if(is.null(readcounts.normalized()) || is.null(pca.transformed.visuals.palette())) {
-      return(NULL)
-    }
+    validate(
+      need(readcounts.normalized(), "No data to build visual parameter table from!"),
+      need(conditions.visuals.table(), "No condition visual mapping!")
+    )
     
     cells <- colnames(readcounts.normalized())
     cells.conditions <- conditions()
     conditions.mapping <- conditions.visuals.table()
-    palette <- pca.transformed.visuals.palette()
-    visuals <- data.frame(row.names = cells, 
-                          color = rep(1, length(cells)), 
-                          shape = rep("circle", length(cells)))
     
-    for(i in 1:nrow(visuals)) {
+    # Setup output
+    factors <- data.frame(row.names = cells,
+                          color = rep("#000000", length(cells)),
+                          symbol = rep("circle", length(cells)),
+                          stringsAsFactors = F)
+    
+    # Go through each cell and select the color & shape based on the first condition providing it
+    for(cell in cells) {
       
-      cell.name <- cells[i]
-      cell.conditions <- cells.conditions[cell.name, ]
+      color <- ""
+      symbol <- ""
       
       for(condition in colnames(cells.conditions)) {
-        
-        if(cells.conditions[i, condition] == F) {
+    
+        if(!cells.conditions[cell, condition]) {
           next()
         }
         
-        if(!(condition %in% rownames(conditions.mapping))) {
-          next()
+        if(color == "") {
+          color <- conditions.mapping[condition, "color"]
         }
         
-        mapping.color <- conditions.mapping[condition,"color"]
-        
-        if(mapping.color != "") {
-          visuals[cell.name,"color"] <- match(mapping.color, palette)
+        if(symbol == "") {
+          symbol <- conditions.mapping[condition, "symbol"]
         }
         
       }
       
+      if(color == "") {
+        color = "#000000"
+      }
+      if(symbol == "") {
+        symbol = "circle"
+      }
+      
+      factors[cell, "color"] <- color
+      factors[cell, "symbol"] <- symbol
+      
     }
     
-    return(visuals)
+    #Convert to factors
+    factors$color <- as.factor(factors$color)
+    factors$symbol <- as.factor(factors$symbol)
+    
+    print(factors)
+
+    return(list("factors" = factors, "palette.colors" = levels(factors$color), "palette.symbols" = levels(factors$symbol)))
     
   })
   
@@ -138,15 +148,14 @@ shinyServer(function(input, output, session) {
   # Update input elements
   #
   
+  #' Start page button. User can click it to go to the "Analyze" section
   observeEvent(input$about.goto.analyze, {
     updateNavbarPage(session, "navigation", "analyze")
   })
   
   observeEvent(pca(), {
     
-    if(is.null(pca())) {
-      return()
-    }
+    validate(need(pca(), "Cannot update input wihout PCA result!"))
     
     components <- colnames(pca()$pc) # Get PC1, PC2, PC3, ...
     selection <- input$pca.plot.cells.axes
@@ -169,10 +178,8 @@ shinyServer(function(input, output, session) {
   
   output$pca.plot.visuals <- renderUI({
     
-    if(is.null(conditions())) {
-      return(NULL)
-    }
-    
+    validate(need(conditions(), "Needing conditions for determining plot visuals!"))
+  
     cells.conditions <- conditions()
     ui <- tagList()
     
@@ -229,9 +236,14 @@ shinyServer(function(input, output, session) {
   observeEvent ( annotation.var(), { callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = annotation.var) })
   
   # PCA results
-  observeEvent ( pca.transformed(), { callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = pca.transformed) })
-  observeEvent ( pca.pc(), { callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = pca.pc) })
-  observeEvent ( pca.var(), { callModule(downloadableDataTable, "pca.var", filename = "pca.var.csv", data = pca.var) })
+  observeEvent ( pca(), 
+                 { 
+                   validate(need(pca(), "No PCA results to show!"))
+                   
+                   callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = reactive({ pca()$transformed })) 
+                   callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = reactive({ pca()$pc }))
+                   callModule(downloadableDataTable, "pca.var", filename = "pca.var.csv", data = reactive({ pca()$var }))
+                 })
   
   # Variance plots
   output$genes.variance.plot <- renderPlot({
@@ -256,47 +268,50 @@ shinyServer(function(input, output, session) {
   # PCA plots
   output$pca.cellplot <- renderPlotly({
     
-    if(is.null(pca.transformed()) || is.null(pca.transformed.visuals()) || is.null(input$pca.plot.cells.axes)) {
-      return(NULL)
-    }
+    validate(
+      need(try(pca()), "No data to plot!"),
+      need(try(input$pca.plot.cells.axes), "No axes to draw!")
+    )
     
-    dimensions.available <- ncol(pca.transformed())
+    # if(is.null(pca.transformed()) || is.null(pca.transformed.visuals()) || is.null(input$pca.plot.cells.axes)) {
+    #   return(NULL)
+    # }
+    
+    pca.transformed <- pca()$transformed
+    pca.transformed.visuals <- pca.transformed.visuals()$factors
+    palette.colors <- pca.transformed.visuals()$palette.colors
+    palette.symbols <- pca.transformed.visuals()$palette.symbols
+    
+    dimensions.available <- ncol(pca.transformed)
     dimensions.requested <- input$pca.plot.cells.axes
     
     dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
     
     if(dimensions.plot == 1) {
-      # ggplot(pca()$transformed,
-      #        aes_string(dimensions.requested[1])) + geom_histogram(bins = 500)
-      
-      #plot_ly()
-      
+    
       plot_ly(type = "histogram",
-             x = pca.transformed()[[dimensions.requested[1]]])
+             x = pca.transformed[[dimensions.requested[1]]])
       
     }
     else if(dimensions.plot == 2) {
-      # ggplot(pca()$transformed, aes_string(x=dimensions.requested[1], y=dimensions.requested[2])) + geom_point(shape = 1)
-      
-      print(pca.transformed.visuals.palette())
       
       #todo: separate traces here -> for each a legend
       
       plot_ly(type = "scatter",
               mode = "markers",
-              x = pca.transformed()[[dimensions.requested[1]]],
-              y = pca.transformed()[[dimensions.requested[2]]],
-              color = pca.transformed.visuals()$color,
-              colors = pca.transformed.visuals.palette())
+              x = pca.transformed[[dimensions.requested[1]]],
+              y = pca.transformed[[dimensions.requested[2]]],
+              color = pca.transformed.visuals$color,
+              colors = palette.colors)
       
     }
     else if(dimensions.plot == 3) {
       
       plot_ly(type = "scatter3d",
               mode = "markers",
-              x = pca.transformed()[[dimensions.requested[1]]],
-              y = pca.transformed()[[dimensions.requested[2]]],
-              z = pca.transformed()[[dimensions.requested[3]]])
+              x = pca.transformed[[dimensions.requested[1]]],
+              y = pca.transformed[[dimensions.requested[2]]],
+              z = pca.transformed[[dimensions.requested[3]]])
       
     }
     

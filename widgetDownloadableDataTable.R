@@ -39,6 +39,7 @@ downloadableDataTableOutput <- function(id) {
 #' @examples
 downloadableDataTable <- function(input, output, session, data, filename, rownames = T) {
   
+  validate(need(data(), "No data to display!"))
   
   output$table <- DT::renderDataTable(data(), options = list(scrollX = TRUE))
   output$export.csv <- downloadHandler(filename, 
