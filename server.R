@@ -16,7 +16,7 @@ library(shinyjs)
 source("readCountImporter.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
-source("conditionTable.R")
+source("visuals.R")
 source("gene.R")
 source("pca.R")
 source("widgetGenericImporter.R")
@@ -37,129 +37,21 @@ shinyServer(function(input, output, session) {
   readcounts.normalized <- reactive({ return(applyReadcountNormalization(readcounts(), input$pca.data.normalization)) })
   annotation <- reactive( { annotateGenes(readcounts.normalized()) } )
   annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()["var"] } })
-  conditions <- reactive({ 
-    
-    if(input$pca.data.conditions.mode == "column") {
-      return(generateConditionTable(readcounts.normalized(), sep = ""))
-    }
-    else if(input$pca.data.conditions.mode == "extract") {
-      return(generateConditionTable(readcounts.normalized(), sep = input$pca.data.conditions.separator))
-    }
-    else if(input$pca.data.conditions.mode == "upload") {
-      return(NULL) #todo
-    }
-    else {
-      return(NULL)
-    }
-    
-    
-    })
+  conditions <- reactive({ serverGetConditionTable(input, readcounts.normalized) })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
-  readcounts.selected <- reactive(
-    { 
-      return(selectTopVariantGenes(readcounts.normalized(), annotation(), input$pca.pca.genes.count))
-    })
+  readcounts.selected <- reactive({ return(selectTopVariantGenes(readcounts.normalized(), annotation(), input$pca.pca.genes.count)) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- reactive( { applyPCA(readcounts.selected()) } )
   
   # Visualizing the data
-  conditions.visuals.table <- reactive({
-    
-    validate(need(conditions(), "Need list of conditions to build visual table"))
-    
-    #todo loading/saving of this table
-    
-    return(data.frame(
-      row.names = colnames(conditions()),
-      color = colorRampPalette(brewer.pal(9, "Set1"))(ncol(conditions())),
-      symbol = rep("circle", ncol(conditions())),
-      stringsAsFactors = F
-    ))
-    
-  })
+  conditions.visuals.table <- reactive({ serverGetConditionVisualsTable(input, conditions) })
   
   #' Build a list of all visual parameters
   #' Return a table with factors for color and symbol for each cell
   #' Return a palette that correspond to the factors
-  pca.transformed.visuals <- reactive({
-    
-    validate(
-      need(readcounts.normalized(), "No data to build visual parameter table from!"),
-      need(conditions.visuals.table(), "No condition visual mapping!")
-    )
-    
-    cells <- colnames(readcounts.normalized())
-    cells.conditions <- conditions()
-    conditions.mapping <- conditions.visuals.table()
-    
-    # Setup output
-    factors <- data.frame(row.names = cells,
-                          color = rep("#000000", length(cells)),
-                          symbol = rep("circle", length(cells)),
-                          stringsAsFactors = F)
-    
-    palette.colors <- c("#000000")
-    palette.colors.conditions <- c("Default")
-    palette.symbols <- c("circle")
-    palette.symbols.conditions <- c("Default")
-    
-    # Go through each cell and select the color & shape based on the first condition providing it
-    for(cell in cells) {
-      
-      color <- ""
-      color.condition <- ""
-      symbol <- ""
-      symbol.condition <- ""
-      
-      for(condition in colnames(cells.conditions)) {
-        
-        if(!cells.conditions[cell, condition]) {
-          next()
-        }
-        
-        if(color == "") {
-          
-          mapping.color <- conditions.mapping[condition, "color"]
-          
-          color <- mapping.color
-          color.condition <- condition
-        }
-        
-        if(symbol == "") {
-          symbol <- conditions.mapping[condition, "symbol"]
-          symbol.condition <- condition
-        }
-        
-      }
-      
-      if(color == "") {
-        color = "#000000"
-        color.condition <- cell
-      }
-      if(symbol == "") {
-        symbol = "circle"
-        symbol.condition <- cell
-      }
-      
-      factors[cell, "color"] <- color.condition # todo: user name for condition
-      factors[cell, "symbol"] <- symbol.condition
-      
-      if(!(color.condition %in% palette.colors.conditions)) { palette.colors <- c(palette.colors, color) }
-      if(!(symbol.condition %in% palette.symbols.conditions)) { palette.symbols <- c(palette.symbols, symbol) }
-      
-    }
-    
-    #Convert to factors
-    factors$color <- as.factor(factors$color)
-    factors$symbol <- as.factor(factors$symbol)
-    
-    print(factors)
-
-    return(list("factors" = factors, "palette.colors" = palette.colors, "palette.symbols" = palette.symbols))
-    
-  })
+  pca.transformed.visuals <- reactive({ serverGetCellVisualsTable(input, readcounts.normalized, conditions, conditions.visuals.table) })
   
   #
   # Update input elements
@@ -305,30 +197,41 @@ shinyServer(function(input, output, session) {
     dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
     
     if(dimensions.plot == 1) {
+      
+      x <- list(title = dimensions.requested[1])
     
       plot_ly(type = "histogram",
-             x = pca.transformed[[dimensions.requested[1]]])
+             x = pca.transformed[[dimensions.requested[1]]],
+             color = pca.transformed.visuals$color,
+             colors = palette.colors) %>% layout(xaxis = x)
       
     }
     else if(dimensions.plot == 2) {
       
-      #todo: separate traces here -> for each a legend
+      x <- list(title = dimensions.requested[1])
+      y <- list(title = dimensions.requested[2])
       
-      plot_ly(type = "scatter",
+      p <- plot_ly(type = "scatter",
               mode = "markers",
               x = pca.transformed[[dimensions.requested[1]]],
               y = pca.transformed[[dimensions.requested[2]]],
               color = pca.transformed.visuals$color,
-              colors = palette.colors)
+              colors = palette.colors) %>% layout(xaxis = x, yaxis = y)
       
     }
     else if(dimensions.plot == 3) {
+      
+      x <- list(title = dimensions.requested[1])
+      y <- list(title = dimensions.requested[2])
+      z <- list(title = dimensions.requested[3])
       
       plot_ly(type = "scatter3d",
               mode = "markers",
               x = pca.transformed[[dimensions.requested[1]]],
               y = pca.transformed[[dimensions.requested[2]]],
-              z = pca.transformed[[dimensions.requested[3]]])
+              z = pca.transformed[[dimensions.requested[3]]],
+              color = pca.transformed.visuals$color,
+              colors = palette.colors) %>% layout(xaxis = x, yaxis = y, zaxis = z)
       
     }
     
