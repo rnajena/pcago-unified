@@ -18,6 +18,18 @@ source("uiHelper.R")
 #'
 #' @examples
 uiPCAPage <- function() {
+  
+  # return(
+  #   navbarPage("App Title",
+  #              tabPanel("Plot"),
+  #              navbarMenu("More",
+  #                         tabPanel("Summary"),
+  #                         "----",
+  #                         "Section header",
+  #                         tabPanel("Table")
+  #              )
+  #   ))
+  
   return(bootstrapPage(
     sidebarLayout(sidebarPanel(
       tabsetPanel(

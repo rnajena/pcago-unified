@@ -37,7 +37,7 @@ downloadableDataTableOutput <- function(id) {
 #' @export
 #'
 #' @examples
-downloadableDataTable <- function(input, output, session, data, filename, rownames = T) {
+downloadableDataTable <- function(input, output, session, data, filename, rownames = T, colnames = NA) {
   
   validate(need(data(), "No data to display!"))
   
@@ -48,7 +48,8 @@ downloadableDataTable <- function(input, output, session, data, filename, rownam
                                         write.table(data(),
                                                   file,
                                                   sep = ",",
-                                                  row.names = rownames)
+                                                  row.names = rownames,
+                                                  col.names = colnames)
                                          
                                        })
   
