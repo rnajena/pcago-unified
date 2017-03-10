@@ -7,7 +7,7 @@
 
 library(RColorBrewer)
 library(Cairo)
-library(ggvis)
+library(scatterplot3d)
 library(ggplot2)
 library(dplyr)
 library(DT)
@@ -35,16 +35,45 @@ shinyServer(function(input, output, session) {
   #
   
   # The starting values are normalized read counts, the annotation table and the condition table
-  readcounts.normalized <- reactive({ return(applyReadcountNormalization(readcounts(), input$pca.data.normalization)) })
-  annotation <- reactive( { annotateGenes(readcounts.normalized()) } )
+  readcounts.processed <- reactive(
+    { 
+      rc <- readcounts()
+      
+      # Remove constant read genes
+      if("remove.constant" %in% input$pca.data.readcounts.processing) {
+        processed <- removeConstantReads(rc)
+        rc <- processed$readcounts
+      }
+      
+      
+      # Apply normalization
+      rc <- applyReadcountNormalization(rc, input$pca.data.normalization)
+      
+      return(rc) 
+    })
+  
+  annotation <- reactive( { annotateGenes(readcounts.processed()) } )
   annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()["var"] } })
-  conditions <- reactive({ serverGetConditionTable(input, readcounts.normalized) })
+  conditions <- reactive({ serverGetConditionTable(input, readcounts.processed) })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
-  readcounts.selected <- reactive({ return(selectTopVariantGenes(readcounts.normalized(), annotation(), input$pca.pca.genes.count)) })
+  readcounts.selected <- reactive({ return(selectTopVariantGenes(readcounts.processed(), annotation(), input$pca.pca.genes.count)) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
-  pca <- reactive( { applyPCA(readcounts.selected()) } )
+  pca <- reactive( {
+    
+    no.constant <- "remove.constant" %in% input$pca.data.readcounts.processing
+    center <-input$pca.pca.settings.center
+    scale <- input$pca.pca.settings.scale
+    
+    validate(
+      need(readcounts.selected(), "No data to apply PCA to!"),
+      need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
+    )
+    
+    applyPCA(readcounts.selected(), center = center, scale = scale) 
+    
+    })
   
   # Visualizing the data
   conditions.visuals.table <- reactive({ serverGetConditionVisualsTable(input, conditions) })
@@ -52,7 +81,7 @@ shinyServer(function(input, output, session) {
   #' Build a list of all visual parameters
   #' Return a table with factors for color and symbol for each cell
   #' Return a palette that correspond to the factors
-  pca.transformed.visuals <- reactive({ serverGetCellVisualsTable(input, readcounts.normalized, conditions, conditions.visuals.table) })
+  pca.transformed.visuals <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, conditions.visuals.table) })
   
   #
   # Update input elements
@@ -79,27 +108,27 @@ shinyServer(function(input, output, session) {
     
   })
   
-  observeEvent(readcounts.normalized(), {
+  observeEvent(readcounts.processed(), {
     
-    genes_max <- nrow(readcounts.normalized())
+    genes_max <- nrow(readcounts.processed())
     
     updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
   })
   
-  output$pca.plot.visuals <- renderUI({
-    
-    validate(need(conditions(), "Needing conditions for determining plot visuals!"))
-  
-    cells.conditions <- conditions()
-    ui <- tagList()
-    
-    for(condition in colnames(cells.conditions)) {
-      ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition), condition))
-    }
-    
-    return(ui)
-    
-  })
+  # output$pca.plot.visuals <- renderUI({
+  #   
+  #   validate(need(conditions(), "Needing conditions for determining plot visuals!"))
+  # 
+  #   cells.conditions <- conditions()
+  #   ui <- tagList()
+  #   
+  #   for(condition in colnames(cells.conditions)) {
+  #     ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition), condition))
+  #   }
+  #   
+  #   return(ui)
+  #   
+  # })
   
   #
   # Input events
@@ -141,7 +170,7 @@ shinyServer(function(input, output, session) {
   
   # Input tables
   observeEvent ( readcounts(), { callModule(downloadableDataTable, "readcounts", filename = "readcounts.csv", data = readcounts) })
-  observeEvent ( readcounts.normalized(), { callModule(downloadableDataTable, "readcounts.normalized.csv", filename = "readcounts.norm.csv", data = readcounts.normalized) })
+  observeEvent ( readcounts.processed(), { callModule(downloadableDataTable, "readcounts.processed.csv", filename = "readcounts.processed.csv", data = readcounts.processed) })
   observeEvent ( conditions(),  { callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions) })
   observeEvent ( annotation.var(), { callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = annotation.var) })
   
@@ -179,8 +208,7 @@ shinyServer(function(input, output, session) {
   output$pca.cellplot <- renderImage({
     
     validate(
-      need(try(pca()), "No data to plot!"),
-      need(try(input$pca.plot.cells.axes), "No axes to draw!")
+      need(input$pca.plot.cells.axes, "No axes to draw!")
     )
     
     # Setup parameters
@@ -194,9 +222,10 @@ shinyServer(function(input, output, session) {
     pca.transformed.visuals <- pca.transformed.visuals()$factors
     
     pca.transformed$color <- pca.transformed.visuals$color
+    pca.transformed$shape <- pca.transformed.visuals$shape
     
     palette.colors <- pca.transformed.visuals()$palette.colors
-    palette.symbols <- pca.transformed.visuals()$palette.symbols
+    palette.shapes <- pca.transformed.visuals()$palette.shapes
     
     dimensions.available <- ncol(pca.transformed)
     dimensions.requested <- input$pca.plot.cells.axes
@@ -206,48 +235,48 @@ shinyServer(function(input, output, session) {
     if(dimensions.plot == 1) {
       
       x <- list(title = dimensions.requested[1])
-    
-      # plot_ly(type = "histogram",
-      #        x = pca.transformed[[dimensions.requested[1]]],
-      #        color = pca.transformed.visuals$color,
-      #        colors = palette.colors) %>% layout(xaxis = x)
       
-      return(NULL)
+      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
+        geom_histogram(aes(fill = factor(color)), bins = 100)
+      
+      ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
       
     }
     else if(dimensions.plot == 2) {
       
       x <- list(title = dimensions.requested[1])
       y <- list(title = dimensions.requested[2])
-      
-      # plot_ly(type = "scatter",
-      #         mode = "markers",
-      #         x = pca.transformed[[dimensions.requested[1]]],
-      #         y = pca.transformed[[dimensions.requested[2]]],
-      #         color = pca.transformed.visuals$color,
-      #         colors = palette.colors) %>% layout(xaxis = x, yaxis = y)
-      
+    
       p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
                                          y = dimensions.requested[2])) + 
-        geom_point(aes(colour = factor(color)))
+        geom_point(aes(colour = factor(color), shape = factor(shape)))
       
       ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
       
     }
     else if(dimensions.plot == 3) {
       
-      # x <- list(title = dimensions.requested[1])
-      # y <- list(title = dimensions.requested[2])
-      # z <- list(title = dimensions.requested[3])
-      # 
-      # plot_ly(type = "scatter3d",
-      #         mode = "markers",
-      #         x = pca.transformed[[dimensions.requested[1]]],
-      #         y = pca.transformed[[dimensions.requested[2]]],
-      #         z = pca.transformed[[dimensions.requested[3]]],
-      #         color = pca.transformed.visuals$color,
-      #         colors = palette.colors) %>% layout(xaxis = x, yaxis = y, zaxis = z)
-      return(NULL)
+      svg(filename = out.file,
+          width = out.width / out.dpi,
+          height = out.height / out.dpi)
+      scatterplot3d(
+        x = pca.transformed[[dimensions.requested[1]]],
+        y = pca.transformed[[dimensions.requested[2]]],
+        z = pca.transformed[[dimensions.requested[3]]],
+        color = palette.colors[as.numeric(pca.transformed$color)],
+        pch = 16,
+        xlab = dimensions.requested[1],
+        ylab = dimensions.requested[2],
+        zlab = dimensions.requested[3],
+        type = "h"
+        
+      )
+      legend("right",
+             legend = levels(pca.transformed$color),
+             col = palette.colors,
+             pch = 16,
+             xpd = T)
+      dev.off()
       
     }
     
@@ -258,5 +287,5 @@ shinyServer(function(input, output, session) {
          download = "pc_plot.svg",
          alt = "PCA cell plot")
     
-  }, deleteFile = F)
+  }, deleteFile = T)
 })

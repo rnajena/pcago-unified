@@ -23,22 +23,23 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
   
   ns <- NS(id)
   
-  tagList(headerPanel(
-    verticalLayout(
-      radioButtons(ns("source"), "Load from ...", c("uploaded file" = "upload", "manual input" = "manual", "sample data" = "sample"), selected = "upload"),
-      conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
-                       textAreaInput(ns("input"), "Manual input")),
-      conditionalPanel(conditionalPanel.equals(ns("source"), "'upload'"), 
-                       fileInput(ns("fileinput"), "Upload file")),
-      conditionalPanel(paste(conditionalPanel.equals(ns("source"), "'manual'"), "||", conditionalPanel.equals(ns("source"), "'upload'")), 
-                       selectInput(ns("importer"), "Importer", importers)),
-      conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
-                       selectInput(ns("sample"), "Sample data", samples)),
-      fluidPage(fluidRow(
-        actionButton(ns("submit"), "Submit"),
-        actionButton(ns("reset"), "Reset"))                                   
-      ))
-  , header = "Import"))
+  tags <- tagList(verticalLayout(
+    radioButtons(ns("source"), "Load from ...", c("uploaded file" = "upload", "manual input" = "manual", "sample data" = "sample"), selected = "upload"),
+    conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
+                     textAreaInput(ns("input"), "Manual input")),
+    conditionalPanel(conditionalPanel.equals(ns("source"), "'upload'"), 
+                     fileInput(ns("fileinput"), "Upload file")),
+    conditionalPanel(paste(conditionalPanel.equals(ns("source"), "'manual'"), "||", conditionalPanel.equals(ns("source"), "'upload'")), 
+                     selectInput(ns("importer"), "Importer", importers)),
+    conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
+                     selectInput(ns("sample"), "Sample data", samples)),
+    fluidPage(fluidRow(
+      actionButton(ns("submit"), "Submit"),
+      actionButton(ns("reset"), "Reset"))                                   
+    )))
+    
+  return(tags)
+    
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.

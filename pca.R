@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-applyPCA <- function(inputdata) {
+applyPCA <- function(inputdata, center, scale) {
   
   if(is.null(inputdata) || ncol(inputdata) == 0 || nrow(inputdata) == 0) {
     return(NULL)
@@ -32,7 +32,7 @@ applyPCA <- function(inputdata) {
   # eigenvector at the index of the gene.
   
   # Using R's internal function for improved speed (and accuracy as they use SDV)
-  result <- prcomp(X)
+  result <- prcomp(X, center = T, scale = T)
   transformed <- data.frame(result$x, row.names = cells)
   pc.names <- names(result$rotation)
   

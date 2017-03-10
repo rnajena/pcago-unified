@@ -28,7 +28,10 @@ uiPCAPlotPanel <- function() {
                                                     "Shape & color points",
                                                     c("Show editor" = "editor",
                                                       "Upload" = "upload")),
-                                       conditionalPanel("input['pca.plot.visuals.source'] == 'editor'", uiOutput("pca.plot.visuals"))
+                                       conditionalPanel("input['pca.plot.visuals.source'] == 'editor'", 
+                                                        headerPanel(header = helpIconText("Editor",
+                                                                                          "By using this editor you can modify the visual parameters of each condition."), 
+                                                                    colorShapeEditorInput("pca.plot.visuals.editor")))
                                        ),
                        bsCollapsePanel("Output settings")
                      )),

@@ -24,15 +24,25 @@ uiPCAPage <- function() {
         tabPanel("Data", bsCollapse(
           bsCollapsePanel("Read counts",
                           value = "readcounts",
-                          genericImporterInput("pca.data.readcounts",
-                                               supportedReadcountFileTypes,
-                                               supportedReadcountImporters,
-                                               availableReadcountSamples),
-                          radioButtons("pca.data.normalization",
-                                       helpIconText("Apply read count normalization", 
-                                                    "If you already have normalized read counts, set this to 'None'.",
-                                                    "Read count normalization"),
-                                       supportedReadcountNormalizationTypes)
+                          bsCollapse(
+                            bsCollapsePanel("Import",
+                                            genericImporterInput("pca.data.readcounts",
+                                                                 supportedReadcountFileTypes,
+                                                                 supportedReadcountImporters,
+                                                                 availableReadcountSamples)),
+                            bsCollapsePanel("Processing",
+                                            checkboxGroupInput("pca.data.readcounts.processing",
+                                                               helpIconText("Apply processing", 
+                                                                            "Removing constant readcount genes is needed for applying centering and scaling for PCA."),
+                                                               choices = c("Remove genes with constant readcounts" = "remove.constant",
+                                                                           "Transpose matrix" = "transpose"),
+                                                               selected = c("remove.constant")),
+                                            radioButtons("pca.data.normalization",
+                                                         helpIconText("Apply read count normalization", 
+                                                                      "If you already have normalized read counts, set this to 'None'.",
+                                                                      "Read count normalization"),
+                                                         supportedReadcountNormalizationTypes))
+                          )
           ),
           bsCollapsePanel("Annotation",
                           value = "annotation",
@@ -67,7 +77,10 @@ uiPCAPage <- function() {
                             column(width=3, actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")) ),
                             column(width=3, actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")) ),
                             column(width=3, actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward")) )
-                          ))
+                          )),
+          bsCollapsePanel("Settings",
+                          checkboxInput("pca.pca.settings.center", "Center data", value = T),
+                          checkboxInput("pca.pca.settings.scale", "Scale data", value = T))
         )),
         tabPanel("Plot", uiPCAPlotPanel()),
         type = "pills"
@@ -78,7 +91,7 @@ uiPCAPage <- function() {
           tabPanel("Read counts", 
                    tabsetPanel(
                      tabPanel("Input read counts", downloadableDataTableOutput("readcounts")),
-                     tabPanel("Normalized read counts", downloadableDataTableOutput("readcounts.normalized")),
+                     tabPanel("Processed read counts", downloadableDataTableOutput("readcounts.normalized")),
                      type = "pills"
                    )),
           tabPanel("Genes",
@@ -100,7 +113,7 @@ uiPCAPage <- function() {
                    )),
           tabPanel("Result plots",
                    tabsetPanel(
-                     tabPanel("Cells", plotOutput("pca.cellplot"), value = "cells"),
+                     tabPanel("Cells", plotOutput("pca.cellplot", width = "100%", height = "500px"), value = "cells"),
                      tabPanel("Gene variance", plotOutput("genes.variance.plot"), value = "variance"),
                      type = "pills",
                      id = "pca.page.resultplots.tab"

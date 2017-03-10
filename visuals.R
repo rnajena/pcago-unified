@@ -81,7 +81,7 @@ serverGetConditionVisualsTable <- function(input, conditions) {
   return(data.frame(
     row.names = colnames(conditions()),
     color = colorRampPalette(brewer.pal(9, "Set1"))(ncol(conditions())),
-    symbol = rep("circle", ncol(conditions())),
+    shape = rep(-1, ncol(conditions())),
     stringsAsFactors = F
   ))
   
@@ -102,21 +102,21 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
   # Setup output
   factors <- data.frame(row.names = cells,
                         color = rep("#000000", length(cells)),
-                        symbol = rep("circle", length(cells)),
+                        shape = rep(16, length(cells)),
                         stringsAsFactors = F)
   
   palette.colors <- c("#000000")
   palette.colors.conditions <- c("Default")
-  palette.symbols <- c("circle")
-  palette.symbols.conditions <- c("Default")
+  palette.shapes <- c(16)
+  palette.shapes.conditions <- c("Default")
   
   # Go through each cell and select the color & shape based on the first condition providing it
   for(cell in cells) {
     
     color <- ""
     color.condition <- ""
-    symbol <- ""
-    symbol.condition <- ""
+    shape <- -1
+    shape.condition <- ""
     
     for(condition in colnames(cells.conditions)) {
       
@@ -132,9 +132,9 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
         color.condition <- condition
       }
       
-      if(symbol == "") {
-        symbol <- conditions.mapping[condition, "symbol"]
-        symbol.condition <- condition
+      if(shape == -1) {
+        shape <- conditions.mapping[condition, "shape"]
+        shape.condition <- condition
       }
       
     }
@@ -143,25 +143,25 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
       color = "#000000"
       color.condition <- cell
     }
-    if(symbol == "") {
-      symbol = "circle"
-      symbol.condition <- cell
+    if(shape == -1) {
+      shape = 16
+      shape.condition <- "Default"
     }
     
     factors[cell, "color"] <- color.condition # todo: user name for condition
-    factors[cell, "symbol"] <- symbol.condition
+    factors[cell, "shape"] <- shape.condition
     
     if(!(color.condition %in% palette.colors.conditions)) { palette.colors <- c(palette.colors, color) }
-    if(!(symbol.condition %in% palette.symbols.conditions)) { palette.symbols <- c(palette.symbols, symbol) }
+    if(!(shape.condition %in% palette.shapes.conditions)) { palette.shapes <- c(palette.shapes, shape) }
     
   }
   
   #Convert to factors
   factors$color <- as.factor(factors$color)
-  factors$symbol <- as.factor(factors$symbol)
+  factors$shape <- as.factor(factors$shape)
   
   print(factors)
   
-  return(list("factors" = factors, "palette.colors" = palette.colors, "palette.symbols" = palette.symbols))
+  return(list("factors" = factors, "palette.colors" = palette.colors, "palette.shapes" = palette.shapes))
   
 }

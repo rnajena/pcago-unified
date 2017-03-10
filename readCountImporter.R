@@ -8,7 +8,8 @@ supportedReadcountImporters <- c("CSV (Comma)" = "csv_comma",
                                  "CSV (Whitespace/Tab)" = "csv_whitespace")
 supportedReadcountFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
-availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv")
+availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv",
+                               "Vitamins" = "vitamins.csv")
 
 #' Imports readcount from filehandle with importer definded by datatype
 #'
@@ -50,8 +51,35 @@ importReadcountSample <- function(sample) {
     return(data)
     
   }
+  else if(sample == "vitamins.csv") {
+    
+    con <- file("sampledata/vitamins.csv", "r")
+    data <- importReadcount(con, "csv_comma")
+    close(con)
+    return(data)
+    
+  }
   else {
     return(NULL)
   }
+  
+}
+
+#' Removes constant read count genes from the table.
+#' As they result in variance = 0, scaling in the PCA step won't work
+#'
+#' @param readcounts 
+#'
+#' @return list of readcounts without constant entries (readcounts) and list of removed genes (genes.removed)
+#' @export
+#'
+#' @examples
+removeConstantReads <- function(readcounts) {
+  
+  invalid <- (do.call(pmin, readcounts) == do.call(pmax, readcounts))
+  readcounts.removed <- readcounts[which(!invalid),]
+  genes.removed <- rownames(readcounts)[invalid]
+  
+  return(list(readcounts = readcounts.removed, genes.removed = genes.removed))
   
 }

@@ -34,3 +34,32 @@
 	border-bottom: 1px solid #ddd!important;
 	font-weight: bold;
 }
+
+.color-shape-editor .condition-list label {
+
+	padding: 0;
+
+}
+
+.color-shape-editor .condition-list input[type="radio"]+span {
+	padding: 5px 5px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+
+.color-shape-editor .condition-list input[type="radio"]:checked+span {
+	font-weight: bold;
+	border: 2px solid #aaa;
+}
+
+.color-shape-editor .condition-list .radio {
+
+	display: inline-block;
+
+}
+
+.color-shape-editor .condition-list input {
+
+	display: none;
+
+}
