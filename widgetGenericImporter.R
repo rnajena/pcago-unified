@@ -91,5 +91,5 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
 
   })
 
-  return(data())
+  return(data)
 }

@@ -28,7 +28,7 @@ options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
-  readcounts <- reactive ( { callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample) } )
+  readcounts <- callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
   
   #
   # Calculations
@@ -76,12 +76,12 @@ shinyServer(function(input, output, session) {
     })
   
   # Visualizing the data
-  conditions.visuals.table <- reactive({ serverGetConditionVisualsTable(input, conditions) })
+  visuals.conditions <- callModule(colorShapeEditor, "pca.plot.visuals.editor", conditions = conditions)
   
   #' Build a list of all visual parameters
   #' Return a table with factors for color and symbol for each cell
   #' Return a palette that correspond to the factors
-  pca.transformed.visuals <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, conditions.visuals.table) })
+  visuals.cell <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, visuals.conditions) })
   
   #
   # Update input elements
@@ -114,22 +114,7 @@ shinyServer(function(input, output, session) {
     
     updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
   })
-  
-  # output$pca.plot.visuals <- renderUI({
-  #   
-  #   validate(need(conditions(), "Needing conditions for determining plot visuals!"))
-  # 
-  #   cells.conditions <- conditions()
-  #   ui <- tagList()
-  #   
-  #   for(condition in colnames(cells.conditions)) {
-  #     ui <- tagAppendChild(ui, colorShapeInput(paste0("pca.plot.visuals.", condition), condition))
-  #   }
-  #   
-  #   return(ui)
-  #   
-  # })
-  
+
   #
   # Input events
   #
@@ -219,13 +204,12 @@ shinyServer(function(input, output, session) {
     
     # Actual plot
     pca.transformed <- pca()$transformed
-    pca.transformed.visuals <- pca.transformed.visuals()$factors
     
-    pca.transformed$color <- pca.transformed.visuals$color
-    pca.transformed$shape <- pca.transformed.visuals$shape
+    pca.transformed$color <- visuals.cell()$factors$color
+    pca.transformed$shape <- visuals.cell()$factors$shape
     
-    palette.colors <- pca.transformed.visuals()$palette.colors
-    palette.shapes <- pca.transformed.visuals()$palette.shapes
+    palette.colors <- visuals.cell()$palette.colors
+    palette.shapes <- visuals.cell()$palette.shapes
     
     dimensions.available <- ncol(pca.transformed)
     dimensions.requested <- input$pca.plot.cells.axes
@@ -249,7 +233,9 @@ shinyServer(function(input, output, session) {
     
       p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
                                          y = dimensions.requested[2])) + 
-        geom_point(aes(colour = factor(color), shape = factor(shape)))
+        geom_point(aes(colour = color, shape = shape))
+      p <- p + scale_color_manual(values = palette.colors)
+      p <- p + scale_shape_manual(values = palette.shapes)
       
       ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
       

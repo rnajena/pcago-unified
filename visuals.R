@@ -72,16 +72,25 @@ serverGetConditionTable <- function(input, readcounts.normalized) {
   }
 }
 
-serverGetConditionVisualsTable <- function(input, conditions) {
+#' Builds a condition visuals table that contains a color and a shape for each condition.
+#'
+#' @param input 
+#' @param conditions List of condition names
+#'
+#' @return Data frame with columns for color ("color") and shape ("shape") where rows are the conditions
+#' @export
+#'
+#' @examples
+generateDefaultConditionVisualsTable <- function(conditions) {
   
-  validate(need(conditions(), "Need list of conditions to build visual table"))
+  validate(need(conditions, "Need list of conditions to build visual table!"))
   
   #todo loading/saving of this table
   
   return(data.frame(
-    row.names = colnames(conditions()),
-    color = colorRampPalette(brewer.pal(9, "Set1"))(ncol(conditions())),
-    shape = rep(-1, ncol(conditions())),
+    row.names = conditions,
+    color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)),
+    shape = rep(-1, length(conditions)),
     stringsAsFactors = F
   ))
   
@@ -105,10 +114,10 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
                         shape = rep(16, length(cells)),
                         stringsAsFactors = F)
   
-  palette.colors <- c("#000000")
-  palette.colors.conditions <- c("Default")
-  palette.shapes <- c(16)
-  palette.shapes.conditions <- c("Default")
+  palette.colors <- c()
+  palette.colors.conditions <- c()
+  palette.shapes <- c()
+  palette.shapes.conditions <- c()
   
   # Go through each cell and select the color & shape based on the first condition providing it
   for(cell in cells) {
@@ -141,7 +150,7 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
     
     if(color == "") {
       color = "#000000"
-      color.condition <- cell
+      color.condition <- "Default"
     }
     if(shape == -1) {
       shape = 16
@@ -151,16 +160,26 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
     factors[cell, "color"] <- color.condition # todo: user name for condition
     factors[cell, "shape"] <- shape.condition
     
-    if(!(color.condition %in% palette.colors.conditions)) { palette.colors <- c(palette.colors, color) }
-    if(!(shape.condition %in% palette.shapes.conditions)) { palette.shapes <- c(palette.shapes, shape) }
+    if(!(color.condition %in% palette.colors.conditions)) { 
+      
+      palette.colors <- c(palette.colors, color) 
+      palette.colors.conditions <- c(palette.colors.conditions, color.condition)
+    }
+    if(!(shape.condition %in% palette.shapes.conditions)) {
+      
+      palette.shapes <- c(palette.shapes, shape) 
+      palette.shapes.conditions <- c(palette.shapes.conditions, shape.condition)
+    }
     
   }
   
   #Convert to factors
-  factors$color <- as.factor(factors$color)
-  factors$shape <- as.factor(factors$shape)
+  factors$color <- factor(factors$color, levels = palette.colors.conditions)
+  factors$shape <- factor(factors$shape, levels = palette.shapes.conditions)
   
   print(factors)
+  print(palette.colors)
+  print(palette.shapes)
   
   return(list("factors" = factors, "palette.colors" = palette.colors, "palette.shapes" = palette.shapes))
   

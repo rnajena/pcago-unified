@@ -24,14 +24,7 @@ uiPCAPlotPanel <- function() {
                                                       multiple = T,
                                                       options = list(maxItems = 3))),
                        bsCollapsePanel("Visualization",
-                                       radioButtons("pca.plot.visuals.source",
-                                                    "Shape & color points",
-                                                    c("Show editor" = "editor",
-                                                      "Upload" = "upload")),
-                                       conditionalPanel("input['pca.plot.visuals.source'] == 'editor'", 
-                                                        headerPanel(header = helpIconText("Editor",
-                                                                                          "By using this editor you can modify the visual parameters of each condition."), 
-                                                                    colorShapeEditorInput("pca.plot.visuals.editor")))
+                                       colorShapeEditorInput("pca.plot.visuals.editor")
                                        ),
                        bsCollapsePanel("Output settings")
                      )),

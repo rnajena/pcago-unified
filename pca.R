@@ -32,7 +32,7 @@ applyPCA <- function(inputdata, center, scale) {
   # eigenvector at the index of the gene.
   
   # Using R's internal function for improved speed (and accuracy as they use SDV)
-  result <- prcomp(X, center = T, scale = T)
+  result <- prcomp(X, center = center, scale = scale)
   transformed <- data.frame(result$x, row.names = cells)
   pc.names <- names(result$rotation)
   
