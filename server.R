@@ -119,6 +119,16 @@ shinyServer(function(input, output, session) {
   # Input events
   #
   
+  # Navigation quick links
+  # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
+  observeEvent(input$pca.nav, {
+    
+    if(input$pca.nav == "pca.cells.plot.quicklink") {
+      updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
+    }
+    
+  })
+  
   # User clicks fine-grained controls in gene count panel
   observeEvent(input$pca.pca.genes.count.lstepdecrease, {
     
