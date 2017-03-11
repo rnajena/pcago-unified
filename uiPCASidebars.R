@@ -28,8 +28,7 @@ uiPCASidebarData <- function() {
                                                            availableReadcountSamples)),
                       bsCollapsePanel("Processing",
                                       checkboxGroupInput("pca.data.readcounts.processing",
-                                                         helpIconText("Apply processing", 
-                                                                      "Removing constant readcount genes is needed for applying centering and scaling for PCA."),
+                                                         helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
                                                          choices = c("Remove genes with constant readcounts" = "remove.constant",
                                                                      "Transpose matrix" = "transpose"),
                                                          selected = c("remove.constant")),
@@ -81,12 +80,13 @@ uiPCASidebarPCA <- function() {
     bsCollapsePanel("Gene count",
                     plotOutput("pca.pca.genes.count.variance.plot", height = "120px"),
                     sliderInput("pca.pca.genes.count", "Gene count", min = 0, max = 0, value = 0, step = 1),
-                    fixedRow(
-                      column(width=3, actionButton("pca.pca.genes.count.lstepdecrease", label = "", icon = icon("fast-backward")) ),
-                      column(width=3, actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")) ),
-                      column(width=3, actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")) ),
-                      column(width=3, actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward")) )
-                    )),
+                    fluidRow(style = "text-align: center;", tags$div(class = "col-centered", style = "display: inline-block;",
+                                                                     actionButton("pca.pca.genes.count.lstepdecrease", label = "", icon = icon("fast-backward")),
+                                                                     actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")),
+                                                                     actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")),
+                                                                     actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward"))
+                                                                     ))
+                    ),
     bsCollapsePanel("Settings",
                     checkboxInput("pca.pca.settings.center", "Center data", value = T),
                     checkboxInput("pca.pca.settings.scale", "Scale data", value = T))
@@ -119,6 +119,10 @@ uiPCASidebarPlot <- function() {
                        bsCollapsePanel("Output settings")
                      )),
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'",
+                     bsCollapse(
+                       bsCollapsePanel("Output settings")
+                     )),
+    conditionalPanel("input['pca.nav'] == 'pca.pc.importance'",
                      bsCollapse(
                        bsCollapsePanel("Output settings")
                      ))

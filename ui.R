@@ -18,7 +18,8 @@ source("uiHelpPage.R")
 #' Attach to bottom of body.
 script.enable.popovers <- I("$(document).ready(function(){
     $('[data-toggle=\"popover\"]').popover({
-      container: 'body'
+      container: 'body',
+      html: true
     });   
 });")
 
@@ -34,7 +35,7 @@ shinyUI(fluidPage(useShinyjs(),
                    tabPanel("About", value = "about", uiAboutPage()),
                    tabPanel("Analyze", value = "analyze", uiPCAPage()),
                    tabPanel("Help", value = "help", uiHelpPage()),
-                   id = "navigation",
+                   id = "main-nav",
                    theme = "style.css"),
                  tags$script(script.enable.popovers)))
 

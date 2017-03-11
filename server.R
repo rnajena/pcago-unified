@@ -15,6 +15,7 @@ library(shiny)
 library(shinyBS)
 library(shinyjs)
 source("readCountImporter.R")
+source("readCountProcessing.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
 source("visuals.R")
@@ -29,6 +30,10 @@ options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
+  # Store side effect variables here
+  variables <- reactiveValues(readcounts.processed.removedgenes = c())
+  
+  # Input tables
   readcounts <- callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
   
   #
@@ -44,6 +49,10 @@ shinyServer(function(input, output, session) {
       if("remove.constant" %in% input$pca.data.readcounts.processing) {
         processed <- removeConstantReads(rc)
         rc <- processed$readcounts
+        variables$readcounts.processed.removedgenes <- processed$genes.removed
+      }
+      else {
+        variables$readcounts.processed.removedgenes <- c()
       }
       
       
@@ -90,7 +99,7 @@ shinyServer(function(input, output, session) {
   
   #' Start page button. User can click it to go to the "Analyze" section
   observeEvent(input$about.goto.analyze, {
-    updateNavbarPage(session, "navigation", "analyze")
+    updateNavbarPage(session, "main-nav", "analyze")
   })
   
   observeEvent(pca(), {
@@ -164,22 +173,46 @@ shinyServer(function(input, output, session) {
   # Render plots & tables
   #
   
-  # Input tables
-  observeEvent ( readcounts(), { callModule(downloadableDataTable, "readcounts", filename = "readcounts.csv", data = readcounts) })
-  observeEvent ( readcounts.processed(), { callModule(downloadableDataTable, "readcounts.processed.csv", filename = "readcounts.processed.csv", data = readcounts.processed) })
-  observeEvent ( conditions(),  { callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions) })
-  observeEvent ( annotation.var(), { callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = annotation.var) })
+  # Tables
+  callModule(downloadableDataTable, "readcounts", filename = "readcounts.csv", data = readcounts)
+  callModule(downloadableDataTable, "readcounts.processed", filename = "readcounts.processed.csv", data = readcounts.processed)
+  callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions)
+  callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = annotation.var)
+  
+  # Texts
+  output$readcounts.processing.steps <- renderUI({
+    
+    result.remove.constant <- reactive({
+      
+      if("remove.constant" %in% input$pca.data.readcounts.processing) {
+        
+        content <- "No genes have been removed."
+        removed.genes <- variables$readcounts.processed.removedgenes
+        
+        if(length(removed.genes) != 0) {
+          
+          genes <- paste(removed.genes, collapse = ", ")
+          content <- paste(length(removed.genes) ,"genes have been removed:", genes)
+        }
+        
+        return(bsCollapsePanel(title = "Remove genes with constant read counts", content))
+      }
+      else {
+        return(tags$div())
+      }
+      
+    })
+    
+    return(bsCollapse(
+      result.remove.constant()
+    ))
+    
+  })
   
   # PCA results
-  observeEvent ( pca(), 
-                 { 
-                   validate(need(pca(), "No PCA results to show!"))
-                   
-                   callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = reactive({ pca()$transformed })) 
-                   callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = reactive({ pca()$pc }))
-                   callModule(downloadableDataTable, "pca.variance", filename = "pca.var.csv", data = reactive({ pca()$var }))
-                   
-                 })
+  callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = reactive({ pca()$transformed })) 
+  callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = reactive({ pca()$pc }))
+  callModule(downloadableDataTable, "pca.variance", filename = "pca.var.csv", data = reactive({ pca()$var }))
   
   # Gene variance plots
 

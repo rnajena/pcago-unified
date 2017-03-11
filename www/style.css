@@ -1,22 +1,23 @@
 /**
  * PCAGO additional style file
  * ===========================
- * 
+ *
  * Contains additional fixes for some quirks of Shiny/Bootstrap
  * and styles for custom controls
- * 
+ *
  */
 
 
 /**
- * Fixes for main navbar
+ * Fixes for main navbar. Thanks to shiny not able to give the damn <nav> entry an ID
+ * this solution is based on that sub-navs have to override this settings
  */
-.navbar-brand {
+.navbar-header .navbar-brand {
 	padding-top: 5px!important;
 	padding-bottom: 5px!important;
 }
 
-.header-logo {
+.navbar-header .navbar-brand .header-logo {
 	height: 100%;
 }
 
@@ -81,4 +82,27 @@
 
 .color-shape-editor .condition-list input {
 	display: none;
+}
+
+/*
+ * Fixes for navlist panel
+ * Make headers more distinct.
+ */
+.nav-stacked .navbar-brand {
+	font-weight: bold;
+	font-size: 16px;
+	color: #555;
+}
+
+/**
+* Style for help page
+*/
+
+.help-page table {
+    border-collapse: collapse;
+}
+
+.help-page th, .help-page td {
+    border: 1px solid #ddd;
+		padding: 15px;
 }

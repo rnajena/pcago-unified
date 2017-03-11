@@ -38,13 +38,20 @@ downloadableDataTableOutput <- function(id, ...) {
 #' @examples
 downloadableDataTable <- function(input, output, session, data, filename, rownames = T, colnames = NA) {
   
-  validate(need(data(), "No data to display!"))
+  table.data <- reactive({
+    
+    validate(need(data(), "No data to display!"))
+    return(data())
+    
+  })
   
-  output$table <- DT::renderDataTable(data(), options = list(scrollX = TRUE))
+  
+  
+  output$table <- DT::renderDataTable(table.data(), options = list(scrollX = TRUE))
   output$export.csv <- downloadHandler(filename, 
                                        function(file) {
                                          
-                                        write.table(data(),
+                                        write.table(table.data(),
                                                   file,
                                                   sep = ",",
                                                   row.names = rownames,
