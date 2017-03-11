@@ -7,6 +7,7 @@ source("readCountImporter.R")
 source("annotationImporter.R")
 source("readCountNormalizer.R")
 source("widgetDownloadableDataTable.R")
+source("widgetDownloadablePlot.R")
 source("widgetGenericImporter.R")
 source("uiHelper.R")
 source("uiPCASidebars.R")
@@ -35,8 +36,9 @@ uiPCAPage <- function() {
                                     tabPanel("Processed read counts", downloadableDataTableOutput("readcounts.processed")),
                                     "----",
                                     "Genes",
-                                    tabPanel("Gene variances", value = "pca.genes.variances", downloadableDataTableOutput("annotation.var"),
-                                             plotOutput("genes.variance.plot")),
+                                    tabPanel("Gene variances", value = "pca.genes.variances",
+                                             downloadablePlotOutput("genes.variance.plot"),
+                                             downloadableDataTableOutput("annotation.var")),
                                     "----",
                                     "Conditions",
                                     tabPanel("Cell condition assignments", downloadableDataTableOutput("conditions"))
@@ -44,11 +46,13 @@ uiPCAPage <- function() {
                          navbarMenu("PCA",
                                     "Principal components",
                                     tabPanel("Principal components", downloadableDataTableOutput("pca.pc")),
-                                    tabPanel("PC variances", downloadableDataTableOutput("pca.var")),
+                                    tabPanel("Importance", 
+                                             downloadablePlotOutput("pca.variance.plot"),
+                                             downloadableDataTableOutput("pca.variance")),
                                     "----",
                                     "Cells",
                                     tabPanel("Transformed values", downloadableDataTableOutput("pca.transformed")),
-                                    tabPanel("Cell plot", value = "pca.cells.plot", plotOutput("pca.cellplot"))
+                                    tabPanel("Cell plot", value = "pca.cells.plot", downloadablePlotOutput("pca.cellplot"))
                                     ),
                          tabPanel(faIconText("link", "Cell plot"), value = "pca.cells.plot.quicklink")))
   ))

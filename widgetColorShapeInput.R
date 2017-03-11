@@ -17,7 +17,7 @@ colorShapeInput.shapes <- c(
   "▲ Filled triangle" = 17,
   "◆ Filled diamond" = 18,
   "⬤ Large filled circle" = 19,
-  "• Small filled circle" = 20,
+  "⦁ Small filled circle" = 20,
   "□ Box" = 0,
   "○ Circle" = 1,
   "△ Triangle" = 2,

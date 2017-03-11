@@ -22,6 +22,7 @@ source("gene.R")
 source("pca.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
+source("widgetDownloadablePlot.R")
 source("widgetColorShapeInput.R")
 
 options(shiny.usecairo=TRUE)
@@ -176,16 +177,21 @@ shinyServer(function(input, output, session) {
                    
                    callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = reactive({ pca()$transformed })) 
                    callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = reactive({ pca()$pc }))
-                   callModule(downloadableDataTable, "pca.var", filename = "pca.var.csv", data = reactive({ pca()$var }))
+                   callModule(downloadableDataTable, "pca.variance", filename = "pca.var.csv", data = reactive({ pca()$var }))
+                   
                  })
   
-  # Variance plots
-  output$genes.variance.plot <- renderPlot({
-    if(is.null(annotation())) {
-      return(NULL)
-    }
-    
-    ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
+  # Gene variance plots
+
+  observeEvent(annotation(), {
+    callModule(downloadablePlot, "genes.variance.plot", exprplot = function( width, height, format, filename ){
+      
+      dpi <- 96
+      
+      p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
+      ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+      
+    })
   })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
@@ -200,88 +206,108 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  output$pca.cellplot <- renderImage({
-    
-    validate(
-      need(input$pca.plot.cells.axes, "No axes to draw!")
-    )
-    
-    # Setup parameters
-    out.width  <- session$clientData$output_pca.cellplot_width
-    out.height <- session$clientData$output_pca.cellplot_height
-    out.dpi <- 96
-    out.file <- tempfile(fileext='.svg')
-    
-    # Actual plot
-    pca.transformed <- pca()$transformed
-    
-    pca.transformed$color <- visuals.cell()$factors$color
-    pca.transformed$shape <- visuals.cell()$factors$shape
-    
-    palette.colors <- visuals.cell()$palette.colors
-    palette.shapes <- visuals.cell()$palette.shapes
-    
-    dimensions.available <- ncol(pca.transformed)
-    dimensions.requested <- input$pca.plot.cells.axes
-    
-    dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
-    
-    if(dimensions.plot == 1) {
+  
+  observeEvent(pca(), {
+    callModule(downloadablePlot, "pca.variance.plot", exprplot = function( width, height, format, filename ){
       
-      x <- list(title = dimensions.requested[1])
+      dpi <- 96
       
-      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
-        geom_histogram(aes(fill = factor(color)), bins = 100)
+      p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=percentage)) + geom_point()
+      ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
       
-      ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
+    })
+  })
+  
+  observeEvent(pca(), {
+    callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
       
-    }
-    else if(dimensions.plot == 2) {
+      dpi <- 96
+      validate(need(input$pca.plot.cells.axes, "No axes to draw!"))
       
-      x <- list(title = dimensions.requested[1])
-      y <- list(title = dimensions.requested[2])
-    
-      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
-                                         y = dimensions.requested[2])) + 
-        geom_point(aes(colour = color, shape = shape))
-      p <- p + scale_color_manual(values = palette.colors)
-      p <- p + scale_shape_manual(values = palette.shapes)
+      # Fetch needed variables from PCA and visual parameters
+      pca.transformed <- pca()$transformed
       
-      ggsave(out.file, p, width = out.width / out.dpi, height = out.height / out.dpi)
+      pca.transformed$color <- visuals.cell()$factors$color
+      pca.transformed$shape <- visuals.cell()$factors$shape
       
-    }
-    else if(dimensions.plot == 3) {
+      palette.colors <- visuals.cell()$palette.colors
+      palette.shapes <- visuals.cell()$palette.shapes
       
-      svg(filename = out.file,
-          width = out.width / out.dpi,
-          height = out.height / out.dpi)
-      scatterplot3d(
-        x = pca.transformed[[dimensions.requested[1]]],
-        y = pca.transformed[[dimensions.requested[2]]],
-        z = pca.transformed[[dimensions.requested[3]]],
-        color = palette.colors[as.numeric(pca.transformed$color)],
-        pch = 16,
-        xlab = dimensions.requested[1],
-        ylab = dimensions.requested[2],
-        zlab = dimensions.requested[3],
-        type = "h"
+      # Determine how many dimensions should be drawn
+      dimensions.available <- ncol(pca.transformed)
+      dimensions.requested <- input$pca.plot.cells.axes
+      
+      dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
+      
+      # Plot based on dimensions
+      if(dimensions.plot == 1) {
         
-      )
-      legend("right",
-             legend = levels(pca.transformed$color),
-             col = palette.colors,
-             pch = 16,
-             xpd = T)
-      dev.off()
+        x <- list(title = dimensions.requested[1])
+        
+        p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
+          geom_histogram(aes(fill = factor(color)), bins = 100)
+        
+        ggsave(filename, p, width = width / dpi, height = height / dpi)
+        
+      }
+      else if(dimensions.plot == 2) {
+        
+        x <- list(title = dimensions.requested[1])
+        y <- list(title = dimensions.requested[2])
+        
+        p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
+                                                y = dimensions.requested[2])) + 
+          geom_point(aes(colour = color, shape = shape))
+        p <- p + scale_color_manual(values = palette.colors)
+        p <- p + scale_shape_manual(values = palette.shapes)
+        
+        ggsave(filename, p, width = width / dpi, height = height / dpi)
+        
+      }
+      else if(dimensions.plot == 3) {
+        
+       
+        
+        # if(format == "svg") {
+        #   svg(filename = filename,
+        #       width = width / dpi,
+        #       height = height / dpi)
+        # }
+        # else if(format == "png") {
+        #   png(filename = filename,
+        #       width = width / dpi,
+        #       height = height / dpi)
+        # }
+        
+        png(filename = filename,
+            width = width / dpi,
+            height = height / dpi)
+        
+        browser() 
+        print("TODO: Broken")
+        
+        scatterplot3d(
+          x = pca.transformed[[dimensions.requested[1]]],
+          y = pca.transformed[[dimensions.requested[2]]],
+          z = pca.transformed[[dimensions.requested[3]]],
+          color = palette.colors[as.numeric(pca.transformed$color)],
+          pch = 16,
+          xlab = dimensions.requested[1],
+          ylab = dimensions.requested[2],
+          zlab = dimensions.requested[3],
+          type = "h"
+          
+        ) 
+        legend("right",
+               legend = levels(pca.transformed$color),
+               col = palette.colors,
+               pch = 16,
+               xpd = T)
+        dev.off()
+        
+      }
       
-    }
-    
-    # Send the plot
-    list(src = out.file,
-         width = out.width,
-         height = out.height,
-         download = "pc_plot.svg",
-         alt = "PCA cell plot")
-    
-  }, deleteFile = T)
+    })
+  })
+
 })

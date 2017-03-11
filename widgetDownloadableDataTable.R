@@ -4,24 +4,23 @@
 
 library(DT)
 library(shiny)
+source("uiHelper.R")
 
 #' Creates a UI with a data table output and download buttons
 #'
 #' @param id ID of the control
+#' @param ... Additional items to include into header bar
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadableDataTableOutput <- function(id) {
+downloadableDataTableOutput <- function(id, ...) {
   
   ns <- NS(id)
   
-  tagList(verticalLayout(
-    wellPanel(fluidPage(
-      fluidRow(downloadButton(ns("export.csv"), "Export *.csv")))),
-    DT::dataTableOutput(ns("table"))
-  ))
+  return(headerPanel(header = tags$span(class="headerbar-row",downloadButton(ns("export.csv"), "Export *.csv"), ...),
+                     DT::dataTableOutput(ns("table"))))
 }
 
 #' Fills the data table with given data output. Use within observeEvent(<data>)
