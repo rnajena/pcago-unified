@@ -47,3 +47,31 @@ applyPCA <- function(inputdata, center, scale) {
               "var" = variances.table,
               "pc" = result$rotation))
 }
+
+#' Server function for PCA
+#'
+#' @param input 
+#' @param readcounts.selected 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverPCA <- function(input, readcounts.selected) {
+  
+  return(reactive( {
+    
+    no.constant <- "remove.constant" %in% input$pca.data.readcounts.processing
+    center <-input$pca.pca.settings.center
+    scale <- input$pca.pca.settings.scale
+    
+    validate(
+      need(readcounts.selected(), "No data to apply PCA to!"),
+      need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
+    )
+    
+    applyPCA(readcounts.selected(), center = center, scale = scale) 
+    
+  }))
+  
+}

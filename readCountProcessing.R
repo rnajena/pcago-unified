@@ -52,8 +52,6 @@ serverReadCountProcessing <- function(readcounts, input) {
     
     output <- list( removed.genes = c(), readcounts = readcounts() )
     
-    browser()
-    
     # Transpose read counts
     if("transpose" %in% input$pca.data.readcounts.processing) {
       output$readcounts <- transposeReadCounts(output$readcounts)

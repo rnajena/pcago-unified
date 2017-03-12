@@ -59,3 +59,13 @@ faIconText <- function(faicon, text, lib = "font-awesome") {
   return(iconText(icon(faicon, lib = lib), text))
   
 }
+
+#' Creates a horizontal divider UI element
+#'
+#' @return Shiny UI element
+#' @export
+#'
+#' @examples
+hDivider <- function() {
+  return(tags$div(class = "hdivider"))
+}
