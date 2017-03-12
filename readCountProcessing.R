@@ -22,3 +22,17 @@ removeConstantReads <- function(readcounts) {
   return(list(readcounts = readcounts.removed, genes.removed = genes.removed))
   
 }
+
+#' Transposes the read count table
+#'
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+transposeReadCounts <- function(readcounts) {
+  
+  return(data.frame(t(readcounts)))
+  
+}

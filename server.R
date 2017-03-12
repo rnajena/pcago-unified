@@ -45,6 +45,11 @@ shinyServer(function(input, output, session) {
     { 
       rc <- readcounts()
       
+      # Transpose read counts
+      if("transpose" %in% input$pca.data.readcounts.processing) {
+        rc <- transposeReadCounts(rc)
+      }
+      
       # Remove constant read genes
       if("remove.constant" %in% input$pca.data.readcounts.processing) {
         processed <- removeConstantReads(rc)
@@ -143,14 +148,14 @@ shinyServer(function(input, output, session) {
   observeEvent(input$pca.pca.genes.count.lstepdecrease, {
     
     current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current - 50)
+    updateSliderInput(session, "pca.pca.genes.count", value = current - input$pca.pca.genes.count.lstep)
     
   })
   
   observeEvent(input$pca.pca.genes.count.lstepincrease, {
     
     current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current + 50)
+    updateSliderInput(session, "pca.pca.genes.count", value = current + input$pca.pca.genes.count.lstep)
     
   })
   
@@ -182,30 +187,36 @@ shinyServer(function(input, output, session) {
   # Texts
   output$readcounts.processing.steps <- renderUI({
     
-    result.remove.constant <- reactive({
-      
-      if("remove.constant" %in% input$pca.data.readcounts.processing) {
-        
-        content <- "No genes have been removed."
-        removed.genes <- variables$readcounts.processed.removedgenes
-        
-        if(length(removed.genes) != 0) {
-          
-          genes <- paste(removed.genes, collapse = ", ")
-          content <- paste(length(removed.genes) ,"genes have been removed:", genes)
-        }
-        
-        return(bsCollapsePanel(title = "Remove genes with constant read counts", content))
-      }
-      else {
-        return(tags$div())
-      }
-      
-    })
+    validate(need(readcounts.processed(), "No processed read counts available."))
     
-    return(bsCollapse(
-      result.remove.constant()
-    ))
+    panels <- list()
+    
+    # Transpose processing
+    if("transpose" %in% input$pca.data.readcounts.processing) {
+      panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Transpose table", "Read counts have been transposed.")
+    }
+    
+    # Remove constant reads processing
+    if("remove.constant" %in% input$pca.data.readcounts.processing) {
+      
+      content <- "No genes have been removed."
+      removed.genes <- variables$readcounts.processed.removedgenes
+      
+      if(length(removed.genes) != 0) {
+        
+        genes <- paste(removed.genes, collapse = ", ")
+        content <- paste(length(removed.genes) ,"genes have been removed:", genes)
+      }
+      
+      panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Remove genes with constant read counts", content)
+    }
+   
+    if(length(panels) == 0) {
+      return(tags$div)
+    }
+    else {
+      return(do.call(bsCollapse, panels))
+    }
     
   })
   
@@ -215,16 +226,14 @@ shinyServer(function(input, output, session) {
   callModule(downloadableDataTable, "pca.variance", filename = "pca.var.csv", data = reactive({ pca()$var }))
   
   # Gene variance plots
-
-  observeEvent(annotation(), {
-    callModule(downloadablePlot, "genes.variance.plot", exprplot = function( width, height, format, filename ){
-      
-      dpi <- 96
-      
-      p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
-      ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
-      
-    })
+  
+  callModule(downloadablePlot, "genes.variance.plot", exprplot = function( width, height, format, filename ){
+    
+    dpi <- 96
+    
+    p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point()
+    ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+    
   })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
@@ -239,108 +248,119 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  
-  observeEvent(pca(), {
-    callModule(downloadablePlot, "pca.variance.plot", exprplot = function( width, height, format, filename ){
-      
-      dpi <- 96
-      
-      p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=percentage)) + geom_point()
-      ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
-      
-    })
+  callModule(downloadablePlot, "pca.variance.plot", exprplot = function( width, height, format, filename ){
+    
+    dpi <- 96
+    
+    p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=percentage)) + geom_point()
+    ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+    
   })
   
-  observeEvent(pca(), {
-    callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
+  callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
+    
+    dpi <- 96
+    validate(need(input$pca.plot.cells.axes, "No axes to draw!"))
+    
+    # Fetch needed variables from PCA and visual parameters
+    pca.transformed <- pca()$transformed
+    
+    pca.transformed$color <- visuals.cell()$factors$color
+    pca.transformed$shape <- visuals.cell()$factors$shape
+    
+    palette.colors <- visuals.cell()$palette.colors
+    palette.shapes <- visuals.cell()$palette.shapes
+    
+    # Determine how many dimensions should be drawn
+    dimensions.available <- ncol(pca.transformed)
+    dimensions.requested <- input$pca.plot.cells.axes
+    
+    dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
+    
+    # Plot based on dimensions
+    if(dimensions.plot == 1) {
       
-      dpi <- 96
-      validate(need(input$pca.plot.cells.axes, "No axes to draw!"))
+      x <- list(title = dimensions.requested[1])
       
-      # Fetch needed variables from PCA and visual parameters
-      pca.transformed <- pca()$transformed
+      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
+        geom_histogram(aes(fill = factor(color)), bins = 100)
       
-      pca.transformed$color <- visuals.cell()$factors$color
-      pca.transformed$shape <- visuals.cell()$factors$shape
+      ggsave(filename, p, width = width / dpi, height = height / dpi)
       
-      palette.colors <- visuals.cell()$palette.colors
-      palette.shapes <- visuals.cell()$palette.shapes
+    }
+    else if(dimensions.plot == 2) {
       
-      # Determine how many dimensions should be drawn
-      dimensions.available <- ncol(pca.transformed)
-      dimensions.requested <- input$pca.plot.cells.axes
+      x <- list(title = dimensions.requested[1])
+      y <- list(title = dimensions.requested[2])
       
-      dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
+      p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
+                                              y = dimensions.requested[2])) + 
+        geom_point(aes(colour = color, shape = shape))
+      p <- p + scale_color_manual(values = palette.colors)
+      p <- p + scale_shape_manual(values = palette.shapes)
       
-      # Plot based on dimensions
-      if(dimensions.plot == 1) {
-        
-        x <- list(title = dimensions.requested[1])
-        
-        p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
-          geom_histogram(aes(fill = factor(color)), bins = 100)
-        
-        ggsave(filename, p, width = width / dpi, height = height / dpi)
-        
-      }
-      else if(dimensions.plot == 2) {
-        
-        x <- list(title = dimensions.requested[1])
-        y <- list(title = dimensions.requested[2])
-        
-        p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
-                                                y = dimensions.requested[2])) + 
-          geom_point(aes(colour = color, shape = shape))
-        p <- p + scale_color_manual(values = palette.colors)
-        p <- p + scale_shape_manual(values = palette.shapes)
-        
-        ggsave(filename, p, width = width / dpi, height = height / dpi)
-        
-      }
-      else if(dimensions.plot == 3) {
-        
-       
-        
-        # if(format == "svg") {
-        #   svg(filename = filename,
-        #       width = width / dpi,
-        #       height = height / dpi)
-        # }
-        # else if(format == "png") {
-        #   png(filename = filename,
-        #       width = width / dpi,
-        #       height = height / dpi)
-        # }
-        
-        png(filename = filename,
+      ggsave(filename, p, width = width / dpi, height = height / dpi)
+      
+    }
+    else if(dimensions.plot == 3) {
+      
+      if(format == "svg") {
+        svg(filename = filename,
             width = width / dpi,
             height = height / dpi)
-        
-        browser() 
-        print("TODO: Broken")
-        
-        scatterplot3d(
-          x = pca.transformed[[dimensions.requested[1]]],
-          y = pca.transformed[[dimensions.requested[2]]],
-          z = pca.transformed[[dimensions.requested[3]]],
-          color = palette.colors[as.numeric(pca.transformed$color)],
-          pch = 16,
-          xlab = dimensions.requested[1],
-          ylab = dimensions.requested[2],
-          zlab = dimensions.requested[3],
-          type = "h"
-          
-        ) 
-        legend("right",
-               legend = levels(pca.transformed$color),
-               col = palette.colors,
-               pch = 16,
-               xpd = T)
-        dev.off()
-        
       }
+      else if(format == "png") {
+        png(filename = filename,
+            width = width,
+            height = height,
+            res = dpi)
+      }
+
+      par(oma = c(1,7,1,1))
       
-    })
+      scatterplot3d(
+        x = pca.transformed[[dimensions.requested[1]]],
+        y = pca.transformed[[dimensions.requested[2]]],
+        z = pca.transformed[[dimensions.requested[3]]],
+        color = palette.colors[as.numeric(pca.transformed$color)],
+        pch = palette.shapes[as.numeric(pca.transformed$shape)],
+        xlab = dimensions.requested[1],
+        ylab = dimensions.requested[2],
+        zlab = dimensions.requested[3],
+        type = "h"
+      )
+      
+      par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+      plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+      
+      # legend("right",
+      #        legend = c(levels(pca.transformed$color), levels(pca.transformed$shape)),
+      #        col = c(palette.colors, rep("black", length(palette.shapes))),
+      #        pch = c(rep(16, length(palette.colors)), palette.shapes),
+      #        bty = "n",
+      #        xpd = T)
+      
+      legend("topleft",
+             legend = levels(pca.transformed$color),
+             col = palette.colors,
+             pch = 16,
+             bty = "n",
+             xpd = T,
+             title = "Color",
+             title.adj = 0) # wtf?
+      legend("bottomleft",
+             legend = levels(pca.transformed$shape),
+             col = "black",
+             pch = palette.shapes,
+             bty = "n",
+             xpd = T,
+             title = "Shape",
+             title.adj = 0)
+      
+      dev.off()
+      
+    }
+    
   })
 
 })

@@ -29,8 +29,8 @@ uiPCASidebarData <- function() {
                       bsCollapsePanel("Processing",
                                       checkboxGroupInput("pca.data.readcounts.processing",
                                                          helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
-                                                         choices = c("Remove genes with constant readcounts" = "remove.constant",
-                                                                     "Transpose matrix" = "transpose"),
+                                                         choices = c("Transpose table" = "transpose",
+                                                                    "Remove genes with constant readcounts" = "remove.constant"),
                                                          selected = c("remove.constant")),
                                       radioButtons("pca.data.normalization",
                                                    helpIconText("Apply read count normalization", 
@@ -85,7 +85,8 @@ uiPCASidebarPCA <- function() {
                                                                      actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")),
                                                                      actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")),
                                                                      actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward"))
-                                                                     ))
+                                                                     )),
+                    numericInput("pca.pca.genes.count.lstep", "Step", 1, 1000, value = 50)
                     ),
     bsCollapsePanel("Settings",
                     checkboxInput("pca.pca.settings.center", "Center data", value = T),

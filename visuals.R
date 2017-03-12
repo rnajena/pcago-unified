@@ -85,8 +85,6 @@ generateDefaultConditionVisualsTable <- function(conditions) {
   
   validate(need(conditions, "Need list of conditions to build visual table!"))
   
-  #todo loading/saving of this table
-  
   return(data.frame(
     row.names = conditions,
     color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)),
@@ -127,7 +125,7 @@ serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, 
     shape <- -1
     shape.condition <- ""
     
-    for(condition in colnames(cells.conditions)) {
+    for(condition in rownames(conditions.mapping)) {
       
       if(!cells.conditions[cell, condition]) {
         next()

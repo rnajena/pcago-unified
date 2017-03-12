@@ -48,6 +48,10 @@ colorShapeEditorInput <- function(id) {
   ns <- NS(id)
   
   return(tagList(tags$div(class="color-shape-editor",
+                          headerPanel(header = tags$span(
+                            downloadButton(ns("export.csv"), "Export *.csv"),
+                            actionButton(ns("import"), "Import *.csv", icon = icon("upload"))
+                          ),
                           tags$div(
                             class="condition-list",
                             radioButtons(ns("conditions"),
@@ -55,7 +59,7 @@ colorShapeEditorInput <- function(id) {
                                          choices = c("None"))),
                           colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
                           selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1))
-                          ))
+                          )))
   
 }
 
@@ -77,7 +81,7 @@ colorShapeEditor <- function(input, output, session, conditions) {
   # Get the current visual table or make a new one based on the current conditions
   visual.table <- reactive({ 
     
-    validate(need(conditions(), "Cannot output visual parameters withoout conditions!"))
+    validate(need(conditions(), "Cannot output visual parameters without conditions!"))
     
     if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), colnames(conditions()))) {
       variables$visuals.table <- generateDefaultConditionVisualsTable(colnames(conditions()))
@@ -143,6 +147,26 @@ colorShapeEditor <- function(input, output, session, conditions) {
     variables$visuals.table[condition, "shape"] <- shape
     
   })
+  
+  #' Handler for download of current visuals table
+  output$export.csv <- downloadHandler(filename = "visuals.csv",
+                                       content = function(file)
+                                       {
+                                         write.table(visual.table(),
+                                                     file,
+                                                     sep = ",",
+                                                     row.names = T,
+                                                     col.names = NA)
+                                       })
+  #' Handle import of visual tables
+  observeEvent(input$import, {
+    
+    showModal(modalDialog(title = "Import"
+    ),
+    session)
+    
+  })
+ 
   
   return(visual.table)
   

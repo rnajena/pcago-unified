@@ -106,3 +106,14 @@
     border: 1px solid #ddd;
 		padding: 15px;
 }
+
+/**
+* A hoirizontal divider for some controls
+*/
+
+.hdivider {
+	border-bottom: 1px solid #ddd;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	height: 1px;
+}
