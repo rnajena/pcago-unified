@@ -36,3 +36,41 @@ transposeReadCounts <- function(readcounts) {
   return(data.frame(t(readcounts)))
   
 }
+
+#' Server function for processed read counts
+#'
+#' @param readcounts 
+#' @param input 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverReadCountProcessing <- function(readcounts, input) {
+  
+  return(reactive({
+    
+    output <- list( removed.genes = c(), readcounts = readcounts() )
+    
+    browser()
+    
+    # Transpose read counts
+    if("transpose" %in% input$pca.data.readcounts.processing) {
+      output$readcounts <- transposeReadCounts(output$readcounts)
+    }
+    
+    # Remove constant read genes
+    if("remove.constant" %in% input$pca.data.readcounts.processing) {
+      processed <- removeConstantReads(output$readcounts)
+      output$readcounts <- processed$readcounts
+      output$removed.genes <- processed$genes.removed
+    }
+    
+    # Apply normalization
+    output$readcounts <- applyReadcountNormalization(output$readcounts, input$pca.data.normalization)
+    
+    return(output)
+    
+  }))
+  
+}

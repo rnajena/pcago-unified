@@ -30,42 +30,10 @@ options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
-  # Store side effect variables here
-  variables <- reactiveValues(readcounts.processed.removedgenes = c())
-  
-  # Input tables
+  # Read counts
   readcounts <- callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
-  
-  #
-  # Calculations
-  #
-  
-  # The starting values are normalized read counts, the annotation table and the condition table
-  readcounts.processed <- reactive(
-    { 
-      rc <- readcounts()
-      
-      # Transpose read counts
-      if("transpose" %in% input$pca.data.readcounts.processing) {
-        rc <- transposeReadCounts(rc)
-      }
-      
-      # Remove constant read genes
-      if("remove.constant" %in% input$pca.data.readcounts.processing) {
-        processed <- removeConstantReads(rc)
-        rc <- processed$readcounts
-        variables$readcounts.processed.removedgenes <- processed$genes.removed
-      }
-      else {
-        variables$readcounts.processed.removedgenes <- c()
-      }
-      
-      
-      # Apply normalization
-      rc <- applyReadcountNormalization(rc, input$pca.data.normalization)
-      
-      return(rc) 
-    })
+  readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
+  readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   annotation <- reactive( { annotateGenes(readcounts.processed()) } )
   annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()["var"] } })
@@ -200,7 +168,7 @@ shinyServer(function(input, output, session) {
     if("remove.constant" %in% input$pca.data.readcounts.processing) {
       
       content <- "No genes have been removed."
-      removed.genes <- variables$readcounts.processed.removedgenes
+      removed.genes <- readcounts.processing.output()$removed.genes
       
       if(length(removed.genes) != 0) {
         
