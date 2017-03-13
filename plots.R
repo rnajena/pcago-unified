@@ -28,7 +28,7 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
     
     if(length(removed.genes) != 0) {
       
-      genes <- paste(removed.genes, collapse = ", ")
+      genes <- paste0(removed.genes, collapse = ", ")
       content <- paste(length(removed.genes) ,"genes have been removed:", genes)
     }
     
@@ -79,21 +79,23 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' @export
 #'
 #' @examples
-pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi, format, filename ){
+pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
   
   validate(need(axes, "No axes to draw!"))
   
   # Fetch needed variables from PCA and visual parameters
   pca.transformed <- pca.transformed
+  
+  # Determine how many dimensions should be drawn
+  dimensions.available <- ncol(pca.transformed)
+  dimensions.requested <- axes
+  
+  # Add visual properties to the variables
   pca.transformed$color <- visuals.cell$factors$color
   pca.transformed$shape <- visuals.cell$factors$shape
   
   palette.colors <- visuals.cell$palette.colors
   palette.shapes <- visuals.cell$palette.shapes
-  
-  # Determine how many dimensions should be drawn
-  dimensions.available <- ncol(pca.transformed)
-  dimensions.requested <- axes
   
   dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
   
@@ -103,7 +105,11 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
     x <- list(title = dimensions.requested[1])
     
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
-      geom_histogram(aes(fill = factor(color)), bins = 100)
+      geom_histogram(aes(fill = color), bins = 100)
+    p <- p + scale_color_manual(values = palette.colors)
+    p <- p + labs(title = title, subtitle = subtitle)
+    #p <- p + scale_linetype_manual(values = palette.shapes)
+    #TODO: Fix Color ; Add linetype as replacement for pch?
     
     ggsave(filename, p, width = width / dpi, height = height / dpi)
     
@@ -118,6 +124,7 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
       geom_point(aes(colour = color, shape = shape))
     p <- p + scale_color_manual(values = palette.colors)
     p <- p + scale_shape_manual(values = palette.shapes)
+    p <- p + labs(title = title, subtitle = subtitle)
     
     ggsave(filename, p, width = width / dpi, height = height / dpi)
     
@@ -147,7 +154,9 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
       xlab = dimensions.requested[1],
       ylab = dimensions.requested[2],
       zlab = dimensions.requested[3],
-      type = "h"
+      type = "h",
+      main = title,
+      sub = subtitle
     )
     
     par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)

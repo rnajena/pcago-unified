@@ -79,15 +79,22 @@ uiPCASidebarPCA <- function() {
     bsCollapsePanel("Gene set"),
     bsCollapsePanel("Gene count",
                     plotOutput("pca.pca.genes.count.variance.plot", height = "120px"),
-                    sliderInput("pca.pca.genes.count", "Gene count", min = 0, max = 0, value = 0, step = 1),
+                    sliderInput("pca.pca.genes.count", "Gene count", min = 0, max = 0, value = 0, step = 1, round = T),
                     fluidRow(style = "text-align: center;", tags$div(class = "col-centered", style = "display: inline-block;",
                                                                      actionButton("pca.pca.genes.count.lstepdecrease", label = "", icon = icon("fast-backward")),
                                                                      actionButton("pca.pca.genes.count.stepdecrease", label = "", icon = icon("step-backward")),
+                                                                     bsButton("pca.pca.genes.count.animation.play", label = tags$span(tags$span(class = "play", icon("play")), tags$span(class = "pause", icon("pause"))), type = "toggle", style = "play-pause"),
                                                                      actionButton("pca.pca.genes.count.stepincrease", label = "", icon = icon("step-forward")),
                                                                      actionButton("pca.pca.genes.count.lstepincrease", label = "", icon = icon("fast-forward"))
                                                                      )),
-                    numericInput("pca.pca.genes.count.lstep", "Step", 1, 1000, value = 50)
-                    ),
+                    hDivider(),
+                    bsCollapse(
+                      bsCollapsePanel("Settings",
+                                      numericInput("pca.pca.genes.count.from", "Min. # of genes", min = 0, max = 0, value = 0),
+                                      numericInput("pca.pca.genes.count.to", "Max. # of genes", min = 0, max = 0, value = 0),
+                                      numericInput("pca.pca.genes.count.by", "Animation step", 1, 1000, value = 10),
+                                      numericInput("pca.pca.genes.count.animation.speed", "Animation speed (ms)", 100, 1000, value = 100))
+                    )),
     bsCollapsePanel("Settings",
                     checkboxInput("pca.pca.settings.center", "Center data", value = T),
                     checkboxInput("pca.pca.settings.scale", "Scale data", value = T))

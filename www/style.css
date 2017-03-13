@@ -117,3 +117,32 @@
 	margin-bottom: 10px;
 	height: 1px;
 }
+
+/*
+ * Style for play/pause button
+ */
+
+.btn-play-pause {
+    background-color: #337ab7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: white;
+}
+
+.btn-play-pause:hover {
+    color: white;
+}
+    
+.btn-play-pause .pause {
+    display: none;
+}
+
+
+.btn-play-pause.active .play {
+    display: none;
+}
+
+.btn-play-pause.active .pause {
+    display: inline-block!important;
+}
+

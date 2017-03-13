@@ -58,7 +58,8 @@ uiPCAPage <- function() {
                                     tabPanel("Transformed values", value = "pca.cells.transformed",
                                              downloadableDataTableOutput("pca.transformed")),
                                     tabPanel("Cell plot", value = "pca.cells.plot",
-                                             downloadablePlotOutput("pca.cellplot"))
+                                             downloadablePlotOutput("pca.cellplot",
+                                                                    downloadButton("pca.cellplot.export.mp4", "Export *.mp4")))
                                     ),
                          tabPanel(faIconText("link", "Cell plot"), value = "pca.cells.plot.quicklink")))
   ))

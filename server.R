@@ -22,12 +22,11 @@ source("visuals.R")
 source("gene.R")
 source("pca.R")
 source("plots.R")
+source("movie.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
 source("widgetColorShapeInput.R")
-
-options(shiny.usecairo=TRUE)
 
 shinyServer(function(input, output, session) {
   
@@ -37,11 +36,11 @@ shinyServer(function(input, output, session) {
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   annotation <- reactive( { annotateGenes(readcounts.processed()) } )
-  annotation.var <- reactive({ if(is.null(annotation())) { NULL } else { annotation()["var"] } })
   conditions <- reactive({ serverGetConditionTable(input, readcounts.processed) })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
-  readcounts.selected <- reactive({ return(selectTopVariantGenes(readcounts.processed(), annotation(), input$pca.pca.genes.count)) })
+  readcounts.filtered <- reactive({ readcounts.processed() })
+  readcounts.selected <- reactive({ selectTopVariantGenes(readcounts.filtered(), annotation(), input$pca.pca.genes.count) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.selected)
@@ -63,6 +62,42 @@ shinyServer(function(input, output, session) {
     updateNavbarPage(session, "main-nav", "analyze")
   })
   
+  #' Handles the animation of the gene counts
+  #' This works by invalidating itself automatically if the play button is toggled
+  #' 
+  #' Info: There's a native animation feature in the slider. But it does not allow
+  #' changing the animation parameters without renderUI; which is slow and fragile due to missing inputs
+  observe({
+    
+    if(input$pca.pca.genes.count.animation.play) {
+      # Separate the actual animation from the environment
+      isolate({
+        
+        from <- input$pca.pca.genes.count.from
+        to <- input$pca.pca.genes.count.to
+        by <- input$pca.pca.genes.count.by
+        current <- input$pca.pca.genes.count
+        
+        validate(need(from < to, "Wrong animation parameters!"))
+        
+        if(current == to) {
+          current <- from
+        }
+        else if(current < to) {
+          current <- min(to, current + by)
+        }
+        else {
+          current <- from
+        }
+        
+        updateSliderInput(session, "pca.pca.genes.count", value = current)
+        
+      })
+      
+      invalidateLater(isolate({input$pca.pca.genes.count.animation.speed}))
+    }
+  })
+  
   observeEvent(pca(), {
     
     validate(need(pca(), "Cannot update input wihout PCA result!"))
@@ -79,11 +114,53 @@ shinyServer(function(input, output, session) {
     
   })
   
+  pca.genes.count.from <- reactive({
+    
+    # Additional checks as the numeric input is broken (accepts values outside of range)
+    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
+    
+    genes_max <- nrow(readcounts.processed())
+    genes_min <- min(1, genes_max)
+    genes_from <- input$pca.pca.genes.count.from
+    genes_to <- input$pca.pca.genes.count.to
+    
+    validate(need(genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
+    
+    genes_from <- max(genes_min, genes_from)
+    
+    return(genes_from)
+  })
+  
+  pca.genes.count.to <- reactive({
+    
+    # Additional checks as the numeric input is broken (accepts values outside of range)
+    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
+    
+    genes_max <- nrow(readcounts.processed())
+    genes_from <- input$pca.pca.genes.count.from
+    genes_to <- input$pca.pca.genes.count.to
+    
+    validate(need( genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
+    
+    genes_to <- min(genes_max, genes_to)
+    
+    return(genes_to)
+    
+  })
+  
+  observeEvent(pca.genes.count.from(), {
+    updateSliderInput(session, "pca.pca.genes.count", min = pca.genes.count.from())
+  })
+  
+  observeEvent(input$pca.genes.count.to, {
+    updateSliderInput(session, "pca.pca.genes.count", max = pca.genes.count.to())
+  })
+  
   observeEvent(readcounts.processed(), {
     genes_max <- nrow(readcounts.processed())
+    updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
     updateNumericInput(session, "pca.pca.genes.count.from", min = min(1, genes_max), max = genes_max, value = min(2, genes_max))
     updateNumericInput(session, "pca.pca.genes.count.to", min = min(1, genes_max), max = genes_max, value = genes_max)
-    updateSliderInput(session, "pca.pca.genes.count", min = min(1, genes_max), max = genes_max, value = genes_max)
   })
 
   #
@@ -101,12 +178,12 @@ shinyServer(function(input, output, session) {
   # User clicks fine-grained controls in gene count panel
   observeEvent(input$pca.pca.genes.count.lstepdecrease, {
     current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current - input$pca.pca.genes.count.lstep)
+    updateSliderInput(session, "pca.pca.genes.count", value = current - input$pca.pca.genes.count.by)
   })
   
   observeEvent(input$pca.pca.genes.count.lstepincrease, {
     current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current + input$pca.pca.genes.count.lstep)
+    updateSliderInput(session, "pca.pca.genes.count", value = current + input$pca.pca.genes.count.by)
   })
   
   observeEvent(input$pca.pca.genes.count.stepdecrease, {
@@ -119,6 +196,46 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, "pca.pca.genes.count", value = current + 1)
   })
 
+  output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
+    
+    validate(
+      need(readcounts.selected(), "No processed read counts!"),
+      need(input$pca.pca.genes.count.from < input$pca.pca.genes.count.to, "Gene count settings wrong!")
+    )
+    
+    progress <- shiny::Progress$new()
+    
+    # When this function exits, close the progress and re-enable the button
+    on.exit({
+      shinyjs::enable("pca.cellplot.export.mp4")
+      progress$close()
+    })
+    progress$set(message = "Creating movie ...", value = 0)
+    
+    shinyjs::disable("pca.cellplot.export.mp4")
+    
+    # Status callback function
+    updateProgress <- function(detail = NULL, value = NULL) {
+      progress$set(value = value, detail = detail)
+    }
+    
+    pcaCellPlotMovie(
+      filename = file,
+      genes.count.from = pca.genes.count.from(),
+      genes.count.to = pca.genes.count.to(),
+      genes.count.by = input$pca.pca.genes.count.by,
+      time.per.frame = input$pca.pca.genes.count.animation.speed,
+      axes = input$pca.plot.cells.axes,
+      visuals.cell = visuals.cell(),
+      readcounts.filtered = readcounts.filtered(),
+      annotation = annotation(),
+      pca.center = input$pca.pca.settings.center,
+      pca.scale = input$pca.pca.settings.scale,
+      updateProgress = updateProgress
+    )
+    
+  })
+  
   #
   # Render plots & tables
   #
@@ -127,7 +244,10 @@ shinyServer(function(input, output, session) {
   callModule(downloadableDataTable, "readcounts", filename = "readcounts.csv", data = readcounts)
   callModule(downloadableDataTable, "readcounts.processed", filename = "readcounts.processed.csv", data = readcounts.processed)
   callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions)
-  callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = annotation.var)
+  callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = reactive({
+    validate(need(annotation(), "No annotation available!"))
+    return(annotation()$var)
+    }))
   
   # Texts
   output$readcounts.processing.steps <- renderUI(readCountsProcessingOutput(
@@ -183,111 +303,5 @@ shinyServer(function(input, output, session) {
                 format,
                 filename)
   })
-  
-  # callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
-  #   
-  #   dpi <- 96
-  #   validate(need(input$pca.plot.cells.axes, "No axes to draw!"))
-  #   
-  #   # Fetch needed variables from PCA and visual parameters
-  #   pca.transformed <- pca()$transformed
-  #   
-  #   pca.transformed$color <- visuals.cell()$factors$color
-  #   pca.transformed$shape <- visuals.cell()$factors$shape
-  #   
-  #   palette.colors <- visuals.cell()$palette.colors
-  #   palette.shapes <- visuals.cell()$palette.shapes
-  #   
-  #   # Determine how many dimensions should be drawn
-  #   dimensions.available <- ncol(pca.transformed)
-  #   dimensions.requested <- input$pca.plot.cells.axes
-  #   
-  #   dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
-  #   
-  #   # Plot based on dimensions
-  #   if(dimensions.plot == 1) {
-  #     
-  #     x <- list(title = dimensions.requested[1])
-  #     
-  #     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
-  #       geom_histogram(aes(fill = factor(color)), bins = 100)
-  #     
-  #     ggsave(filename, p, width = width / dpi, height = height / dpi)
-  #     
-  #   }
-  #   else if(dimensions.plot == 2) {
-  #     
-  #     x <- list(title = dimensions.requested[1])
-  #     y <- list(title = dimensions.requested[2])
-  #     
-  #     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
-  #                                             y = dimensions.requested[2])) + 
-  #       geom_point(aes(colour = color, shape = shape))
-  #     p <- p + scale_color_manual(values = palette.colors)
-  #     p <- p + scale_shape_manual(values = palette.shapes)
-  #     
-  #     ggsave(filename, p, width = width / dpi, height = height / dpi)
-  #     
-  #   }
-  #   else if(dimensions.plot == 3) {
-  #     
-  #     if(format == "svg") {
-  #       svg(filename = filename,
-  #           width = width / dpi,
-  #           height = height / dpi)
-  #     }
-  #     else if(format == "png") {
-  #       png(filename = filename,
-  #           width = width,
-  #           height = height,
-  #           res = dpi)
-  #     }
-  # 
-  #     par(oma = c(1,7,1,1))
-  #     
-  #     scatterplot3d(
-  #       x = pca.transformed[[dimensions.requested[1]]],
-  #       y = pca.transformed[[dimensions.requested[2]]],
-  #       z = pca.transformed[[dimensions.requested[3]]],
-  #       color = palette.colors[as.numeric(pca.transformed$color)],
-  #       pch = palette.shapes[as.numeric(pca.transformed$shape)],
-  #       xlab = dimensions.requested[1],
-  #       ylab = dimensions.requested[2],
-  #       zlab = dimensions.requested[3],
-  #       type = "h"
-  #     )
-  #     
-  #     par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-  #     plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-  #     
-  #     # legend("right",
-  #     #        legend = c(levels(pca.transformed$color), levels(pca.transformed$shape)),
-  #     #        col = c(palette.colors, rep("black", length(palette.shapes))),
-  #     #        pch = c(rep(16, length(palette.colors)), palette.shapes),
-  #     #        bty = "n",
-  #     #        xpd = T)
-  #     
-  #     legend("topleft",
-  #            legend = levels(pca.transformed$color),
-  #            col = palette.colors,
-  #            pch = 16,
-  #            bty = "n",
-  #            xpd = T,
-  #            title = "Color",
-  #            title.adj = 0) # wtf?
-  #     legend("bottomleft",
-  #            legend = levels(pca.transformed$shape),
-  #            col = "black",
-  #            pch = palette.shapes,
-  #            bty = "n",
-  #            xpd = T,
-  #            title = "Shape",
-  #            title.adj = 0)
-  #     
-  #     dev.off()
-  #     
-  #   }
-  #   
-  # })
 
 })
