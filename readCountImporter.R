@@ -4,8 +4,8 @@
 
 #' A list of all read count data types that will be supported
 #' The user selects one of those types, which will then invoke the corresponding importer
-supportedReadcountImporters <- c("CSV (Comma)" = "csv_comma",
-                                 "CSV (Whitespace/Tab)" = "csv_whitespace")
+supportedReadcountImporters <- c("CSV" = "csv_comma",
+                                 "TSV" = "csv_whitespace")
 supportedReadcountFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv",

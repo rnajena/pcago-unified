@@ -2,7 +2,7 @@
  * PCAGO additional style file
  * ===========================
  *
- * Contains additional fixes for some quirks of Shiny/Bootstrap
+ * Contains fixes for some quirks of Shiny/Bootstrap
  * and styles for custom controls
  *
  */
@@ -132,7 +132,7 @@
 .btn-play-pause:hover {
     color: white;
 }
-    
+
 .btn-play-pause .pause {
     display: none;
 }
@@ -146,3 +146,30 @@
     display: inline-block!important;
 }
 
+/*
+* Style for the navbar in Analyze page
+*/
+.pca-page nav .navbar-header {
+	display: none;
+}
+
+.pca-page nav {
+	border-width: 1px;
+}
+
+.pca-page .navbar-default .navbar-nav > .active > a,
+.pca-page .navbar-default .navbar-nav > .active > a:focus,
+.pca-page .navbar-default .navbar-nav > .active > a:hover   {
+	background-color: #337ab7;
+	color: #fff;
+}
+
+.pca-page .navbar-default .container-fluid {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.pca-page .navbar-default {
+	margin-left: 15px;
+	margin-right: 15px;
+}

@@ -23,7 +23,7 @@ script.enable.popovers <- I("$(document).ready(function(){
     });   
 });")
 
-shinyUI(fluidPage(useShinyjs(),
+shinyUI(tags$div(useShinyjs(),
                   list(tags$head(HTML('<link rel="icon", href="icon.png",
                                    type="image/png" />'))),
                   div(style="padding: 1px 0px; width: '100%'",

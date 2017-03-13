@@ -19,7 +19,10 @@ downloadableDataTableOutput <- function(id, ...) {
   
   ns <- NS(id)
   
-  return(headerPanel(header = tags$span(class="headerbar-row",downloadButton(ns("export.csv"), "Export *.csv"), ...),
+  return(headerPanel(header = tags$span(class="headerbar-row",
+                                        downloadButton(ns("export.csv"), "Export *.csv"),
+                                        downloadButton(ns("export.tsv"), "Export *.tsv"),
+                                        ...),
                      DT::dataTableOutput(ns("table"))))
 }
 
@@ -56,6 +59,16 @@ downloadableDataTable <- function(input, output, session, data, filename, rownam
                                                   sep = ",",
                                                   row.names = rownames,
                                                   col.names = colnames)
+                                         
+                                       })
+  output$export.tsv <- downloadHandler(filename, 
+                                       function(file) {
+                                         
+                                         write.table(table.data(),
+                                                     file,
+                                                     sep = "\t",
+                                                     row.names = rownames,
+                                                     col.names = colnames)
                                          
                                        })
   

@@ -28,7 +28,7 @@ uiPCAPage <- function() {
       tabPanel("Plot", uiPCASidebarPlot()),
       type = "pills"
     )),
-    mainPanel(navbarPage(title = "",
+    mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
                          navbarMenu("Data",
                                     "Read counts",
@@ -62,5 +62,5 @@ uiPCAPage <- function() {
                                                                     downloadButton("pca.cellplot.export.mp4", "Export *.mp4")))
                                     ),
                          tabPanel(faIconText("link", "Cell plot"), value = "pca.cells.plot.quicklink")))
-  ))
+  )))
 }
