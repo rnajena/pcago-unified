@@ -69,6 +69,7 @@ colorShapeEditorInput <- function(id) {
                                              radioButtons(ns("conditions"),
                                                           "Available conditions",
                                                           choices = c("None"))),
+                                           textInput(ns("name"), "Custom name"),
                                            colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
                                            selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1))
                           
@@ -124,8 +125,7 @@ colorShapeEditor <- function(input, output, session, conditions) {
     condition <- input$conditions
     color <- visual.table()[condition, "color"]
     shape <- visual.table()[condition, "shape"]
-    
-    print(c(condition, color, shape))
+    name <- visual.table()[condition, "name"]
     
     if(is.null(color) || color == "") {
       color <- "transparent"
@@ -136,6 +136,7 @@ colorShapeEditor <- function(input, output, session, conditions) {
     
     updateColourInput(session, "color", value = color)
     updateSelectizeInput(session, "shape", selected = shape)
+    updateTextInput(session, "name", value = name)
     
   })
   
@@ -165,6 +166,17 @@ colorShapeEditor <- function(input, output, session, conditions) {
     shape <- as.numeric(input$shape)
     
     variables$visuals.table[condition, "shape"] <- shape
+    
+  })
+  
+  observeEvent(input$name, {
+    
+    validate(need(visual.table(), "No visual table to write to!"))
+    
+    condition <- input$conditions
+    name <- input$name
+    
+    variables$visuals.table[condition, "name"] <- name
     
   })
   

@@ -5,6 +5,9 @@
 library(shiny)
 source("helpers.R")
 
+# Default condition for later use
+condition.default <- "{default}"
+
 # Importers for condition visuals
 supportedConditionVisualsImporters <- c("CSV" = "csv_comma",
                                  "TSV" = "csv_whitespace")
@@ -120,22 +123,63 @@ generateDefaultConditionVisualsTable <- function(conditions) {
     row.names = conditions,
     color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)),
     shape = rep(-1, length(conditions)),
+    fill = rep("", length(conditions)),
+    name = rep("", length(conditions)),
     stringsAsFactors = F
   ))
   
 }
 
-serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, conditions.visuals.table) {
+#' Gets the
+#'
+#' @param visuals.conditions Table of all condition visual parameters
+#' @param cond Vector of conditions
+#'
+#' @return Vector of names for the input conditions
+#' @export
+#'
+#' @examples
+conditionName <- function(visuals.conditions, conditions) {
+  
+  return(sapply(conditions, function(cond) {
+    
+    if(cond == condition.default) {
+      return("Default")
+    }
+    else if(visuals.conditions[cond, "name"] != "") {
+      return(visuals.conditions[cond, "name"])
+    }
+    else {
+      return(cond)
+    }
+    
+  }))
+  
+}
+
+#' Builds cell visual table that finds the conditions applying to a cell and generates the
+#' visual parameters for it
+#'
+#' @param input 
+#' @param readcounts.processed 
+#' @param conditions 
+#' @param visuals.conditions 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, visuals.conditions) {
   
   validate(
     need(readcounts.processed(), "No data to build visual parameter table from!"),
     need(conditions(), "No conditions for visual mapping!"),
-    need(conditions.visuals.table(), "No condition visual mapping!")
+    need(visuals.conditions(), "No condition visual mapping!")
   )
   
   cells <- colnames(readcounts.processed())
   cells.conditions <- conditions()
-  conditions.mapping <- conditions.visuals.table()
+  visuals.conditions <- visuals.conditions()
   
   # Setup output
   factors <- data.frame(row.names = cells,
@@ -156,22 +200,21 @@ serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, c
     shape <- -1
     shape.condition <- ""
     
-    for(condition in rownames(conditions.mapping)) {
+    for(condition in rownames(visuals.conditions)) {
       
       if(!cells.conditions[cell, condition]) {
         next()
       }
       
       if(color == "") {
-        
-        mapping.color <- conditions.mapping[condition, "color"]
+        mapping.color <- visuals.conditions[condition, "color"]
         
         color <- mapping.color
         color.condition <- condition
       }
       
       if(shape == -1) {
-        shape <- conditions.mapping[condition, "shape"]
+        shape <- visuals.conditions[condition, "shape"]
         shape.condition <- condition
       }
       
@@ -179,11 +222,11 @@ serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, c
     
     if(color == "") {
       color = "#000000"
-      color.condition <- "Default"
+      color.condition <- condition.default
     }
     if(shape == -1) {
       shape = 16
-      shape.condition <- "Default"
+      shape.condition <- condition.default
     }
     
     factors[cell, "color"] <- color.condition # todo: user name for condition
@@ -206,10 +249,8 @@ serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, c
   factors$color <- factor(factors$color, levels = palette.colors.conditions)
   factors$shape <- factor(factors$shape, levels = palette.shapes.conditions)
   
-  print(factors)
-  print(palette.colors)
-  print(palette.shapes)
-  
-  return(list("factors" = factors, "palette.colors" = palette.colors, "palette.shapes" = palette.shapes))
+  return(list("factors" = factors, 
+              "palette.colors" = palette.colors, 
+              "palette.shapes" = palette.shapes))
   
 }

@@ -67,6 +67,7 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' Saves a plot of PCA transformed cells with given axes to a file with given format
 #'
 #' @param pca.transformed Transformed cells
+#' @param visuals.conditions Visual parameters for each condition
 #' @param visuals.cell Visual parameters for each cell
 #' @param axes The axes to be plotted (PC1, PC2, ...). Up to 3 axes can be plotted.
 #' @param width 
@@ -79,7 +80,7 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' @export
 #'
 #' @examples
-pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
+pcaCellPlot <- function(pca, visuals.conditions, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
   
   validate(need(axes, "No axes to draw!"))
   
@@ -111,12 +112,18 @@ pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, fil
     
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
       geom_histogram(aes(fill = color), bins = 100)
-    p <- p + scale_color_manual(values = palette.colors)
+    p <- p + scale_fill_manual(values = palette.colors,
+                                breaks = levels(pca.transformed$color),
+                                labels = conditionName(visuals.conditions, levels(pca.transformed$color)))
     p <- p + labs(title = title, 
                   subtitle = subtitle,
                   x = pc.lab(dimensions.requested[1]))
     #p <- p + scale_linetype_manual(values = palette.shapes)
     #TODO: Fix Color ; Add linetype as replacement for pch?
+    
+    if(setequal(levels(pca.transformed$color), c("{default}"))) {
+      p <- p + guides(color = F)
+    }
     
     ggsave(filename, p, width = width / dpi, height = height / dpi)
     
@@ -129,12 +136,25 @@ pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, fil
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
                                             y = dimensions.requested[2])) + 
       geom_point(aes(colour = color, shape = shape))
-    p <- p + scale_color_manual(values = palette.colors)
-    p <- p + scale_shape_manual(values = palette.shapes)
+    
+    #' Add legends to the plot and map the correct colors to the factor levels
+    p <- p + scale_color_manual(values = palette.colors,
+                                breaks = levels(pca.transformed$color),
+                                labels = conditionName(visuals.conditions, levels(pca.transformed$color)))
+    p <- p + scale_shape_manual(values = palette.shapes,
+                                breaks = levels(pca.transformed$shape),
+                                labels = conditionName(visuals.conditions, levels(pca.transformed$shape)))
     p <- p + labs(title = title, 
                   subtitle = subtitle,
                   x = pc.lab(dimensions.requested[1]),
                   y = pc.lab(dimensions.requested[2]))
+    
+    if(setequal(levels(pca.transformed$color), c("{default}"))) {
+      p <- p + guides(color = F)
+    }
+    if(setequal(levels(pca.transformed$shape), c("{default}"))) {
+      p <- p + guides(shape = F)
+    }
     
     ggsave(filename, p, width = width / dpi, height = height / dpi)
     
@@ -173,7 +193,7 @@ pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, fil
     plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
     
     legend("topleft",
-           legend = levels(pca.transformed$color),
+           legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
            col = palette.colors,
            pch = 16,
            bty = "n",
@@ -181,7 +201,7 @@ pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, fil
            title = "Color",
            title.adj = 0) # wtf?
     legend("bottomleft",
-           legend = levels(pca.transformed$shape),
+           legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
            col = "black",
            pch = palette.shapes,
            bty = "n",

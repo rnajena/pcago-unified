@@ -11,6 +11,7 @@ library(shiny)
 #' @param genes.count.to To which top variant gene count the animation should play
 #' @param genes.count.by Step size to increase gene count
 #' @param axes Vector of displayed axes (PC1, PC2, ...). 
+#' @param visuals.conditions Visual definitions for each condition
 #' @param visuals.cell Visual definitions for each cell
 #' @param readcounts.filtered Filtered read counts. Contains read counts with specific set of genes
 #' @param annotation Gene annotation
@@ -28,6 +29,7 @@ pcaCellPlotMovie <- function(filename,
                              genes.count.by, 
                              time.per.frame,
                              axes, 
+                             visuals.conditions,
                              visuals.cell,
                              readcounts.filtered,
                              annotation,
@@ -49,6 +51,7 @@ pcaCellPlotMovie <- function(filename,
     
     pca <- applyPCA(readcounts.selected, center = pca.center, scale = pca.scale)
     pcaCellPlot(pca,
+                visuals.conditions,
                 visuals.cell,
                 axes,
                 640,

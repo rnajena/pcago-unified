@@ -238,6 +238,7 @@ shinyServer(function(input, output, session) {
       genes.count.by = input$pca.pca.genes.count.by,
       time.per.frame = input$pca.pca.genes.count.animation.speed,
       axes = input$pca.plot.cells.axes,
+      visuals.conditions = visuals.conditions(),
       visuals.cell = visuals.cell(),
       readcounts.filtered = readcounts.filtered(),
       annotation = annotation(),
@@ -306,6 +307,7 @@ shinyServer(function(input, output, session) {
              need(visuals.cell(), "No visual parameters!"))
     
     pcaCellPlot(pca(),
+                visuals.conditions(),
                 visuals.cell(),
                 input$pca.plot.cells.axes,
                 width,
