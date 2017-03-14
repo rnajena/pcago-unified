@@ -19,11 +19,12 @@ downloadablePlotOutput <- function(id, ...) {
   
   ns <- NS(id)
   
-  return(headerPanel(header = tags$span(class="headerbar-row",
-                                        downloadButton(ns("export.svg"), "Export *.svg"),
-                                        downloadButton(ns("export.png"), "Export *.png"),
-                                        ...),
-                     plotOutput(ns("plot"))))
+  return(tags$div(class = "downloadable-plot",
+                   headerPanel(header = tags$span(class="headerbar-row",
+                                                  downloadButton(ns("export.svg"), "Export *.svg"),
+                                                  downloadButton(ns("export.png"), "Export *.png"),
+                                                  ...),
+                               plotOutput(ns("plot")))))
 }
 
 

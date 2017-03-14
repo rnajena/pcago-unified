@@ -25,10 +25,9 @@ annotateGenes <- function(readcounts) {
   # We always have the variance of each gene
   geneids <- rownames(readcounts)
   gene.var <- rowVars(data.matrix(readcounts))
-  gene.var.percentage <- gene.var / sum(gene.var)
   
   genetable <- data.frame(var = gene.var,
-                          var.percentage = gene.var.percentage,
+                          var.relative = gene.var / sum(gene.var),
                           row.names = geneids)
   
   # Sort by variance

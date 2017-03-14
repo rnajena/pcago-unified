@@ -27,6 +27,7 @@ source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
 source("widgetColorShapeInput.R")
+source("widgetGeneralPlotSettings.R")
 
 shinyServer(function(input, output, session) {
   
@@ -208,47 +209,6 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, "pca.pca.genes.count", value = current + 1)
   })
 
-  output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
-    
-    validate(
-      need(readcounts.selected(), "No processed read counts!"),
-      need(input$pca.pca.genes.count.from < input$pca.pca.genes.count.to, "Gene count settings wrong!")
-    )
-    
-    progress <- shiny::Progress$new()
-    
-    # When this function exits, close the progress and re-enable the button
-    on.exit({
-      shinyjs::enable("pca.cellplot.export.mp4")
-      progress$close()
-    })
-    
-    progress$set(message = "Creating movie ...", value = 0)
-    shinyjs::disable("pca.cellplot.export.mp4")
-    
-    # Status callback function
-    updateProgress <- function(detail = NULL, value = NULL) {
-      progress$set(value = value, detail = detail)
-    }
-    
-    pcaCellPlotMovie(
-      filename = file,
-      genes.count.from = pca.genes.count.from(),
-      genes.count.to = pca.genes.count.to(),
-      genes.count.by = input$pca.pca.genes.count.by,
-      time.per.frame = input$pca.pca.genes.count.animation.speed,
-      axes = input$pca.plot.cells.axes,
-      visuals.conditions = visuals.conditions(),
-      visuals.cell = visuals.cell(),
-      readcounts.filtered = readcounts.filtered(),
-      annotation = annotation(),
-      pca.center = input$pca.pca.settings.center,
-      pca.scale = input$pca.pca.settings.scale,
-      updateProgress = updateProgress
-    )
-    
-  })
-  
   #
   # Render plots & tables
   #
@@ -259,11 +219,18 @@ shinyServer(function(input, output, session) {
   callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions)
   callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = reactive({
     validate(need(annotation(), "No annotation available!"))
-    return(annotation()$var)
+    
+    table <- data.frame(row.names = rownames(annotation()), 
+                        Variance = annotation()$var,
+                        "Relative variance" = annotation()$var / sum(annotation()$var))
+    table <- table[order(table$Variance, decreasing = T), ,drop = F]
+    
+    return(table)
+    
     }))
   
   # Texts
-  output$readcounts.processing.steps <- renderUI(readCountsProcessingOutput(
+  output$readcounts.processing.steps <- renderUI(serverReadCountsProcessingOutput(
     input,
     readcounts.processed,
     readcounts.processing.output
@@ -287,6 +254,7 @@ shinyServer(function(input, output, session) {
     
     p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point() 
     p <- p + geom_vline(xintercept = input$pca.pca.genes.count, color = "red")
+    p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
     
     return(p)
   })
@@ -296,25 +264,86 @@ shinyServer(function(input, output, session) {
     
     dpi <- 96
     
-    p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=percentage)) + geom_point()
+    p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=var.relative)) + geom_point()
+    p <- p + labs(x = "Principal component", y = "Relative variance")
     ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
     
   })
+  
+  pca.cellplot.settings <- callModule(generalPlotSettings, "pca.cells.plot.generalsettings")
   
   callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
     
+    plot.settings <- pca.cellplot.settings()
+    plot.width <- if(plot.settings$width < 50) { width } else { plot.settings$width }
+    plot.height <- if(plot.settings$height < 50) { height } else { plot.settings$height }
+    plot.dpi <- plot.settings$dpi
+    plot.title <- if(plot.settings$title == "") { "Cell PCA" } else { plot.settings$title }
+    plot.subtitle <- if(plot.settings$title == "") { paste(nrow(pca()$pc), "genes") } else { plot.settings$subtitle }
+    
     pcaCellPlot(pca(),
                 visuals.conditions(),
                 visuals.cell(),
                 input$pca.plot.cells.axes,
-                width,
-                height,
-                96,
+                plot.width,
+                plot.height,
+                plot.dpi,
                 format,
-                filename)
+                filename,
+                title = plot.title,
+                subtitle = plot.subtitle)
+  })
+  
+  output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
+    
+    validate(
+      need(readcounts.selected(), "No processed read counts!"),
+      need(input$pca.pca.genes.count.from < input$pca.pca.genes.count.to, "Gene count settings wrong!")
+    )
+    
+    progress <- shiny::Progress$new()
+    
+    # When this function exits, close the progress and re-enable the button
+    on.exit({
+      shinyjs::enable("pca.cellplot.export.mp4")
+      progress$close()
+    })
+    
+    progress$set(message = "Creating movie ...", value = 0)
+    shinyjs::disable("pca.cellplot.export.mp4")
+    
+    # Status callback function
+    updateProgress <- function(detail = NULL, value = NULL) {
+      progress$set(value = value, detail = detail)
+    }
+    
+    plot.settings <- pca.cellplot.settings()
+    plot.width <- if(plot.settings$width < 50) { width } else { plot.settings$width }
+    plot.height <- if(plot.settings$height < 50) { height } else { plot.settings$height }
+    plot.dpi <- plot.settings$dpi
+    
+    pcaCellPlotMovie(
+      filename = file,
+      plot.width,
+      plot.height,
+      plot.dpi,
+      genes.count.from = pca.genes.count.from(),
+      genes.count.to = pca.genes.count.to(),
+      genes.count.by = input$pca.pca.genes.count.by,
+      time.per.frame = input$pca.pca.genes.count.animation.speed,
+      axes = input$pca.plot.cells.axes,
+      visuals.conditions = visuals.conditions(),
+      visuals.cell = visuals.cell(),
+      readcounts.filtered = readcounts.filtered(),
+      annotation = annotation(),
+      pca.center = input$pca.pca.settings.center,
+      pca.scale = input$pca.pca.settings.scale,
+      updateProgress = updateProgress
+    )
+    
   })
 
 })

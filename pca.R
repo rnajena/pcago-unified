@@ -38,9 +38,8 @@ applyPCA <- function(inputdata, center, scale) {
   
   # Build the variance table
   variances <- (result$sdev)^2
-  variances.percent <- variances / sum(variances)
   variances.table <- data.frame(var = variances, 
-                                percentage = variances.percent, 
+                                var.relative = variances / sum(variances), 
                                 row.names = pc.names)
   
   return(list("transformed" = transformed,

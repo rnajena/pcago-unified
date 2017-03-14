@@ -60,6 +60,7 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
 geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
   
   p <- ggplot(annotation, aes(x=1:nrow(annotation), y=log(var))) + geom_point()
+  p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   
 }
@@ -80,7 +81,9 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' @export
 #'
 #' @examples
-pcaCellPlot <- function(pca, visuals.conditions, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
+pcaCellPlot <- function(pca, visuals.conditions, visuals.cell, axes, 
+                        width, height, dpi, format, filename,
+                        title = "Cell PCA", subtitle = NULL ){
   
   validate(need(axes, "No axes to draw!"))
   

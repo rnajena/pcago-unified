@@ -7,6 +7,9 @@ library(shiny)
 #' Renders a movie showing the PCA cell plot over increasing amount of top variant genes
 #'
 #' @param filename File name of the rendered video
+#' @param width Plot width in pixels
+#' @param height Plot height in pixels
+#' @param dpi Plot DPI
 #' @param genes.count.from From which top variant gene count the animation should start
 #' @param genes.count.to To which top variant gene count the animation should play
 #' @param genes.count.by Step size to increase gene count
@@ -24,6 +27,9 @@ library(shiny)
 #'
 #' @examples
 pcaCellPlotMovie <- function(filename,
+                             width,
+                             height,
+                             dpi,
                              genes.count.from, 
                              genes.count.to, 
                              genes.count.by, 
@@ -54,9 +60,9 @@ pcaCellPlotMovie <- function(filename,
                 visuals.conditions,
                 visuals.cell,
                 axes,
-                640,
-                480,
-                96,
+                width,
+                height,
+                dpi,
                 "png",
                 plot.filename,
                 subtitle = paste(genecounts[i], "genes"))

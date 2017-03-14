@@ -14,11 +14,11 @@
 ## Code
 
 * Improve performance
-* Add error handling to read count + visuals importer
+* Add error handling to read count
 
 ## Bugs
 
-* Gene variances table not displaying
+* Plot sizes buggy
 
 ## Additional notes
 
