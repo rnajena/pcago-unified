@@ -52,12 +52,14 @@ Select a condition and set a color or shape. If you don't provide a color or sha
 
 You can also upload your own condition visuals table. Upload a table with following format:
 
-| Condition  | Color                                               | Shape                                    |
+| condition  | color                                               | shape                                    |
 |------------|-----------------------------------------------------|------------------------------------------|
 | Condition1 | Leave empty for no color, otherwise a valid R color | -1 for no shape, otherwise a valid R pch |
 | Condition2 | ...                                                 | ...                                      |
 | Condition3 | ...                                                 | ...                                      |
 | ...        | ...                                                 | ...                                      |
+
+Please note that the column names must exactly match those shown here.
 
 ### Behavior on multiple applying conditions
 

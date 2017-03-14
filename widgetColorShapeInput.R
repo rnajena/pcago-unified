@@ -33,7 +33,12 @@ colorShapeInput.shapes <- c(
   "✡ Up- and down pointing triangle" = 11,
   "⊞ Box with plus" = 12,
   "⊗ Circle with cross" = 13,
-  "⟎ Box with down pointing triangle" = 14
+  "⟎ Box with down pointing triangle" = 14,
+  "● Filled circle BGR" = 21,
+  "■ Filled box BGR" = 22,
+  "◆ Filled diamond BGR" = 23,
+  "▲ Filled triangle BGR" = 24,
+  "▼ Filled down pointing triangle BGR" = 25
 )
 
 #' Creates a widget that allows editing of visual parameters of a condition visual mapping table.

@@ -65,21 +65,21 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
         con <- file(inFile$datapath, "r")
         data <- tryCatch({exprimport(con, importer)}, 
                          error = function(e){
-                           print(e)
+                           showNotification(paste("Error:", e), type = "error", duration = NULL)
                            return(NULL)
                            }, 
                          warning = function(w)
                            {
-                           print(w)
+                           showNotification(paste("Error:", e), type = "error", duration = NULL)
                            return(NULL)
                            })
         close(con)
         
-        if(is.null(data)) {
-          showNotification("Error while importing the data!", type = "error")
+        if(!is.null(data)) {
+          showNotification("Data has been successfully imported.", type = "message")
         } 
         else {
-          showNotification("Data has been successfully imported.", type = "message")
+          showNotification("Error while importing the data", type = "error")
         }
         
         return(data)
@@ -95,21 +95,21 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
       con <- textConnection(input$input)
       data <- tryCatch({exprimport(con, importer)}, 
                        error = function(e){
-                         print(e)
+                         showNotification(paste("Error:", e), type = "error", duration = NULL)
                          return(NULL)
                        }, 
                        warning = function(w)
                        {
-                         print(w)
+                         showNotification(paste("Error:", e), type = "error", duration = NULL)
                          return(NULL)
                        })
       close(con)
       
-      if(is.null(data)) {
-        showNotification("Error while importing the data!", type = "error")
+      if(!is.null(data)) {
+        showNotification("Data has been successfully imported.", type = "message")
       } 
       else {
-        showNotification("Data has been successfully imported.", type = "message")
+        showNotification("Error while importing the data", type = "error")
       }
       
       return(data)

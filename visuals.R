@@ -3,6 +3,7 @@
 #' 
 
 library(shiny)
+source("helpers.R")
 
 # Importers for condition visuals
 supportedConditionVisualsImporters <- c("CSV" = "csv_comma",
@@ -29,7 +30,22 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
   
-  # TODO error handling
+  # Handle errors
+  if(!setequal(conditions, rownames(data))) {
+    stop("Imported visual definition has different set of conditions!")
+  }
+  if(!setequal(c("color", "shape"), colnames(data))) {
+    stop("Imported visual definition doesn't have all columns!")
+  }
+  if(!is.character(data$color)) {
+    stop("Imported visual definition has invalid colors!")
+  }
+  if(!all(isColor(data$color[data$color != ""]))) {
+    stop("Imported visual definition has invalid colors!")
+  }
+  if(!is.numeric(data$shape)) {
+    stop("Imported visual definition has invalid shapes!")
+  }
   
   return(data)
 }
@@ -85,24 +101,6 @@ generateConditionTable <- function(readcounts, sep = "_") {
   
   return(result)
   
-}
-
-serverGetConditionTable <- function(input, readcounts.normalized) {
-  
-  validate(need(readcounts.normalized(), "Cannot get condition table without read counts!"))
-  
-  if(input$pca.data.conditions.mode == "column") {
-    return(generateConditionTable(readcounts.normalized(), sep = ""))
-  }
-  else if(input$pca.data.conditions.mode == "extract") {
-    return(generateConditionTable(readcounts.normalized(), sep = input$pca.data.conditions.separator))
-  }
-  else if(input$pca.data.conditions.mode == "upload") {
-    return(NULL) #todo
-  }
-  else {
-    return(NULL)
-  }
 }
 
 #' Builds a condition visuals table that contains a color and a shape for each condition.

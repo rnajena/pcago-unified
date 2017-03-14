@@ -7,6 +7,7 @@ library(shinyBS)
 source("widgetInPlaceHelp.R")
 source("widgetColorShapeInput.R")
 source("widgetGeneralPlotSettings.R")
+source("widgetCellConditionImporter.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -47,20 +48,7 @@ uiPCASidebarData <- function() {
     ),
     bsCollapsePanel("Conditions",
                     value = "conditions",
-                    radioButtons("pca.data.conditions.mode",
-                                 "Source of cell conditions for visualization:",
-                                 c("Column names" = "column",
-                                   "Extract from columns" = "extract",
-                                   "Upload" = "upload"),
-                                 selected = "column"),
-                    conditionalPanel(conditionalPanel.equals("pca.data.conditions.mode", "'extract'"),
-                                     selectizeInput("pca.data.conditions.separator",
-                                                    label = "Separator",
-                                                    choices = c("_", ".", ":", "#"),
-                                                    selected = "_",
-                                                    options = list("create" = T))),
-                    conditionalPanel(conditionalPanel.equals("pca.data.conditions.mode", "'upload'"),
-                                     genericImporterInput("pca.data.conditions.upload",filetypes = c("text/csv"), importers = c("Default"))))
+                    cellConditionImporterUI("conditions.importer"))
   ))
   
 }

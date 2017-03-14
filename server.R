@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   annotation <- reactive( { annotateGenes(readcounts.processed()) } )
-  conditions <- reactive({ serverGetConditionTable(input, readcounts.processed) })
+  conditions <- callModule(cellConditionImporter, "conditions.importer", readcounts = readcounts.processed)
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.filtered <- reactive({ readcounts.processed() })
@@ -222,8 +222,8 @@ shinyServer(function(input, output, session) {
       shinyjs::enable("pca.cellplot.export.mp4")
       progress$close()
     })
-    progress$set(message = "Creating movie ...", value = 0)
     
+    progress$set(message = "Creating movie ...", value = 0)
     shinyjs::disable("pca.cellplot.export.mp4")
     
     # Status callback function
