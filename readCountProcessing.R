@@ -15,6 +15,10 @@ library(shiny)
 #' @examples
 removeConstantReads <- function(readcounts) {
   
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
   invalid <- (do.call(pmin, readcounts) == do.call(pmax, readcounts))
   readcounts.removed <- readcounts[which(!invalid),]
   genes.removed <- rownames(readcounts)[invalid]
@@ -33,6 +37,10 @@ removeConstantReads <- function(readcounts) {
 #' @examples
 transposeReadCounts <- function(readcounts) {
   
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
   return(data.frame(t(readcounts)))
   
 }
@@ -49,6 +57,8 @@ transposeReadCounts <- function(readcounts) {
 serverReadCountProcessing <- function(readcounts, input) {
   
   return(reactive({
+    
+    validate(need(readcounts(), "No read counts to process!"))
     
     output <- list( removed.genes = c(), readcounts = readcounts() )
     

@@ -2,6 +2,39 @@
 #' Contains functions that are used for plot visualization
 #' 
 
+library(shiny)
+
+# Importers for condition visuals
+supportedConditionVisualsImporters <- c("CSV" = "csv_comma",
+                                 "TSV" = "csv_whitespace")
+supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+
+#' Imports visual definitions from filehandle with importer defined by datatype
+#'
+#' @param filehandle Either a filename or a connection
+#' @param datatype One value in supportedReadcountDataTypes
+#' @param conditions Vector of condition names
+#'
+#' @return Data frame containing the visual parameters for each condition
+#' @export
+#'
+#' @examples
+importConditionVisuals <- function(filehandle, datatype, conditions) {
+  
+  sep = ","
+  
+  if(datatype == "csv_whitespace") {
+    sep = ""
+  }
+  
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  
+  # TODO error handling
+  
+  return(data)
+}
+
+
 #' Generates a condition table by separating the condition names 
 #'
 #' @param readcounts 
@@ -94,15 +127,15 @@ generateDefaultConditionVisualsTable <- function(conditions) {
   
 }
 
-serverGetCellVisualsTable <- function(input, readcounts.normalized, conditions, conditions.visuals.table) {
+serverGetCellVisualsTable <- function(input, readcounts.processed, conditions, conditions.visuals.table) {
   
   validate(
-    need(readcounts.normalized(), "No data to build visual parameter table from!"),
+    need(readcounts.processed(), "No data to build visual parameter table from!"),
     need(conditions(), "No conditions for visual mapping!"),
     need(conditions.visuals.table(), "No condition visual mapping!")
   )
   
-  cells <- colnames(readcounts.normalized())
+  cells <- colnames(readcounts.processed())
   cells.conditions <- conditions()
   conditions.mapping <- conditions.visuals.table()
   

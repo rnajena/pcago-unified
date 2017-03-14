@@ -13,8 +13,8 @@
 
 ## Code
 
-* Replace readcounts.processed by readcounts.selected when appropriate
 * Improve performance
+* Add error handling to read count + visuals importer
 
 ## Bugs
 
@@ -23,3 +23,7 @@
 ## Additional notes
 
 * Use notifications for importer messages
+
+## R Quirks
+
+* RStudio downloads don't overwrite files correctly

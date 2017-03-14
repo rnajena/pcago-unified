@@ -9,6 +9,7 @@ library(colourpicker)
 library(RColorBrewer)
 source("uiHelper.R")
 source("visuals.R")
+source("widgetGenericImporter.R")
 
 colorShapeInput.shapes <- c(
   "No shape" = -1,
@@ -50,16 +51,23 @@ colorShapeEditorInput <- function(id) {
   return(tagList(tags$div(class="color-shape-editor",
                           headerPanel(header = tags$span(
                             downloadButton(ns("export.csv"), "Export *.csv"),
-                            actionButton(ns("import"), "Import *.csv", icon = icon("upload"))
+                            bsButton(ns("import"), "Import", icon = icon("upload"), type = "toggle")
                           ),
-                          tags$div(
-                            class="condition-list",
-                            radioButtons(ns("conditions"),
-                                         "Available conditions",
-                                         choices = c("None"))),
-                          colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
-                          selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1))
-                          )))
+                          conditionalPanel(conditionalPanel.equals(ns("import"), "true"), 
+                                           genericImporterInput(ns("importer"), 
+                                                                supportedConditionVisualsFileTypes, 
+                                                                supportedConditionVisualsImporters)),
+                          conditionalPanel(conditionalPanel.equals(ns("import"), "false"), 
+                                           tags$div(
+                                             id="condition-list",
+                                             class="condition-list",
+                                             radioButtons(ns("conditions"),
+                                                          "Available conditions",
+                                                          choices = c("None"))),
+                                           colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
+                                           selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1))
+                          
+                          ))))
   
 }
 
@@ -101,13 +109,18 @@ colorShapeEditor <- function(input, output, session, conditions) {
   })
   
   # Based on selected choice update the current color and shape settings
-  observeEvent(input$conditions, {
+  # Its own function as this is also used on importing
+  observe({
     
-    validate(need(visual.table(), "No visual table to update input!"))
+    validate(need(visual.table(), "No visual table to update input!"),
+             need(input$conditions, "No current condition!"),
+             need(input$conditions %in% rownames(visual.table()), "Condition not in visual table!"))
     
     condition <- input$conditions
     color <- visual.table()[condition, "color"]
     shape <- visual.table()[condition, "shape"]
+    
+    print(c(condition, color, shape))
     
     if(is.null(color) || color == "") {
       color <- "transparent"
@@ -120,6 +133,8 @@ colorShapeEditor <- function(input, output, session, conditions) {
     updateSelectizeInput(session, "shape", selected = shape)
     
   })
+  
+  #observeEvent(input$conditions, update.inputs)
   
   # Change color/shape based on input
   observeEvent(input$color, {
@@ -158,15 +173,21 @@ colorShapeEditor <- function(input, output, session, conditions) {
                                                      row.names = T,
                                                      col.names = NA)
                                        })
-  #' Handle import of visual tables
-  observeEvent(input$import, {
+  
+  #' Handler for import of visuals table
+  visual.table.imported <- callModule(genericImporter, "importer", exprimport = function(con, importer) {
+    conditions <- colnames(isolate({conditions()}))
+    imported <- importConditionVisuals(con, importer, conditions)
+    return(imported)
+  })
+  
+  #' When the user imports a visual table, apply it
+  observeEvent(visual.table.imported(), {
     
-    showModal(modalDialog(title = "Import"
-    ),
-    session)
+    validate(need(visual.table.imported(), "Import went wrong! Won't modify table."))
+    variables$visuals.table <- visual.table.imported()
     
   })
- 
   
   return(visual.table)
   

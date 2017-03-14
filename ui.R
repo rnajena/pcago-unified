@@ -35,7 +35,7 @@ shinyUI(tags$div(useShinyjs(),
                    tabPanel("About", value = "about", uiAboutPage()),
                    tabPanel("Analyze", value = "analyze", uiPCAPage()),
                    tabPanel("Help", value = "help", uiHelpPage()),
-                   id = "main-nav",
+                   id = "main.nav",
                    theme = "style.css"),
                  tags$script(script.enable.popovers)))
 

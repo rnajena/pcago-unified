@@ -59,7 +59,59 @@ shinyServer(function(input, output, session) {
   
   #' Start page button. User can click it to go to the "Analyze" section
   observeEvent(input$about.goto.analyze, {
-    updateNavbarPage(session, "main-nav", "analyze")
+    updateNavbarPage(session, "main.nav", "analyze")
+  })
+  
+  # Navigation quick links
+  # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
+  observeEvent(input$pca.nav, {
+    if(input$pca.nav == "pca.cells.plot.quicklink") {
+      updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
+    }
+  })
+  
+  #' 
+  #' Fetch gene count parameters
+  #' Usually using input$ would be sufficient,
+  #' but numericInput is broken
+  #' 
+  
+  pca.genes.count.from <- reactive({
+    
+    # Additional checks as the numeric input is broken (accepts values outside of range)
+    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
+    
+    genes_max <- nrow(readcounts.filtered())
+    genes_min <- min(1, genes_max)
+    genes_from <- input$pca.pca.genes.count.from
+    genes_to <- input$pca.pca.genes.count.to
+    
+    validate(need(genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
+    
+    genes_from <- max(genes_min, genes_from)
+    
+    return(genes_from)
+  })
+  
+  pca.genes.count.to <- reactive({
+    
+    # Additional checks as the numeric input is broken (accepts values outside of range)
+    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
+    
+    genes_max <- nrow(readcounts.filtered())
+    genes_from <- input$pca.pca.genes.count.from
+    genes_to <- input$pca.pca.genes.count.to
+    
+    validate(need( genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
+    
+    genes_to <- min(genes_max, genes_to)
+    
+    return(genes_to)
+    
+  })
+  
+  pca.genes.count.by <- reactive({
+    return(max(0, input$pca.pca.genes.count.by))
   })
   
   #' Handles the animation of the gene counts
@@ -73,8 +125,8 @@ shinyServer(function(input, output, session) {
       # Separate the actual animation from the environment
       isolate({
         
-        from <- input$pca.pca.genes.count.from
-        to <- input$pca.pca.genes.count.to
+        from <- pca.genes.count.from()
+        to <- pca.genes.count.to()
         by <- input$pca.pca.genes.count.by
         current <- input$pca.pca.genes.count
         
@@ -114,39 +166,7 @@ shinyServer(function(input, output, session) {
     
   })
   
-  pca.genes.count.from <- reactive({
-    
-    # Additional checks as the numeric input is broken (accepts values outside of range)
-    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
-    
-    genes_max <- nrow(readcounts.processed())
-    genes_min <- min(1, genes_max)
-    genes_from <- input$pca.pca.genes.count.from
-    genes_to <- input$pca.pca.genes.count.to
-    
-    validate(need(genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
-    
-    genes_from <- max(genes_min, genes_from)
-    
-    return(genes_from)
-  })
   
-  pca.genes.count.to <- reactive({
-    
-    # Additional checks as the numeric input is broken (accepts values outside of range)
-    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
-    
-    genes_max <- nrow(readcounts.processed())
-    genes_from <- input$pca.pca.genes.count.from
-    genes_to <- input$pca.pca.genes.count.to
-    
-    validate(need( genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
-    
-    genes_to <- min(genes_max, genes_to)
-    
-    return(genes_to)
-    
-  })
   
   observeEvent(pca.genes.count.from(), {
     updateSliderInput(session, "pca.pca.genes.count", min = pca.genes.count.from())
@@ -156,8 +176,8 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, "pca.pca.genes.count", max = pca.genes.count.to())
   })
   
-  observeEvent(readcounts.processed(), {
-    genes_max <- nrow(readcounts.processed())
+  observeEvent(readcounts.filtered(), {
+    genes_max <- nrow(readcounts.filtered())
     updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
     updateNumericInput(session, "pca.pca.genes.count.from", min = min(1, genes_max), max = genes_max, value = min(2, genes_max))
     updateNumericInput(session, "pca.pca.genes.count.to", min = min(1, genes_max), max = genes_max, value = genes_max)
@@ -166,14 +186,6 @@ shinyServer(function(input, output, session) {
   #
   # Input events
   #
-  
-  # Navigation quick links
-  # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
-  observeEvent(input$pca.nav, {
-    if(input$pca.nav == "pca.cells.plot.quicklink") {
-      updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
-    }
-  })
   
   # User clicks fine-grained controls in gene count panel
   observeEvent(input$pca.pca.genes.count.lstepdecrease, {

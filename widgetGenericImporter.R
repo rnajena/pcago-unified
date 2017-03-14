@@ -63,8 +63,24 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
       
       if(!is.null(inFile)) {
         con <- file(inFile$datapath, "r")
-        data <- exprimport(con, importer)
+        data <- tryCatch({exprimport(con, importer)}, 
+                         error = function(e){
+                           print(e)
+                           return(NULL)
+                           }, 
+                         warning = function(w)
+                           {
+                           print(w)
+                           return(NULL)
+                           })
         close(con)
+        
+        if(is.null(data)) {
+          showNotification("Error while importing the data!", type = "error")
+        } 
+        else {
+          showNotification("Data has been successfully imported.", type = "message")
+        }
         
         return(data)
       }
@@ -77,14 +93,31 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
     else if(input$source == "manual") {
       importer <- input$importer
       con <- textConnection(input$input)
-      data <- exprimport(con, importer)
+      data <- tryCatch({exprimport(con, importer)}, 
+                       error = function(e){
+                         print(e)
+                         return(NULL)
+                       }, 
+                       warning = function(w)
+                       {
+                         print(w)
+                         return(NULL)
+                       })
       close(con)
+      
+      if(is.null(data)) {
+        showNotification("Error while importing the data!", type = "error")
+      } 
+      else {
+        showNotification("Data has been successfully imported.", type = "message")
+      }
       
       return(data)
     }
     else if(input$source == "sample") {
       
       sample <- input$sample
+      showNotification(paste("Loaded sample", sample), type = "message")
       return(exprsample(sample))
       
     }
