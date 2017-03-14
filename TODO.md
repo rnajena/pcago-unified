@@ -18,11 +18,12 @@
 
 ## Bugs
 
-* Nothing
+* Gene variances table not displaying
 
 ## Additional notes
 
 * Use notifications for importer messages
+* ggplot2 has slow performance (3x slower than scatterplot3d)
 
 ## R Quirks
 

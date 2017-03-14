@@ -48,7 +48,7 @@ pcaCellPlotMovie <- function(filename,
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.selected, center = pca.center, scale = pca.scale)
-    pcaCellPlot(pca$transformed,
+    pcaCellPlot(pca,
                 visuals.cell,
                 axes,
                 640,
@@ -74,4 +74,6 @@ pcaCellPlotMovie <- function(filename,
                "-i", paste0(basefile, "_%d.png"), 
                "-c:v", "libx264",
                filename))
+  
+  showNotification("Your video file has been successfully rendered.", type = "message")
 }

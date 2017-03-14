@@ -43,7 +43,8 @@ downloadableDataTable <- function(input, output, session, data, filename, rownam
   
   table.data <- reactive({
     
-    validate(need(data(), "No data to display!"))
+    validate(need(data(), "No data to display!"),
+             need(is.data.frame(data()) || is.matrix(data()), "Data is not a data frame!"))
     return(data())
     
   })

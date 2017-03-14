@@ -79,12 +79,17 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' @export
 #'
 #' @examples
-pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
+pcaCellPlot <- function(pca, visuals.cell, axes, width, height, dpi, format, filename, title = "Cell PCA", subtitle = NULL ){
   
   validate(need(axes, "No axes to draw!"))
   
   # Fetch needed variables from PCA and visual parameters
-  pca.transformed <- pca.transformed
+  pca.transformed <- pca$transformed
+  pca.var <- pca$var
+  
+  pc.lab <- function(pc) {
+    return(paste0(pc, ": ", round(pca.var[pc, "percentage"] * 100, 2), "% variance"))
+  }
   
   # Determine how many dimensions should be drawn
   dimensions.available <- ncol(pca.transformed)
@@ -107,7 +112,9 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
       geom_histogram(aes(fill = color), bins = 100)
     p <- p + scale_color_manual(values = palette.colors)
-    p <- p + labs(title = title, subtitle = subtitle)
+    p <- p + labs(title = title, 
+                  subtitle = subtitle,
+                  x = pc.lab(dimensions.requested[1]))
     #p <- p + scale_linetype_manual(values = palette.shapes)
     #TODO: Fix Color ; Add linetype as replacement for pch?
     
@@ -124,7 +131,10 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
       geom_point(aes(colour = color, shape = shape))
     p <- p + scale_color_manual(values = palette.colors)
     p <- p + scale_shape_manual(values = palette.shapes)
-    p <- p + labs(title = title, subtitle = subtitle)
+    p <- p + labs(title = title, 
+                  subtitle = subtitle,
+                  x = pc.lab(dimensions.requested[1]),
+                  y = pc.lab(dimensions.requested[2]))
     
     ggsave(filename, p, width = width / dpi, height = height / dpi)
     
@@ -151,9 +161,9 @@ pcaCellPlot <- function(pca.transformed, visuals.cell, axes, width, height, dpi,
       z = pca.transformed[[dimensions.requested[3]]],
       color = palette.colors[as.numeric(pca.transformed$color)],
       pch = palette.shapes[as.numeric(pca.transformed$shape)],
-      xlab = dimensions.requested[1],
-      ylab = dimensions.requested[2],
-      zlab = dimensions.requested[3],
+      xlab = pc.lab(dimensions.requested[1]),
+      ylab = pc.lab(dimensions.requested[2]),
+      zlab = pc.lab(dimensions.requested[3]),
       type = "h",
       main = title,
       sub = subtitle

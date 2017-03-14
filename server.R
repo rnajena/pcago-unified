@@ -281,9 +281,8 @@ shinyServer(function(input, output, session) {
     })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
-    if(is.null(annotation())) {
-      return(NULL)
-    }
+   
+    validate(need(annotation(), "No gene annotation to display!"))
     
     p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point() 
     p <- p + geom_vline(xintercept = input$pca.pca.genes.count, color = "red")
@@ -306,7 +305,7 @@ shinyServer(function(input, output, session) {
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
     
-    pcaCellPlot(pca()$transformed,
+    pcaCellPlot(pca(),
                 visuals.cell(),
                 input$pca.plot.cells.axes,
                 width,
