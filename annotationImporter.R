@@ -6,6 +6,7 @@
 # The user selects one of those types, which will then invoke the corresponding importer
 supportedAnnotationImporters <- c("GFF v3" = "gff3")
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
+availableAnnotationSamples <- c("Vitamins" = "vitamins.gff3")
 
 #' Imports annotation from filehandle with importer definded by datatype
 #'

@@ -30,7 +30,12 @@ importReadcount <- function(filehandle, datatype) {
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
 
-  # TODO error handling
+  if(nrow(data) == 0 || ncol(data) == 0) {
+    stop("Read count table is empty!")
+  }
+  if(!all(apply(data, 1, function(x) { is.numeric(x) }))) {
+    stop("Read count table is not entirely numeric!")
+  }
   
   return(data)
 }

@@ -67,6 +67,12 @@ serverReadCountProcessing <- function(readcounts, input) {
       output$readcounts <- transposeReadCounts(output$readcounts)
     }
     
+    # Prevent too many cells
+    if(ncol(output$readcounts) > 100) {
+      showNotification("There are over 100 cells! I won't calculate with that! Maybe you need to transpose your data?", type = "error")
+      return(NULL)
+    }
+    
     # Remove constant read genes
     if("remove.constant" %in% input$pca.data.readcounts.processing) {
       processed <- removeConstantReads(output$readcounts)
