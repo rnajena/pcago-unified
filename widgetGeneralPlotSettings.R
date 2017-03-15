@@ -18,7 +18,7 @@ generalPlotSettingsInput <- function(id) {
   
 }
 
-generalPlotSettings <- function(input, output, session) {
+generalPlotSettings_ <- function(input, output, session) {
   
   return(reactive({
     
@@ -32,4 +32,8 @@ generalPlotSettings <- function(input, output, session) {
     
   }))
   
+}
+
+generalPlotSettings <- function(id) {
+  return(callModule(generalPlotSettings_, id))
 }

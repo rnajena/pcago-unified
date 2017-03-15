@@ -190,7 +190,7 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
                                        })
   
   #' Handler for import of visuals table
-  visual.table.imported <- callModule(genericImporter, "importer", exprimport = function(con, importer) {
+  visual.table.imported <- genericImporterData("importer", exprimport = function(con, importer) {
     conditions <- colnames(isolate({conditions()}))
     imported <- importConditionVisuals(con, importer, conditions)
     return(imported)

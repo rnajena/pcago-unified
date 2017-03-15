@@ -28,7 +28,7 @@ cellConditionImporterUI <- function(id) {
   
 }
 
-cellConditionImporter <- function(input, output, session, readcounts) {
+cellConditionImporterValue_ <- function(input, output, session, readcounts) {
   
   return(reactive({
     
@@ -48,5 +48,11 @@ cellConditionImporter <- function(input, output, session, readcounts) {
     }
     
   }))
+  
+}
+
+cellConditionImporterValue <- function(id, readcounts) {
+  
+  return(callModule(cellConditionImporterValue_, id, readcounts = readcounts))
   
 }

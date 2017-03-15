@@ -32,12 +32,12 @@ source("widgetGeneralPlotSettings.R")
 shinyServer(function(input, output, session) {
   
   # Read counts
-  readcounts <- callModule(genericImporter, "pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
+  readcounts <- genericImporterData("pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
   readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   annotation <- reactive( { annotateGenes(readcounts.processed()) } )
-  conditions <- callModule(cellConditionImporter, "conditions.importer", readcounts = readcounts.processed)
+  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.filtered <- reactive({ readcounts.processed() })
@@ -270,7 +270,7 @@ shinyServer(function(input, output, session) {
     
   })
   
-  pca.cellplot.settings <- callModule(generalPlotSettings, "pca.cells.plot.generalsettings")
+  pca.cellplot.settings <- generalPlotSettings("pca.cells.plot.generalsettings")
   
   downloadablePlot("pca.cellplot", exprplot = function( width, height, format, filename ){
     

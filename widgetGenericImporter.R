@@ -43,17 +43,19 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' @param input 
 #' @param output 
 #' @param session 
 #' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer)
+#' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample)
 #'
 #' @return Data imported by the importer
 #' @export
 #'
 #' @examples
-genericImporter <- function(input, output, session, exprimport, exprsample) {
+genericImporterData_ <- function(input, output, session, exprimport, exprsample) {
   
   data <- eventReactive(input$submit, {
     
@@ -125,4 +127,20 @@ genericImporter <- function(input, output, session, exprimport, exprsample) {
   })
 
   return(data)
+}
+
+#' Server function of generic importer. Use within callModule and reactive context.
+#'
+#' @param id UI element ID
+#' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer)
+#' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample)
+#'
+#' @return Data imported by the importer
+#' @export
+#'
+#' @examples
+genericImporterData <- function(id, exprimport, exprsample) {
+  
+  return(callModule(genericImporterData_, id, exprimport = exprimport, exprsample = exprsample))
+  
 }
