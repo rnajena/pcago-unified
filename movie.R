@@ -26,7 +26,7 @@ library(shiny)
 #' @export
 #'
 #' @examples
-pcaCellPlotMovie <- function(filename,
+savePCACellPlotMovie <- function(filename,
                              width,
                              height,
                              dpi,
@@ -56,7 +56,7 @@ pcaCellPlotMovie <- function(filename,
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.selected, center = pca.center, scale = pca.scale)
-    pcaCellPlot(pca,
+    savePCACellPlot(pca,
                 visuals.conditions,
                 visuals.cell,
                 axes,

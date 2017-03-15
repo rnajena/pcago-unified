@@ -26,20 +26,22 @@ downloadableDataTableOutput <- function(id, ...) {
                      DT::dataTableOutput(ns("table"))))
 }
 
-#' Fills the data table with given data output. Use within observeEvent(<data>)
+#' Fills the data table with given data output.
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' @param input 
 #' @param output 
 #' @param session 
 #' @param data Data to be displayed. Should be a reactive
-#' @param filename Filename of the downloaded file
-#' @param rownames Export row names, too. Default = TRUE
+#' @param export.filename Filename of the downloaded file
+#' @param export.rownames Export row names, too. Default = TRUE
+#' @param export.colnames Parameter of write.table.
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadableDataTable <- function(input, output, session, data, filename, rownames = T, colnames = NA) {
+downloadableDataTable_ <- function(input, output, session, data, export.filename, export.rownames = T, export.colnames = NA) {
   
   table.data <- reactive({
     
@@ -52,25 +54,47 @@ downloadableDataTable <- function(input, output, session, data, filename, rownam
   
   
   output$table <- DT::renderDataTable(table.data(), options = list(scrollX = TRUE))
-  output$export.csv <- downloadHandler(filename, 
+  output$export.csv <- downloadHandler(paste0(export.filename, ".csv"), 
                                        function(file) {
                                          
                                         write.table(table.data(),
                                                   file,
                                                   sep = ",",
-                                                  row.names = rownames,
-                                                  col.names = colnames)
+                                                  row.names = export.rownames,
+                                                  col.names = export.colnames)
                                          
                                        })
-  output$export.tsv <- downloadHandler(filename, 
+  output$export.tsv <- downloadHandler(paste0(export.filename, ".csv"), 
                                        function(file) {
                                          
                                          write.table(table.data(),
                                                      file,
                                                      sep = "\t",
-                                                     row.names = rownames,
-                                                     col.names = colnames)
+                                                     row.names = export.rownames,
+                                                     col.names = export.colnames)
                                          
                                        })
+  
+}
+
+#' Fills the data table with given data output.
+#' 
+#' @param data Data to be displayed. Should be a reactive
+#' @param export.filename Filename of the downloaded file
+#' @param export.rownames Export row names, too. Default = TRUE
+#' @param export.colnames Parameter of write.table.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+downloadableDataTable <- function(id, data, export.filename = "table", export.rownames = T, export.colnames = NA) {
+  
+  return(callModule(downloadableDataTable_,
+                    id, 
+                    data = data, 
+                    export.filename = export.filename,
+                    export.rownames = export.rownames,
+                    export.colnames = export.colnames))
   
 }

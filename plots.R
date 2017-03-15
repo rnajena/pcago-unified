@@ -57,7 +57,7 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
 #' @export
 #'
 #' @examples
-geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
+saveGeneVariancePlot <- function(annotation, width, height, dpi, format, filename){
   
   p <- ggplot(annotation, aes(x=1:nrow(annotation), y=log(var))) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
@@ -81,7 +81,7 @@ geneVariancePlot <- function(annotation, width, height, dpi, format, filename){
 #' @export
 #'
 #' @examples
-pcaCellPlot <- function(pca, visuals.conditions, visuals.cell, axes, 
+savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes, 
                         width, height, dpi, format, filename,
                         title = "Cell PCA", subtitle = NULL ){
   
@@ -92,7 +92,7 @@ pcaCellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
   pca.var <- pca$var
   
   pc.lab <- function(pc) {
-    return(paste0(pc, ": ", round(pca.var[pc, "percentage"] * 100, 2), "% variance"))
+    return(paste0(pc, ": ", round(pca.var[pc, "var.relative"] * 100, 2), "% variance"))
   }
   
   # Determine how many dimensions should be drawn

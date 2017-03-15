@@ -29,45 +29,69 @@ downloadablePlotOutput <- function(id, ...) {
 
 
 #' Plots a downloadable plot
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' @param input 
 #' @param output 
 #' @param session 
 #' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
-#' @param format Format of data sent to user (default: png)
-#' @param alt Alt text for img object (default: "Plot")
+#' @param render.format Format of data sent to user (default: png)
+#' @param render.alt Alt text for img object (default: "Plot")
+#' @param export.filename Base filename of exported plot
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadablePlot <- function(input, output, session, exprplot, format = "png", alt = "Plot", filename = "plot") {
+downloadablePlot_ <- function(input, output, session, exprplot, render.format = "png", render.alt = "Plot", export.filename = "plot") {
   
   out.width <- reactive({ session$clientData[[paste0("output_", session$ns("plot"), "_width")]] })
   out.height <- reactive({ session$clientData[[paste0("output_", session$ns("plot"), "_height")]] })
   
   output$plot <- renderImage({
     
-    out.file <- tempfile(fileext=paste0(".", format))
+    out.file <- tempfile(fileext=paste0(".", render.format))
     
-    exprplot(width = out.width(), height = out.height(), filename = out.file, format = format)
+    exprplot(width = out.width(), height = out.height(), filename = out.file, format = render.format)
     
     return(list(src = out.file,
          width = out.width(),
          height = out.height(),
-         alt = alt))
+         alt = render.alt))
   })
   
-  output$export.svg <- downloadHandler(filename = paste0(filename, ".svg"),
+  output$export.svg <- downloadHandler(filename = paste0(export.filename, ".svg"),
                                        content = function(file) {
                                          exprplot(width = out.width(), height = out.height(), filename = file, format = "svg")
                                        },
                                        contentType = "image/svg")
 
-  output$export.png <- downloadHandler(filename = paste0(filename, ".png"),
+  output$export.png <- downloadHandler(filename = paste0(export.filename, ".png"),
                                        content = function(file) {
                                          exprplot(width = out.width(), height = out.height(), filename = file, format = "png")
                                        },
                                        contentType = "image/png")
+  
+}
+
+#' Plots a downloadable plot
+#'
+#' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
+#' @param render.format Format of data sent to user (default: png)
+#' @param render.alt Alt text for img object (default: "Plot")
+#' @param export.filename Base filename of exported plot
+#'
+#' @return
+#' @export
+#'
+#' @examples
+downloadablePlot <- function(id, exprplot, render.format = "png", render.alt = "Plot", export.filename = "plot") {
+  
+  return(callModule(downloadablePlot_,
+                    id,
+                    exprplot = exprplot,
+                    render.format = render.format,
+                    render.alt = render.alt,
+                    export.filename = export.filename))
   
 }

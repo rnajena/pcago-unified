@@ -104,13 +104,13 @@ uiPCASidebarPlot <- function() {
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'",
                      bsCollapse(
                        bsCollapsePanel("Axes",
-                                       selectizeInput("pca.plot.cells.axes",
+                                       selectizeInput("pca.cells.plot.axes",
                                                       "Visible axes (x, y, z)",
                                                       choices = c(),
                                                       multiple = T,
                                                       options = list(maxItems = 3))),
                        bsCollapsePanel("Visualization",
-                                       colorShapeEditorInput("pca.plot.visuals.editor")
+                                       colorShapeEditorInput("pca.cells.plot.visuals")
                        ),
                        bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cells.plot.generalsettings"))
                      )),

@@ -47,7 +47,7 @@ shinyServer(function(input, output, session) {
   pca <- serverPCA(input, readcounts.selected)
   
   # Visualizing the data
-  visuals.conditions <- callModule(colorShapeEditor, "pca.plot.visuals.editor", conditions = conditions)
+  visuals.conditions <- colorShapeEditorValue("pca.cells.plot.visuals", conditions)
   
   #' Build a list of all visual parameters
   #' Return a table with factors for color and symbol for each cell
@@ -156,14 +156,14 @@ shinyServer(function(input, output, session) {
     validate(need(pca(), "Cannot update input wihout PCA result!"))
     
     components <- colnames(pca()$pc) # Get PC1, PC2, PC3, ...
-    selection <- input$pca.plot.cells.axes
+    selection <- input$pca.cells.plot.axes
     
     # Preserve the current selection if it's possible. Otherwise select the two first principal components
     if(is.null(selection) || !all(selection %in% components)) {
       selection <- components[1:min(2, length(components))]
     }
     
-    updateSelectizeInput(session, "pca.plot.cells.axes", choices = components, selected = selection)
+    updateSelectizeInput(session, "pca.cells.plot.axes", choices = components, selected = selection)
     
   })
   
@@ -214,10 +214,10 @@ shinyServer(function(input, output, session) {
   #
   
   # Tables
-  callModule(downloadableDataTable, "readcounts", filename = "readcounts.csv", data = readcounts)
-  callModule(downloadableDataTable, "readcounts.processed", filename = "readcounts.processed.csv", data = readcounts.processed)
-  callModule(downloadableDataTable, "conditions", filename = "conditions.csv", data = conditions)
-  callModule(downloadableDataTable, "annotation.var", filename = "variance.csv", data = reactive({
+  downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
+  downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
+  downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
+  downloadableDataTable("annotation.var", export.filename = "variance", data = reactive({
     validate(need(annotation(), "No annotation available!"))
     
     table <- data.frame(row.names = rownames(annotation()), 
@@ -237,15 +237,15 @@ shinyServer(function(input, output, session) {
   ))
   
   # PCA results
-  callModule(downloadableDataTable, "pca.transformed", filename = "pca.transformed.csv", data = reactive({ pca()$transformed })) 
-  callModule(downloadableDataTable, "pca.pc", filename = "pca.pc.csv", data = reactive({ pca()$pc }))
-  callModule(downloadableDataTable, "pca.variance", filename = "pca.var.csv", data = reactive({ pca()$var }))
+  downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
+  downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
+  downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
   
   # Gene variance plots
   
-  callModule(downloadablePlot, "genes.variance.plot", exprplot = function(width, height, format, filename) 
+  downloadablePlot("genes.variance.plot", exprplot = function(width, height, format, filename) 
     { 
-      geneVariancePlot(annotation(), width, height, 96, format, filename) 
+    saveGeneVariancePlot(annotation(), width, height, 96, format, filename) 
     })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
@@ -260,7 +260,7 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  callModule(downloadablePlot, "pca.variance.plot", exprplot = function( width, height, format, filename ){
+  downloadablePlot("pca.variance.plot", exprplot = function( width, height, format, filename ){
     
     dpi <- 96
     
@@ -272,7 +272,7 @@ shinyServer(function(input, output, session) {
   
   pca.cellplot.settings <- callModule(generalPlotSettings, "pca.cells.plot.generalsettings")
   
-  callModule(downloadablePlot, "pca.cellplot", exprplot = function( width, height, format, filename ){
+  downloadablePlot("pca.cellplot", exprplot = function( width, height, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
@@ -284,10 +284,10 @@ shinyServer(function(input, output, session) {
     plot.title <- if(plot.settings$title == "") { "Cell PCA" } else { plot.settings$title }
     plot.subtitle <- if(plot.settings$title == "") { paste(nrow(pca()$pc), "genes") } else { plot.settings$subtitle }
     
-    pcaCellPlot(pca(),
+    savePCACellPlot(pca(),
                 visuals.conditions(),
                 visuals.cell(),
-                input$pca.plot.cells.axes,
+                input$pca.cells.plot.axes,
                 plot.width,
                 plot.height,
                 plot.dpi,
@@ -321,11 +321,11 @@ shinyServer(function(input, output, session) {
     }
     
     plot.settings <- pca.cellplot.settings()
-    plot.width <- if(plot.settings$width < 50) { width } else { plot.settings$width }
-    plot.height <- if(plot.settings$height < 50) { height } else { plot.settings$height }
+    plot.width <- if(plot.settings$width < 50) { 640 } else { plot.settings$width }
+    plot.height <- if(plot.settings$height < 50) { 480 } else { plot.settings$height }
     plot.dpi <- plot.settings$dpi
     
-    pcaCellPlotMovie(
+    savePCACellPlotMovie(
       filename = file,
       plot.width,
       plot.height,
@@ -334,7 +334,7 @@ shinyServer(function(input, output, session) {
       genes.count.to = pca.genes.count.to(),
       genes.count.by = input$pca.pca.genes.count.by,
       time.per.frame = input$pca.pca.genes.count.animation.speed,
-      axes = input$pca.plot.cells.axes,
+      axes = input$pca.cells.plot.axes,
       visuals.conditions = visuals.conditions(),
       visuals.cell = visuals.cell(),
       readcounts.filtered = readcounts.filtered(),

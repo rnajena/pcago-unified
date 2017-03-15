@@ -78,17 +78,15 @@ colorShapeEditorInput <- function(id) {
 }
 
 #' Creates a condition visual mapping based on the settings the user specified in the input
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
-#' @param input 
-#' @param output 
-#' @param session 
-#' @param conditions List of conditions
+#' @param conditions Reactive conditions table
 #'
 #' @return
 #' @export
 #'
 #' @examples
-colorShapeEditor <- function(input, output, session, conditions) {
+colorShapeEditorValue_ <- function(input, output, session, conditions) {
   
   variables <- reactiveValues(visuals.table = NULL)
   
@@ -208,4 +206,17 @@ colorShapeEditor <- function(input, output, session, conditions) {
   
   return(visual.table)
   
+}
+
+#' Creates a condition visual mapping based on the settings the user specified in the input
+#'
+#' @param id Id of the UI element
+#' @param conditions Reactive cell conditions definitions table
+#'
+#' @return
+#' @export
+#'
+#' @examples
+colorShapeEditorValue <- function(id, conditions) {
+  return(callModule(colorShapeEditorValue_, id, conditions = conditions))
 }

@@ -2,14 +2,12 @@
 
 ## Features
 
-* Background/Fill color as visual parameter
-* Legend text as visual parameter
-* Import of visual parameters
 * Annotations, GO terms, ...
 * Normalization
 * Plot output settings (width, height, dpi)
 * Plot title/subtitle
 * PC variances in plot
+* Upload own condition definitions
 
 ## Code
 
