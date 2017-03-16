@@ -8,10 +8,49 @@ source("helpers.R")
 # Default condition for later use
 condition.default <- "{default}"
 
+# Importers for cell condition mappings
+supportedCellConditionImporters <- c("CSV" = "csv_comma",
+                                        "TSV" = "csv_whitespace")
+supportedCellConditionFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+
 # Importers for condition visuals
 supportedConditionVisualsImporters <- c("CSV" = "csv_comma",
                                  "TSV" = "csv_whitespace")
 supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+
+#' Imports cell condition assignments from filehandle with importer definded by datatype
+#'
+#' @param filehandle Either a filename or a connection
+#' @param datatype One value in supportedCellConditionFileTypes
+#' @param cells Vector of cell names that have to be explained by the table
+#'
+#' @return Data frame containing the read data
+#' @export
+#'
+#' @examples
+importCellConditions <- function(filehandle, datatype, cells) {
+  
+  sep = ","
+  
+  if(datatype == "csv_whitespace") {
+    sep = ""
+  }
+  
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  
+  if(nrow(data) == 0 || ncol(data) == 0) {
+    stop("Cell condition table is empty!")
+  }
+  if(!all(apply(data, 1, function(x) { is.logical(x) }))) {
+    stop("Cell condition table is not entirely boolean!")
+  }
+  if(!setequal(rownames(data), cells)) {
+    stop("Data does not assign conditions to all cells!")
+  }
+  
+  return(data)
+}
+
 
 #' Imports visual definitions from filehandle with importer defined by datatype
 #'

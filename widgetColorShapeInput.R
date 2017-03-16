@@ -8,7 +8,7 @@ library(shiny)
 library(colourpicker)
 library(RColorBrewer)
 source("uiHelper.R")
-source("visuals.R")
+source("conditions.R")
 source("widgetGenericImporter.R")
 
 colorShapeInput.shapes <- c(

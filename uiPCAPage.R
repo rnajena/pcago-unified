@@ -4,7 +4,7 @@
 
 library(shiny)
 source("readCountImporter.R")
-source("annotationImporter.R")
+source("annotation.R")
 source("readCountNormalizer.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")

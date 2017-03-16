@@ -52,7 +52,7 @@ savePCACellPlotMovie <- function(filename,
       updateProgress(value = i / length(genecounts), detail = "Rendering plots")  
     }
     
-    readcounts.selected <- selectTopVariantGenes(readcounts.filtered, annotation, genecounts[i])
+    readcounts.selected <- selectTopVariantGeneReadcounts(readcounts.filtered, annotation, genecounts[i])
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.selected, center = pca.center, scale = pca.scale)

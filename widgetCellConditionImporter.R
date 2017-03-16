@@ -4,6 +4,7 @@
 
 library(shiny)
 source("widgetGenericImporter.R")
+source("conditions.R")
 
 cellConditionImporterUI <- function(id) {
   
@@ -23,12 +24,22 @@ cellConditionImporterUI <- function(id) {
                                     selected = "_",
                                     options = list("create" = T))),
     conditionalPanel(conditionalPanel.equals(ns("mode"), "'upload'"),
-                     genericImporterInput(ns("importer"),filetypes = c("text/csv"), importers = c("Default")))
+                     genericImporterInput(ns("importer"),filetypes = supportedCellConditionFileTypes, importers = supportedCellConditionImporters))
   ))
   
 }
 
 cellConditionImporterValue_ <- function(input, output, session, readcounts) {
+  
+  cell.conditions.imported <- genericImporterData("importer", exprimport = function(con, importer) {
+    
+    validate(need(readcounts(), "Cannot import condition table without read counts!"))
+    
+    cells <- colnames(readcounts())
+    return(importCellConditions(con, importer, cells))
+  })
+  
+  observeEvent(cell.conditions.imported(), { })
   
   return(reactive({
     
@@ -41,7 +52,8 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
       return(generateConditionTable(readcounts(), sep = input$separator))
     }
     else if(input$mode == "upload") {
-      return(NULL) #todo
+      validate(need(cell.conditions.imported(), "No imported data available."))
+      return(cell.conditions.imported())
     }
     else {
       return(NULL)

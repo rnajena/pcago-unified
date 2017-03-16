@@ -16,10 +16,9 @@ library(shinyBS)
 library(shinyjs)
 source("readCountImporter.R")
 source("readCountProcessing.R")
-source("annotationImporter.R")
+source("annotation.R")
 source("readCountNormalizer.R")
-source("visuals.R")
-source("gene.R")
+source("conditions.R")
 source("pca.R")
 source("plots.R")
 source("movie.R")
@@ -36,12 +35,18 @@ shinyServer(function(input, output, session) {
   readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
-  annotation <- reactive( { annotateGenes(readcounts.processed()) } )
+  annotation <- reactive( { 
+    
+    variances <- geneVarianceTable(readcounts.processed())
+    return(list(variances = variances))
+    
+    } )
+  
   conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.filtered <- reactive({ readcounts.processed() })
-  readcounts.selected <- reactive({ selectTopVariantGenes(readcounts.filtered(), annotation(), input$pca.pca.genes.count) })
+  readcounts.selected <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), annotation(), input$pca.pca.genes.count) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.selected)
@@ -220,9 +225,10 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("annotation.var", export.filename = "variance", data = reactive({
     validate(need(annotation(), "No annotation available!"))
     
-    table <- data.frame(row.names = rownames(annotation()), 
-                        Variance = annotation()$var,
-                        "Relative variance" = annotation()$var / sum(annotation()$var))
+    variances <- annotation()$variances
+    table <- data.frame(row.names = rownames(variances), 
+                        Variance = variances$var,
+                        "Relative variance" = variances$var / sum(variances$var))
     table <- table[order(table$Variance, decreasing = T), ,drop = F]
     
     return(table)
@@ -245,14 +251,16 @@ shinyServer(function(input, output, session) {
   
   downloadablePlot("genes.variance.plot", exprplot = function(width, height, format, filename) 
     { 
-    saveGeneVariancePlot(annotation(), width, height, 96, format, filename) 
+    saveGeneVariancePlot(annotation()$variances, width, height, 96, format, filename) 
     })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
    
     validate(need(annotation(), "No gene annotation to display!"))
     
-    p <- ggplot(annotation(), aes(x=1:nrow(annotation()), y=log(var))) + geom_point() 
+    variances <- annotation()$variances
+    
+    p <- ggplot(variances, aes(x=1:nrow(variances), y=log(var))) + geom_point() 
     p <- p + geom_vline(xintercept = input$pca.pca.genes.count, color = "red")
     p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
     
