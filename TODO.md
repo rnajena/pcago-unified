@@ -7,7 +7,7 @@
 * Plot output settings (width, height, dpi)
 * Plot title/subtitle
 * PC variances in plot
-* Upload own condition definitions
+* Gene information
 
 ## Code
 
@@ -26,3 +26,4 @@
 ## R Quirks
 
 * RStudio downloads don't overwrite files correctly
+* R 3.3.3 compile rtracklayer etc. from source https://support.bioconductor.org/p/93347/#93373

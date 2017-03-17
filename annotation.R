@@ -8,27 +8,82 @@
 
 library(shiny)
 library(matrixStats)
+library(rtracklayer)
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
-supportedAnnotationImporters <- c("GFF v3" = "gff3")
+supportedAnnotationImporters <- c("GFF" = "gff")
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 availableAnnotationSamples <- c("Vitamins" = "vitamins.gff3")
 
-#' Imports annotation from filehandle with importer definded by datatype
+#' Imports an annotation and returns a data frame with several information.
+#' This annotation will be later used to extract the gene information.
+#' 
+#' For all annotated genes the table will at least contain following entries:
+#' 
+#' seq.start: Start position of the feature
+#' seq.end: End position of the feature
+#' seq.length: Length of the feature sequence
 #'
 #' @param filehandle Either a filename or a connection
 #' @param datatype One value in supportedAnnotationDataTypes
 #'
-#' @return Data frame containing the read data
+#' @return Updated annotation
 #' @export
 #'
 #' @examples
 importAnnotation <- function(filehandle, datatype) {
   
+  if(datatype == "gff") {
+    gr <- import.gff(filehandle)
+    
+    seq.start <- start(gr)
+    seq.end <- end(gr)
+    seq.length <- width(gr)
+    
+    table <- mcols(gr)
+    table$seq.start <- seq.start
+    table$seq.end <- seq.end
+    table$seq.length <- seq.length
+    
+    return(table)
+  }
+  else {
+    return(NULL)
+  }
+  
 }
 
-#' Creates the final annotation for all genes
+#' Condenses multiple information sources about genes into one data source about the genes in the read counts
+#' This will be later used to filter genes
+#' 
+#' Access the information about a gene by x$gene.id
+#' 
+#' A gene has following information entries:
+#' 
+#' variance: The variance of this gene
+#' variance.relative: The relative variance of this gene
+#' sequence: The sequence ID the gene is located in
+#' sequence.start: The start position of this gene
+#' sequence.stop: The stop position of the gene
+#' sequence.length: The length of the gene
+#' features: Vector of features that are associated with the gene
+#' go.terms: Vector of GO terms associated with the gene
+#'
+#' @param readcounts The read count table
+#' @param variances The gene variance table
+#' @param annotation The gene annotation table
+#'
+#' @return List indexed by gene ID
+#' @export
+#'
+#' @examples
+buildGeneInformation <- function(readcounts, variances, annotation) {
+  
+}
+
+
+#' Creates a table with gene ID and its variance and relative variance.
 #'
 #' @param readcounts Read counts
 #'
@@ -36,7 +91,7 @@ importAnnotation <- function(filehandle, datatype) {
 #' @export
 #'
 #' @examples
-geneVarianceTable <- function(readcounts) {
+buildGeneVarianceTable <- function(readcounts) {
   
   if(is.null(readcounts) || ncol(readcounts) < 2 || nrow(readcounts) == 0) {
     return(NULL)
@@ -58,22 +113,22 @@ geneVarianceTable <- function(readcounts) {
 #' Selects only the top n most variant genes from the read count table.
 #'
 #' @param readcounts The readcount table to be filtered
-#' @param annotation Gene annotation object
+#' @param gene.variances Gene variances table
 #' @param top The top n of genes 1 <= n <= nrow(readcounts)
 #'
 #' @return Filtered readcount table
 #' @export
 #'
 #' @examples
-selectTopVariantGeneReadcounts <- function(readcounts, annotation, top) {
+selectTopVariantGeneReadcounts <- function(readcounts, gene.variances, top) {
   
-  if(is.null(readcounts) || is.null(annotation) || top <= 0 || ncol(readcounts) < 2 || nrow(readcounts) == 0) {
+  if(!is.data.frame(readcounts) || !is.data.frame(gene.variances) || top <= 0) {
     return(NULL)
   }
   
   # Fetch the variances for all available genes
   # But only select those which are in the read count table
-  variances <- annotation$variances[rownames(readcounts),]
+  variances <- gene.variances[rownames(readcounts),]
   
   topgeneids <- rownames(variances)[1:min(top, nrow(variances))]
   readcounts.geneids <- rownames(readcounts)

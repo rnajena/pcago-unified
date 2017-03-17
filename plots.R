@@ -46,7 +46,7 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
 
 #' Saves a plot of gene variances to a file with given format
 #'
-#' @param annotation Gene annotation
+#' @param gene.variances Gene variances
 #' @param width 
 #' @param height 
 #' @param dpi 
@@ -57,9 +57,9 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
 #' @export
 #'
 #' @examples
-saveGeneVariancePlot <- function(annotation, width, height, dpi, format, filename){
+saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, filename){
   
-  p <- ggplot(annotation, aes(x=1:nrow(annotation), y=log(var))) + geom_point()
+  p <- ggplot(gene.variances, aes(x=1:nrow(gene.variances), y=log(var))) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   

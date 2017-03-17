@@ -17,7 +17,7 @@ library(shiny)
 #' @param visuals.conditions Visual definitions for each condition
 #' @param visuals.cell Visual definitions for each cell
 #' @param readcounts.filtered Filtered read counts. Contains read counts with specific set of genes
-#' @param annotation Gene annotation
+#' @param gene.variances Gene variances
 #' @param pca.center Center data before PCA
 #' @param pca.scale Scale data before PCA
 #' @param updateProgress Function that takes progress input. Parameters are detail (current operation) and value (current progress)
@@ -38,7 +38,7 @@ savePCACellPlotMovie <- function(filename,
                              visuals.conditions,
                              visuals.cell,
                              readcounts.filtered,
-                             annotation,
+                             gene.variances,
                              pca.center,
                              pca.scale,
                              updateProgress = NULL) {
@@ -52,7 +52,7 @@ savePCACellPlotMovie <- function(filename,
       updateProgress(value = i / length(genecounts), detail = "Rendering plots")  
     }
     
-    readcounts.selected <- selectTopVariantGeneReadcounts(readcounts.filtered, annotation, genecounts[i])
+    readcounts.selected <- selectTopVariantGeneReadcounts(readcounts.filtered, gene.variances, genecounts[i])
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.selected, center = pca.center, scale = pca.scale)
