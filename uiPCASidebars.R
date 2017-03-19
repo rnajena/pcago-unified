@@ -5,6 +5,7 @@
 library(shiny)
 library(shinyBS)
 
+source("uiHelper.R")
 source("widgetInPlaceHelp.R")
 source("widgetFilterSelection.R")
 source("widgetColorShapeInput.R")
@@ -67,8 +68,10 @@ uiPCASidebarData <- function() {
 uiPCASidebarPCA <- function() {
   
   return(bsCollapse(
-    bsCollapsePanel("Gene set",
-                    filterSelectionInput("pca.pca.genes.set.features", "Associated features")),
+    bsCollapsePanel("Filter genes",
+                    wellPanel(filterSelectionInput("pca.pca.genes.set.features", "by feature types")),
+                    hDivider(),
+                    textOutput("pca.pca.genes.set.count")),
     bsCollapsePanel("Gene count",
                     plotOutput("pca.pca.genes.count.variance.plot", height = "120px"),
                     sliderInput("pca.pca.genes.count", "Gene count", min = 0, max = 0, value = 0, step = 1, round = T),

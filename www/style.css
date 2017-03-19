@@ -192,15 +192,6 @@
 * Style for selection filter widget
 */
 
-.filter-selection-input .selection {
-	display: flex;
-	align-items: flex-end;
-}
-
-.filter-selection-input .selection .filter-values {
-	flex-grow: 2;
-}
-
-.filter-selection-input .selection .filter-operation .control-label {
-	visibility: hidden;
-}
+/*.filter-selection-input .filter-operation {
+	min-width: 100px;
+}*/

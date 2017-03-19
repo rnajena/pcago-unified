@@ -19,16 +19,18 @@ filterSelectionInput <- function(id, header = "") {
   ns  <- NS(id)
   
   return(tags$div(class = "filter-selection-input",
-    tags$div(class = "selection",
-             tags$div(class = "filter-values", selectizeInput(ns("values"), 
-                                                              label = header, 
-                                                              multiple = T,
-                                                              choices = c(), 
-                                                              width = "auto")),
-             tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
-                                                                label = header, 
-                                                                choices = c("AND", "OR"), 
-                                                                width = "100px"))),
+                  tags$label(header),
+                  fixedRow(
+                    column(8, tags$div(class = "filter-values", selectizeInput(ns("values"), 
+                                                                               label = "", 
+                                                                               multiple = T,
+                                                                               choices = c("All (*)" = "*"),
+                                                                               selected = c("*")))),
+                    column(4, tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
+                                                                                 label = "", 
+                                                                                 choices = c("AND", "OR"),
+                                                                                 selected = "OR")))
+                  ),
     checkboxInput(ns("invert.selection"), "Invert selection")
   ))
   
@@ -54,15 +56,21 @@ filterSelectionInput <- function(id, header = "") {
 filterSelectionValues_ <- function(input, output, session, values) {
   
   observeEvent(values(), {
-    updateSelectInput(values = c("All (*)" = "*", names(values())))
+    updateSelectInput(session, "values", choices = c("All (*)" = "*", names(values())), selected = c("*"))
   })
   
   selected.values <- reactive({
     
     selected.keys <- input$values
     
+    # Do this to prevent breaking the axis selectize inputs
     if(length(selected.keys) == 0) {
-      return(c())
+      selected.keys <- names(values())
+    }
+    
+    # Handle "Select All" case
+    if("*" %in% selected.keys) {
+      selected.keys <- names(values())
     }
     
     #' Depending on the user's selection apply union (OR) or intersect (AND) to 
@@ -105,5 +113,7 @@ filterSelectionValues_ <- function(input, output, session, values) {
 #'
 #' @examples
 filterSelectionValues <- function(id, values) {
-  return(callModule(filterSelectionValues_, id, values = values))
+  return(callModule(filterSelectionValues_,
+                    id,
+                    values = values))
 }

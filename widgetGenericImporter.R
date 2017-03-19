@@ -57,7 +57,22 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
 #' @examples
 genericImporterData_ <- function(input, output, session, exprimport, exprsample) {
   
-  data <- eventReactive(input$submit, {
+  variables <- reactiveValues(data = NULL)
+  
+  observeEvent(input$reset, {
+    
+    variables$data <- NULL
+    showNotification("Data has been reset.", type = "message")
+    
+  })
+  
+  observeEvent(input$submit, {
+    
+    showNotification("Please wait ... importing data", 
+                     duration = NULL,
+                     closeButton = F,
+                     id = "genericimporter.importing")
+    on.exit({ removeNotification(id = "genericimporter.importing") })
     
     if(input$source == "upload") {
       inFile <- input$fileinput
@@ -84,10 +99,11 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
           showNotification("Error while importing the data", type = "error")
         }
         
-        return(data)
+        variables$data <- data
       }
       else
       {
+        showNotification("Error while importing the data: No file uploaded!", type = "error")
         return(NULL)
       }
         
@@ -114,7 +130,7 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
         showNotification("Error while importing the data", type = "error")
       }
       
-      return(data)
+      variables$data <- data
     }
     else if(input$source == "sample") {
       
@@ -138,13 +154,13 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
         showNotification("Error while importing sample!", type = "error")
       }
       
-      return(data)
+      variables$data <- data
       
     }
 
   })
 
-  return(data)
+  return(reactive( { variables$data } ))
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.

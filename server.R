@@ -35,10 +35,10 @@ shinyServer(function(input, output, session) {
   readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
+  # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
-  # TODO
-  
+  # Gene annotation
   gene.info.annotation <- genericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
     return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
   },
@@ -46,31 +46,40 @@ shinyServer(function(input, output, session) {
     return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
   })
   
-  gene.info <- reactive({
-    return(gene.info.annotation())
-  })
-  
-  observeEvent(gene.info.annotation(), {
+  # Extract the mapping from FEATURE -> List of genes. If it's not available, make a default list
+  gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set.features",  reactive({
     
-    gene.info.annotation()
-    
-  })
+    if(!is.null(gene.info.annotation())) {
+      return(gene.info.annotation()$features)
+    }
+    else {
+      return(list("Unknown" = rownames(readcounts.processed())))
+    }
+  }))
   
-  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
+  # The filtered read counts just intersects the list of genes returned by each filter
+  readcounts.filtered <- reactive({
+    
+    keep.genes <- rownames(readcounts.processed())
+    keep.genes <- intersect(keep.genes, gene.info.annotation.features())
+    
+    keep.readcounts <- readcounts.processed()[keep.genes,]
+    
+    return(keep.readcounts)
+    })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
-  readcounts.filtered <- reactive({ readcounts.processed() })
   readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), input$pca.pca.genes.count) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.top.variant)
   
-  # Visualizing the data
-  visuals.conditions <- colorShapeEditorValue("pca.cells.plot.visuals", conditions)
-  
   #' Build a list of all visual parameters
-  #' Return a table with factors for color and symbol for each cell
-  #' Return a palette that correspond to the factors
+  #' 1. We have for each cell CELL -> Is in condition true/false? mapping (conditions)
+  #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
+  #' 3. Based on this determine the visual conditions for each cell
+  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
+  visuals.conditions <- colorShapeEditorValue("pca.cells.plot.visuals", conditions)
   visuals.cell <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, visuals.conditions) })
   
   #
@@ -94,6 +103,7 @@ shinyServer(function(input, output, session) {
   #' Fetch gene count parameters
   #' Usually using input$ would be sufficient,
   #' but numericInput is broken
+  #' TODO: More elegant solution
   #' 
   
   pca.genes.count.from <- reactive({
@@ -186,8 +196,6 @@ shinyServer(function(input, output, session) {
     
   })
   
-  
-  
   observeEvent(pca.genes.count.from(), {
     updateSliderInput(session, "pca.pca.genes.count", min = pca.genes.count.from())
   })
@@ -235,6 +243,8 @@ shinyServer(function(input, output, session) {
   # Tables
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
+  downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered)
+  downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
   downloadableDataTable("annotation.var", export.filename = "variance", data = reactive({
     validate(need(gene.variances(), "No annotation available!"))
@@ -249,6 +259,14 @@ shinyServer(function(input, output, session) {
     }))
   
   # Texts
+  
+  output$pca.pca.genes.set.count <- renderText({
+    
+    validate(need(readcounts.filtered(), "0 genes selected"))
+    
+    return(paste(nrow(readcounts.filtered()), "genes selected"))
+  })
+  
   output$readcounts.processing.steps <- renderUI(serverReadCountsProcessingOutput(
     input,
     readcounts.processed,
