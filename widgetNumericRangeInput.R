@@ -4,6 +4,16 @@
 
 library(shiny)
 
+#' Creates a control that allows the user to select a range of numbers with precision of numericInput
+#'
+#' @param id 
+#' @param label.from 
+#' @param label.to 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 numericRangeInput <- function(id, label.from, label.to) {
   
   ns <- NS(id)
@@ -17,6 +27,20 @@ numericRangeInput <- function(id, label.from, label.to) {
   ))
 }
 
+#' Returns value of numeric range input
+#'
+#' @param input 
+#' @param output 
+#' @param session 
+#' @param value.min Reactive returning the min. value
+#' @param value.max Reactive returning the max. value
+#' @param value.default.min Optional reactive returning the default min value (NULL for value.min)
+#' @param value.default.max Optional reactive returning the default max value (NULL for value.max)
+#'
+#' @return List with range start (from) and range end (to)
+#' @export
+#'
+#' @examples
 numericRangeInputValue_ <- function(input, output, session, value.min, value.max, value.default.min = NULL, value.default.max = NULL) {
   
   observe({
@@ -49,10 +73,10 @@ numericRangeInputValue_ <- function(input, output, session, value.min, value.max
   range <- reactive( {
     
     if(from() < to()) {
-      return(c("from" = from(), "to" = to()))
+      return(list("from" = from(), "to" = to()))
     }
     else {
-      return(c("from" = value.min(), "to" = value.max()))
+      return(list("from" = value.min(), "to" = value.max()))
     }
     
   })
@@ -70,6 +94,18 @@ numericRangeInputValue_ <- function(input, output, session, value.min, value.max
   
 }
 
+#' Returns value of numeric range input
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
+#'
+#' @param value.min Reactive returning the min. value
+#' @param value.max Reactive returning the max. value
+#' @param value.default.min Optional reactive returning the default min value (NULL for value.min)
+#' @param value.default.max Optional reactive returning the default max value (NULL for value.max)
+#'
+#' @return List with range start (from) and range end (to)
+#' @export
+#'
+#' @examples
 numericRangeInputValue <- function(id, value.min, value.max, value.default.min = NULL, value.default.max = NULL) {
   return(callModule(numericRangeInputValue_, 
                     id, 

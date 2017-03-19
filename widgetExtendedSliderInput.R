@@ -38,15 +38,20 @@ extendedSliderInput <- function(id, header = "") {
   
 }
 
-#' Title
+
+#' Returns the value and animation steps from an extended slider input.
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' @param input 
 #' @param output 
 #' @param session 
-#' @param min Reactive expression returning the desired min. value
-#' @param max Reactive expression returning the desired max. value
+#' @param value.min Reactive returning the min. value
+#' @param value.max Reactive returning the max. value
+#' @param value.default Optional reactive returning the default value (NULL for min. value)
+#' @param value.default.min Optional reactive returning the default min value of the slider range (NULL for value.min)
+#' @param value.default.max Optional reactive returning the default max value of the slider range (NULL for value.max)
 #'
-#' @return
+#' @return List with value (value), slider range start (from), slider range stop (to), animation step (by), animation delay (delay)
 #' @export
 #'
 #' @examples
@@ -134,6 +139,18 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   
 }
 
+#' Returns the value and animation steps from an extended slider input.
+#'
+#' @param value.min Reactive returning the min. value
+#' @param value.max Reactive returning the max. value
+#' @param value.default Optional reactive returning the default value (NULL for min. value)
+#' @param value.default.min Optional reactive returning the default min value of the slider range (NULL for value.min)
+#' @param value.default.max Optional reactive returning the default max value of the slider range (NULL for value.max)
+#'
+#' @return List with value (value), slider range start (from), slider range stop (to), animation step (by), animation delay (delay)
+#' @export
+#'
+#' @examples
 extendedSliderInputValue <- function(id, value.min, value.max, value.default = NULL, value.default.min = NULL, value.default.max = NULL) {
   return(callModule(extendedSliderInputValue_, 
                     id,
