@@ -179,11 +179,28 @@
 */
 
 /* Override the image size, so it doesn't get scaled by Shiny's default plot output */
-.downloadable-plot img {
+/*.downloadable-plot img {
 	width: 100%;
 	height: auto;
-}
+}*/
 
 /*.downloadable-plot .shiny-plot-output {
 	height: auto!important;
 }*/
+
+/*
+* Style for selection filter widget
+*/
+
+.filter-selection-input .selection {
+	display: flex;
+	align-items: flex-end;
+}
+
+.filter-selection-input .selection .filter-values {
+	flex-grow: 2;
+}
+
+.filter-selection-input .selection .filter-operation .control-label {
+	visibility: hidden;
+}

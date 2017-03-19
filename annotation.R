@@ -12,41 +12,71 @@ library(rtracklayer)
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
-supportedAnnotationImporters <- c("GFF" = "gff")
+supportedAnnotationImporters <- c("Ensembl GFF" = "gff_ensembl")
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 availableAnnotationSamples <- c("Vitamins" = "vitamins.gff3")
 
-#' Imports an annotation and returns a data frame with several information.
-#' This annotation will be later used to extract the gene information.
-#' 
-#' For all annotated genes the table will at least contain following entries:
-#' 
-#' seq.start: Start position of the feature
-#' seq.end: End position of the feature
-#' seq.length: Length of the feature sequence
+#' Extracts gene information from an Ensembl GFF file
+#' See importGeneInformationFromAnnotation for more info
 #'
-#' @param filehandle Either a filename or a connection
-#' @param datatype One value in supportedAnnotationDataTypes
+#' @param filehandle 
+#' @param readcounts 
 #'
-#' @return Updated annotation
+#' @return
 #' @export
 #'
 #' @examples
-importAnnotation <- function(filehandle, datatype) {
+importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts) {
   
-  if(datatype == "gff") {
-    gr <- import.gff(filehandle)
+  # Load the data inside the GFF file
+  gr <- suppressWarnings(import.gff(filehandle)) # Supppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
+  gff <- mcols(gr)
+  
+  # Build table containing the sequence, start, stop & length
+  # Will fail if not every gene is explained
+  meta.indices <- match(rownames(readcounts), gff$gene_id)
+  
+  if(any(is.na(meta.indices))) {
+    stop("Annotation does not contain all genes!")
+  }
+  
+  gene.meta <- gff[meta.indices,]
+  sequence.info <- data.frame(row.names = rownames(readcounts),
+                              sequence = as.vector(seqnames(gr)[meta.indices]),
+                              start = start(gr)[meta.indices],
+                              end = end(gr)[meta.indices],
+                              length = width(gr)[meta.indices])
+  
+  # Extract features
+  features <- list()
+  
+  for(feature_type in unique(gff$type)) {
     
-    seq.start <- start(gr)
-    seq.end <- end(gr)
-    seq.length <- width(gr)
-    
-    table <- mcols(gr)
-    table$seq.start <- seq.start
-    table$seq.end <- seq.end
-    table$seq.length <- seq.length
-    
-    return(table)
+    ids <- unlist(gff[gff$type == feature_type,"Parent"])
+    gene_ids <- gff[match(ids, gff$ID),"gene_id"]
+   
+    if(length(gene_ids) > 0) {
+     features[[feature_type]] <- gene_ids 
+    }
+  }
+  
+  return(list(sequence.info = sequence.info, features = features))
+}
+
+#' Extracts gene information from an annotation
+#'
+#' @param filehandle 
+#' @param datatype 
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts) {
+  
+  if(datatype == "gff_ensembl") {
+    return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts))
   }
   else {
     return(NULL)
@@ -54,34 +84,21 @@ importAnnotation <- function(filehandle, datatype) {
   
 }
 
-#' Condenses multiple information sources about genes into one data source about the genes in the read counts
-#' This will be later used to filter genes
-#' 
-#' Access the information about a gene by x$gene.id
-#' 
-#' A gene has following information entries:
-#' 
-#' variance: The variance of this gene
-#' variance.relative: The relative variance of this gene
-#' sequence: The sequence ID the gene is located in
-#' sequence.start: The start position of this gene
-#' sequence.stop: The stop position of the gene
-#' sequence.length: The length of the gene
-#' features: Vector of features that are associated with the gene
-#' go.terms: Vector of GO terms associated with the gene
-#'
-#' @param readcounts The read count table
-#' @param variances The gene variance table
-#' @param annotation The gene annotation table
-#'
-#' @return List indexed by gene ID
-#' @export
-#'
-#' @examples
-buildGeneInformation <- function(readcounts, variances, annotation) {
+importSampleGeneInformationFromAnnotation <- function(sample, readcounts) {
+  
+  if(sample == "vitamins.gff3") {
+    
+    con <- file("sampledata/vitamins.gff3", "r")
+    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts)
+    close(con)
+    return(data)
+    
+  }
+  else {
+    return(NULL)
+  }
   
 }
-
 
 #' Creates a table with gene ID and its variance and relative variance.
 #'

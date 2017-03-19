@@ -72,7 +72,7 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
                            }, 
                          warning = function(w)
                            {
-                           showNotification(paste("Error:", e), type = "error", duration = NULL)
+                           showNotification(paste("Warning:", w), type = "warning", duration = NULL)
                            return(NULL)
                            })
         close(con)
@@ -102,7 +102,7 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
                        }, 
                        warning = function(w)
                        {
-                         showNotification(paste("Error:", e), type = "error", duration = NULL)
+                         showNotification(paste("Warning:", w), type = "warning", duration = NULL)
                          return(NULL)
                        })
       close(con)
@@ -119,8 +119,26 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
     else if(input$source == "sample") {
       
       sample <- input$sample
-      showNotification(paste("Loaded sample", sample), type = "message")
-      return(exprsample(sample))
+      
+      data <- tryCatch({exprsample(sample)}, 
+                       error = function(e){
+                         showNotification(paste("Error:", e), type = "error", duration = NULL)
+                         return(NULL)
+                       }, 
+                       warning = function(w)
+                       {
+                         showNotification(paste("Warning:", w), type = "warning", duration = NULL)
+                         return(NULL)
+                       })
+      
+      if(!is.null(data)) {
+        showNotification(paste("Loaded sample", sample), type = "message")
+      } 
+      else {
+        showNotification("Error while importing sample!", type = "error")
+      }
+      
+      return(data)
       
     }
 

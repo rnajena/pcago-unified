@@ -31,21 +31,39 @@ source("widgetGeneralPlotSettings.R")
 shinyServer(function(input, output, session) {
   
   # Read counts
-  readcounts <- genericImporterData("pca.data.readcounts", exprimport = importReadcount, exprsample = importReadcountSample)
+  readcounts <- genericImporterData("pca.data.readcounts.importer", exprimport = importReadcount, exprsample = importReadcountSample)
   readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
- 
+  
+  # TODO
+  
+  gene.info.annotation <- genericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
+    return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
+  },
+  exprsample = function(sample) {
+    return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
+  })
+  
+  gene.info <- reactive({
+    return(gene.info.annotation())
+  })
+  
+  observeEvent(gene.info.annotation(), {
+    
+    gene.info.annotation()
+    
+  })
   
   conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   readcounts.filtered <- reactive({ readcounts.processed() })
-  readcounts.selected <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), input$pca.pca.genes.count) })
+  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), input$pca.pca.genes.count) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
-  pca <- serverPCA(input, readcounts.selected)
+  pca <- serverPCA(input, readcounts.top.variant)
   
   # Visualizing the data
   visuals.conditions <- colorShapeEditorValue("pca.cells.plot.visuals", conditions)
@@ -301,7 +319,7 @@ shinyServer(function(input, output, session) {
   output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
     
     validate(
-      need(readcounts.selected(), "No processed read counts!"),
+      need(readcounts.top.variant(), "No processed read counts!"),
       need(input$pca.pca.genes.count.from < input$pca.pca.genes.count.to, "Gene count settings wrong!")
     )
     

@@ -50,13 +50,13 @@ applyPCA <- function(inputdata, center, scale) {
 #' Server function for PCA
 #'
 #' @param input 
-#' @param readcounts.selected 
+#' @param readcounts.top.variant
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverPCA <- function(input, readcounts.selected) {
+serverPCA <- function(input, readcounts.top.variant) {
   
   return(reactive( {
     
@@ -65,11 +65,11 @@ serverPCA <- function(input, readcounts.selected) {
     scale <- input$pca.pca.settings.scale
     
     validate(
-      need(readcounts.selected(), "No data to apply PCA to!"),
+      need(readcounts.top.variant(), "No data to apply PCA to!"),
       need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
     )
     
-    applyPCA(readcounts.selected(), center = center, scale = scale) 
+    applyPCA(readcounts.top.variant(), center = center, scale = scale) 
     
   }))
   
