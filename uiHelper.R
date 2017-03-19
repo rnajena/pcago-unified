@@ -69,3 +69,4 @@ faIconText <- function(faicon, text, lib = "font-awesome") {
 hDivider <- function() {
   return(tags$div(class = "hdivider"))
 }
+

@@ -27,6 +27,8 @@ source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
 source("widgetColorShapeInput.R")
 source("widgetGeneralPlotSettings.R")
+source("widgetExtendedSliderInput.R")
+source("serverUINavigation.R")
 
 shinyServer(function(input, output, session) {
   
@@ -69,7 +71,12 @@ shinyServer(function(input, output, session) {
     })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
-  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), input$pca.pca.genes.count) })
+  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
+                                             value.min = reactive({ 1 }),
+                                             value.max = reactive({ nrow(readcounts.filtered()) }),
+                                             value.default = reactive({ nrow(readcounts.filtered()) }),
+                                             value.default.min = reactive( { min(2, nrow(readcounts.filtered())) }))
+  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.top.variant)
@@ -86,156 +93,40 @@ shinyServer(function(input, output, session) {
   # Update input elements
   #
   
-  #' Start page button. User can click it to go to the "Analyze" section
-  observeEvent(input$about.goto.analyze, {
-    updateNavbarPage(session, "main.nav", "analyze")
-  })
+  # For navigation (links)
+  serverNavigation(input, session)
   
-  # Navigation quick links
-  # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
-  observeEvent(input$pca.nav, {
-    if(input$pca.nav == "pca.cells.plot.quicklink") {
-      updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
-    }
-  })
+  # All server side of UI handling top variant gene count
+  #pca.gene.count <- serverPCATopVariantGeneCount(input, session, readcounts.filtered)
   
-  #' 
-  #' Fetch gene count parameters
-  #' Usually using input$ would be sufficient,
-  #' but numericInput is broken
-  #' TODO: More elegant solution
-  #' 
   
-  pca.genes.count.from <- reactive({
-    
-    # Additional checks as the numeric input is broken (accepts values outside of range)
-    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
-    
-    genes_max <- nrow(readcounts.filtered())
-    genes_min <- min(1, genes_max)
-    genes_from <- input$pca.pca.genes.count.from
-    genes_to <- input$pca.pca.genes.count.to
-    
-    validate(need(genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
-    
-    genes_from <- max(genes_min, genes_from)
-    
-    return(genes_from)
-  })
   
-  pca.genes.count.to <- reactive({
+  observeEvent(readcounts.top.variant(), {
     
-    # Additional checks as the numeric input is broken (accepts values outside of range)
-    # This bug is from 2015 (sic!) https://github.com/rstudio/shiny/issues/927
+    validate(need(readcounts.top.variant(), "Cannot update input wihout read counts!"))
     
-    genes_max <- nrow(readcounts.filtered())
-    genes_from <- input$pca.pca.genes.count.from
-    genes_to <- input$pca.pca.genes.count.to
+    # components <- colnames(pca()$pc) # Get PC1, PC2, PC3, ...
+    # selection <- input$pca.cells.plot.axes
+    # 
+    # # Preserve the current selection if it's possible. Otherwise select the two first principal components
+    # if(is.null(selection) || !all(selection %in% components)) {
+    #   selection <- components[1:min(2, length(components))]
+    # }
+    # Note does work, but is annoying AF in initialization step as it's IMPOSSIBLE to only send events WHEN I NEED!
     
-    validate(need( genes_max == 0 || genes_from < genes_to, "Invalid range given!"))
-    
-    genes_to <- min(genes_max, genes_to)
-    
-    return(genes_to)
-    
-  })
-  
-  pca.genes.count.by <- reactive({
-    return(max(0, input$pca.pca.genes.count.by))
-  })
-  
-  #' Handles the animation of the gene counts
-  #' This works by invalidating itself automatically if the play button is toggled
-  #' 
-  #' Info: There's a native animation feature in the slider. But it does not allow
-  #' changing the animation parameters without renderUI; which is slow and fragile due to missing inputs
-  observe({
-    
-    if(input$pca.pca.genes.count.animation.play) {
-      # Separate the actual animation from the environment
-      isolate({
-        
-        from <- pca.genes.count.from()
-        to <- pca.genes.count.to()
-        by <- input$pca.pca.genes.count.by
-        current <- input$pca.pca.genes.count
-        
-        validate(need(from < to, "Wrong animation parameters!"))
-        
-        if(current == to) {
-          current <- from
-        }
-        else if(current < to) {
-          current <- min(to, current + by)
-        }
-        else {
-          current <- from
-        }
-        
-        updateSliderInput(session, "pca.pca.genes.count", value = current)
-        
-      })
-      
-      invalidateLater(isolate({input$pca.pca.genes.count.animation.speed}))
-    }
-  })
-  
-  observeEvent(pca(), {
-    
-    validate(need(pca(), "Cannot update input wihout PCA result!"))
-    
-    components <- colnames(pca()$pc) # Get PC1, PC2, PC3, ...
+    # New method: We know how many PCx we will get. So allow them. Remove them at plot step
+    components <- sapply(1:ncol(readcounts.top.variant()), function(x) { paste0("PC", x) })
     selection <- input$pca.cells.plot.axes
     
-    # Preserve the current selection if it's possible. Otherwise select the two first principal components
-    if(is.null(selection) || !all(selection %in% components)) {
-      selection <- components[1:min(2, length(components))]
+    if(length(selection) == 0) {
+      selection <- intersect(c("PC1", "PC2"), components)
     }
     
     updateSelectizeInput(session, "pca.cells.plot.axes", choices = components, selected = selection)
     
   })
-  
-  observeEvent(pca.genes.count.from(), {
-    updateSliderInput(session, "pca.pca.genes.count", min = pca.genes.count.from())
-  })
-  
-  observeEvent(input$pca.genes.count.to, {
-    updateSliderInput(session, "pca.pca.genes.count", max = pca.genes.count.to())
-  })
-  
-  observeEvent(readcounts.filtered(), {
-    genes_max <- nrow(readcounts.filtered())
-    updateSliderInput(session, "pca.pca.genes.count", min = 1, max = genes_max, value = genes_max)
-    updateNumericInput(session, "pca.pca.genes.count.from", min = min(1, genes_max), max = genes_max, value = min(2, genes_max))
-    updateNumericInput(session, "pca.pca.genes.count.to", min = min(1, genes_max), max = genes_max, value = genes_max)
-  })
 
-  #
-  # Input events
-  #
-  
-  # User clicks fine-grained controls in gene count panel
-  observeEvent(input$pca.pca.genes.count.lstepdecrease, {
-    current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current - input$pca.pca.genes.count.by)
-  })
-  
-  observeEvent(input$pca.pca.genes.count.lstepincrease, {
-    current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current + input$pca.pca.genes.count.by)
-  })
-  
-  observeEvent(input$pca.pca.genes.count.stepdecrease, {
-    current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current - 1)
-  })
-  
-  observeEvent(input$pca.pca.genes.count.stepincrease, {
-    current <- input$pca.pca.genes.count
-    updateSliderInput(session, "pca.pca.genes.count", value = current + 1)
-  })
-
+ 
   #
   # Render plots & tables
   #
@@ -258,12 +149,8 @@ shinyServer(function(input, output, session) {
     
     }))
   
-  # Texts
-  
   output$pca.pca.genes.set.count <- renderText({
-    
     validate(need(readcounts.filtered(), "0 genes selected"))
-    
     return(paste(nrow(readcounts.filtered()), "genes selected"))
   })
   
@@ -289,8 +176,10 @@ shinyServer(function(input, output, session) {
    
     validate(need(gene.variances(), "No gene variances to display!"))
     
+    genes.count <- pca.gene.count()$value
+    
     p <- ggplot(gene.variances(), aes(x=1:nrow(gene.variances()), y=log(var))) + geom_point() 
-    p <- p + geom_vline(xintercept = input$pca.pca.genes.count, color = "red")
+    p <- p + geom_vline(xintercept = genes.count, color = "red")
     p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
     
     return(p)
@@ -309,6 +198,7 @@ shinyServer(function(input, output, session) {
   
   pca.cellplot.settings <- generalPlotSettings("pca.cells.plot.generalsettings")
   
+  # Handler for cell plot rendering
   downloadablePlot("pca.cellplot", exprplot = function( width, height, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
@@ -334,6 +224,7 @@ shinyServer(function(input, output, session) {
                 subtitle = plot.subtitle)
   })
   
+  # Handler for movie export of cell plot
   output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
     
     validate(
@@ -367,9 +258,9 @@ shinyServer(function(input, output, session) {
       plot.width,
       plot.height,
       plot.dpi,
-      genes.count.from = pca.genes.count.from(),
-      genes.count.to = pca.genes.count.to(),
-      genes.count.by = input$pca.pca.genes.count.by,
+      genes.count.from = pca.genes.count()$from,
+      genes.count.to = pca.genes.count()$to,
+      genes.count.by = pca.genes.count()$by,
       time.per.frame = input$pca.pca.genes.count.animation.speed,
       axes = input$pca.cells.plot.axes,
       visuals.conditions = visuals.conditions(),

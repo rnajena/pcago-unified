@@ -56,7 +56,11 @@ filterSelectionInput <- function(id, header = "") {
 filterSelectionValues_ <- function(input, output, session, values) {
   
   observeEvent(values(), {
-    updateSelectInput(session, "values", choices = c("All (*)" = "*", names(values())), selected = c("*"))
+    
+    choices <- names(values())
+    names(choices) <- sapply(choices, function(x) { paste0(x, " (", length(values()[[x]]), ")") })
+    
+    updateSelectInput(session, "values", choices = c("All (*)" = "*", choices), selected = c("*"))
   })
   
   selected.values <- reactive({

@@ -96,8 +96,12 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
   }
   
   # Determine how many dimensions should be drawn
-  dimensions.available <- ncol(pca.transformed)
-  dimensions.requested <- axes
+  dimensions.available <- colnames(pca.transformed)
+  dimensions.requested <- intersect(axes, dimensions.available)
+  dimensions.plot <- min(length(dimensions.requested), length(dimensions.available)) 
+  
+  validate(need(dimensions.plot > 0, "No axes to draw!"),
+           need(dimensions.plot <= 3, "Too many axes to draw!"))
   
   # Add visual properties to the variables
   pca.transformed$color <- visuals.cell$factors$color
@@ -105,8 +109,6 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
   
   palette.colors <- visuals.cell$palette.colors
   palette.shapes <- visuals.cell$palette.shapes
-  
-  dimensions.plot <- min(length(dimensions.requested), dimensions.available) 
   
   # Plot based on dimensions
   if(dimensions.plot == 1) {
