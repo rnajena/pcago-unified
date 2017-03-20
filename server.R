@@ -51,17 +51,20 @@ shinyServer(function(input, output, session) {
   
   gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set",  reactive({
     
-    gene.criteria <- list()
+    gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
+    unused.genes <- rownames(readcounts.processed())
     
     if(!is.null(gene.info.annotation())) {
       criteria <- gene.info.annotation()$features
-      names(criteria) <- sapply(names(criteria), function(x) { paste("Feature:", x) })
       
-      gene.criteria <- append(gene.criteria, criteria)
+      gene.criteria[["Associated features"]] <- criteria #TODO get rid of genes only in annotation
+      covered.genes <- unlist(criteria)
+      unused.genes <- setdiff(unused.genes, covered.genes)
     }
     
-    if(length(gene.criteria) == 0) {
-      gene.criteria <- list("Unknown" = rownames(readcounts.processed()))
+    # Now look for genes that haven't been covered and create a list
+    if(length(unused.genes) > 0) {
+      gene.criteria[["Misc"]] <- list("Without criteria" = unused.genes)
     }
     
     return(gene.criteria)

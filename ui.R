@@ -14,15 +14,6 @@ source("uiAboutPage.R")
 source("uiPCAPage.R")
 source("uiHelpPage.R")
 
-#' Script that enables all popovers (needed for help texts)
-#' Attach to bottom of body.
-script.enable.popovers <- I("$(document).ready(function(){
-    $('[data-toggle=\"popover\"]').popover({
-      container: 'body',
-      html: true
-    });   
-});")
-
 shinyUI(tags$div(useShinyjs(),
                   list(tags$head(HTML('<link rel="icon", href="icon.png",
                                    type="image/png" />'))),
@@ -37,5 +28,5 @@ shinyUI(tags$div(useShinyjs(),
                    tabPanel("Help", value = "help", uiHelpPage()),
                    id = "main.nav",
                    theme = "style.css"),
-                 tags$script(script.enable.popovers)))
+                 tags$script(I(includeText("scripts/globalBody.js")))))
 

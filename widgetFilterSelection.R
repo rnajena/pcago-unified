@@ -25,7 +25,8 @@ filterSelectionInput <- function(id, header = "") {
                                                                    choices = c("All (*)" = "*"),
                                                                    selected = c("*"),
                                                                    options = list(
-                                                                     render = I(includeText("scripts/filterSelectionInputSelectizeRender.js"))
+                                                                     render = I(includeText("scripts/filterSelectionInputSelectizeRender.js")),
+                                                                     plugins = list("remove_button")
                                                                    ))),
                   tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
                                                                      label = "", 
@@ -57,24 +58,32 @@ filterSelectionValues_ <- function(input, output, session, values) {
   
   observeEvent(values(), {
     
-    choices <- names(values())
-    names(choices) <- sapply(choices, function(x) { paste0(x, " (", length(values()[[x]]), ")") })
+    choices <- list()
     
-    updateSelectInput(session, "values", choices = c("All (*)" = "*", choices), selected = c("*"))
+    # We generate the values as CATEGORY.NAME (which matches the output of unlist(,recursive = F)) )
+    for(category in names(values())) {
+      category.values <- sapply(names(values()[[category]]), function(x) { paste0(category, ".", x) })
+      names(category.values) <- sapply(names(values()[[category]]), function(x) { paste0(x, " (", length(values()[[category]][[x]]), ")") })
+      choices[[category]] <- category.values
+    }
+    
+    choices[["Misc"]] <- append(choices[["Misc"]], list("All (*)" = "*"))
+    updateSelectInput(session, "values", choices = choices, selected = c("*"))
   })
   
   selected.values <- reactive({
     
     selected.keys <- input$values
+    available.values <- unlist(values(), recursive = F)
     
     # Do this to prevent breaking the axis selectize inputs
     if(length(selected.keys) == 0) {
-      selected.keys <- names(values())
+      selected.keys <- names(available.values)
     }
     
     # Handle "Select All" case
     if("*" %in% selected.keys) {
-      selected.keys <- names(values())
+      selected.keys <- names(available.values)
     }
     
     #' Depending on the user's selection apply union (OR) or intersect (AND) to 
@@ -84,14 +93,14 @@ filterSelectionValues_ <- function(input, output, session, values) {
     selected.strings <- c()
     
     if(input$operation == "AND") {
-      selected.strings <- Reduce(intersect, values()[selected.keys])
+      selected.strings <- Reduce(intersect, available.values[selected.keys])
     }
     else if(input$operation == "OR") {
-      selected.strings <- Reduce(union, values()[selected.keys])
+      selected.strings <- Reduce(union, available.values[selected.keys])
     }
     
     if(input$invert.selection) {
-      all.strings <- Reduce(union, values())
+      all.strings <- Reduce(union, available.values)
       selected.strings <- setdiff(all.strings, selected.strings)
     }
     
