@@ -26,7 +26,7 @@ filterSelectionInput <- function(id, header = "") {
                                                                    selected = c("*"),
                                                                    options = list(
                                                                      render = I(includeText("scripts/filterSelectionInputSelectizeRender.js")),
-                                                                     plugins = list("remove_button")
+                                                                     plugins = list("remove_button", "drag_drop")
                                                                    ))),
                   tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
                                                                      label = "", 
