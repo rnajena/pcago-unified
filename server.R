@@ -48,15 +48,24 @@ shinyServer(function(input, output, session) {
     return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
   })
   
-  # Extract the mapping from FEATURE -> List of genes. If it's not available, make a default list
-  gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set.features",  reactive({
+  
+  gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set",  reactive({
+    
+    gene.criteria <- list()
     
     if(!is.null(gene.info.annotation())) {
-      return(gene.info.annotation()$features)
+      criteria <- gene.info.annotation()$features
+      names(criteria) <- sapply(names(criteria), function(x) { paste("Feature:", x) })
+      
+      gene.criteria <- append(gene.criteria, criteria)
     }
-    else {
-      return(list("Unknown" = rownames(readcounts.processed())))
+    
+    if(length(gene.criteria) == 0) {
+      gene.criteria <- list("Unknown" = rownames(readcounts.processed()))
     }
+    
+    return(gene.criteria)
+    
   }))
   
   # The filtered read counts just intersects the list of genes returned by each filter
@@ -74,8 +83,7 @@ shinyServer(function(input, output, session) {
   pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
                                              value.min = reactive({ 1 }),
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default.min = reactive( { min(2, nrow(readcounts.filtered())) }))
+                                             value.default = reactive({ nrow(readcounts.filtered()) }))
   readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) })
   
   # pca is applied to the selected genes and setup some values to be used by outputs

@@ -19,19 +19,19 @@ filterSelectionInput <- function(id, header = "") {
   ns  <- NS(id)
   
   return(tags$div(class = "filter-selection-input",
-                  tags$label(header),
-                  fixedRow(
-                    column(8, tags$div(class = "filter-values", selectizeInput(ns("values"), 
-                                                                               label = "", 
-                                                                               multiple = T,
-                                                                               choices = c("All (*)" = "*"),
-                                                                               selected = c("*")))),
-                    column(4, tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
-                                                                                 label = "", 
-                                                                                 choices = c("AND", "OR"),
-                                                                                 selected = "OR")))
-                  ),
-    checkboxInput(ns("invert.selection"), "Invert selection")
+                  tags$div(class = "filter-values", selectizeInput(ns("values"), 
+                                                                   label = header, 
+                                                                   multiple = T,
+                                                                   choices = c("All (*)" = "*"),
+                                                                   selected = c("*"),
+                                                                   options = list(
+                                                                     render = I(includeText("scripts/filterSelectionInputSelectizeRender.js"))
+                                                                   ))),
+                  tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
+                                                                     label = "", 
+                                                                     choices = c("AND", "OR"),
+                                                                     selected = "OR")),
+                  checkboxInput(ns("invert.selection"), "Invert selection")
   ))
   
 }

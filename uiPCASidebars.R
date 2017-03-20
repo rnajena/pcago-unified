@@ -13,6 +13,7 @@ source("widgetGeneralPlotSettings.R")
 source("widgetCellConditionImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
+source("widgetInPlaceHelp.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -71,7 +72,7 @@ uiPCASidebarPCA <- function() {
   
   return(bsCollapse(
     bsCollapsePanel("Filter genes",
-                    wellPanel(filterSelectionInput("pca.pca.genes.set.features", "by feature types")),
+                    filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
                     hDivider(),
                     textOutput("pca.pca.genes.set.count")),
     bsCollapsePanel("Gene count",

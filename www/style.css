@@ -192,9 +192,9 @@
 * Style for selection filter widget
 */
 
-/*.filter-selection-input .filter-operation {
-	min-width: 100px;
-}*/
+.filter-selection-input .filter-values .selectize-input {
+	height: 200px;
+}
 
 /*
 * Style for nested collapse panels
