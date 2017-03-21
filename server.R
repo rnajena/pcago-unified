@@ -38,14 +38,8 @@ shinyServer(function(input, output, session) {
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
-  # Gene annotation
-  # gene.info.annotation <- genericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
-  #   return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
-  # },
-  # exprsample = function(sample) {
-  #   return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
-  # })
-  
+  # Fetch gene info annotation with an integrating generic importer.
+  # This allows the user to provide multiple data source with only one UI and feedback what was found
   gene.info.annotation <- integratingGenericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
       return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
     },

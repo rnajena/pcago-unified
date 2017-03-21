@@ -53,13 +53,6 @@ uiPCASidebarData <- function() {
                                                     supportedAnnotationFileTypes,
                                                     supportedAnnotationImporters,
                                                     availableAnnotationSamples)
-                    # bsCollapse(
-                    #   # bsCollapsePanel("Associated features", genericImporterInput("pca.data.annotation.importer",
-                    #   #                                                             supportedAnnotationFileTypes,
-                    #   #                                                             supportedAnnotationImporters,
-                    #   #                                                             availableAnnotationSamples)),
-                    #   bsCollapsePanel("Test", )
-                    # )
                     
     ),
     bsCollapsePanel("Conditions",
