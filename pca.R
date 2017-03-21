@@ -4,24 +4,28 @@
 
 #' Applies PCA to input data
 #'
-#' @param inputdata 
+#' @param readcounts Read counts
 #'
 #' @return List of transformed values (transformed), variances (var), principal components (pc)
 #' @export
 #'
 #' @examples
-applyPCA <- function(inputdata, center, scale) {
+applyPCA <- function(readcounts, center, scale) {
   
-  if(is.null(inputdata) || ncol(inputdata) == 0 || nrow(inputdata) == 0) {
+  # Soft and hard parameter checking
+  if(is.null(readcounts) || ncol(readcounts) == 0 || nrow(readcounts) == 0) {
     return(NULL)
+  }
+  if(!is.logical(center) || !is.logical(scale)) {
+    stop("Invalid arguments!")
   }
   
   # Extract the data 
-  X <- inputdata
+  X <- readcounts
   X <- t(X) # We want to do PCA for our cells
   
   # Extract the cells for later use
-  cells <- colnames(inputdata)
+  cells <- colnames(readcounts)
   
   # PCA works by diagonalizing the covariance matrix by transforming
   # the data with a transform matrix consisting of the eigenvectors (as rows)
@@ -47,30 +51,3 @@ applyPCA <- function(inputdata, center, scale) {
               "pc" = result$rotation))
 }
 
-#' Server function for PCA
-#'
-#' @param input 
-#' @param readcounts.top.variant
-#'
-#' @return
-#' @export
-#'
-#' @examples
-serverPCA <- function(input, readcounts.top.variant) {
-  
-  return(reactive( {
-    
-    no.constant <- "remove.constant" %in% input$pca.data.readcounts.processing
-    center <-input$pca.pca.settings.center
-    scale <- input$pca.pca.settings.scale
-    
-    validate(
-      need(readcounts.top.variant(), "No data to apply PCA to!"),
-      need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
-    )
-    
-    applyPCA(readcounts.top.variant(), center = center, scale = scale) 
-    
-  }))
-  
-}

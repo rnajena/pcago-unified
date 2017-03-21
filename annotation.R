@@ -28,6 +28,10 @@ availableAnnotationSamples <- c("Vitamins" = "vitamins.gff3")
 #' @examples
 importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts) {
   
+  if(missing(filehandle) || !is.data.frame(readcounts)) {
+    stop("Invalid arguments!")
+  }
+  
   # Load the data inside the GFF file
   gr <- suppressWarnings(import.gff(filehandle)) # Supppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
   gff <- mcols(gr)
@@ -76,6 +80,10 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
 #' @examples
 importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts) {
   
+  if(missing(filehandle) || !is.character(datatype) || !is.data.frame(readcounts)) {
+    stop("Invalid arguments!")
+  }
+  
   if(datatype == "gff_ensembl") {
     return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts))
   }
@@ -86,6 +94,10 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
 }
 
 importSampleGeneInformationFromAnnotation <- function(sample, readcounts) {
+  
+  if(!is.character(sample) || !is.data.frame(readcounts)) {
+    stop("Invalid arguments!")
+  }
   
   if(sample == "vitamins.gff3") {
     

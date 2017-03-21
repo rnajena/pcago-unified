@@ -51,6 +51,10 @@ colorShapeInput.shapes <- c(
 #' @examples
 colorShapeEditorInput <- function(id) {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(tagList(tags$div(class="color-shape-editor",

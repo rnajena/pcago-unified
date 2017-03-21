@@ -1,6 +1,8 @@
 #'
-#' Contains methods that will import the read count table
+#' Contains methods that are related to read counts
 #' 
+
+library(shiny)
 
 #' A list of all read count data types that will be supported
 #' The user selects one of those types, which will then invoke the corresponding importer
@@ -10,6 +12,10 @@ supportedReadcountFileTypes <- c("text/csv", "text/comma-separated-values,text/p
 
 availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv",
                                "Vitamins" = "vitamins.csv")
+
+#' Supported read count normalization types
+supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "TPM" = "tpm")
+
 
 #' Imports readcount from filehandle with importer definded by datatype
 #'
@@ -21,6 +27,10 @@ availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv",
 #'
 #' @examples
 importReadcount <- function(filehandle, datatype) {
+  
+  if(missing(filehandle) || !is.character(datatype)) {
+    stop("Invalid arguments!")
+  }
   
   sep = ","
   
@@ -50,6 +60,10 @@ importReadcount <- function(filehandle, datatype) {
 #' @examples
 importReadcountSample <- function(sample) {
   
+  if(!is.character(sample)) {
+    stop("Invalid arguments!")
+  }
+  
   if(sample == "vitamins.small.csv") {
     
     con <- file("sampledata/vitamins.small.csv", "r")
@@ -69,5 +83,62 @@ importReadcountSample <- function(sample) {
   else {
     return(NULL)
   }
+  
+}
+
+#' Applies normalization to a read count table. The normalization algorithm is determined by normalizationtype
+#'
+#' @param rawdata Read count table
+#' @param normalizationtype One of supportedReadcountNormalizationTypes
+#'
+#' @return Normalized read count table
+#' @export
+#'
+#' @examples
+applyReadcountNormalization <- function(rawdata, normalizationtype) {
+  
+  validate(need(rawdata, "No data to normalize!"))
+  
+  return(rawdata) # todo
+}
+
+#' Removes constant read count genes from the table.
+#' As they result in variance = 0, scaling in the PCA step won't work
+#'
+#' @param readcounts 
+#'
+#' @return list of readcounts without constant entries (readcounts) and list of removed genes (genes.removed)
+#' @export
+#'
+#' @examples
+removeConstantReads <- function(readcounts) {
+  
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
+  invalid <- (do.call(pmin, readcounts) == do.call(pmax, readcounts))
+  readcounts.removed <- readcounts[which(!invalid),]
+  genes.removed <- rownames(readcounts)[invalid]
+  
+  return(list(readcounts = readcounts.removed, genes.removed = genes.removed))
+  
+}
+
+#' Transposes the read count table
+#'
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+transposeReadCounts <- function(readcounts) {
+  
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
+  return(data.frame(t(readcounts)))
   
 }

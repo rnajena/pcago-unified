@@ -17,6 +17,10 @@ source("uiHelper.R")
 #' @examples
 downloadableDataTableOutput <- function(id, ...) {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(headerPanel(header = tags$span(class="headerbar-row",

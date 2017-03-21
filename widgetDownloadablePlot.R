@@ -17,6 +17,10 @@ source("uiHelper.R")
 #' @examples
 downloadablePlotOutput <- function(id, ...) {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(tags$div(class = "downloadable-plot",

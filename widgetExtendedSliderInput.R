@@ -18,6 +18,10 @@ source("widgetNumericRangeInput.R")
 #' @examples
 extendedSliderInput <- function(id, header = "") {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(tagList(sliderInput(ns("count"), header, min = 0, max = 0, value = 0, step = 1, round = T),

@@ -16,6 +16,10 @@ library(shiny)
 #' @examples
 numericRangeInput <- function(id, label.from, label.to) {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(tagList(

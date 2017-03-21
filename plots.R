@@ -1,48 +1,5 @@
-
 library(shiny)
 library(shinyBS)
-
-#' Summary of read count processing.
-#' Use as expression inside renderUI
-#'
-#' @return
-#' @export
-#'
-#' @examples
-serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.processing.output) {
-  
-  validate(need(readcounts.processed(), "No processed read counts available."))
-  
-  panels <- list()
-  
-  # Transpose processing
-  if("transpose" %in% input$pca.data.readcounts.processing) {
-    panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Transpose table", "Read counts have been transposed.")
-  }
-  
-  # Remove constant reads processing
-  if("remove.constant" %in% input$pca.data.readcounts.processing) {
-    
-    content <- "No genes have been removed."
-    removed.genes <- readcounts.processing.output()$removed.genes
-    
-    if(length(removed.genes) != 0) {
-      
-      genes <- paste0(removed.genes, collapse = ", ")
-      content <- paste(length(removed.genes) ,"genes have been removed:", genes)
-    }
-    
-    panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Remove genes with constant read counts", content)
-  }
-  
-  if(length(panels) == 0) {
-    return(tags$div)
-  }
-  else {
-    return(do.call(bsCollapse, panels))
-  }
-  
-}
 
 #' Saves a plot of gene variances to a file with given format
 #'
@@ -58,6 +15,13 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
 #'
 #' @examples
 saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, filename){
+  
+  # Soft and hard parameter checking
+  validate(need(gene.variances, "No gene variances available!"))
+  
+  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) || !is.character(format) || !is.character(filename)) {
+    stop("Invalid arguments!")
+  }
   
   p <- ggplot(gene.variances, aes(x=1:nrow(gene.variances), y=log(var))) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
@@ -85,7 +49,16 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
                         width, height, dpi, format, filename,
                         title = "Cell PCA", subtitle = NULL ){
   
-  validate(need(axes, "No axes to draw!"))
+  # Soft and hard parameter checking
+  validate(
+    need(pca, "No PCA results available!"),
+    need(axes, "No axes to draw!"),
+    need(visuals.conditions, "No condition visual parameters available!"),
+    need(visuals.cell, "No cell visual parameters available!"))
+  
+  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) || !is.character(format) || !is.character(filename)) {
+    stop("Invalid arguments!")
+  }
   
   # Fetch needed variables from PCA and visual parameters
   pca.transformed <- pca$transformed

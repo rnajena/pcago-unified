@@ -16,6 +16,10 @@ source("conditions.R")
 #' @examples
 cellConditionImporterUI <- function(id) {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns <- NS(id)
   
   return(tagList(

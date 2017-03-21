@@ -12,6 +12,7 @@
 ## Code
 
 * Improve performance
+* Insert parameter checking (missing, is.xyz) in all functions
 
 ## Bugs
 

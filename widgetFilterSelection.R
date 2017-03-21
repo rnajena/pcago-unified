@@ -16,6 +16,10 @@ library(shiny)
 #' @examples
 filterSelectionInput <- function(id, header = "") {
   
+  if(!is.character(id)) {
+    stop("Invalid arguments!")
+  }
+  
   ns  <- NS(id)
   
   return(tags$div(class = "filter-selection-input",

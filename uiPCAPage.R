@@ -3,9 +3,8 @@
 #' 
 
 library(shiny)
-source("readCountImporter.R")
+source("readcounts.R")
 source("annotation.R")
-source("readCountNormalizer.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
 source("widgetGenericImporter.R")

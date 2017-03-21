@@ -13,6 +13,11 @@ library(shiny)
 #'
 #' @examples
 isColor <- function(x) {
+  
+  if(is.character(x)) {
+    stop("Invalid arguments!")
+  }
+  
   sapply(x, function(X) {
     tryCatch(is.matrix(col2rgb(X)), 
              error = function(e) FALSE)
