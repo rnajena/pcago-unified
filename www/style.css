@@ -241,3 +241,13 @@
 .sbs-panel-group .sbs-panel-group > .panel > .panel-heading > .panel-title {
 	font-size: 14px;
 }
+
+/*
+* Style for integrating generic importer
+*/
+.integrating-generic-importer .status .data-sets {
+	font-weight: bold;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	color: #337ab7;
+}

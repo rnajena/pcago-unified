@@ -46,6 +46,23 @@ shinyServer(function(input, output, session) {
     return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
   })
   
+  gene.info.annotation.test <- integratingGenericImporterData("pca.data.annotation.importer.test", exprimport = function(con, importer) {
+    return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
+  },
+  exprsample = function(sample) {
+    return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
+  },
+  exprintegrate = function(data, callback) {
+    output <- list()
+    
+    callback(c("Gene lengths", "Associated features", "GO terms"), c())
+    
+    return(output)
+  })
+  
+  observe({
+    gene.info.annotation.test()
+  })
   
   gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set",  reactive({
     

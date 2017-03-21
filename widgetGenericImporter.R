@@ -20,7 +20,10 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-genericImporterInput <- function(id, filetypes, importers, samples = c(), reset.button = T) {
+genericImporterInput <- function(id, filetypes, importers, samples = c(), 
+                                 submit.button.text = "Submit", reset.button.text = "Reset",
+                                 reset.button = T, 
+                                 additional.buttons = tagList(), additional.content = tagList()) {
   
   ns <- NS(id)
   
@@ -34,9 +37,11 @@ genericImporterInput <- function(id, filetypes, importers, samples = c(), reset.
                      selectInput(ns("importer"), "Importer", importers)),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
                      selectInput(ns("sample"), "Sample data", samples)),
+    additional.content,
     fluidPage(fluidRow(
-       actionButton(ns("submit"), "Submit"),
-       if(reset.button) actionButton(ns("reset"), "Reset") else tags$div())                                   
+       actionButton(ns("submit"), submit.button.text),
+       if(reset.button) actionButton(ns("reset"), reset.button.text) else tagList(),
+       additional.buttons)
     )))
     
   return(tags)

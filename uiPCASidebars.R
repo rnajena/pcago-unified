@@ -14,6 +14,7 @@ source("widgetCellConditionImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
+source("widgetIntegratingGenericImporter.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -53,7 +54,10 @@ uiPCASidebarData <- function() {
                                                                                   supportedAnnotationFileTypes,
                                                                                   supportedAnnotationImporters,
                                                                                   availableAnnotationSamples)),
-                      bsCollapsePanel("GO terms")
+                      bsCollapsePanel("Test", integratingGenericImporterInput("pca.data.annotation.importer.test",
+                                                                   supportedAnnotationFileTypes,
+                                                                   supportedAnnotationImporters,
+                                                                   availableAnnotationSamples))
                     )
                     
     ),
