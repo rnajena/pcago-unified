@@ -45,6 +45,8 @@ uiPCAPage <- function() {
                                     tabPanel("Gene variances", value = "pca.genes.variances",
                                              downloadablePlotOutput("genes.variance.plot"),
                                              downloadableDataTableOutput("annotation.var")),
+                                    tabPanel("Gene variances (filtered)", value = "pca.genes.variances.filtered",
+                                             downloadablePlotOutput("genes.variance.filtered.plot")),
                                     "----",
                                     "Conditions",
                                     tabPanel("Cell condition assignments", value = "pca.conditions",

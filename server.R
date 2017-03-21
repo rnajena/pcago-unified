@@ -82,6 +82,8 @@ shinyServer(function(input, output, session) {
     return(keep.readcounts)
     })
   
+  gene.variances.filtered <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
+  
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
                                              value.min = reactive({ 1 }),
@@ -182,14 +184,18 @@ shinyServer(function(input, output, session) {
     { 
     saveGeneVariancePlot(gene.variances(), width, height, 96, format, filename) 
     })
+  downloadablePlot("genes.variance.filtered.plot", exprplot = function(width, height, format, filename) 
+  { 
+    saveGeneVariancePlot(gene.variances.filtered(), width, height, 96, format, filename) 
+  })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
    
-    validate(need(gene.variances(), "No gene variances to display!"))
+    validate(need(gene.variances.filtered(), "No gene variances to display!"))
     
     genes.count <- pca.gene.count()$value
     
-    p <- ggplot(gene.variances(), aes(x=1:nrow(gene.variances()), y=log(var))) + geom_point() 
+    p <- ggplot(gene.variances.filtered(), aes(x=1:nrow(gene.variances.filtered()), y=log(var))) + geom_point() 
     p <- p + geom_vline(xintercept = genes.count, color = "red")
     p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
     
@@ -239,8 +245,7 @@ shinyServer(function(input, output, session) {
   output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
     
     validate(
-      need(readcounts.top.variant(), "No processed read counts!"),
-      need(input$pca.pca.genes.count.from < input$pca.pca.genes.count.to, "Gene count settings wrong!")
+      need(readcounts.filtered(), "No filtered read counts!")
     )
     
     progress <- shiny::Progress$new()
@@ -269,10 +274,10 @@ shinyServer(function(input, output, session) {
       plot.width,
       plot.height,
       plot.dpi,
-      genes.count.from = pca.genes.count()$from,
-      genes.count.to = pca.genes.count()$to,
-      genes.count.by = pca.genes.count()$by,
-      time.per.frame = input$pca.pca.genes.count.animation.speed,
+      genes.count.from = pca.gene.count()$from,
+      genes.count.to = pca.gene.count()$to,
+      genes.count.by = pca.gene.count()$by,
+      time.per.frame = pca.gene.count()$delay,
       axes = input$pca.cells.plot.axes,
       visuals.conditions = visuals.conditions(),
       visuals.cell = visuals.cell(),

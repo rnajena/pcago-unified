@@ -54,12 +54,9 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
     
     ids <- unlist(gff[gff$type == feature_type,"Parent"])
     gene_ids <- gff[match(ids, gff$ID),"gene_id"]
+    gene_ids <- intersect(gene_ids, rownames(readcounts)) # Reduce to genes that are actually present in read counts
    
     if(length(gene_ids) > 0) {
-      
-      # Reduce to genes that are actually present in read counts
-      gene_ids <- intersect(gene_ids, rownames(readcounts))
-      
       features[[feature_type]] <- gene_ids 
     }
   }
