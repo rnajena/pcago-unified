@@ -14,12 +14,13 @@ source("uiHelper.R")
 #' @param filetypes Accepted filetypes of fileInput sub-control
 #' @param importers Vector of importer names that will be passed to the import function
 #' @param samples Vector of sample data
+#' @param reset.button Show reset button
 #'
 #' @return Shiny UI controls
 #' @export
 #'
 #' @examples
-genericImporterInput <- function(id, filetypes, importers, samples = c()) {
+genericImporterInput <- function(id, filetypes, importers, samples = c(), reset.button = T) {
   
   ns <- NS(id)
   
@@ -34,8 +35,8 @@ genericImporterInput <- function(id, filetypes, importers, samples = c()) {
     conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
                      selectInput(ns("sample"), "Sample data", samples)),
     fluidPage(fluidRow(
-      actionButton(ns("submit"), "Submit"),
-      actionButton(ns("reset"), "Reset"))                                   
+       actionButton(ns("submit"), "Submit"),
+       if(reset.button) actionButton(ns("reset"), "Reset") else tags$div())                                   
     )))
     
   return(tags)

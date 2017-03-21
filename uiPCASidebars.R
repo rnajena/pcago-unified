@@ -48,10 +48,14 @@ uiPCASidebarData <- function() {
     ),
     bsCollapsePanel("Annotation",
                     value = "annotation",
-                    genericImporterInput("pca.data.annotation.importer",
-                                         supportedAnnotationFileTypes,
-                                         supportedAnnotationImporters,
-                                         availableAnnotationSamples)
+                    bsCollapse(
+                      bsCollapsePanel("Associated features", genericImporterInput("pca.data.annotation.importer",
+                                                                                  supportedAnnotationFileTypes,
+                                                                                  supportedAnnotationImporters,
+                                                                                  availableAnnotationSamples)),
+                      bsCollapsePanel("GO terms")
+                    )
+                    
     ),
     bsCollapsePanel("Conditions",
                     value = "conditions",
@@ -105,7 +109,7 @@ uiPCASidebarPlot <- function() {
                                                       "Visible axes (x, y, z)",
                                                       choices = c(),
                                                       multiple = T,
-                                                      options = list(maxItems = 3))),
+                                                      options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
                        bsCollapsePanel("Visualization",
                                        colorShapeEditorInput("pca.cells.plot.visuals")
                        ),
