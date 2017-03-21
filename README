@@ -12,7 +12,10 @@ shinyBS >= 0.61
 shinyjs >= 0.9
 ggplot2 >= 2.2.1
 matrixStats >= 0.51.0
+scatterplot3d >= <todo>
+<todo: Bioconductor packages>
 
 2. Credits
 
 Uses code from https://github.com/daattali/advanced-shiny by Dean Attali. Licensed under the MIT license.
+Uses icons from Breeze Icons https://github.com/KDE/breeze-icons by Uri Herrera <uri_herrera@nitrux.in> and others. Licensed under LGPL version 3. See ICONS_LICENSE for more info.

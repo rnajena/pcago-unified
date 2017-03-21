@@ -1,5 +1,14 @@
 library(shiny)
 
+#' Creates a help entry for the help page. Returns a tabPanel for navigation with content loaded from markdown
+#'
+#' @param title Title of the help page
+#' @param markdown Filename of the markdown file
+#'
+#' @return Shiny UI element
+#' @export
+#'
+#' @examples
 uiHelpPageEntry <- function(title, markdown) {
   
   return(tabPanel(title, tags$div(class = "help-page", includeMarkdown(markdown))))

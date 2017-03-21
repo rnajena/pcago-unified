@@ -8,12 +8,10 @@
 * Plot title/subtitle
 * PC variances in plot
 * Gene information
-* Correct number of entries in feature selection
 
 ## Code
 
 * Improve performance
-* Add error handling to read count
 
 ## Bugs
 

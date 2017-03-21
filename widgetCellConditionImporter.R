@@ -6,6 +6,14 @@ library(shiny)
 source("widgetGenericImporter.R")
 source("conditions.R")
 
+#' Creates a widget that allows the user to select a method of extracting cell conditions
+#'
+#' @param id 
+#'
+#' @return Shiny UI element
+#' @export
+#'
+#' @examples
 cellConditionImporterUI <- function(id) {
   
   ns <- NS(id)
@@ -29,6 +37,18 @@ cellConditionImporterUI <- function(id) {
   
 }
 
+#' Extracts the cell conditions based on the user input.
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
+#'
+#' @param input 
+#' @param output 
+#' @param session 
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 cellConditionImporterValue_ <- function(input, output, session, readcounts) {
   
   cell.conditions.imported <- genericImporterData("importer", exprimport = function(con, importer) {
@@ -63,6 +83,15 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
   
 }
 
+#' Extracts the cell conditions based on the user input.
+#'
+#' @param id 
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 cellConditionImporterValue <- function(id, readcounts) {
   
   return(callModule(cellConditionImporterValue_, id, readcounts = readcounts))
