@@ -68,11 +68,20 @@ integratingGenericImporterData_ <- function(input, output, session, exprimport, 
       tags$label(class = "control-label", "Imported data")
     )
     
-    for(choice in variables$status.choices) {
-      tag.icon <- if(choice %in% variables$status.selected) icon("check-square-o") else icon("square-o")
-      tag <- tagAppendChild(tag, tags$div(tags$span(tag.icon), tags$span(choice)))
-    }
+    choices <- variables$status.choices
+    choices.names <- if(is.null(names(choices))) choices else names(choices)
     
+    # Have to use numeric for as I cannot preserve that damn name /:
+    if(length(choices) > 0) {
+      for(i in 1:length(choices)) {
+        
+        choice <- choices[i]
+        choice.name <- choices.names[i]
+        
+        tag.icon <- if(choice %in% variables$status.selected) icon("check-square-o") else icon("square-o")
+        tag <- tagAppendChild(tag, tags$div(tags$span(tag.icon), tags$span(choice.name)))
+      }
+    }
     tag <- tagAppendChild(tag, tags$div(class = "data-sets",paste(length(variables$data), "data sets loaded.")))
     
     return(tag)

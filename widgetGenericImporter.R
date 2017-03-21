@@ -78,7 +78,11 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
                      duration = NULL,
                      closeButton = F,
                      id = "genericimporter.importing")
-    on.exit({ removeNotification(id = "genericimporter.importing") })
+    shinyjs::disable("submit")
+    on.exit({ 
+      shinyjs::enable("submit")
+      removeNotification(id = "genericimporter.importing") 
+      })
     
     if(input$source == "upload") {
       inFile <- input$fileinput
