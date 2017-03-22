@@ -46,14 +46,28 @@ shinyServer(function(input, output, session) {
     },
     exprintegrate = function(data, callback) {
       output <- list()
+      genes <- rownames(readcounts())
       
-      choices = c("Sequence info" = "sequence.info", "Associated features" = "features", "GO terms" = "go")
+      choices = c("sequence.info",
+                  "features", 
+                  "go")
       selected = c()
       
       for(current.data in data) {
         output <- append(output, current.data) # merge lists
         selected <- c(selected, names(current.data))
       }
+      
+      sequence.info.genes <- if(!is.null(output$sequence.info)) intersect(rownames(output$sequence.info), genes) else c()
+      feature.genes <- if(!is.null(output$features)) intersect(unlist(output$features), genes) else c()
+      go.genes <- c()
+      
+      names(choices) <- c(
+        if(length(sequence.info.genes) == 0) "Sequence info" else paste0("Sequence info (", length(sequence.info.genes), "/", length(genes), ")"),
+        if(length(feature.genes) == 0) "Associated features" else paste0("Associated features (", length(feature.genes), "/", length(genes), ")"),
+        if(length(go.genes) == 0) "GO terms" else paste0("GO terms (", length(go.genes), "/", length(genes), ")")
+      )
+      
       
       callback(choices, selected)
       return(output)

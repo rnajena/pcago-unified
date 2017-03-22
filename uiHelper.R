@@ -70,3 +70,24 @@ hDivider <- function() {
   return(tags$div(class = "hdivider"))
 }
 
+#' Joins a vector to a string with a limit
+#' Use this for UI
+#'
+#' @param x 
+#' @param sep 
+#' @param limit 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+strJoinLimited <- function(x, sep = ", ", limit = NULL) {
+  
+  if(is.null(limit) || length(x) <= limit) {
+    return(paste(x, collapse = sep))
+  }
+  else {
+    return(paste0(paste(x[1:limit], collapse = sep), sep, "... (", length(x), ")"))
+  }
+  
+}

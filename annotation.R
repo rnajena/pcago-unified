@@ -51,7 +51,7 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
     showNotification(type = "warning", 
                      duration = NULL,
                      paste("Could not find sequence information for all genes. Following genes are affected:", 
-                                             paste(na.genes, collapse = ", ")))
+                           strJoinLimited(na.genes, limit = 10)))
     
   }
   
