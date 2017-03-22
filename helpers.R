@@ -23,3 +23,33 @@ isColor <- function(x) {
              error = function(e) FALSE)
   })
 }
+
+#' Custom implementation of withProgress
+#' 
+#' callback function: updateProgress(detail = NULL, value = NULL)
+#' Updates the progress with description of current task (detail) and the progress (value; numeric in 0 ... 1) 
+#'
+#' @param expr Function that takes 1 parameter (callback function)
+#' @param message 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+withProgressCustom <- function(expr, message) {
+  
+  progress <- shiny::Progress$new()
+  on.exit({
+    progress$close()
+  })
+  
+  progress$set(message = message, value = 0)
+  
+  # Status callback function
+  updateProgress <- function(detail = NULL, value = NULL) {
+    progress$set(value = value, detail = detail)
+  }
+  
+  return(expr(updateProgress))
+  
+}

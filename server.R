@@ -27,6 +27,7 @@ source("widgetColorShapeInput.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
 source("serverFunctions.R")
+source("helpers.R")
 
 shinyServer(function(input, output, session) {
   
@@ -146,15 +147,6 @@ shinyServer(function(input, output, session) {
     
     validate(need(readcounts.top.variant(), "Cannot update input wihout read counts!"))
     
-    # components <- colnames(pca()$pc) # Get PC1, PC2, PC3, ...
-    # selection <- input$pca.cells.plot.axes
-    # 
-    # # Preserve the current selection if it's possible. Otherwise select the two first principal components
-    # if(is.null(selection) || !all(selection %in% components)) {
-    #   selection <- components[1:min(2, length(components))]
-    # }
-    # Note does work, but is annoying AF in initialization step as it's IMPOSSIBLE to only send events WHEN I NEED!
-    
     # New method: We know how many PCx we will get. So allow them. Remove them at plot step
     components <- sapply(1:ncol(readcounts.top.variant()), function(x) { paste0("PC", x) })
     selection <- input$pca.cells.plot.axes
@@ -211,6 +203,8 @@ shinyServer(function(input, output, session) {
     }
     if("features" %in% names(gene.info.annotation())) {
       features <- gene.info.annotation()$features
+      
+      # Note: This is expensive as the features are structured in inverse way to increase filter performance
       table[["Features"]] <- sapply(genes, function(gene) { 
         
         features <- Filter(function(feature) { gene %in% features[[feature]] }, names(features))
@@ -309,45 +303,41 @@ shinyServer(function(input, output, session) {
       need(readcounts.filtered(), "No filtered read counts!")
     )
     
-    progress <- shiny::Progress$new()
-    
-    # When this function exits, close the progress and re-enable the button
+    # Disable the export button, so the user doesn't spam it
     on.exit({
       shinyjs::enable("pca.cellplot.export.mp4")
-      progress$close()
     })
-    
-    progress$set(message = "Creating movie ...", value = 0)
     shinyjs::disable("pca.cellplot.export.mp4")
-    
-    # Status callback function
-    updateProgress <- function(detail = NULL, value = NULL) {
-      progress$set(value = value, detail = detail)
-    }
-    
+  
     plot.settings <- pca.cellplot.settings()
     plot.width <- if(plot.settings$width < 50) { 640 } else { plot.settings$width }
     plot.height <- if(plot.settings$height < 50) { 480 } else { plot.settings$height }
     plot.dpi <- plot.settings$dpi
     
-    savePCACellPlotMovie(
-      filename = file,
-      plot.width,
-      plot.height,
-      plot.dpi,
-      genes.count.from = pca.gene.count()$from,
-      genes.count.to = pca.gene.count()$to,
-      genes.count.by = pca.gene.count()$by,
-      time.per.frame = pca.gene.count()$delay,
-      axes = input$pca.cells.plot.axes,
-      visuals.conditions = visuals.conditions(),
-      visuals.cell = visuals.cell(),
-      readcounts.filtered = readcounts.filtered(),
-      gene.variances = gene.variances(),
-      pca.center = input$pca.pca.settings.center,
-      pca.scale = input$pca.pca.settings.scale,
-      updateProgress = updateProgress
-    )
+    withProgressCustom(function(updateProgress) {
+      
+      savePCACellPlotMovie(
+        filename = file,
+        plot.width,
+        plot.height,
+        plot.dpi,
+        genes.count.from = pca.gene.count()$from,
+        genes.count.to = pca.gene.count()$to,
+        genes.count.by = pca.gene.count()$by,
+        time.per.frame = pca.gene.count()$delay,
+        axes = input$pca.cells.plot.axes,
+        visuals.conditions = visuals.conditions(),
+        visuals.cell = visuals.cell(),
+        readcounts.filtered = readcounts.filtered(),
+        gene.variances = gene.variances(),
+        pca.center = input$pca.pca.settings.center,
+        pca.scale = input$pca.pca.settings.scale,
+        updateProgress = updateProgress
+      )
+      
+    }, message = "Creating movie")
+    
+    
     
   })
 
