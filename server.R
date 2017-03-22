@@ -85,7 +85,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(gene.info.annotation())) {
       criteria <- gene.info.annotation()$features
       
-      gene.criteria[["Associated features"]] <- criteria #TODO get rid of genes only in annotation
+      gene.criteria[["Associated features"]] <- criteria 
       covered.genes <- unlist(criteria)
       unused.genes <- setdiff(unused.genes, covered.genes)
     }
@@ -178,7 +178,7 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered)
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
-  downloadableDataTable("annotation.var", export.filename = "variance", data = reactive({
+  downloadableDataTable("genes.variance", export.filename = "variance", data = reactive({
     validate(need(gene.variances(), "No annotation available!"))
     
     table <- data.frame(row.names = rownames(gene.variances()), 
@@ -189,6 +189,39 @@ shinyServer(function(input, output, session) {
     return(table)
     
     }))
+  downloadableDataTable("genes.annotation", export.filename = "annotation", data = reactive({
+    validate(need(gene.info.annotation(), "No annotation available!"))
+    
+    genes <- rownames(readcounts())
+    table <- data.frame(row.names = genes,
+                        "Sequence" = rep(NA, length(genes)),
+                        "Start" = rep(NA, length(genes)),
+                        "End" = rep(NA, length(genes)),
+                        "Length" = rep(NA, length(genes)),
+                        "Features" = rep(NA, length(genes)))
+    
+    if("sequence.info" %in% names(gene.info.annotation())) {
+      sequence.info <- gene.info.annotation()$sequence.info
+      indices <- match(genes, rownames(sequence.info))
+      
+      table$Sequence <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "sequence"] })
+      table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start"] })
+      table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end"] })
+      table$Length <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "length"] })
+    }
+    if("features" %in% names(gene.info.annotation())) {
+      features <- gene.info.annotation()$features
+      table[["Features"]] <- sapply(genes, function(gene) { 
+        
+        features <- Filter(function(feature) { gene %in% features[[feature]] }, names(features))
+        return(paste(features, collapse = "; "))
+        
+        })
+    }
+    
+    return(table)
+    
+  }))
   
   output$pca.pca.genes.set.count <- renderText({
     validate(need(readcounts.filtered(), "0 genes selected"))

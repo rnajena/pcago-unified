@@ -55,7 +55,6 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
     
   }
   
-  #gene.meta <- gff[meta.indices,]
   sequence.info <- data.frame(row.names = genes,
                               sequence = as.vector(seqnames(gr)[meta.indices]),
                               start = start(gr)[meta.indices],
