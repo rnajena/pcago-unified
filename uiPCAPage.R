@@ -29,6 +29,7 @@ uiPCAPage <- function() {
     )),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
+                         selected = "pca.cells.plot",
                          navbarMenu("Data",
                                     "Read counts",
                                     tabPanel("Raw read counts", value = "pca.readcounts.raw", downloadableDataTableOutput("readcounts")),

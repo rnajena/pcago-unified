@@ -8,6 +8,7 @@
 * Plot title/subtitle
 * PC variances in plot
 * Gene information
+* Annotation: Show gene count in collected data
 
 ## Code
 
@@ -22,6 +23,7 @@
 
 * Use notifications for importer messages
 * ggplot2 has slow performance (3x slower than scatterplot3d)
+* All annotation results won't necessary contain all genes and in order!
 
 ## R Quirks
 

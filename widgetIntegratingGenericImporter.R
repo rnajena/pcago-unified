@@ -71,7 +71,7 @@ integratingGenericImporterData_ <- function(input, output, session, exprimport, 
   
   # Clear all data if user clicks clear button
   observeEvent(input$clear, {
-    stored.data$data <- list()
+    variables$data <- list()
   })
   
   # Output the callback from the integration

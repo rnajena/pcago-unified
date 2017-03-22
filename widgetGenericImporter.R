@@ -20,10 +20,15 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-genericImporterInput <- function(id, filetypes, importers, samples = c(), 
-                                 submit.button.text = "Submit", reset.button.text = "Reset",
+genericImporterInput <- function(id, 
+                                 filetypes, 
+                                 importers, 
+                                 samples = c(), 
+                                 submit.button.text = "Submit", 
+                                 reset.button.text = "Reset",
                                  reset.button = T, 
-                                 additional.buttons = tagList(), additional.content = tagList()) {
+                                 additional.buttons = tagList(),
+                                 additional.content = tagList()) {
   
   ns <- NS(id)
   
@@ -92,12 +97,12 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
         con <- file(inFile$datapath, "r")
         data <- tryCatch({exprimport(con, importer)}, 
                          error = function(e){
-                           showNotification(paste("Error:", e), type = "error", duration = NULL)
+                           showNotification(paste(e), type = "error", duration = NULL)
                            return(NULL)
                            }, 
                          warning = function(w)
                            {
-                           showNotification(paste("Warning:", w), type = "warning", duration = NULL)
+                           showNotification(paste(w), type = "warning", duration = NULL)
                            return(NULL)
                            })
         close(con)
@@ -123,12 +128,12 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
       con <- textConnection(input$input)
       data <- tryCatch({exprimport(con, importer)}, 
                        error = function(e){
-                         showNotification(paste("Error:", e), type = "error", duration = NULL)
+                         showNotification(paste(e), type = "error", duration = NULL)
                          return(NULL)
                        }, 
                        warning = function(w)
                        {
-                         showNotification(paste("Warning:", w), type = "warning", duration = NULL)
+                         showNotification(paste(w), type = "warning", duration = NULL)
                          return(NULL)
                        })
       close(con)
@@ -148,12 +153,12 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
       
       data <- tryCatch({exprsample(sample)}, 
                        error = function(e){
-                         showNotification(paste("Error:", e), type = "error", duration = NULL)
+                         showNotification(paste(e), type = "error", duration = NULL)
                          return(NULL)
                        }, 
                        warning = function(w)
                        {
-                         showNotification(paste("Warning:", w), type = "warning", duration = NULL)
+                         showNotification(paste(w), type = "warning", duration = NULL)
                          return(NULL)
                        })
       

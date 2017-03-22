@@ -33,7 +33,7 @@ filterSelectionInput <- function(id, header = "") {
                                                                      plugins = list("remove_button", "drag_drop")
                                                                    ))),
                   tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
-                                                                     label = "", 
+                                                                     label = "Filter settings", 
                                                                      choices = c("AND", "OR"),
                                                                      selected = "OR")),
                   checkboxInput(ns("invert.selection"), "Invert selection")

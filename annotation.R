@@ -37,15 +37,26 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   gff <- mcols(gr)
   
   # Build table containing the sequence, start, stop & length
-  # Will fail if not every gene is explained
-  meta.indices <- match(rownames(readcounts), gff$gene_id)
+  
+  genes <- rownames(readcounts)
+  meta.indices <- match(genes, gff$gene_id) # F: Index of gene in readcounts -> Index of gene in gff annotation
   
   if(any(is.na(meta.indices))) {
-    stop("Annotation does not contain all genes!")
+    
+    # Remove genes that are NA. They will not appear in the annotation
+    na.genes <- genes[is.na(meta.indices)]
+    genes <- genes[!is.na(meta.indices)]
+    meta.indices <- na.omit(meta.indices)
+    
+    showNotification(type = "warning", 
+                     duration = NULL,
+                     paste("Could not find sequence information for all genes. Following genes are affected:", 
+                                             paste(na.genes, collapse = ", ")))
+    
   }
   
-  gene.meta <- gff[meta.indices,]
-  sequence.info <- data.frame(row.names = rownames(readcounts),
+  #gene.meta <- gff[meta.indices,]
+  sequence.info <- data.frame(row.names = genes,
                               sequence = as.vector(seqnames(gr)[meta.indices]),
                               start = start(gr)[meta.indices],
                               end = end(gr)[meta.indices],

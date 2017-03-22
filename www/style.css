@@ -192,21 +192,25 @@
 * Style for Shiny output error
 */
 .shiny-output-error {
-	top: 0!important;
+	/*top: 0!important;
 	left: 0!important;
 	position: relative!important;
 	height: auto!important;
-	display: inline-block!important;
+	display: inline-block!important;*/
 	border: 1px solid #ddd;
 	border-radius: 3px;
-	padding: 5px 5px 5px 50px;
+	padding: 5px 5px 5px 5px;
 	margin: 5px;
 	font-size: 16px;
+	font-weight: bolder;
 	color: #31363b;
-	background-image: url("emblem-warning.svg");
-	background-repeat: no-repeat;
-	background-size: auto 80%;
-	background-position: left center;
+	background: repeating-linear-gradient(
+  45deg,
+  #ecf0f1,
+  #ecf0f1 10px,
+  #d4dbdf 10px,
+  #d4dbdf 20px
+	);
 }
 
 /*

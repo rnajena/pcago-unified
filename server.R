@@ -32,8 +32,6 @@ shinyServer(function(input, output, session) {
   
   # Read counts
   readcounts <- genericImporterData("pca.data.readcounts.importer", exprimport = importReadcount, exprsample = importReadcountSample)
-  readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
-  readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
@@ -41,10 +39,10 @@ shinyServer(function(input, output, session) {
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
   gene.info.annotation <- integratingGenericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
-      return(importGeneInformationFromAnnotation(con, importer, readcounts.processed()))
+      return(importGeneInformationFromAnnotation(con, importer, readcounts()))
     },
     exprsample = function(sample) {
-      return(importSampleGeneInformationFromAnnotation(sample, readcounts.processed()))
+      return(importSampleGeneInformationFromAnnotation(sample, readcounts()))
     },
     exprintegrate = function(data, callback) {
       output <- list()
@@ -60,6 +58,10 @@ shinyServer(function(input, output, session) {
       callback(choices, selected)
       return(output)
     })
+  
+  # Readcount processing
+  readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
+  readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   gene.info.annotation.features <- filterSelectionValues("pca.pca.genes.set",  reactive({
     
