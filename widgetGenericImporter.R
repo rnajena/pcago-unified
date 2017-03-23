@@ -24,6 +24,7 @@ genericImporterInput <- function(id,
                                  filetypes, 
                                  importers, 
                                  samples = c(), 
+                                 generators = c(),
                                  submit.button.text = "Submit", 
                                  reset.button.text = "Reset",
                                  reset.button = T, 
@@ -32,10 +33,17 @@ genericImporterInput <- function(id,
   
   ns <- NS(id)
   
+  sources <- c("uploaded file" = "upload", 
+               "manual input" = "manual")
+  if(length(samples) > 0) {
+    sources <- c(sources, "sample data" = "sample")
+  }
+  if(length(generators) > 0) {
+    sources <- c(sources, "generate" = "generate")
+  }
+  
   tags <- tagList(verticalLayout(
-    radioButtons(ns("source"), "Load from ...", c("uploaded file" = "upload", 
-                                                  "manual input" = "manual", 
-                                                  "sample data" = "sample"), selected = "upload"),
+    radioButtons(ns("source"), "Load from ...", sources, selected = "upload"),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
                      textAreaInput(ns("input"), "Manual input")),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'upload'"), 
@@ -44,6 +52,8 @@ genericImporterInput <- function(id,
                      selectInput(ns("importer"), "Importer", importers)),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
                      selectInput(ns("sample"), "Sample data", samples)),
+    conditionalPanel(conditionalPanel.equals(ns("source"), "'generate'"), 
+                     selectInput(ns("generator"), "Use generator", generators)),
     additional.content,
     fluidPage(fluidRow(
        actionButton(ns("submit"), submit.button.text),
@@ -63,12 +73,13 @@ genericImporterInput <- function(id,
 #' @param session 
 #' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer)
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample)
+#' @param exprgenerator install The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator)
 #'
 #' @return Data imported by the importer
 #' @export
 #'
 #' @examples
-genericImporterData_ <- function(input, output, session, exprimport, exprsample) {
+genericImporterData_ <- function(input, output, session, exprimport, exprsample, exprgenerator) {
   
   variables <- reactiveValues(data = NULL)
   
@@ -174,6 +185,31 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
       variables$data <- data
       
     }
+    else if(input$source == "generator") {
+      
+      generator <- input$generator
+      
+      data <- tryCatch({exprgenerator(generator)}, 
+                       error = function(e){
+                         showNotification(paste(e), type = "error", duration = NULL)
+                         return(NULL)
+                       }, 
+                       warning = function(w)
+                       {
+                         showNotification(paste(w), type = "warning", duration = NULL)
+                         return(NULL)
+                       })
+      
+      if(!is.null(data)) {
+        showNotification(paste("Loaded sample", sample), type = "message")
+      } 
+      else {
+        showNotification("Error while importing sample!", type = "error")
+      }
+      
+      variables$data <- data
+      
+    }
 
   })
 
@@ -185,13 +221,14 @@ genericImporterData_ <- function(input, output, session, exprimport, exprsample)
 #' @param id UI element ID
 #' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer)
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample)
+#' @param exprgenerator install The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator)
 #'
 #' @return Data imported by the importer
 #' @export
 #'
 #' @examples
-genericImporterData <- function(id, exprimport, exprsample) {
+genericImporterData <- function(id, exprimport, exprsample, exprgenerator) {
   
-  return(callModule(genericImporterData_, id, exprimport = exprimport, exprsample = exprsample))
+  return(callModule(genericImporterData_, id, exprimport = exprimport, exprsample = exprsample, exprgenerator = exprgenerator))
   
 }

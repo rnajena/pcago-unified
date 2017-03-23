@@ -282,16 +282,20 @@ shinyServer(function(input, output, session) {
     plot.dpi <- plot.settings$dpi
     plot.title <- if(plot.settings$title == "") { "Cell PCA" } else { plot.settings$title }
     plot.subtitle <- if(plot.settings$title == "") { paste(nrow(pca()$pc), "genes") } else { plot.settings$subtitle }
+    plot.customlabel.shape <- input$pca.cells.plot.visuals.label.shape
+    plot.customlabel.color <- input$pca.cells.plot.visuals.label.color
     
-    savePCACellPlot(pca(),
-                visuals.conditions(),
-                visuals.cell(),
-                input$pca.cells.plot.axes,
-                plot.width,
-                plot.height,
-                plot.dpi,
-                format,
-                filename,
+    savePCACellPlot(pca = pca(),
+                visuals.conditions = visuals.conditions(),
+                visuals.cell = visuals.cell(),
+                axes = input$pca.cells.plot.axes,
+                customlabel.color = plot.customlabel.color,
+                customlabel.shape = plot.customlabel.shape,
+                width = plot.width,
+                height = plot.height,
+                dpi = plot.dpi,
+                format = format,
+                filename = filename,
                 title = plot.title,
                 subtitle = plot.subtitle)
   })
@@ -313,6 +317,8 @@ shinyServer(function(input, output, session) {
     plot.width <- if(plot.settings$width < 50) { 640 } else { plot.settings$width }
     plot.height <- if(plot.settings$height < 50) { 480 } else { plot.settings$height }
     plot.dpi <- plot.settings$dpi
+    plot.customlabel.shape <- input$pca.cells.plot.visuals.label.shape
+    plot.customlabel.color <- input$pca.cells.plot.visuals.label.color
     
     withProgressCustom(function(updateProgress) {
       
@@ -326,6 +332,8 @@ shinyServer(function(input, output, session) {
         genes.count.by = pca.gene.count()$by,
         time.per.frame = pca.gene.count()$delay,
         axes = input$pca.cells.plot.axes,
+        customlabel.color = plot.customlabel.color,
+        customlabel.shape = plot.customlabel.shape,
         visuals.conditions = visuals.conditions(),
         visuals.cell = visuals.cell(),
         readcounts.filtered = readcounts.filtered(),

@@ -109,7 +109,10 @@ uiPCASidebarPlot <- function() {
                                                       multiple = T,
                                                       options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
                        bsCollapsePanel("Visualization",
-                                       colorShapeEditorInput("pca.cells.plot.visuals")
+                                       colorShapeEditorInput("pca.cells.plot.visuals"),
+                                       hDivider(),
+                                       textInput("pca.cells.plot.visuals.label.color", "Custom color description"),
+                                       textInput("pca.cells.plot.visuals.label.shape", "Custom shape description")
                        ),
                        bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cells.plot.generalsettings"))
                      )),

@@ -34,6 +34,8 @@ saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, fil
 #' @param pca.transformed Transformed cells
 #' @param visuals.conditions Visual parameters for each condition
 #' @param visuals.cell Visual parameters for each cell
+#' @param customlabel.color Custom label for color
+#' @param customlabel.shape Custom label for shape
 #' @param axes The axes to be plotted (PC1, PC2, ...). Up to 3 axes can be plotted.
 #' @param width 
 #' @param height 
@@ -45,9 +47,19 @@ saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, fil
 #' @export
 #'
 #' @examples
-savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes, 
-                        width, height, dpi, format, filename,
-                        title = "Cell PCA", subtitle = NULL ){
+savePCACellPlot <- function(pca, 
+                            visuals.conditions, 
+                            visuals.cell, 
+                            customlabel.color,
+                            customlabel.shape,
+                            axes, 
+                            width, 
+                            height, 
+                            dpi, 
+                            format,
+                            filename,
+                            title = "Cell PCA", 
+                            subtitle = NULL ){
   
   # Soft and hard parameter checking
   validate(
@@ -83,6 +95,9 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
   palette.colors <- visuals.cell$palette.colors
   palette.shapes <- visuals.cell$palette.shapes
   
+  label.color <- if(customlabel.color == "") "Color" else customlabel.color
+  label.shape <- if(customlabel.shape == "") "Shape" else customlabel.shape
+  
   # Plot based on dimensions
   if(dimensions.plot == 1) {
     
@@ -90,7 +105,8 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
     
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
       geom_histogram(aes(fill = color), bins = 100)
-    p <- p + scale_fill_manual(values = palette.colors,
+    p <- p + scale_fill_manual(name = label.color,
+                                values = palette.colors,
                                 breaks = levels(pca.transformed$color),
                                 labels = conditionName(visuals.conditions, levels(pca.transformed$color)))
     p <- p + labs(title = title, 
@@ -116,10 +132,12 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
       geom_point(aes(colour = color, shape = shape))
     
     #' Add legends to the plot and map the correct colors to the factor levels
-    p <- p + scale_color_manual(values = palette.colors,
+    p <- p + scale_color_manual(name = label.color,
+                                values = palette.colors,
                                 breaks = levels(pca.transformed$color),
                                 labels = conditionName(visuals.conditions, levels(pca.transformed$color)))
-    p <- p + scale_shape_manual(values = palette.shapes,
+    p <- p + scale_shape_manual(name = label.shape,
+                                values = palette.shapes,
                                 breaks = levels(pca.transformed$shape),
                                 labels = conditionName(visuals.conditions, levels(pca.transformed$shape)))
     p <- p + labs(title = title, 
@@ -176,7 +194,7 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
            pch = 16,
            bty = "n",
            xpd = T,
-           title = "Color",
+           title = label.color,
            title.adj = 0) # wtf?
     legend("bottomleft",
            legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
@@ -184,7 +202,7 @@ savePCACellPlot <- function(pca, visuals.conditions, visuals.cell, axes,
            pch = palette.shapes,
            bty = "n",
            xpd = T,
-           title = "Shape",
+           title = label.shape,
            title.adj = 0)
     
     dev.off()

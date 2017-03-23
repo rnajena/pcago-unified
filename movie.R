@@ -14,6 +14,8 @@ library(shiny)
 #' @param genes.count.to To which top variant gene count the animation should play
 #' @param genes.count.by Step size to increase gene count
 #' @param axes Vector of displayed axes (PC1, PC2, ...). 
+#' @param customlabel.color Custom label for color
+#' @param customlabel.shape Custom label for shape
 #' @param visuals.conditions Visual definitions for each condition
 #' @param visuals.cell Visual definitions for each cell
 #' @param readcounts.filtered Filtered read counts. Contains read counts with specific set of genes
@@ -35,6 +37,8 @@ savePCACellPlotMovie <- function(filename,
                              genes.count.by, 
                              time.per.frame,
                              axes, 
+                             customlabel.color,
+                             customlabel.shape,
                              visuals.conditions,
                              visuals.cell,
                              readcounts.filtered,
@@ -46,6 +50,7 @@ savePCACellPlotMovie <- function(filename,
   if(!is.character(filename) || !is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) ||
      !is.numeric(genes.count.from) || !is.numeric(genes.count.to) || !is.numeric(genes.count.by) ||
      !is.numeric(time.per.frame) || !is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
+     !is.character(customlabel.color) || !is.character(customlabel.shape) ||
      !is.data.frame(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
     stop("Invalid arguments!")
   }
@@ -67,6 +72,8 @@ savePCACellPlotMovie <- function(filename,
                 visuals.conditions,
                 visuals.cell,
                 axes,
+                customlabel.color,
+                customlabel.shape,
                 width,
                 height,
                 dpi,

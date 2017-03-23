@@ -30,7 +30,7 @@ isColor <- function(x) {
 #' Updates the progress with description of current task (detail) and the progress (value; numeric in 0 ... 1) 
 #'
 #' @param expr Function that takes 1 parameter (callback function)
-#' @param message 
+#' @param message Message of the progress bar
 #'
 #' @return
 #' @export
