@@ -5,15 +5,13 @@
 * Annotations, GO terms, ...
 * Normalization
 * Plot output settings (width, height, dpi)
-* Plot title/subtitle
 * PC variances in plot
 * Gene information
-* Annotation: Show gene count in collected data
+* GO terms
 
 ## Code
 
 * Improve performance
-* Insert parameter checking (missing, is.xyz) in all functions
 
 ## Bugs
 

@@ -76,6 +76,8 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
   
+  
+  
   # Handle errors
   if(!setequal(conditions, rownames(data))) {
     stop("Imported visual definition has different set of conditions!")

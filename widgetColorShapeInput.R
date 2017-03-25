@@ -142,8 +142,6 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
     
   })
   
-  #observeEvent(input$conditions, update.inputs)
-  
   # Change color/shape based on input
   observeEvent(input$color, {
     

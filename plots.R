@@ -34,8 +34,8 @@ saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, fil
 #' @param pca.transformed Transformed cells
 #' @param visuals.conditions Visual parameters for each condition
 #' @param visuals.cell Visual parameters for each cell
-#' @param customlabel.color Custom label for color
-#' @param customlabel.shape Custom label for shape
+#' @param customlabel.color Custom label for color legend
+#' @param customlabel.shape Custom label for shape legend
 #' @param axes The axes to be plotted (PC1, PC2, ...). Up to 3 axes can be plotted.
 #' @param width 
 #' @param height 
@@ -185,6 +185,7 @@ savePCACellPlot <- function(pca,
       sub = subtitle
     )
     
+    # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?
     par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
     plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
     

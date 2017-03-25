@@ -10,9 +10,7 @@ library(shiny)
 #' @param width Plot width in pixels
 #' @param height Plot height in pixels
 #' @param dpi Plot DPI
-#' @param genes.count.from From which top variant gene count the animation should start
-#' @param genes.count.to To which top variant gene count the animation should play
-#' @param genes.count.by Step size to increase gene count
+#' @param animation.params Animation parameters
 #' @param axes Vector of displayed axes (PC1, PC2, ...). 
 #' @param customlabel.color Custom label for color
 #' @param customlabel.shape Custom label for shape
@@ -32,10 +30,7 @@ savePCACellPlotMovie <- function(filename,
                              width,
                              height,
                              dpi,
-                             genes.count.from, 
-                             genes.count.to, 
-                             genes.count.by, 
-                             time.per.frame,
+                             animation.params,
                              axes, 
                              customlabel.color,
                              customlabel.shape,
@@ -56,12 +51,12 @@ savePCACellPlotMovie <- function(filename,
   }
   
   basefile <- tempfile()
-  genecounts <- unique(c(seq(genes.count.from, genes.count.to, genes.count.by), genes.count.to))
+  genecounts <- unique(c(seq(animation.params$from, animation.params$to, animation.params$by), animation.params$to))
   
   for(i in 1:length(genecounts)) {
     
     if(is.function(updateProgress)) {
-      updateProgress(value = i / length(genecounts), detail = "Rendering plots")  
+      updateProgress(value = i / length(genecounts), detail = "Generating plots")  
     }
     
     readcounts.top.variant <- selectTopVariantGeneReadcounts(readcounts.filtered, gene.variances, genecounts[i])
@@ -88,7 +83,7 @@ savePCACellPlotMovie <- function(filename,
     updateProgress(detail = "Rendering video file")
   }
   
-  spf <- time.per.frame / 1000 # Seconds per frames
+  spf <- animation.params$delay / 1000 # Seconds per frames
   fps <- 1 / spf
   
   

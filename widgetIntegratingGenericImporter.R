@@ -23,12 +23,16 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-integratingGenericImporterInput <- function(id, filetypes, importers, samples = c()) {
+integratingGenericImporterInput <- function(id, filetypes, importers, samples = c(), generators = c()) {
   
   ns <- NS(id)
   
   return(tags$div(class = "integrating-generic-importer",
-    genericImporterInput(ns("importer"), filetypes, importers, samples, 
+    genericImporterInput(ns("importer"), 
+                         filetypes = filetypes, 
+                         importers = mporters, 
+                         samples = samples, 
+                         generators = generators,
                          reset.button = F,
                          additional.buttons = tagList(
                            actionButton(ns("clear"), "Reset")
@@ -50,13 +54,14 @@ integratingGenericImporterInput <- function(id, filetypes, importers, samples = 
 #' @param session 
 #' @param exprimport 
 #' @param exprsample 
+#' @param exprgenerator
 #' @param exprintegrate Generates output data based on the data. 
 #'
 #' @return Integrated data (produced by exprintegrate)
 #' @export
 #'
 #' @examples
-integratingGenericImporterData_ <- function(input, output, session, exprimport, exprsample, exprintegrate) {
+integratingGenericImporterData_ <- function(input, output, session, exprimport, exprsample, exprgenerator, exprintegrate) {
   
   variables <- reactiveValues(data = list(), status.choices = c(), status.selected = c())
   importer.data <- genericImporterData("importer", exprimport, exprsample)
@@ -136,17 +141,19 @@ integratingGenericImporterData_ <- function(input, output, session, exprimport, 
 #' @param id 
 #' @param exprimport 
 #' @param exprsample 
+#' @param exprgenerator
 #' @param exprintegrate 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-integratingGenericImporterData <- function(id, exprimport, exprsample, exprintegrate) {
+integratingGenericImporterData <- function(id, exprimport, exprsample, exprgenerator, exprintegrate) {
   return(callModule(integratingGenericImporterData_, 
                     id, 
                     exprimport = exprimport,
                     exprsample = exprsample,
+                    exprgenerator = exprgenerator,
                     exprintegrate = exprintegrate
                     ))
 }

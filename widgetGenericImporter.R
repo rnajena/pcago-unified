@@ -79,7 +79,7 @@ genericImporterInput <- function(id,
 #' @export
 #'
 #' @examples
-genericImporterData_ <- function(input, output, session, exprimport, exprsample, exprgenerator) {
+genericImporterData_ <- function(input, output, session, exprimport, exprsample, exprgenerator, exprgenerator) {
   
   variables <- reactiveValues(data = NULL)
   
