@@ -11,7 +11,7 @@ source("uiHelper.R")
 source("conditions.R")
 source("widgetGenericImporter.R")
 
-colorShapeInput.shapes <- c(
+visualsEditor.shapes <- c(
   "No shape" = -1,
   "● Filled circle" = 16,
   "■ Filled square" = 15,
@@ -49,7 +49,7 @@ colorShapeInput.shapes <- c(
 #' @export
 #'
 #' @examples
-colorShapeEditorInput <- function(id) {
+visualsEditorUI <- function(id) {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -75,10 +75,7 @@ colorShapeEditorInput <- function(id) {
                                                           choices = c("None"))),
                                            textInput(ns("name"), "Custom name"),
                                            colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
-                                           selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1),
-                                           hDivider(),
-                                           textInput("label.color", "Custom color legend"),
-                                           textInput("shape", "Custom shape legend"))
+                                           selectizeInput(ns("shape"), "Shape", choices = visualsEditor.shapes, selected = -1))
                           
                           ))))
   
@@ -87,13 +84,13 @@ colorShapeEditorInput <- function(id) {
 #' Creates a condition visual mapping based on the settings the user specified in the input
 #' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
-#' @param conditions Reactive conditions table
+#' @param conditions Reactive vector of conditions that are present in the plot
 #'
 #' @return
 #' @export
 #'
 #' @examples
-colorShapeEditorValue_ <- function(input, output, session, conditions) {
+visualsEditorValue_ <- function(input, output, session, conditions) {
   
   variables <- reactiveValues(visuals.table = NULL)
   
@@ -102,8 +99,8 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
     
     validate(need(conditions(), "Cannot output visual parameters without conditions!"))
     
-    if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), colnames(conditions()))) {
-      variables$visuals.table <- generateDefaultConditionVisualsTable(colnames(conditions()))
+    if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), (conditions()))) {
+      variables$visuals.table <- generateDefaultConditionVisualsTable((conditions()))
     }
     
     return(variables$visuals.table)
@@ -115,7 +112,7 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
     
     validate(need(conditions(), "Cannot output visual parameters withoout conditions!"))
     
-    updateRadioButtons(session, "conditions", choices = colnames(conditions()))
+    updateRadioButtons(session, "conditions", choices = (conditions()))
     
   })
   
@@ -191,7 +188,7 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
                                                      file,
                                                      sep = ",",
                                                      row.names = T,
-                                                     col.names = NA)
+                                                     col.names = NA) #TODO export legends
                                        })
   
   #' Handler for import of visuals table
@@ -216,12 +213,12 @@ colorShapeEditorValue_ <- function(input, output, session, conditions) {
 #' Creates a condition visual mapping based on the settings the user specified in the input
 #'
 #' @param id Id of the UI element
-#' @param conditions Reactive cell conditions definitions table
+#' @param conditions Reactive vector of conditions that are present in the plot
 #'
 #' @return
 #' @export
 #'
 #' @examples
-colorShapeEditorValue <- function(id, conditions) {
-  return(callModule(colorShapeEditorValue_, id, conditions = conditions))
+visualsEditorValue <- function(id, conditions) {
+  return(callModule(visualsEditorValue_, id, conditions = conditions))
 }

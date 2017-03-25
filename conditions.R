@@ -78,9 +78,9 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   
   # We also want to save custom labels for color and shape in the file
   # They are located in the column names and defined by <column>=<custom label>
-  extracted <- data.frame.labels(data)
-  data <- extracted$data
-  labels <- extracted$labels
+  # extracted <- data.frame.labels(data)
+  # data <- extracted$data
+  # labels <- extracted$labels
   
   # Handle errors
   if(!setequal(conditions, rownames(data))) {

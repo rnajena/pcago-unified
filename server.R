@@ -23,7 +23,7 @@ source("movie.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
-source("widgetColorShapeInput.R")
+source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
 source("serverFunctions.R")
@@ -128,7 +128,7 @@ shinyServer(function(input, output, session) {
   #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
   #' 3. Based on this determine the visual conditions for each cell
   conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
-  visuals.conditions <- colorShapeEditorValue("pca.cells.plot.visuals", conditions)
+  visuals.conditions <- visualsEditorValue("pca.cells.plot.visuals", reactive({colnames(conditions())}))
   visuals.cell <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, visuals.conditions) })
   
   #
@@ -282,8 +282,8 @@ shinyServer(function(input, output, session) {
     plot.dpi <- plot.settings$dpi
     plot.title <- if(plot.settings$title == "") { "Cell PCA" } else { plot.settings$title }
     plot.subtitle <- if(plot.settings$title == "") { paste(nrow(pca()$pc), "genes") } else { plot.settings$subtitle }
-    plot.customlabel.shape <- input$pca.cells.plot.visuals.label.shape
-    plot.customlabel.color <- input$pca.cells.plot.visuals.label.color
+    plot.customlabel.shape <- plot.settings$legend.shape
+    plot.customlabel.color <- plot.settings$legend.color
     
     savePCACellPlot(pca = pca(),
                 visuals.conditions = visuals.conditions(),
