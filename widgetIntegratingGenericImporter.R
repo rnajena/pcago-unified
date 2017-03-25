@@ -30,7 +30,7 @@ integratingGenericImporterInput <- function(id, filetypes, importers, samples = 
   return(tags$div(class = "integrating-generic-importer",
     genericImporterInput(ns("importer"), 
                          filetypes = filetypes, 
-                         importers = mporters, 
+                         importers = importers, 
                          samples = samples, 
                          generators = generators,
                          reset.button = F,

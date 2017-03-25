@@ -3,6 +3,7 @@
 #' 
 
 library(shiny)
+library(reshape2)
 
 #' Returns logical vector indicating for each input element if they are a valid color
 #'
@@ -14,14 +15,44 @@ library(shiny)
 #' @examples
 isColor <- function(x) {
   
-  if(is.character(x)) {
+  if(!is.character(x)) {
     stop("Invalid arguments!")
   }
-  
+  if(length(x) == 0) {
+    return(T)
+  }
+
   sapply(x, function(X) {
-    tryCatch(is.matrix(col2rgb(X)), 
+    tryCatch(is.matrix(col2rgb(X)),
              error = function(e) FALSE)
   })
+}
+
+#' Reads a data frame and extracts labels for the columns from them.
+#' Columns that have the form "colum=Custom label" are seen as labeled columns.
+#' This function will reshape the data frame to only contain the actual column name (here "column")
+#' and return the labels
+#' If no custom label is provided, the label is the column name
+#'
+#' @param data 
+#'
+#' @return List with data frame with correct column names ($data) and named vector of column labels ($labels).
+#' @export
+#'
+#' @examples
+data.frame.labels = function(data) {
+  
+  col <- colsplit(colnames(data), "=", c("id", "label"))
+  col.labels <- apply(col, 1, function(x) { if(is.na(x[["label"]])) x[["id"]] else x[["label"]] })
+  names(col.labels) <- col$id
+  
+  output <- list()
+  output$data <- data
+  colnames(output$data) <- col$id
+  output$labels <- col.labels
+  
+  return(output)
+  
 }
 
 #' Custom implementation of withProgress

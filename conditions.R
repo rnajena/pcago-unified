@@ -74,9 +74,13 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
     sep = ""
   }
   
-  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
   
-  
+  # We also want to save custom labels for color and shape in the file
+  # They are located in the column names and defined by <column>=<custom label>
+  extracted <- data.frame.labels(data)
+  data <- extracted$data
+  labels <- extracted$labels
   
   # Handle errors
   if(!setequal(conditions, rownames(data))) {
@@ -85,11 +89,11 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   if(!setequal(c("color", "shape", "name"), colnames(data))) {
     stop("Imported visual definition doesn't have all columns!")
   }
-  if(!is.character(data$color)) {
-    stop("Imported visual definition has invalid colors!")
-  }
   if(!is.character(data$name)) {
     stop("Imported visual definition has invalid names!")
+  }
+  if(!is.character(data$color)) {
+    stop("Imported visual definition has invalid colors!")
   }
   if(!all(isColor(data$color[data$color != ""]))) {
     stop("Imported visual definition has invalid colors!")

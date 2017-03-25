@@ -75,7 +75,10 @@ colorShapeEditorInput <- function(id) {
                                                           choices = c("None"))),
                                            textInput(ns("name"), "Custom name"),
                                            colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
-                                           selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1))
+                                           selectizeInput(ns("shape"), "Shape", choices = colorShapeInput.shapes, selected = -1),
+                                           hDivider(),
+                                           textInput("label.color", "Custom color legend"),
+                                           textInput("shape", "Custom shape legend"))
                           
                           ))))
   
