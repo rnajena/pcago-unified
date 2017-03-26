@@ -255,3 +255,30 @@
 	margin-bottom: 5px;
 	color: #337ab7;
 }
+
+/*
+* Style for dropdown menu
+*/
+.dropdown-button {
+	display: inline-block;
+}
+
+.dropdown-button .dropdown-menu .btn {
+	text-align: left;
+	border: 0;
+}
+
+.dropdown-button .dropdown-menu li {
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
+
+.dropdown-button .dropdown-menu li:last-child {
+	border-bottom: 0;
+	padding-bottom: 0;
+}
+
+.dropdown-button .dropdown-menu li:first-child {
+	padding-top: 0;
+}

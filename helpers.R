@@ -97,3 +97,53 @@ withProgressCustom <- function(expr, message) {
 getOrDefault.character <- function(input, default) {
   return(if(is.null(input) || length(input) == 0) input else default)
 }
+
+#' Saves a plot using R default plotting system
+#'
+#' @param width 
+#' @param height 
+#' @param dpi 
+#' @param format 
+#' @param expr 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+saveRPlot <- function(width, height, dpi, filename, format, expr) {
+  
+  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi)
+     || !is.character(filename) || !is.character(format) || missing(expr)) {
+    stop("Invalid arguments!")
+  } 
+  
+  if(format == "svg") {
+    svg(filename = filename,
+        width = width / dpi,
+        height = height / dpi)
+  }
+  else if(format == "png") {
+    png(filename = filename,
+        width = width,
+        height = height,
+        units = "px",
+        res = dpi)
+  }
+  else if(format == "pdf") {
+    svg(filename = filename,
+        width = width / dpi,
+        height = height / dpi)
+  }
+  else if(format == "tiff") {
+    tiff(filename = filename,
+         width = width,
+         height = height,
+         units = "px",
+         res = dpi)
+  }
+  
+  expr()
+  
+  dev.off()
+  
+}

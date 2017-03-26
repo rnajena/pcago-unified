@@ -17,11 +17,11 @@ library(shinyBS)
 saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename){
   
   plot.settings <- setNA(plot.settings, 
-                         width = 640, 
+                         PlotSettings(width = 640, 
                          height = 480,
                          dpi = 96,
                          title = "Gene variances",
-                         subtitle = "")
+                         subtitle = ""))
   
   width <- plot.settings@width
   height <- plot.settings@height
@@ -69,13 +69,13 @@ savePCACellPlot <- function(pca,
                             filename ){
   
   plot.settings <- setNA(plot.settings, 
-                         width = 640, 
+                         PlotSettings(width = 640, 
                          height = 480,
                          dpi = 96,
                          title = "Cell plot",
                          subtitle = "",
                          legend.color = "Color",
-                         legend.shape = "Shape")
+                         legend.shape = "Shape"))
   
   width <- plot.settings@width
   height <- plot.settings@height
@@ -92,7 +92,7 @@ savePCACellPlot <- function(pca,
     need(visuals.conditions, "No condition visual parameters available!"),
     need(visuals.cell, "No cell visual parameters available!"))
   
-  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) || !is.character(format) || !is.character(filename)) {
+  if(!is.character(format) || !is.character(filename)) {
     stop("Invalid arguments!")
   }
   
@@ -129,6 +129,7 @@ savePCACellPlot <- function(pca,
     
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1])) + 
       geom_histogram(aes(fill = color), bins = 100)
+    #p <- p + theme_classic()
     p <- p + scale_fill_manual(name = label.color,
                                 values = palette.colors,
                                 breaks = levels(pca.transformed$color),
@@ -154,6 +155,7 @@ savePCACellPlot <- function(pca,
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
                                             y = dimensions.requested[2])) + 
       geom_point(aes(colour = color, shape = shape))
+    #p <- p + theme_classic()
     
     #' Add legends to the plot and map the correct colors to the factor levels
     p <- p + scale_color_manual(name = label.color,
@@ -180,58 +182,44 @@ savePCACellPlot <- function(pca,
     
   }
   else if(dimensions.plot == 3) {
-    
-    if(format == "svg") {
-      svg(filename = filename,
-          width = width / dpi,
-          height = height / dpi)
-    }
-    else if(format == "png") {
-      png(filename = filename,
-          width = width,
-          height = height,
-          res = dpi)
-    }
-    
-    par(oma = c(1,7,1,1))
-    
-    scatterplot3d(
-      x = pca.transformed[[dimensions.requested[1]]],
-      y = pca.transformed[[dimensions.requested[2]]],
-      z = pca.transformed[[dimensions.requested[3]]],
-      color = palette.colors[as.numeric(pca.transformed$color)],
-      pch = palette.shapes[as.numeric(pca.transformed$shape)],
-      xlab = pc.lab(dimensions.requested[1]),
-      ylab = pc.lab(dimensions.requested[2]),
-      zlab = pc.lab(dimensions.requested[3]),
-      type = "h",
-      main = title,
-      sub = subtitle
-    )
-    
-    # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?
-    par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-    plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-    
-    legend("topleft",
-           legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
-           col = palette.colors,
-           pch = 16,
-           bty = "n",
-           xpd = T,
-           title = label.color,
-           title.adj = 0) # wtf?
-    legend("bottomleft",
-           legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
-           col = "black",
-           pch = palette.shapes,
-           bty = "n",
-           xpd = T,
-           title = label.shape,
-           title.adj = 0)
-    
-    dev.off()
-    
+    saveRPlot(width, height, dpi, filename, format, expr = function() {
+      par(oma = c(1,7,1,1))
+      
+      scatterplot3d(
+        x = pca.transformed[[dimensions.requested[1]]],
+        y = pca.transformed[[dimensions.requested[2]]],
+        z = pca.transformed[[dimensions.requested[3]]],
+        color = palette.colors[as.numeric(pca.transformed$color)],
+        pch = palette.shapes[as.numeric(pca.transformed$shape)],
+        xlab = pc.lab(dimensions.requested[1]),
+        ylab = pc.lab(dimensions.requested[2]),
+        zlab = pc.lab(dimensions.requested[3]),
+        type = "h",
+        main = title,
+        sub = subtitle
+      )
+      
+      # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?
+      par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+      plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+      
+      legend("topleft",
+             legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
+             col = palette.colors,
+             pch = 16,
+             bty = "n",
+             xpd = T,
+             title = label.color,
+             title.adj = 0) # wtf?
+      legend("bottomleft",
+             legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
+             col = "black",
+             pch = palette.shapes,
+             bty = "n",
+             xpd = T,
+             title = label.shape,
+             title.adj = 0)
+    })
   }
   
 }

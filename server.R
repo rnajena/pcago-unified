@@ -242,6 +242,7 @@ shinyServer(function(input, output, session) {
     })
   downloadablePlot("genes.variance.filtered.plot", exprplot = function(plot.settings, format, filename) 
   { 
+    plot.settings <- setNA(plot.settings, PlotSettings(subtitle = "Filtered genes"))
     saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename) 
   })
   
@@ -262,11 +263,11 @@ shinyServer(function(input, output, session) {
   downloadablePlot("pca.variance.plot", exprplot = function( plot.settings, format, filename ){
     
     plot.settings <- setNA(plot.settings, 
-                           width = 640, 
+                           PlotSettings(width = 640, 
                            height = 480,
                            dpi = 96,
                            title = "Principal component variances",
-                           subtitle = "")
+                           subtitle = ""))
     
     width <- plot.settings@width
     height <- plot.settings@height
@@ -283,11 +284,12 @@ shinyServer(function(input, output, session) {
   pca.cellplot.settings <- generalPlotSettings("pca.cells.plot.generalsettings")
   
   # Handler for cell plot rendering
-  downloadablePlot("pca.cellplot", exprplot = function( plot.settings, format, filename ){
+  downloadablePlot("pca.cellplot", plot.settings = pca.cellplot.settings, exprplot = function( plot.settings, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
-   
+    
+    plot.settings <- setNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
     
     savePCACellPlot(pca = pca(),
                 visuals.conditions = visuals.conditions(),
@@ -318,7 +320,7 @@ shinyServer(function(input, output, session) {
         filename = file,
         animation.params = pca.gene.count(),
         axes = input$pca.cells.plot.axes,
-        plot.settings = PlotSettings(width = 640, height = 480, dpi = 96),
+        plot.settings = pca.cellplot.settings(),
         visuals.conditions = visuals.conditions(),
         visuals.cell = visuals.cell(),
         readcounts.filtered = readcounts.filtered(),

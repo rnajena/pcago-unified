@@ -91,3 +91,18 @@ strJoinLimited <- function(x, sep = ", ", limit = NULL) {
   }
   
 }
+
+dropdownButton <- function(id, label, content, icon = NULL, button.style = "btn-default") {
+  
+  wrapped <- lapply(content, function(x) { tags$li(x) })
+  
+  return(tags$div(class = "dropdown dropdown-button",
+                  tags$button(class = paste(c("btn", button.style, "dropdown-toggle"), collapse = " "), 
+                              type = "button",
+                              "data-toggle" = "dropdown",
+                              icon,
+                              label,
+                              tags$span(class = "caret")),
+                  tags$ul(class = "dropdown-menu",
+                          wrapped)))
+}

@@ -62,8 +62,8 @@ PlotSettings <- setClass(
 
 #' Overwrites NA plot settings with values provided in ellipsis
 #'
-#' @param object A PlotSettings object
-#' @param ... Settings to overwrite with default settings if they are NA
+#' @param object.target A PlotSettings object
+#' @param object.source A PlotSettings object
 #'
 #' @return
 #' @rdname setNA
@@ -71,31 +71,55 @@ PlotSettings <- setClass(
 #'
 #' @examples
 setGeneric(name = "setNA",
-           def = function(object, ...) {
+           def = function(object.target, object.source) {
              standardGeneric("setNA")
            })
 
 #' @rdname setNA
 setMethod(f = "setNA",
-          signature = "PlotSettings",
-          definition = function(object, ...) {
+          signature = signature(object.target = "PlotSettings", object.source = "PlotSettings"),
+          definition = function(object.target, object.source) {
             
-            overwrite <- list(...)
+            if(!is.na(object.source@width) && is.na(object.target@width)) { object.target@width <- object.source@width }
+            if(!is.na(object.source@height) && is.na(object.target@height)) { object.target@height <- object.source@height }
+            if(!is.na(object.source@dpi) && is.na(object.target@dpi)) { object.target@dpi <- object.source@dpi }
+            if(!is.na(object.source@title) && is.na(object.target@title)) { object.target@title <- object.source@title }
+            if(!is.na(object.source@subtitle) && is.na(object.target@subtitle)) { object.target@subtitle <- object.source@subtitle }
+            if(!is.na(object.source@legend.color) && is.na(object.target@legend.color)) { object.target@legend.color <- object.source@legend.color }
+            if(!is.na(object.source@legend.shape) && is.na(object.target@legend.shape)) { object.target@legend.shape <- object.source@legend.shape }
             
-            if(!all(names(overwrite) %in% slotNames(object))) {
-              stop("Unknown keys!")
-            }
+            validObject(object.target)
+            return(object.target)
+          })
+
+#' Overwrites values in target from non-NA values in source
+#'
+#' @param object.target A PlotSettings object
+#' @param object.source A PlotSettings object
+#'
+#' @return
+#' @rdname overwrite
+#' @export
+#'
+#' @examples
+setGeneric(name = "overwrite",
+           def = function(object.target, object.source) {
+             standardGeneric("overwrite")
+           })
+
+#' @rdname overwrite
+setMethod(f = "overwrite",
+          signature = signature(object.target = "PlotSettings", object.source = "PlotSettings"),
+          definition = function(object.target, object.source) {
             
-            for(key in names(overwrite)) {
-              if(key == "width") { if(is.na(object@width)) object@width <- overwrite$width }
-              else if(key == "height") { if(is.na(object@height)) object@height <- overwrite$height }
-              else if(key == "dpi") { if(is.na(object@dpi)) object@dpi <- overwrite$dpi }
-              else if(key == "title") { if(is.na(object@title)) object@title <- overwrite$title }
-              else if(key == "subtitle") { if(is.na(object@subtitle)) object@subtitle <- overwrite$subtitle }
-              else if(key == "legend.color") { if(is.na(object@legend.color)) object@legend.color <- overwrite$legend.color }
-              else if(key == "legend.shape") { if(is.na(object@legend.shape)) object@legend.shape <- overwrite$legend.shape }
-            }
+            if(!is.na(object.source@width)) { object.target@width <- object.source@width }
+            if(!is.na(object.source@height)) { object.target@height <- object.source@height }
+            if(!is.na(object.source@dpi)) { object.target@dpi <- object.source@dpi }
+            if(!is.na(object.source@title)) { object.target@title <- object.source@title }
+            if(!is.na(object.source@subtitle)) { object.target@subtitle <- object.source@subtitle }
+            if(!is.na(object.source@legend.color)) { object.target@legend.color <- object.source@legend.color }
+            if(!is.na(object.source@legend.shape)) { object.target@legend.shape <- object.source@legend.shape }
             
-            validObject(object)
-            return(object)
+            validObject(object.target)
+            return(object.target)
           })

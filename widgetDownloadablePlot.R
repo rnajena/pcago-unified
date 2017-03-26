@@ -10,13 +10,16 @@ source("classPlotSettings.R")
 #' Creates a UI with a plot output and download buttons
 #'
 #' @param id ID of the control
-#' @param ... Additional items to include into header bar
+#' @param custom.header.items Additional items to include into header bar
+#' @param custom.export.items Additional items in the export menu
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadablePlotOutput <- function(id, ...) {
+downloadablePlotOutput <- function(id, 
+                                   custom.header.items = NULL,
+                                   custom.export.items = NULL) {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -24,11 +27,23 @@ downloadablePlotOutput <- function(id, ...) {
   
   ns <- NS(id)
   
+  export.items <- tagList(
+    downloadButton(ns("export.svg"), "as *.svg"),
+    downloadButton(ns("export.png"), "as *.png"),
+    downloadButton(ns("export.pdf"), "as *.pdf"),
+    downloadButton(ns("export.tiff"), "as *.tiff")
+  )
+  
+  if(!is.null(custom.export.items)) {
+    export.items <- tagAppendChildren(export.items, list = custom.export.items)
+  }
+  
   return(tags$div(class = "downloadable-plot",
                    headerPanel(header = tags$span(class="headerbar-row",
-                                                  downloadButton(ns("export.svg"), "Export *.svg"),
-                                                  downloadButton(ns("export.png"), "Export *.png"),
-                                                  ...),
+                                                  dropdownButton(ns("menu.export"), "Export image", 
+                                                                 icon = icon("download"),
+                                                                 export.items),
+                                                  custom.header.items),
                                plotOutput(ns("plot")))))
 }
 
@@ -40,6 +55,7 @@ downloadablePlotOutput <- function(id, ...) {
 #' @param output 
 #' @param session 
 #' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
+#' @param plot.settings Reactive that returns a plot settings object
 #' @param render.format Format of data sent to user (default: png)
 #' @param render.alt Alt text for img object (default: "Plot")
 #' @param export.filename Base filename of exported plot
@@ -48,17 +64,28 @@ downloadablePlotOutput <- function(id, ...) {
 #' @export
 #'
 #' @examples
-downloadablePlot_ <- function(input, output, session, exprplot, render.format = "png", render.alt = "Plot", export.filename = "plot") {
+downloadablePlot_ <- function(input, 
+                              output, 
+                              session, 
+                              exprplot, 
+                              plot.settings = reactive({ PlotSettings() }), 
+                              render.format = "png", 
+                              render.alt = "Plot", 
+                              export.filename = "plot") {
   
   out.width <- reactive({ session$clientData[[paste0("output_", session$ns("plot"), "_width")]] })
   out.height <- reactive({ session$clientData[[paste0("output_", session$ns("plot"), "_height")]] })
   
+  # If the user didn't set any output sizes, overwrite them here
+  plot.settings.defaults <- reactive({
+    return(setNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = 96) ))
+    })
+  
   output$plot <- renderImage({
     
     out.file <- tempfile(fileext=paste0(".", render.format))
-    plot.settings <- PlotSettings(width = out.width(), height = out.height(), dpi = 96)
     
-    exprplot(plot.settings = plot.settings, filename = out.file, format = render.format)
+    exprplot(plot.settings = plot.settings.defaults(), filename = out.file, format = render.format)
     
     return(list(src = out.file,
          width = out.width(),
@@ -68,21 +95,32 @@ downloadablePlot_ <- function(input, output, session, exprplot, render.format = 
   
   output$export.svg <- downloadHandler(filename = paste0(export.filename, ".svg"),
                                        content = function(file) {
-                                         exprplot(plot.settings = plot.settings, filename = file, format = "svg")
+                                         exprplot(plot.settings = plot.settings.defaults(), filename = file, format = "svg")
                                        },
                                        contentType = "image/svg")
 
   output$export.png <- downloadHandler(filename = paste0(export.filename, ".png"),
                                        content = function(file) {
-                                         exprplot(plot.settings = plot.settings, filename = file, format = "png")
+                                         exprplot(plot.settings = plot.settings.defaults(), filename = file, format = "png")
                                        },
                                        contentType = "image/png")
+  output$export.pdf <- downloadHandler(filename = paste0(export.filename, ".pdf"),
+                                       content = function(file) {
+                                         exprplot(plot.settings = plot.settings.defaults(), filename = file, format = "pdf")
+                                       },
+                                       contentType = "application/pdf")
+  output$export.tiff <- downloadHandler(filename = paste0(export.filename, ".tiff"),
+                                       content = function(file) {
+                                         exprplot(plot.settings = plot.settings.defaults(), filename = file, format = "tiff")
+                                       },
+                                       contentType = "image/tiff")
   
 }
 
 #' Plots a downloadable plot
 #'
 #' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
+#' @param plot.settings Reactive that returns a plot settings object
 #' @param render.format Format of data sent to user (default: png)
 #' @param render.alt Alt text for img object (default: "Plot")
 #' @param export.filename Base filename of exported plot
@@ -91,11 +129,17 @@ downloadablePlot_ <- function(input, output, session, exprplot, render.format = 
 #' @export
 #'
 #' @examples
-downloadablePlot <- function(id, exprplot, render.format = "png", render.alt = "Plot", export.filename = "plot") {
+downloadablePlot <- function(id, 
+                             exprplot, 
+                             plot.settings = reactive({ PlotSettings() }), 
+                             render.format = "png", 
+                             render.alt = "Plot", 
+                             export.filename = "plot") {
   
   return(callModule(downloadablePlot_,
                     id,
                     exprplot = exprplot,
+                    plot.settings = plot.settings,
                     render.format = render.format,
                     render.alt = render.alt,
                     export.filename = export.filename))
