@@ -6,6 +6,7 @@ source("conditions.R")
 source("pca.R")
 source("plots.R")
 source("movie.R")
+source("widgetCellConditionImporter.R")
 
 #' Handles some server side navigation features
 #'
@@ -30,7 +31,6 @@ serverNavigation <- function(input, session) {
       updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
     }
   })
-  
 }
 
 #' Server function for processed read counts
@@ -75,6 +75,107 @@ serverReadCountProcessing <- function(readcounts, input) {
     
   }))
   
+}
+
+#' Provides the gene annotation
+#'
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverGeneInfoAnnotation <- function(readcounts) {
+  
+  return(integratingGenericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
+    return(importGeneInformationFromAnnotation(con, importer, readcounts()))
+  },
+  exprsample = function(sample) {
+    return(importSampleGeneInformationFromAnnotation(sample, readcounts()))
+  },
+  exprintegrate = function(data, callback) {
+    output <- list()
+    genes <- rownames(readcounts())
+    
+    choices = c("sequence.info",
+                "features", 
+                "go")
+    selected = c()
+    
+    for(current.data in data) {
+      output <- append(output, current.data) # merge lists
+      selected <- c(selected, names(current.data))
+    }
+    
+    sequence.info.genes <- if(!is.null(output$sequence.info)) intersect(rownames(output$sequence.info), genes) else c()
+    feature.genes <- if(!is.null(output$features)) intersect(unlist(output$features), genes) else c()
+    go.genes <- c()
+    
+    names(choices) <- c(
+      if(length(sequence.info.genes) == 0) "Sequence info" else paste0("Sequence info (", length(sequence.info.genes), "/", length(genes), ")"),
+      if(length(feature.genes) == 0) "Associated features" else paste0("Associated features (", length(feature.genes), "/", length(genes), ")"),
+      if(length(go.genes) == 0) "GO terms" else paste0("GO terms (", length(go.genes), "/", length(genes), ")")
+    )
+    
+    callback(choices, selected)
+    return(output)
+  }))
+  
+}
+
+#' Lets the user choose a set of genes based on the features
+#'
+#' @param readcounts.processed 
+#' @param gene.info.annotation 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
+  
+  return(filterSelectionValues("pca.pca.genes.set",  reactive({
+    
+    gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
+    unused.genes <- rownames(readcounts.processed())
+    
+    if(!is.null(gene.info.annotation())) {
+      criteria <- gene.info.annotation()$features
+      
+      gene.criteria[["Associated features"]] <- criteria 
+      covered.genes <- unlist(criteria)
+      unused.genes <- setdiff(unused.genes, covered.genes)
+    }
+    
+    # Now look for genes that haven't been covered and create a list
+    if(length(unused.genes) > 0) {
+      gene.criteria[["Misc"]] <- list("Without criteria" = unused.genes)
+    }
+    
+    return(gene.criteria)
+    
+  })))
+}
+
+#' Filters the read count table by only returning the rows that are in the list of genes.
+#'
+#' @param genes.filtered 
+#' @param readcounts.processed 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
+  return(reactive({
+    
+    keep.genes <- rownames(readcounts.processed())
+    keep.genes <- intersect(keep.genes, genes.filtered())
+    
+    keep.readcounts <- readcounts.processed()[keep.genes,]
+    
+    return(keep.readcounts)
+  }))
 }
 
 #' Server function for PCA
@@ -244,4 +345,56 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
     return(do.call(bsCollapse, panels))
   }
   
+}
+
+serverGeneVarianceTableData <- function(gene.variances) {
+  return(reactive({
+    validate(need(gene.variances(), "No annotation available!"))
+    
+    table <- data.frame(row.names = rownames(gene.variances()), 
+                        Variance = gene.variances()$var,
+                        "Relative variance" = gene.variances()$var / sum(gene.variances()$var))
+    table <- table[order(table$Variance, decreasing = T), ,drop = F]
+    
+    return(table)
+    
+  }))
+}
+
+serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
+  return(reactive({
+    validate(need(gene.info.annotation(), "No annotation available!"))
+    
+    genes <- rownames(readcounts())
+    table <- data.frame(row.names = genes,
+                        "Sequence" = rep(NA, length(genes)),
+                        "Start" = rep(NA, length(genes)),
+                        "End" = rep(NA, length(genes)),
+                        "Length" = rep(NA, length(genes)),
+                        "Features" = rep(NA, length(genes)))
+    
+    if("sequence.info" %in% names(gene.info.annotation())) {
+      sequence.info <- gene.info.annotation()$sequence.info
+      indices <- match(genes, rownames(sequence.info))
+      
+      table$Sequence <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "sequence"] })
+      table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start"] })
+      table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end"] })
+      table$Length <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "length"] })
+    }
+    if("features" %in% names(gene.info.annotation())) {
+      features <- gene.info.annotation()$features
+      
+      # Note: This is expensive as the features are structured in inverse way to increase filter performance
+      table[["Features"]] <- sapply(genes, function(gene) { 
+        
+        features <- Filter(function(feature) { gene %in% features[[feature]] }, names(features))
+        return(paste(features, collapse = "; "))
+        
+      })
+    }
+    
+    return(table)
+    
+  }))
 }

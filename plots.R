@@ -1,6 +1,38 @@
 library(shiny)
 library(shinyBS)
 
+#' Plots the principal component variances
+#'
+#' @param pca 
+#' @param plot.settings 
+#' @param format 
+#' @param filename 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
+  plot.settings <- setNA(plot.settings, 
+                         PlotSettings(width = 640, 
+                                      height = 480,
+                                      dpi = 96,
+                                      title = "Principal component variances",
+                                      subtitle = ""))
+  
+  width <- plot.settings@width
+  height <- plot.settings@height
+  dpi <- plot.settings@dpi
+  title <- plot.settings@title
+  subtitle <- plot.settings@subtitle
+  
+  p <- ggplot(pca()$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
+  p <- p + labs(x = "Principal component", y = "Relative variance")
+  ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+  
+  return(plot.settings)
+}
+
 #' Saves a plot of gene variances to a file with given format
 #'
 #' @param gene.variances Gene variances
@@ -39,6 +71,8 @@ saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename
   p <- ggplot(gene.variances, aes(x=1:nrow(gene.variances), y=log(var))) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)", title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+  
+  return(plot.settings)
   
 }
 
@@ -221,5 +255,7 @@ savePCACellPlot <- function(pca,
              title.adj = 0)
     })
   }
+  
+  return(plot.settings)
   
 }

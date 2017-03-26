@@ -145,7 +145,7 @@ buildGeneVarianceTable <- function(readcounts) {
                           row.names = geneids)
   
   # Sort by variance
-  variances.table <- variances.table[order(variances.table$var, decreasing = T), , drop = F]
+  variances.table <- variances.table[order(variances.table$var, decreasing = T), ,drop = F]
   
   return(variances.table)
 }

@@ -54,7 +54,7 @@ downloadablePlotOutput <- function(id,
 #' @param input 
 #' @param output 
 #' @param session 
-#' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
+#' @param exprplot Function that takes width, height, format and filename and saves a plot to filename. Optionally returns plot settings object
 #' @param plot.settings Reactive that returns a plot settings object
 #' @param render.format Format of data sent to user (default: png)
 #' @param render.alt Alt text for img object (default: "Plot")
@@ -85,11 +85,22 @@ downloadablePlot_ <- function(input,
     
     out.file <- tempfile(fileext=paste0(".", render.format))
     
-    exprplot(plot.settings = plot.settings.defaults(), filename = out.file, format = render.format)
+    plot.settings.output <- exprplot(plot.settings = plot.settings.defaults(), filename = out.file, format = render.format)
+    width <- out.width()
+    height <- out.height()
+    
+    if(!is.null(plot.settings.output)) {
+      if(!is.na(plot.settings.output@width)) {
+        width <- plot.settings.output@width
+      }
+      if(!is.na(plot.settings.output@height)) {
+        height <- plot.settings.output@height
+      }
+    }
     
     return(list(src = out.file,
-         width = out.width(),
-         height = out.height(),
+         width = width,
+         height = height,
          alt = render.alt))
   })
   
@@ -120,7 +131,7 @@ downloadablePlot_ <- function(input,
 #' Plots a downloadable plot
 #'
 #' @param exprplot Function that takes width, height, format and filename and saves a plot to filename
-#' @param plot.settings Reactive that returns a plot settings object
+#' @param plot.settings Reactive that returns a plot settings object. Optionally returns plot settings object.
 #' @param render.format Format of data sent to user (default: png)
 #' @param render.alt Alt text for img object (default: "Plot")
 #' @param export.filename Base filename of exported plot
