@@ -55,8 +55,9 @@ downloadablePlot_ <- function(input, output, session, exprplot, render.format = 
   output$plot <- renderImage({
     
     out.file <- tempfile(fileext=paste0(".", render.format))
+    plot.settings <- plotSettings(out.width(), out.height(), 96)
     
-    exprplot(width = out.width(), height = out.height(), filename = out.file, format = render.format)
+    exprplot(plot.settings = plot.settings, filename = out.file, format = render.format)
     
     return(list(src = out.file,
          width = out.width(),
@@ -66,13 +67,13 @@ downloadablePlot_ <- function(input, output, session, exprplot, render.format = 
   
   output$export.svg <- downloadHandler(filename = paste0(export.filename, ".svg"),
                                        content = function(file) {
-                                         exprplot(width = out.width(), height = out.height(), filename = file, format = "svg")
+                                         exprplot(plot.settings = plot.settings, filename = file, format = "svg")
                                        },
                                        contentType = "image/svg")
 
   output$export.png <- downloadHandler(filename = paste0(export.filename, ".png"),
                                        content = function(file) {
-                                         exprplot(width = out.width(), height = out.height(), filename = file, format = "png")
+                                         exprplot(plot.settings = plot.settings, filename = file, format = "png")
                                        },
                                        contentType = "image/png")
   

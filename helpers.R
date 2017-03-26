@@ -84,3 +84,50 @@ withProgressCustom <- function(expr, message) {
   return(expr(updateProgress))
   
 }
+
+#' Returns input if it isn't empty or NULL
+#'
+#' @param input 
+#' @param default 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getOrDefault.character <- function(input, default) {
+  return(if(is.null(input) || length(input) == 0) input else default)
+}
+
+#' Helper function that creates a list of plot settings
+#'
+#' @param width 
+#' @param height 
+#' @param dpi 
+#' @param format 
+#' @param title 
+#' @param subtitle 
+#' @param legend.color 
+#' @param legend.shape 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotSettings <- function(width, height, dpi, title = "", subtitle = "", legend.color = "", legend.shape = "") {
+  
+  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) 
+     || !is.character(title) || !is.character(subtitle) || !is.character(legend.color) || !is.character(legend.shape)) {
+    stop("Invalid arguments!")
+  }
+  
+  return(list(
+    width = width,
+    height = height,
+    dpi = dpi,
+    title = title,
+    subtitle = subtitle,
+    legend.color = legend.color,
+    legend.shape = legend.shape
+  ))
+  
+}

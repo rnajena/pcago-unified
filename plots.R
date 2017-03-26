@@ -14,7 +14,13 @@ library(shinyBS)
 #' @export
 #'
 #' @examples
-saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, filename){
+saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename){
+  
+  width <- plot.settings$width
+  height <- plot.settings$height
+  dpi <- plot.settings$dpi
+  title <- getOrDefault.character(plot.settings$title, "Gene variances")
+  subtitle <- getOrDefault.character(plot.settings$title, "")
   
   # Soft and hard parameter checking
   validate(need(gene.variances, "No gene variances available!"))
@@ -24,7 +30,7 @@ saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, fil
   }
   
   p <- ggplot(gene.variances, aes(x=1:nrow(gene.variances), y=log(var))) + geom_point()
-  p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
+  p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)", title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   
 }
@@ -50,16 +56,18 @@ saveGeneVariancePlot <- function(gene.variances, width, height, dpi, format, fil
 savePCACellPlot <- function(pca, 
                             visuals.conditions, 
                             visuals.cell, 
-                            customlabel.color,
-                            customlabel.shape,
                             axes, 
-                            width, 
-                            height, 
-                            dpi, 
+                            plot.settings,
                             format,
-                            filename,
-                            title = "Cell PCA", 
-                            subtitle = NULL ){
+                            filename ){
+  
+  width <- plot.settings$width
+  height <- plot.settings$height
+  dpi <- plot.settings$dpi
+  customlabel.color <- plot.settings$legend.color
+  customlabel.shape <- plot.settings$legend.shape
+  title <- getOrDefault.character(plot.settings$title, "Cell plot")
+  subtitle <- getOrDefault.character(plot.settings$title, "")
   
   # Soft and hard parameter checking
   validate(

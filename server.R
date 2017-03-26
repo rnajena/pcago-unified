@@ -235,13 +235,13 @@ shinyServer(function(input, output, session) {
   
   # Gene variance plots
   
-  downloadablePlot("genes.variance.plot", exprplot = function(width, height, format, filename) 
+  downloadablePlot("genes.variance.plot", exprplot = function(plot.settings, format, filename) 
     { 
-    saveGeneVariancePlot(gene.variances(), width, height, 96, format, filename) 
+    saveGeneVariancePlot(gene.variances(), plot.settings, format, filename) 
     })
-  downloadablePlot("genes.variance.filtered.plot", exprplot = function(width, height, format, filename) 
+  downloadablePlot("genes.variance.filtered.plot", exprplot = function(plot.settings, format, filename) 
   { 
-    saveGeneVariancePlot(gene.variances.filtered(), width, height, 96, format, filename) 
+    saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename) 
   })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
@@ -258,9 +258,13 @@ shinyServer(function(input, output, session) {
   })
   
   # PCA plots
-  downloadablePlot("pca.variance.plot", exprplot = function( width, height, format, filename ){
+  downloadablePlot("pca.variance.plot", exprplot = function( plot.settings, format, filename ){
     
-    dpi <- 96
+    width <- plot.settings$width
+    height <- plot.settings$height
+    dpi <- plot.settings$dpi
+    title <- getOrDefault.character(plot.settings$title, "Principal component variances")
+    subtitle <- getOrDefault.character(plot.settings$title, "")
     
     p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=var.relative)) + geom_point()
     p <- p + labs(x = "Principal component", y = "Relative variance")
@@ -271,33 +275,19 @@ shinyServer(function(input, output, session) {
   pca.cellplot.settings <- generalPlotSettings("pca.cells.plot.generalsettings")
   
   # Handler for cell plot rendering
-  downloadablePlot("pca.cellplot", exprplot = function( width, height, format, filename ){
+  downloadablePlot("pca.cellplot", exprplot = function( plot.settings, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
-    
-    plot.settings <- pca.cellplot.settings()
-    plot.width <- if(plot.settings$width < 50) { width } else { plot.settings$width }
-    plot.height <- if(plot.settings$height < 50) { height } else { plot.settings$height }
-    plot.dpi <- plot.settings$dpi
-    plot.title <- if(plot.settings$title == "") { "Cell PCA" } else { plot.settings$title }
-    plot.subtitle <- if(plot.settings$title == "") { paste(nrow(pca()$pc), "genes") } else { plot.settings$subtitle }
-    plot.customlabel.shape <- plot.settings$legend.shape
-    plot.customlabel.color <- plot.settings$legend.color
+   
     
     savePCACellPlot(pca = pca(),
                 visuals.conditions = visuals.conditions(),
                 visuals.cell = visuals.cell(),
                 axes = input$pca.cells.plot.axes,
-                customlabel.color = plot.customlabel.color,
-                customlabel.shape = plot.customlabel.shape,
-                width = plot.width,
-                height = plot.height,
-                dpi = plot.dpi,
+                plot.settings = plot.settings,
                 format = format,
-                filename = filename,
-                title = plot.title,
-                subtitle = plot.subtitle)
+                filename = filename)
   })
   
   # Handler for movie export of cell plot
@@ -313,24 +303,14 @@ shinyServer(function(input, output, session) {
     })
     shinyjs::disable("pca.cellplot.export.mp4")
   
-    plot.settings <- pca.cellplot.settings()
-    plot.width <- if(plot.settings$width < 50) { 640 } else { plot.settings$width }
-    plot.height <- if(plot.settings$height < 50) { 480 } else { plot.settings$height }
-    plot.dpi <- plot.settings$dpi
-    plot.customlabel.shape <- input$pca.cells.plot.visuals.label.shape
-    plot.customlabel.color <- input$pca.cells.plot.visuals.label.color
     
     withProgressCustom(function(updateProgress) {
       
       savePCACellPlotMovie(
         filename = file,
-        plot.width,
-        plot.height,
-        plot.dpi,
         animation.params = pca.gene.count(),
         axes = input$pca.cells.plot.axes,
-        customlabel.color = plot.customlabel.color,
-        customlabel.shape = plot.customlabel.shape,
+        plot.settings = plotSettings(width = 640, height = 480, dpi = 96),
         visuals.conditions = visuals.conditions(),
         visuals.cell = visuals.cell(),
         readcounts.filtered = readcounts.filtered(),

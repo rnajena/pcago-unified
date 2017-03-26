@@ -27,13 +27,9 @@ library(shiny)
 #'
 #' @examples
 savePCACellPlotMovie <- function(filename,
-                             width,
-                             height,
-                             dpi,
+                             plot.settings,
                              animation.params,
                              axes, 
-                             customlabel.color,
-                             customlabel.shape,
                              visuals.conditions,
                              visuals.cell,
                              readcounts.filtered,
@@ -42,10 +38,9 @@ savePCACellPlotMovie <- function(filename,
                              pca.scale,
                              updateProgress = NULL) {
   
-  if(!is.character(filename) || !is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) ||
+  if(!is.character(filename) || 
      !is.numeric(genes.count.from) || !is.numeric(genes.count.to) || !is.numeric(genes.count.by) ||
      !is.numeric(time.per.frame) || !is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
-     !is.character(customlabel.color) || !is.character(customlabel.shape) ||
      !is.data.frame(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
     stop("Invalid arguments!")
   }
@@ -63,18 +58,13 @@ savePCACellPlotMovie <- function(filename,
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale)
-    savePCACellPlot(pca,
-                visuals.conditions,
-                visuals.cell,
-                axes,
-                customlabel.color,
-                customlabel.shape,
-                width,
-                height,
-                dpi,
-                "png",
-                plot.filename,
-                subtitle = paste(genecounts[i], "genes"))
+    savePCACellPlot(pca = pca,
+                visuals.conditions = visuals.conditions,
+                visuals.cell = visuals.cell,
+                axes = axes,
+                plot.settings = plot.settings,
+                format = "png",
+                filename = plot.filename) #TODO gene subtitle
     
   }
   
