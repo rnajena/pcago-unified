@@ -5,6 +5,7 @@
 library(DT)
 library(shiny)
 source("uiHelper.R")
+source("classPlotSettings.R")
 
 #' Creates a UI with a plot output and download buttons
 #'
@@ -55,7 +56,7 @@ downloadablePlot_ <- function(input, output, session, exprplot, render.format = 
   output$plot <- renderImage({
     
     out.file <- tempfile(fileext=paste0(".", render.format))
-    plot.settings <- plotSettings(out.width(), out.height(), 96)
+    plot.settings <- PlotSettings(width = out.width(), height = out.height(), dpi = 96)
     
     exprplot(plot.settings = plot.settings, filename = out.file, format = render.format)
     

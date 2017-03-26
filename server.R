@@ -28,6 +28,7 @@ source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
 source("serverFunctions.R")
 source("helpers.R")
+source("classPlotSettings.R")
 
 shinyServer(function(input, output, session) {
   
@@ -260,11 +261,18 @@ shinyServer(function(input, output, session) {
   # PCA plots
   downloadablePlot("pca.variance.plot", exprplot = function( plot.settings, format, filename ){
     
-    width <- plot.settings$width
-    height <- plot.settings$height
-    dpi <- plot.settings$dpi
-    title <- getOrDefault.character(plot.settings$title, "Principal component variances")
-    subtitle <- getOrDefault.character(plot.settings$title, "")
+    plot.settings <- setNA(plot.settings, 
+                           width = 640, 
+                           height = 480,
+                           dpi = 96,
+                           title = "Principal component variances",
+                           subtitle = "")
+    
+    width <- plot.settings@width
+    height <- plot.settings@height
+    dpi <- plot.settings@dpi
+    title <- plot.settings@title
+    subtitle <- plot.settings@subtitle
     
     p <- ggplot(pca()$var, aes(x=rownames(pca()$var), y=var.relative)) + geom_point()
     p <- p + labs(x = "Principal component", y = "Relative variance")
@@ -310,7 +318,7 @@ shinyServer(function(input, output, session) {
         filename = file,
         animation.params = pca.gene.count(),
         axes = input$pca.cells.plot.axes,
-        plot.settings = plotSettings(width = 640, height = 480, dpi = 96),
+        plot.settings = PlotSettings(width = 640, height = 480, dpi = 96),
         visuals.conditions = visuals.conditions(),
         visuals.cell = visuals.cell(),
         readcounts.filtered = readcounts.filtered(),

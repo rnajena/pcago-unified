@@ -16,11 +16,18 @@ library(shinyBS)
 #' @examples
 saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename){
   
-  width <- plot.settings$width
-  height <- plot.settings$height
-  dpi <- plot.settings$dpi
-  title <- getOrDefault.character(plot.settings$title, "Gene variances")
-  subtitle <- getOrDefault.character(plot.settings$title, "")
+  plot.settings <- setNA(plot.settings, 
+                         width = 640, 
+                         height = 480,
+                         dpi = 96,
+                         title = "Gene variances",
+                         subtitle = "")
+  
+  width <- plot.settings@width
+  height <- plot.settings@height
+  dpi <- plot.settings@dpi
+  title <- plot.settings@title
+  subtitle <- plot.settings@subtitle
   
   # Soft and hard parameter checking
   validate(need(gene.variances, "No gene variances available!"))
@@ -61,13 +68,22 @@ savePCACellPlot <- function(pca,
                             format,
                             filename ){
   
-  width <- plot.settings$width
-  height <- plot.settings$height
-  dpi <- plot.settings$dpi
-  customlabel.color <- plot.settings$legend.color
-  customlabel.shape <- plot.settings$legend.shape
-  title <- getOrDefault.character(plot.settings$title, "Cell plot")
-  subtitle <- getOrDefault.character(plot.settings$title, "")
+  plot.settings <- setNA(plot.settings, 
+                         width = 640, 
+                         height = 480,
+                         dpi = 96,
+                         title = "Cell plot",
+                         subtitle = "",
+                         legend.color = "Color",
+                         legend.shape = "Shape")
+  
+  width <- plot.settings@width
+  height <- plot.settings@height
+  dpi <- plot.settings@dpi
+  title <- plot.settings@title
+  subtitle <- plot.settings@subtitle
+  customlabel.color <- plot.settings@legend.color
+  customlabel.shape <- plot.settings@legend.shape
   
   # Soft and hard parameter checking
   validate(

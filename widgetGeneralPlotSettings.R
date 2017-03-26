@@ -4,6 +4,7 @@
 
 library(shiny)
 source("uiHelper.R")
+source("classPlotSettings.R")
 
 generalPlotSettingsInput <- function(id) {
   
@@ -27,14 +28,14 @@ generalPlotSettings_ <- function(input, output, session) {
   
   return(reactive({
     
-    return(list(
-      width = input$width,
-      height = input$height,
-      dpi = input$dpi,
-      title = input$title,
-      subtitle = input$subtitle,
-      legend.color = input$legend.color,
-      legend.shape = input$legend.shape
+    return(PlotSettings(
+      width = if(input$width > 0) input$width else NA_integer_,
+      height = if(input$height > 0) input$height else NA_integer_,
+      dpi = if(input$dpi > 0) input$dpi else NA_integer_,
+      title = if(nchar(input$title) > 0) input$title else NA_character_,
+      subtitle = if(nchar(input$subtitle) > 0) input$subtitle else NA_character_,
+      legend.color = if(nchar(input$legend.color) > 0) input$legend.color else NA_character_,
+      legend.shape = if(nchar(input$legend.shape) > 0) input$legend.shape else NA_character_
     ))
     
   }))
