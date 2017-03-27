@@ -76,7 +76,7 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
     }
   }
   
-  return(list(sequence.info = sequence.info, features = features))
+  return(Annotation(sequence.info = sequence.info, gene.features = GeneFilter(data = features)))
 }
 
 #' Extracts gene information from an annotation
@@ -99,7 +99,7 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
     return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts))
   }
   else {
-    return(NULL)
+    stop(paste("Unknown datatype", datatype))
   }
   
 }
@@ -128,7 +128,7 @@ importSampleGeneInformationFromAnnotation <- function(sample, readcounts) {
     
   }
   else {
-    return(NULL)
+    stop(paste("Unknown sample", sample))
   }
   
 }

@@ -43,16 +43,16 @@ GeneFilter <- setClass(
 #'
 #' @return
 #' @export
-#' @rdname merge
+#' @rdname mergeGeneFilter
 #'
 #' @examples
-setGeneric(name = "merge",
+setGeneric(name = "mergeGeneFilter",
            def = function(object1, object2) {
-             standardGeneric("merge")
+             standardGeneric("mergeGeneFilter")
            })
 
-#' @rdname merge
-setMethod(f = "merge",
+#' @rdname mergeGeneFilter
+setMethod(f = "mergeGeneFilter",
           signature = signature(object1 = "GeneFilter", object2 = "GeneFilter"),
           definition = function(object1, object2) {
             
@@ -76,16 +76,16 @@ setMethod(f = "merge",
 #'
 #' @return
 #' @export
-#' @rdname invert
+#' @rdname invertGeneFilter
 #'
 #' @examples
-setGeneric(name = "invert",
+setGeneric(name = "invertGeneFilter",
            def = function(object) {
-             standardGeneric("invert")
+             standardGeneric("invertGeneFilter")
            })
 
-#' @rdname invert
-setMethod(f = "invert",
+#' @rdname invertGeneFilter
+setMethod(f = "invertGeneFilter",
           signature = signature(object = "GeneFilter"),
           definition = function(object) {
             
@@ -108,19 +108,40 @@ setMethod(f = "invert",
 #'
 #' @return
 #' @export
-#' @rdname filterKeys
+#' @rdname geneFilterKeys
 #'
 #' @examples
-setGeneric(name = "filterKeys",
+setGeneric(name = "geneFilterKeys",
            def = function(object) {
-             standardGeneric("filterKeys")
+             standardGeneric("geneFilterKeys")
            })
 
-#' @rdname filterKeys
-setMethod(f = "filterKeys",
+#' @rdname geneFilterKeys
+setMethod(f = "geneFilterKeys",
           signature = signature(object = "GeneFilter"),
           definition = function(object) {
             return(names(object@data))
+          })
+
+#' Returns the genes in the GeneFilter object
+#'
+#' @param object GeneFilter object
+#'
+#' @return
+#' @export
+#' @rdname geneFilterGenes
+#'
+#' @examples
+setGeneric(name = "geneFilterGenes",
+           def = function(object) {
+             standardGeneric("geneFilterGenes")
+           })
+
+#' @rdname geneFilterGenes
+setMethod(f = "geneFilterGenes",
+          signature = signature(object = "GeneFilter"),
+          definition = function(object) {
+            return(unique(unlist((object@data))))
           })
 
 #' Returns the vector of genes that belongs to the filter entries
@@ -130,17 +151,43 @@ setMethod(f = "filterKeys",
 #'
 #' @return
 #' @export
-#' @rdname selectGenes
+#' @rdname geneFilterSelectGenes
 #'
 #' @examples
-setGeneric(name = "selectGenes",
+setGeneric(name = "geneFilterSelectGenes",
            def = function(object, filter.keys) {
-             standardGeneric("selectGenes")
+             standardGeneric("geneFilterSelectGenes")
            })
 
-#' @rdname selectGenes
-setMethod(f = "selectGenes",
+#' @rdname geneFilterSelectGenes
+setMethod(f = "geneFilterSelectGenes",
           signature = signature(object = "GeneFilter", filter.keys = "character"),
           definition = function(object, filter.keys) {
             return(unlist(object@data[filter.keys]))
+          })
+
+#' Returns a new GeneFilter object that only contains the genes defined in the restrict.genes vector
+#'
+#' @param object GeneFilter object
+#' @param restrict.gene Vector of gene names
+#'
+#' @return
+#' @export
+#' @rdname geneFilterRestrictToGenes
+#'
+#' @examples
+setGeneric(name = "geneFilterRestrictToGenes",
+           def = function(object, restrict.gene) {
+             standardGeneric("geneFilterRestrictToGenes")
+           })
+
+#' @rdname geneFilterRestrictToGenes
+setMethod(f = "geneFilterRestrictToGenes",
+          signature = signature(object = "GeneFilter", restrict.gene = "character"),
+          definition = function(object, restrict.gene) {
+            
+            object@data <- lapply(object@data, function(x) { intersect(x, restrict.gene)  })
+            object@data <- object@data[lapply(object@data, length) > 0]
+            
+            return(object)
           })
