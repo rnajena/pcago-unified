@@ -9,6 +9,7 @@
 library(shiny)
 library(matrixStats)
 library(rtracklayer)
+source("classAnnotation.R")
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
@@ -103,6 +104,15 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
   
 }
 
+#' Importa a sample annotation file
+#'
+#' @param sample 
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 importSampleGeneInformationFromAnnotation <- function(sample, readcounts) {
   
   if(!is.character(sample) || !is.data.frame(readcounts)) {

@@ -9,13 +9,13 @@ source("helpers.R")
 condition.default <- "{default}"
 
 # Importers for cell condition mappings
-supportedCellConditionImporters <- c("CSV" = "csv_comma",
-                                        "TSV" = "csv_whitespace")
+supportedCellConditionImporters <- c("CSV" = "csv",
+                                        "TSV" = "tsv")
 supportedCellConditionFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 # Importers for condition visuals
-supportedConditionVisualsImporters <- c("CSV" = "csv_comma",
-                                 "TSV" = "csv_whitespace")
+supportedConditionVisualsImporters <- c("CSV" = "csv",
+                                 "TSV" = "tsv")
 supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 #' Imports cell condition assignments from filehandle with importer definded by datatype
@@ -30,14 +30,20 @@ supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values
 #' @examples
 importCellConditions <- function(filehandle, datatype, cells) {
   
-  if(missing(filehandle) || !is.character(datatype) || !is.character(readcounts)) {
+  if(missing(filehandle) || !is.character(datatype) || !is.character(cells)) {
     stop("Invalid arguments!")
   }
   
-  sep = ","
+  sep <- ","
   
-  if(datatype == "csv_whitespace") {
-    sep = ""
+  if(datatype == "tsv") {
+    sep <- ""
+  }
+  else if(datatype == "csv") {
+    sep <- ","
+  }
+  else {
+    stop(paste("Unsupported format", datatype))
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
@@ -68,10 +74,16 @@ importCellConditions <- function(filehandle, datatype, cells) {
 #' @examples
 importConditionVisuals <- function(filehandle, datatype, conditions) {
   
-  sep = ","
+  sep <- ","
   
-  if(datatype == "csv_whitespace") {
-    sep = ""
+  if(datatype == "tsv") {
+    sep <- ""
+  }
+  else if(datatype == "csv") {
+    sep <- ","
+  }
+  else {
+    stop(paste("Unsupported format", datatype))
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)

@@ -23,7 +23,7 @@ library(shiny)
 #' @examples
 PlotSettings <- setClass(
   "PlotSettings",
-  slots = c(
+  slots = signature(
     width = "numeric",
     height = "numeric",
     dpi = "numeric",
