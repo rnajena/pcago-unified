@@ -100,6 +100,7 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
+    # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'",
                      bsCollapse(
                        bsCollapsePanel("Axes",
@@ -113,13 +114,20 @@ uiPCASidebarPlot <- function() {
                        ),
                        bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cells.plot.generalsettings"))
                      )),
+    # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'",
                      bsCollapse(
-                       bsCollapsePanel("Output settings")
+                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.genes.variances.generalsettings"))
                      )),
+    # Gene variances plot (filtered genes)
+    conditionalPanel("input['pca.nav'] == 'pca.genes.variances.filtered'",
+                     bsCollapse(
+                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.genes.variances.filtered.generalsettings"))
+                     )),
+    # PCA PC variances
     conditionalPanel("input['pca.nav'] == 'pca.pc.importance'",
                      bsCollapse(
-                       bsCollapsePanel("Output settings")
+                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.pc.importance.generalsettings"))
                      ))
   ))
 }

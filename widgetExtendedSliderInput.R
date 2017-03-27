@@ -34,7 +34,7 @@ extendedSliderInput <- function(id, header = "") {
                  )),
                  hDivider(),
                  bsCollapse(
-                   bsCollapsePanel("Settings",
+                   bsCollapsePanel("Animation parameters",
                                    numericRangeInput(ns("anim.range"), "From", "To"),
                                    numericInput(ns("anim.by"), "Animation step", 1, 1000, value = 10),
                                    numericInput(ns("anim.delay"), "Animation speed (ms)", 100, 1000, value = 100))

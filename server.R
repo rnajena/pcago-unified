@@ -124,11 +124,18 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
   downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
   
-  downloadablePlot("genes.variance.plot", exprplot = function(plot.settings, format, filename) 
+  pca.genes.variances.settings <- generalPlotSettings("pca.genes.variances.generalsettings")
+  downloadablePlot("genes.variance.plot", 
+                   plot.settings = pca.genes.variances.settings, 
+                   exprplot = function(plot.settings, format, filename) 
   { 
     return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename))
   })
-  downloadablePlot("genes.variance.filtered.plot", exprplot = function(plot.settings, format, filename) 
+  
+  pca.genes.variances.filtered.settings <- generalPlotSettings("pca.genes.variances.filtered.generalsettings")
+  downloadablePlot("genes.variance.filtered.plot",
+                   plot.settings = pca.genes.variances.filtered.settings,
+                   exprplot = function(plot.settings, format, filename) 
   { 
     plot.settings <- setNA(plot.settings, PlotSettings(subtitle = "Filtered genes"))
     return(saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename))
@@ -152,7 +159,11 @@ shinyServer(function(input, output, session) {
     return(p)
   })
   
-  downloadablePlot("pca.variance.plot", exprplot = function( plot.settings, format, filename ){
+  pca.variance.plot.settings <- generalPlotSettings("pca.pc.importance.generalsettings")
+  
+  downloadablePlot("pca.variance.plot", 
+                   plot.settings = pca.variance.plot.settings, 
+                   exprplot = function( plot.settings, format, filename ){
     return(savePCAVariancePlot(pca(), plot.settings, format, filename))
   })
   

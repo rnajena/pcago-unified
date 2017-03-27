@@ -26,8 +26,8 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
-  p <- ggplot(pca()$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
-  p <- p + labs(x = "Principal component", y = "Relative variance")
+  p <- ggplot(pca$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
+  p <- p + labs(x = "Principal component", y = "Relative variance", title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   
   return(plot.settings)
