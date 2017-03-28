@@ -128,35 +128,51 @@ shinyServer(function(input, output, session) {
   downloadablePlot("genes.variance.plot", 
                    plot.settings = pca.genes.variances.settings, 
                    exprplot = function(plot.settings, format, filename) 
-  { 
-    return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename))
-  })
+                   { 
+                     return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename, 
+                                                 logarithmic = input$genes.variance.plot.log))
+                   })
   
   pca.genes.variances.filtered.settings <- generalPlotSettings("pca.genes.variances.filtered.generalsettings")
   downloadablePlot("genes.variance.filtered.plot",
                    plot.settings = pca.genes.variances.filtered.settings,
                    exprplot = function(plot.settings, format, filename) 
-  { 
-    plot.settings <- setNA(plot.settings, PlotSettings(subtitle = "Filtered genes"))
-    return(saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename))
-  })
+                   { 
+                     return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename, 
+                                                 logarithmic = input$pca.genes.variance.filtered.plot.log))
+                   })
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
    
     validate(need(gene.variances.filtered(), "No gene variances to display!"))
     
+    logarithmic <- input$pca.genes.variance.filtered.plot.log # Use the setting from the equivalent plot
     genes.count <- pca.gene.count()$value
     data <- gene.variances.filtered()
     data$logvar <- log(data$var)
     data.selection <- data[1:genes.count,]
     
-    p <- ggplot(data, aes(x=1:nrow(data), y=logvar))
-    p <- p + geom_vline(xintercept = genes.count, color = "red")
-    p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$logvar), ymax = logvar, x = 1:genes.count), fill = "#da4453")
-    p <- p + geom_point()
-    p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
     
-    return(p)
+    
+    if(logarithmic) {
+      p <- ggplot(data, aes(x=1:nrow(data), y=logvar))
+      p <- p + geom_vline(xintercept = genes.count, color = "red")
+      p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$logvar), ymax = logvar, x = 1:genes.count), fill = "#da4453")
+      p <- p + geom_point()
+      p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
+      
+      return(p)
+    }
+    else {
+      p <- ggplot(data, aes(x=1:nrow(data), y=var))
+      p <- p + geom_vline(xintercept = genes.count, color = "red")
+      p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$var), ymax = var, x = 1:genes.count), fill = "#da4453")
+      p <- p + geom_point()
+      p <- p + labs(x = "Top n-th variant gene", y = "σ²")
+      
+      return(p)
+    }
+    
   })
   
   pca.variance.plot.settings <- generalPlotSettings("pca.pc.importance.generalsettings")

@@ -26,8 +26,10 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
+  plot.y.label <- paste0("Relative variance (Σσ² = ", sum(pca$var), ")")
+  
   p <- ggplot(pca$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
-  p <- p + labs(x = "Principal component", y = "Relative variance", title = title, subtitle = subtitle)
+  p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   
   return(plot.settings)
@@ -41,12 +43,13 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
 #' @param dpi 
 #' @param format 
 #' @param filename 
+#' @param logarithmic Display logarithmic values
 #'
 #' @return
 #' @export
 #'
 #' @examples
-saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename){
+saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename, logarithmic = F){
   
   plot.settings <- setNA(plot.settings, 
                          PlotSettings(width = 640, 
@@ -68,8 +71,11 @@ saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename
     stop("Invalid arguments!")
   }
   
-  p <- ggplot(gene.variances, aes(x=1:nrow(gene.variances), y=log(var))) + geom_point()
-  p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)", title = title, subtitle = subtitle)
+  plot.aes <- if(logarithmic) aes(x=1:nrow(gene.variances), y=log(var)) else aes(x=1:nrow(gene.variances), y=var)
+  plot.y.label <- if(logarithmic) "log(σ²)" else "σ²"
+  
+  p <- ggplot(gene.variances, plot.aes) + geom_point()
+  p <- p + labs(x = "Top n-th variant gene", y = plot.y.label, title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   
   return(plot.settings)

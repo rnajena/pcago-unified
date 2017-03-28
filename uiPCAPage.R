@@ -19,7 +19,6 @@ source("uiPCASidebars.R")
 #' @examples
 uiPCAPage <- function() {
   
-  
   return(sidebarLayout(
     sidebarPanel(tabsetPanel(
       tabPanel("Data", uiPCASidebarData()),
@@ -45,10 +44,25 @@ uiPCAPage <- function() {
                                     tabPanel("Annotation", value = "pca.genes.annotation",
                                              downloadableDataTableOutput("genes.annotation")),
                                     tabPanel("Variances", value = "pca.genes.variances",
-                                             downloadablePlotOutput("genes.variance.plot"),
+                                             downloadablePlotOutput("genes.variance.plot",
+                                                                    custom.header.items = tagList(
+                                                                      bsButton("genes.variance.plot.log", 
+                                                                               "Logarithmic",
+                                                                               icon = icon("superscript"),
+                                                                               type = "toggle",
+                                                                               value = T)
+                                                                    )),
                                              downloadableDataTableOutput("genes.variance")),
                                     tabPanel("Variances (filtered)", value = "pca.genes.variances.filtered",
-                                             downloadablePlotOutput("genes.variance.filtered.plot")),
+                                             downloadablePlotOutput("genes.variance.filtered.plot",
+                                                                    custom.header.items = tagList(
+                                                                      bsButton("pca.genes.variance.filtered.plot.log", 
+                                                                               "Logarithmic",
+                                                                               icon = icon("superscript"),
+                                                                               type = "toggle",
+                                                                               value = T)
+                                                                    ))
+                                             ),
                                     "----",
                                     "Conditions",
                                     tabPanel("Cell condition assignments", value = "pca.conditions",
