@@ -9,14 +9,26 @@ source("helpers.R")
 condition.default <- "{default}"
 
 # Importers for cell condition mappings
-supportedCellConditionImporters <- c("CSV" = "csv",
-                                        "TSV" = "tsv")
-supportedCellConditionFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+# supportedCellConditionImporters <- c("CSV" = "csv",
+#                                         "TSV" = "tsv")
+supportedCellConditionImporters <- list(
+  ImporterEntry(name = "csv", label = "CSV"),
+  ImporterEntry(name = "tsv", label = "TSV")
+)
+availableCellConditionSamples <- list()
+supportedCellConditionGenerators <- list()
+#supportedCellConditionFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 # Importers for condition visuals
-supportedConditionVisualsImporters <- c("CSV" = "csv",
-                                 "TSV" = "tsv")
-supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+# supportedConditionVisualsImporters <- c("CSV" = "csv",
+#                                  "TSV" = "tsv")
+supportedConditionVisualsImporters <- list(
+  ImporterEntry(name = "csv", label = "CSV"),
+  ImporterEntry(name = "tsv", label = "TSV")
+)
+supportedConditionVisualsGenerators <- list()
+availableConditionVisualSamples <- list()
+#supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 #' Imports cell condition assignments from filehandle with importer definded by datatype
 #'

@@ -33,7 +33,12 @@ source("classPlotSettings.R")
 shinyServer(function(input, output, session) {
   
   # Read counts
-  readcounts <- genericImporterData("pca.data.readcounts.importer", exprimport = importReadcount, exprsample = importReadcountSample)
+  readcounts <- genericImporterData("pca.data.readcounts.importer", 
+                                    importers = reactive(supportedReadcountImporters),
+                                    samples = reactive(availableReadcountSamples),
+                                    generators = reactive(supportedReadcountGenerators),
+                                    exprimport = importReadcount, 
+                                    exprsample = importReadcountSample)
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )

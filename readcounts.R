@@ -3,15 +3,22 @@
 #' 
 
 library(shiny)
+source("classImporterEntry.R")
 
 #' A list of all read count data types that will be supported
 #' The user selects one of those types, which will then invoke the corresponding importer
-supportedReadcountImporters <- c("CSV" = "csv",
-                                 "TSV" = "tsv")
-supportedReadcountFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
-availableReadcountSamples <- c("Vitamins (small)" = "vitamins.small.csv",
-                               "Vitamins" = "vitamins.csv")
+supportedReadcountImporters <- list(
+  ImporterEntry(name = "csv", label = "CSV"),
+  ImporterEntry(name = "tsv", label = "TSV")
+)
+
+supportedReadcountGenerators <- list()
+
+availableReadcountSamples <- list(
+  ImporterEntry(name = "vitamins.small.csv", label = "Vitamins (small)"),
+  ImporterEntry(name = "vitamins.csv", label = "Vitamins")
+)
 
 #' Supported read count normalization types
 supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "TPM" = "tpm")

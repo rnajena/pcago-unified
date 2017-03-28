@@ -9,13 +9,27 @@
 library(shiny)
 library(matrixStats)
 library(rtracklayer)
+library(biomaRt)
 source("classAnnotation.R")
+source("classImporterEntry.R")
+source("biomart.R")
 
 # A list of all read count data types that will be supported
 # The user selects one of those types, which will then invoke the corresponding importer
-supportedAnnotationImporters <- c("Ensembl GFF" = "gff_ensembl")
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
-availableAnnotationSamples <- c("Vitamins" = "vitamins.gff3")
+supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
+                                                   label = "Ensembl GFF"))
+supportedAnnotationGenerators <- list(ImporterEntry(name = "ensembl_go",
+                                                    label = "Ensembl GO terms",
+                                                    parameters = list(
+                                                      ImporterParameter(name = "dataset", 
+                                                                        label = "Dataset", 
+                                                                        type = "select", 
+                                                                        select.values = reactive(getBioMartDatsets()))
+                                                    ))
+                                      )
+availableAnnotationSamples <- list(ImporterEntry(name = "vitamins.gff3",
+                                                 label = "Vitamins"))
 
 #' Extracts gene information from an Ensembl GFF file
 #' See importGeneInformationFromAnnotation for more info
@@ -113,7 +127,7 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
 #' @export
 #'
 #' @examples
-importSampleGeneInformationFromAnnotation <- function(sample, readcounts) {
+importSampleGeneInformation <- function(sample, readcounts) {
   
   if(!is.character(sample) || !is.data.frame(readcounts)) {
     stop("Invalid arguments!")

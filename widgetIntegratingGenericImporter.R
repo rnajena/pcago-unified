@@ -23,16 +23,12 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-integratingGenericImporterInput <- function(id, filetypes, importers, samples = c(), generators = c()) {
+integratingGenericImporterInput <- function(id) {
   
   ns <- NS(id)
   
   return(tags$div(class = "integrating-generic-importer",
     genericImporterInput(ns("importer"), 
-                         filetypes = filetypes, 
-                         importers = importers, 
-                         samples = samples, 
-                         generators = generators,
                          reset.button = F,
                          additional.buttons = tagList(
                            actionButton(ns("clear"), "Reset")
@@ -61,10 +57,25 @@ integratingGenericImporterInput <- function(id, filetypes, importers, samples = 
 #' @export
 #'
 #' @examples
-integratingGenericImporterData_ <- function(input, output, session, exprimport, exprsample, exprgenerator, exprintegrate) {
+integratingGenericImporterData_ <- function(input, 
+                                            output, 
+                                            session, 
+                                            importers,
+                                            samples,
+                                            generators,
+                                            exprimport, 
+                                            exprsample, 
+                                            exprgenerator, 
+                                            exprintegrate) {
   
   variables <- reactiveValues(data = list(), status.choices = c(), status.selected = c())
-  importer.data <- genericImporterData("importer", exprimport, exprsample)
+  importer.data <- genericImporterData("importer",
+                                       importers = importers,
+                                       samples = samples,
+                                       generators = generators,
+                                       exprimport = exprimport,
+                                       exprsample = exprsample,
+                                       exprgenerator = exprgenerator)
   
   # Collect data from generic importer if it's available
   # Store it into it's own array to be able to re-use the importer
@@ -148,9 +159,19 @@ integratingGenericImporterData_ <- function(input, output, session, exprimport, 
 #' @export
 #'
 #' @examples
-integratingGenericImporterData <- function(id, exprimport, exprsample, exprgenerator, exprintegrate) {
+integratingGenericImporterData <- function(id, 
+                                           importers,
+                                           samples,
+                                           generators,
+                                           exprimport, 
+                                           exprsample, 
+                                           exprgenerator, 
+                                           exprintegrate) {
   return(callModule(integratingGenericImporterData_, 
                     id, 
+                    importers = importers,
+                    samples = samples,
+                    generators = generators,
                     exprimport = exprimport,
                     exprsample = exprsample,
                     exprgenerator = exprgenerator,

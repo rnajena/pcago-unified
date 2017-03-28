@@ -7,6 +7,17 @@
 
 library(shiny)
 
+#' An additional parameter for generic importer
+#'
+#' @slot name character. 
+#' @slot label character. 
+#' @slot type character. 
+#' @slot select.values A list, vector or a reactive that returns one of those 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ImporterParameter <- setClass(
   "ImporterParameter",
   slots = signature(
@@ -25,6 +36,9 @@ ImporterParameter <- setClass(
     
     if(is.na(object@name)) {
       return("No name defined!")
+    }
+    if(is.na(object@label)) {
+      return("No label defined!")
     }
     if(!(object@type %in% c("select"))) {
       return(paste("Unknown type", object@type))

@@ -30,10 +30,7 @@ uiPCASidebarData <- function() {
                     value = "readcounts",
                     bsCollapse(
                       bsCollapsePanel("Import",
-                                      genericImporterInput("pca.data.readcounts.importer",
-                                                           supportedReadcountFileTypes,
-                                                           supportedReadcountImporters,
-                                                           availableReadcountSamples)),
+                                      genericImporterInput("pca.data.readcounts.importer")),
                       bsCollapsePanel("Processing",
                                       checkboxGroupInput("pca.data.readcounts.processing",
                                                          helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
@@ -49,10 +46,7 @@ uiPCASidebarData <- function() {
     ),
     bsCollapsePanel("Annotation",
                     value = "annotation",
-                    integratingGenericImporterInput("pca.data.annotation.importer",
-                                                    supportedAnnotationFileTypes,
-                                                    supportedAnnotationImporters,
-                                                    availableAnnotationSamples)
+                    integratingGenericImporterInput("pca.data.annotation.importer")
                     
     ),
     bsCollapsePanel("Conditions",

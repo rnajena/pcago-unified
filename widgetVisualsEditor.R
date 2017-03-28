@@ -63,9 +63,7 @@ visualsEditorUI <- function(id) {
                             bsButton(ns("import"), "Import", icon = icon("upload"), type = "toggle")
                           ),
                           conditionalPanel(conditionalPanel.equals(ns("import"), "true"), 
-                                           genericImporterInput(ns("importer"), 
-                                                                supportedConditionVisualsFileTypes, 
-                                                                supportedConditionVisualsImporters)),
+                                           genericImporterInput(ns("importer"))),
                           conditionalPanel(conditionalPanel.equals(ns("import"), "false"), 
                                            tags$div(
                                              id="condition-list",
@@ -192,7 +190,11 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
                                        })
   
   #' Handler for import of visuals table
-  visual.table.imported <- genericImporterData("importer", exprimport = function(con, importer) {
+  visual.table.imported <- genericImporterData("importer", 
+                                               importers = reactive(supportedConditionVisualsImporters),
+                                               samples = reactive(availableConditionVisualSamples),
+                                               generators = reactive(supportedConditionVisualsGenerators),
+                                               exprimport = function(con, importer) {
     conditions <- colnames(isolate({conditions()}))
     imported <- importConditionVisuals(con, importer, conditions)
     return(imported)

@@ -36,7 +36,7 @@ cellConditionImporterUI <- function(id) {
                                     selected = "_",
                                     options = list("create" = T))),
     conditionalPanel(conditionalPanel.equals(ns("mode"), "'upload'"),
-                     genericImporterInput(ns("importer"),filetypes = supportedCellConditionFileTypes, importers = supportedCellConditionImporters))
+                     genericImporterInput(ns("importer")))
   ))
   
 }
@@ -55,7 +55,11 @@ cellConditionImporterUI <- function(id) {
 #' @examples
 cellConditionImporterValue_ <- function(input, output, session, readcounts) {
   
-  cell.conditions.imported <- genericImporterData("importer", exprimport = function(con, importer) {
+  cell.conditions.imported <- genericImporterData("importer", 
+                                                  importers = reactive(supportedCellConditionImporters),
+                                                  samples = reactive(availableCellConditionSamples),
+                                                  generators = reactive(supportedConditionVisualsGenerators),
+                                                  exprimport = function(con, importer) {
     
     validate(need(readcounts(), "Cannot import condition table without read counts!"))
     

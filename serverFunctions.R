@@ -87,11 +87,18 @@ serverReadCountProcessing <- function(readcounts, input) {
 #' @examples
 serverGeneInfoAnnotation <- function(readcounts) {
   
-  return(integratingGenericImporterData("pca.data.annotation.importer", exprimport = function(con, importer) {
+  return(integratingGenericImporterData("pca.data.annotation.importer", 
+                                        importers = reactive(supportedAnnotationImporters),
+                                        samples = reactive(availableAnnotationSamples),
+                                        generators = reactive(supportedAnnotationGenerators),
+                                        exprimport = function(con, importer) {
     return(importGeneInformationFromAnnotation(con, importer, readcounts()))
   },
   exprsample = function(sample) {
-    return(importSampleGeneInformationFromAnnotation(sample, readcounts()))
+    return(importSampleGeneInformation(sample, readcounts()))
+  },
+  exprgenerator = function(generator) {
+    return(generateGeneInformation(generator, readcounts()))
   },
   exprintegrate = function(data, callback) {
     output <- Annotation()

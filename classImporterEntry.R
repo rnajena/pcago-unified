@@ -5,6 +5,16 @@
 library(shiny)
 source("classImporterParameter.R")
 
+#' Entry of generic importer
+#'
+#' @slot name character. 
+#' @slot label character. 
+#' @slot parameters List of ImporterParameter objects 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ImporterEntry <- setClass(
   "ImporterEntry",
   slots = signature(
@@ -21,6 +31,9 @@ ImporterEntry <- setClass(
     
     if(is.na(object@name)) {
       return("No valid name!")
+    }
+    if(is.na(object@label)) {
+      return("No valid label!")
     }
     for(entry in object@parameters) {
       if(!is(entry, "ImporterParameter")) {
