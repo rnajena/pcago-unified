@@ -21,14 +21,21 @@ Annotation <- setClass(
   slots = signature(
     sequence.info = "data.frame",
     gene.features = "GeneFilter",
-    gene.go.terms = "GeneFilter"
+    gene.go.terms = "GeneFilter",
+    gene.scaffold = "GeneFilter"
   ),
   prototype = list(
     sequence.info = data.frame(),
     gene.features = GeneFilter(),
-    gene.go.terms = GeneFilter()
+    gene.go.terms = GeneFilter(),
+    gene.scaffold = GeneFilter()
   ),
   validity = function(object) {
+    
+    if(nrow(object@sequence.info) > 0 && colnames(object@sequence.info) != c("scaffold", "start_position", "end_position", "length")) {
+      return("Invalid sequence info object")
+    }
+    
     return(T)
   }
 )
@@ -53,12 +60,20 @@ setMethod(f = "mergeAnnotation",
           signature = signature(object1 = "Annotation", object2 = "Annotation"),
           definition = function(object1, object2) {
             
+            
             # Merge sequence info
             if(nrow(object2@sequence.info) != 0) {
               
-              #TODO
               if(nrow(object1@sequence.info) != 0) {
-                stop("Not implemented!")
+                
+                # overwritten.genes <- intersect(rownames(object1@sequence.info), rownames(object2@sequence.info))
+                # 
+                # if(length(overwritten.genes) > 0) {
+                #   showNotification(paste("Overwriting existing sequence information of following genes:", strJoinLimited(overwritten.genes)),
+                #                    type = "warning")
+                # }
+                
+                object1@sequence.info[rownames(object2@sequence.info),] <- object2@sequence.info[,]
               }
               
               object1@sequence.info <- object2@sequence.info
@@ -68,6 +83,7 @@ setMethod(f = "mergeAnnotation",
             # Merge gene filters
             object1@gene.features <- mergeGeneFilter(object1@gene.features, object2@gene.features)
             object1@gene.go.terms <- mergeGeneFilter(object1@gene.go.terms, object2@gene.go.terms)
+            object1@gene.scaffold <- mergeGeneFilter(object1@gene.scaffold, object2@gene.scaffold)
             
             return(object1)
            
@@ -93,10 +109,19 @@ setMethod(f = "annotationRestrictToGenes",
           signature = signature(object = "Annotation", restrict.gene = "character"),
           definition = function(object, restrict.gene) {
             
-            #TODO: sequence.info
+            if(nrow(object@sequence.info) > 0) {
+              
+              supported.genes <- intersect(rownames(object@sequence.info), restrict.gene)
+              
+              if(length(supported.genes) > 0) {
+                object@sequence.info <- object@sequence.info[supported.genes,]
+              }
+              
+            }
             
             object@gene.features <- geneFilterRestrictToGenes(object@gene.features, restrict.gene)
             object@gene.go.terms <- geneFilterRestrictToGenes(object@gene.go.terms, restrict.gene)
+            object@gene.scaffold <- geneFilterRestrictToGenes(object@gene.scaffold, restrict.gene)
             
             return(object)
           })

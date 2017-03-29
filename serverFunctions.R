@@ -91,48 +91,48 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                         importers = reactive(supportedAnnotationImporters),
                                         samples = reactive(availableAnnotationSamples),
                                         generators = reactive(supportedAnnotationGenerators),
-                                        exprimport = function(con, importer) {
-    return(importGeneInformationFromAnnotation(con, importer, readcounts()))
-  },
-  exprsample = function(sample) {
-    return(importSampleGeneInformation(sample, readcounts()))
-  },
-  exprgenerator = function(generator) {
-    return(generateGeneInformation(generator, readcounts()))
-  },
-  exprintegrate = function(data, callback) {
-    output <- Annotation()
-    genes <- rownames(readcounts())
-    
-    choices = c("sequence.info",
-                "features", 
-                "go")
-    selected = c()
-    
-    # Merge data into output
-    for(current.data in data) {
-      if(!is.null(data)) {
-        output <- mergeAnnotation(output, current.data)
-      }
-    }
-    
-    sequence.info.genes <- intersect(rownames(output@sequence.info), genes)
-    feature.genes <- intersect(geneFilterGenes(output@gene.features), genes)
-    go.genes <- intersect(geneFilterGenes(output@gene.go.terms), genes)
-    
-    names(choices) <- c(
-      if(length(sequence.info.genes) == 0) "Sequence info" else paste0("Sequence info (", length(sequence.info.genes), "/", length(genes), ")"),
-      if(length(feature.genes) == 0) "Associated features" else paste0("Associated features (", length(feature.genes), "/", length(genes), ")"),
-      if(length(go.genes) == 0) "GO terms" else paste0("GO terms (", length(go.genes), "/", length(genes), ")")
-    )
-    
-    if(length(sequence.info.genes) > 0) { selected <- c(selected, "sequence.info") }
-    if(length(feature.genes) > 0) { selected <- c(selected, "features") }
-    if(length(go.genes) > 0) { selected <- c(selected, "go") }
-    
-    callback(choices, selected)
-    return(output)
-  }))
+                                        exprimport = function(con, importer, parameters) {
+                                          return(importGeneInformationFromAnnotation(con, importer, readcounts()))
+                                        },
+                                        exprsample = function(sample, parameters) {
+                                          return(importSampleGeneInformation(sample, readcounts()))
+                                        },
+                                        exprgenerator = function(generator, parameters) {
+                                          return(generateGeneInformation(generator, parameters, readcounts()))
+                                        },
+                                        exprintegrate = function(data, callback) {
+                                          output <- Annotation()
+                                          genes <- rownames(readcounts())
+                                          
+                                          choices = c("sequence.info",
+                                                      "features", 
+                                                      "go")
+                                          selected = c()
+                                          
+                                          # Merge data into output
+                                          for(current.data in data) {
+                                            if(!is.null(data)) {
+                                              output <- mergeAnnotation(output, current.data)
+                                            }
+                                          }
+                                          
+                                          sequence.info.genes <- intersect(rownames(output@sequence.info), genes)
+                                          feature.genes <- intersect(geneFilterGenes(output@gene.features), genes)
+                                          go.genes <- intersect(geneFilterGenes(output@gene.go.terms), genes)
+                                          
+                                          names(choices) <- c(
+                                            if(length(sequence.info.genes) == 0) "Sequence info" else paste0("Sequence info (", length(sequence.info.genes), "/", length(genes), ")"),
+                                            if(length(feature.genes) == 0) "Associated features" else paste0("Associated features (", length(feature.genes), "/", length(genes), ")"),
+                                            if(length(go.genes) == 0) "GO terms" else paste0("GO terms (", length(go.genes), "/", length(genes), ")")
+                                          )
+                                          
+                                          if(length(sequence.info.genes) > 0) { selected <- c(selected, "sequence.info") }
+                                          if(length(feature.genes) > 0) { selected <- c(selected, "features") }
+                                          if(length(go.genes) > 0) { selected <- c(selected, "go") }
+                                          
+                                          callback(choices, selected)
+                                          return(output)
+                                        }))
   
 }
 
@@ -151,27 +151,39 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
     
     gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
     all.genes <- rownames(readcounts.processed())
-    unused.genes <- rownames(readcounts.processed())
     
     if(!is.null(gene.info.annotation())) {
       
       annotation <- gene.info.annotation()
       annotation <- annotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
       
-      if(length(geneFilterKeys(annotation@gene.features)) > 0) {
+      {
+        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.features))
         gene.criteria[["Associated features"]] <- annotation@gene.features@data
-        unused.genes <- setdiff(unused.genes, geneFilterGenes(annotation@gene.features))
+        
+        if(length(unused.genes) > 0) {
+          gene.criteria[["Associated features"]][["No data"]] <- unused.genes
+        }
       }
-      if(length(geneFilterKeys(annotation@gene.go.terms)) > 0) {
+      {
+        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.go.terms))
         gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms@data
-        unused.genes <- setdiff(unused.genes, geneFilterGenes(annotation@gene.go.terms))
+        
+        if(length(unused.genes) > 0) {
+          gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
+        }
+        
+      }
+      {
+        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.scaffold))
+        gene.criteria[["Scaffold"]] <- annotation@gene.scaffold@data
+        
+        if(length(unused.genes) > 0) {
+          gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
+        }
+       
       }
       
-    }
-    
-    # Now look for genes that haven't been covered and create a list
-    if(length(unused.genes) > 0) {
-      gene.criteria[["Misc"]] <- list("Without criteria" = unused.genes)
     }
     
     return(gene.criteria)
@@ -387,9 +399,14 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
   return(reactive({
     validate(need(gene.info.annotation(), "No annotation available!"))
     
+    notification.id <- progressNotification("Building table data ...")
+    on.exit({
+      removeNotification(notification.id)
+    })
+    
     genes <- rownames(readcounts())
     table <- data.frame(row.names = genes,
-                        "Sequence" = rep(NA, length(genes)),
+                        "Scaffold" = rep(NA, length(genes)),
                         "Start" = rep(NA, length(genes)),
                         "End" = rep(NA, length(genes)),
                         "Length" = rep(NA, length(genes)),
@@ -399,17 +416,19 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
     features <- gene.info.annotation()@gene.features
     features.inv <- invertGeneFilter(features)
     go.terms <- gene.info.annotation()@gene.go.terms
+    go.terms.inv <- invertGeneFilter(go.terms)
     
     if(nrow(sequence.info) > 0) {
       indices <- match(genes, rownames(sequence.info))
       
-      table$Sequence <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "sequence"] })
-      table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start"] })
-      table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end"] })
+      table$Sequence <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "scaffold"] })
+      table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start_position"] })
+      table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end_position"] })
       table$Length <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "length"] })
     }
     
     table$Features <- sapply(genes, function(x) { if(x %in% names(features.inv)) paste(features.inv[[x]], collapse = "; ") else NA })
+    table[["GO terms"]] <- sapply(genes, function(x) { if(x %in% names(go.terms.inv)) paste(go.terms.inv[[x]], collapse = "; ") else NA })
     
     
     return(table)

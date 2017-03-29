@@ -194,17 +194,19 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
                                                importers = reactive(supportedConditionVisualsImporters),
                                                samples = reactive(availableConditionVisualSamples),
                                                generators = reactive(supportedConditionVisualsGenerators),
-                                               exprimport = function(con, importer) {
-    conditions <- colnames(isolate({conditions()}))
-    imported <- importConditionVisuals(con, importer, conditions)
-    return(imported)
-  })
+                                               exprimport = function(con, importer, parameters) {
+                                                 return(importConditionVisuals(con, importer, conditions()))
+                                               },
+                                               exprsample = function(sample, parameters) {
+                                                 return(importConditionVisualsSample(sample, conditions()))
+                                               })
   
   #' When the user imports a visual table, apply it
   observeEvent(visual.table.imported(), {
     
-    validate(need(visual.table.imported(), "Import went wrong! Won't modify table."))
-    variables$visuals.table <- visual.table.imported()
+    if(!is.null(visual.table.imported())) {
+      variables$visuals.table <- visual.table.imported()
+    }
     
   })
   

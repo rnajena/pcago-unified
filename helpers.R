@@ -4,6 +4,7 @@
 
 library(shiny)
 library(reshape2)
+library(stringi)
 
 #' Returns logical vector indicating for each input element if they are a valid color
 #'
@@ -82,6 +83,56 @@ withProgressCustom <- function(expr, message) {
   }
   
   return(expr(updateProgress))
+  
+}
+
+#' Creates a notification that indicates progress without a progress bar
+#' Server code must close this notification manually!
+#'
+#' @param id Id of the notification if NULL, an ID will be generated
+#' @param message 
+#'
+#' @return ID of the notification
+#' @export
+#'
+#' @examples
+progressNotification <- function(message, id = NULL) {
+  
+  if(is.null(id)) {
+    id <- stringi::stri_rand_strings(1, 16)
+  }
+  
+  showNotification(
+    ui = tags$span(icon("circle-o-notch", class = "fa-spin"), message),
+    id = id,
+    closeButton = F,
+    type = "default",
+    duration = NULL
+  )
+  
+  return(id)
+}
+
+
+
+#' Runs an expression with progress notification
+#'
+#' @param message 
+#' @param expr 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+withProgressNotification <- function(message, expr) {
+  
+  id <- stringi::stri_rand_strings(1, 16)
+  on.exit({
+    removeNotification(id = id)
+  })
+  
+  progressNotification(id = id, message = message)
+  return(expr())
   
 }
 

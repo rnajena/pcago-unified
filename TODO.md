@@ -4,10 +4,6 @@
 
 * Annotations, GO terms, ...
 * Normalization
-* Plot output settings (width, height, dpi)
-* PC variances in plot
-* Gene information
-* GO terms
 
 ## Code
 

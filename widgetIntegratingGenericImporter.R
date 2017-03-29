@@ -112,6 +112,7 @@ integratingGenericImporterData_ <- function(input,
         tag <- tagAppendChild(tag, tags$div(tags$span(tag.icon), tags$span(choice.name)))
       }
     }
+    
     tag <- tagAppendChild(tag, tags$div(class = "data-sets",paste(length(variables$data), "data sets loaded.")))
     
     return(tag)

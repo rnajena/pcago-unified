@@ -221,6 +221,7 @@
 	height: 150px;
 }
 
+
 /*
 * Style for nested collapse panels
 */
@@ -233,13 +234,13 @@
 	border: 0;
 }
 
-
 .sbs-panel-group .sbs-panel-group > .panel {
 	border-width: 0;
 }
 
 .sbs-panel-group .sbs-panel-group > .panel > .panel-heading {
 	border-bottom: 1px solid #ddd;
+	background-color: #fff;
 }
 
 .sbs-panel-group .sbs-panel-group > .panel > .panel-heading > .panel-title {
@@ -281,4 +282,55 @@
 
 .dropdown-button .dropdown-menu li:first-child {
 	padding-top: 0;
+}
+
+/*
+* Style for notifications (the default ones are too bright and can be easily overseen)
+*/
+.shiny-notification {
+
+}
+
+.shiny-notification-message {
+	background-color: #337ab7;
+	border-color: #2e6da4;
+	color: #ffffff;
+}
+
+.shiny-notification-message .shiny-notification-close {
+	color: #ffffff;
+}
+
+.shiny-notification-warning {
+	font-weight: bold;
+	color: #232629;
+	background: repeating-linear-gradient(
+	  45deg,
+	  #fdbc4b,
+	  #fdbc4b 10px,
+	  #f39c1f 10px,
+	  #f39c1f 20px
+	);
+	border-color: #ca8d36;
+}
+
+.shiny-notification-warning .shiny-notification-close {
+	color: #232629;
+}
+
+.shiny-notification-error {
+	font-weight: bold;
+	color: #ffffff;
+	background: repeating-linear-gradient(
+	  45deg,
+	  #ed1515,
+	  #ed1515 10px,
+	  #da4453 10px,
+	  #da4453 20px
+	);
+	border-color: #ba1010;
+}
+
+.shiny-notification-error .shiny-notification-close {
+	color: #ffffff;
 }

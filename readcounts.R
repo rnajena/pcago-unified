@@ -16,6 +16,7 @@ supportedReadcountImporters <- list(
 supportedReadcountGenerators <- list()
 
 availableReadcountSamples <- list(
+  ImporterEntry(name = "vitamins.debug.csv", label = "Vitamins (debug)"),
   ImporterEntry(name = "vitamins.small.csv", label = "Vitamins (small)"),
   ImporterEntry(name = "vitamins.csv", label = "Vitamins")
 )
@@ -33,7 +34,7 @@ supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "
 #' @export
 #'
 #' @examples
-importReadcount <- function(filehandle, datatype) {
+importReadcount <- function(filehandle, datatype, parameters) {
   
   if(missing(filehandle) || !is.character(datatype)) {
     stop("Invalid arguments!")
@@ -71,31 +72,16 @@ importReadcount <- function(filehandle, datatype) {
 #' @export
 #'
 #' @examples
-importReadcountSample <- function(sample) {
+importReadcountSample <- function(sample, parameters) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
   }
   
-  if(sample == "vitamins.small.csv") {
-    
-    con <- file("sampledata/vitamins.small.csv", "r")
-    data <- importReadcount(con, "csv")
-    close(con)
-    return(data)
-    
-  }
-  else if(sample == "vitamins.csv") {
-    
-    con <- file("sampledata/vitamins.csv", "r")
-    data <- importReadcount(con, "csv")
-    close(con)
-    return(data)
-    
-  }
-  else {
-    return(NULL)
-  }
+  con <- file(paste0("sampledata/", sample), "r")
+  data <- importReadcount(con, "csv")
+  close(con)
+  return(data)
   
 }
 

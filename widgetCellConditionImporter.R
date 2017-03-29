@@ -59,7 +59,7 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
                                                   importers = reactive(supportedCellConditionImporters),
                                                   samples = reactive(availableCellConditionSamples),
                                                   generators = reactive(supportedConditionVisualsGenerators),
-                                                  exprimport = function(con, importer) {
+                                                  exprimport = function(con, importer, parameters) {
     
     validate(need(readcounts(), "Cannot import condition table without read counts!"))
     

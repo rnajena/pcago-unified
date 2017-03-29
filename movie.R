@@ -38,9 +38,7 @@ savePCACellPlotMovie <- function(filename,
                              pca.scale,
                              updateProgress = NULL) {
   
-  if(!is.character(filename) || 
-     !is.numeric(genes.count.from) || !is.numeric(genes.count.to) || !is.numeric(genes.count.by) ||
-     !is.numeric(time.per.frame) || !is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
+  if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
      !is.data.frame(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
     stop("Invalid arguments!")
   }

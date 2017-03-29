@@ -17,18 +17,16 @@ supportedCellConditionImporters <- list(
 )
 availableCellConditionSamples <- list()
 supportedCellConditionGenerators <- list()
-#supportedCellConditionFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
 
 # Importers for condition visuals
-# supportedConditionVisualsImporters <- c("CSV" = "csv",
-#                                  "TSV" = "tsv")
 supportedConditionVisualsImporters <- list(
   ImporterEntry(name = "csv", label = "CSV"),
   ImporterEntry(name = "tsv", label = "TSV")
 )
 supportedConditionVisualsGenerators <- list()
-availableConditionVisualSamples <- list()
-#supportedConditionVisualsFileTypes <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+availableConditionVisualSamples <- list(
+  ImporterEntry(name = "visuals.vitamins.small.csv", label = "Vitamins (Small)"),
+  ImporterEntry(name = "visuals.vitamins.large.csv", label = "Vitamins (Large)"))
 
 #' Imports cell condition assignments from filehandle with importer definded by datatype
 #'
@@ -100,12 +98,6 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
   
-  # We also want to save custom labels for color and shape in the file
-  # They are located in the column names and defined by <column>=<custom label>
-  # extracted <- data.frame.labels(data)
-  # data <- extracted$data
-  # labels <- extracted$labels
-  
   # Handle errors
   if(!setequal(conditions, rownames(data))) {
     stop("Imported visual definition has different set of conditions!")
@@ -127,6 +119,27 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   }
   
   return(data)
+}
+
+#' Imports sample with given sample id
+#'
+#' @param sample 
+#'
+#' @return Data frame containing the read data
+#' @export
+#'
+#' @examples
+importConditionVisualsSample <- function(sample, conditions) {
+  
+  if(!is.character(sample)) {
+    stop("Invalid arguments!")
+  }
+  
+  con <- file(paste0("sampledata/", sample), "r")
+  data <- importConditionVisuals(con, "csv", conditions)
+  close(con)
+  return(data)
+  
 }
 
 

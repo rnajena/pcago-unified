@@ -32,6 +32,16 @@ source("classPlotSettings.R")
 
 shinyServer(function(input, output, session) {
   
+  # observe({
+  #   showNotification("Test.Default", duration = NULL, type = "default")
+  #   showNotification("Test.Message", duration = NULL, type = "message")
+  #   showNotification("Test.Warning", duration = NULL, type = "warning")
+  #   showNotification("Test.Error", duration = NULL, type = "error")
+  #   progress <- shiny::Progress$new()
+  #   progress$set(message = "Test.Progress", value = 0.5)
+  #   progressNotification("test.progress.notify", "Test.ProgressNotify")
+  # })
+  
   # Read counts
   readcounts <- genericImporterData("pca.data.readcounts.importer", 
                                     importers = reactive(supportedReadcountImporters),
@@ -226,7 +236,7 @@ shinyServer(function(input, output, session) {
         filename = file,
         animation.params = pca.gene.count(),
         axes = input$pca.cells.plot.axes,
-        plot.settings = pca.cellplot.settings,
+        plot.settings = pca.cellplot.settings(),
         visuals.conditions = visuals.conditions(),
         visuals.cell = visuals.cell(),
         readcounts.filtered = readcounts.filtered(),

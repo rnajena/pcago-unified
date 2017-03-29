@@ -131,8 +131,8 @@ genericImporterData_ <- function(input,
     updateRadioButtons(session, "source", choices = sources) 
   })
   
-  # Render the parameter UI based on the currently selected importer
-  output$parameters <- renderUI({
+  # Returns the current selected importer object
+  importer.object <- reactive({
     
     importer.object <- NULL
     
@@ -146,18 +146,28 @@ genericImporterData_ <- function(input,
       importer.object <- Find(function(x) { x@name == input$generator }, generators())
     }
     
-    if(!is.null(importer.object)) {
+    return(importer.object)
+    
+  })
+  
+  # Render the parameter UI based on the currently selected importer
+  output$parameters <- renderUI({
+    
+    if(!is.null(importer.object())) {
       
       output <- tagList()
       ns <- session$ns
       
-      for(param in importer.object@parameters) {
+      for(param in importer.object()@parameters) {
         if(param@type == "select") {
           
           select.values <- param@select.values
           
           if(is.reactive(select.values)) {
-            select.values <- select.values() # For heavy values
+            
+            notification.id <- progressNotification(paste("Loading available parametes for", param@label))
+            select.values <- select.values()
+            removeNotification(notification.id)
           }
           
           output <- tagAppendChild(output, selectizeInput(ns(paste0("parameter.", param@name)), label = param@label, choices = select.values))
@@ -176,11 +186,6 @@ genericImporterData_ <- function(input,
     
   })
   
-  # The parameter list that will be supplied by exprimport, exprgenerate
-  importer.parameters <- reactive({
-    return(list())
-  })
-  
   # Reset data to NULL if reset button is clicked
   observeEvent(input$reset, {
     
@@ -192,15 +197,26 @@ genericImporterData_ <- function(input,
   # Import if the user clicks on the submit button
   observeEvent(input$submit, {
     
-    showNotification("Please wait ... importing data", 
-                     duration = NULL,
-                     closeButton = F,
-                     id = "genericimporter.importing")
+    notification.id <- progressNotification("Please wait ... importing data")
+    
     shinyjs::disable("submit")
     on.exit({ 
       shinyjs::enable("submit")
-      removeNotification(id = "genericimporter.importing") 
+      removeNotification(id = notification.id) 
       })
+    
+    # Generate parameters
+    parameters <- list()
+    
+    for(param in importer.object()@parameters) {
+      input.id <- paste0("parameter.", param@name)
+      parameters[[param@name]] <- input[[input.id]]
+    }
+    
+    # Run the importers
+    
+    # Reset the old variable so we 100% trigger a change
+    variables$data <- NULL
     
     if(input$source == "upload") {
       inFile <- input$fileinput
@@ -208,7 +224,7 @@ genericImporterData_ <- function(input,
       
       if(!is.null(inFile)) {
         con <- file(inFile$datapath, "r")
-        data <- tryCatch({exprimport(con, importer, importer.parameters())}, 
+        data <- tryCatch({exprimport(con, importer, parameters)}, 
                          error = function(e){
                            showNotification(paste(e), type = "error", duration = NULL)
                            return(NULL)
@@ -239,7 +255,7 @@ genericImporterData_ <- function(input,
     else if(input$source == "manual") {
       importer <- input$importer
       con <- textConnection(input$input)
-      data <- tryCatch({exprimport(con, importer, importer.parameters())}, 
+      data <- tryCatch({exprimport(con, importer, parameters)}, 
                        error = function(e){
                          showNotification(paste(e), type = "error", duration = NULL)
                          return(NULL)
@@ -264,7 +280,7 @@ genericImporterData_ <- function(input,
       
       sample <- input$sample
       
-      data <- tryCatch({exprsample(sample)}, 
+      data <- tryCatch({exprsample(sample, parameters)}, 
                        error = function(e){
                          showNotification(paste(e), type = "error", duration = NULL)
                          return(NULL)
@@ -285,11 +301,11 @@ genericImporterData_ <- function(input,
       variables$data <- data
       
     }
-    else if(input$source == "generator") {
+    else if(input$source == "generate") {
       
       generator <- input$generator
       
-      data <- tryCatch({exprgenerator(generator, importer.parameters())}, 
+      data <- tryCatch({exprgenerator(generator, parameters)}, 
                        error = function(e){
                          showNotification(paste(e), type = "error", duration = NULL)
                          return(NULL)
@@ -301,7 +317,7 @@ genericImporterData_ <- function(input,
                        })
       
       if(!is.null(data)) {
-        showNotification(paste("Loaded sample", sample), type = "message")
+        showNotification(paste("Generated data using", generator), type = "message")
       } 
       else {
         showNotification("Error while importing sample!", type = "error")
@@ -312,7 +328,6 @@ genericImporterData_ <- function(input,
     }
 
   })
-
   return(reactive( { variables$data } ))
 }
 
