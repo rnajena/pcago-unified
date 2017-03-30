@@ -204,7 +204,7 @@ serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
   return(reactive({
     
     keep.genes <- rownames(readcounts.processed())
-    keep.genes <- intersect(keep.genes, genes.filtered())
+    keep.genes <- intersect(keep.genes, genes.filtered()$values)
     
     keep.readcounts <- readcounts.processed()[keep.genes,]
     

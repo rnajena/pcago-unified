@@ -75,20 +75,28 @@ filterSelectionValues_ <- function(input, output, session, values) {
     updateSelectInput(session, "values", choices = choices, selected = c("*"))
   })
   
-  selected.values <- reactive({
-    
-    selected.keys <- input$values
-    available.values <- unlist(values(), recursive = F)
+  available.values <- reactive({
+    return(unlist(values(), recursive = F))
+  })
+  
+  selected.keys <- reactive({
+    keys <- input$values
     
     # Do this to prevent breaking the axis selectize inputs
-    if(length(selected.keys) == 0) {
-      selected.keys <- names(available.values)
+    if(length(keys) == 0) {
+      keys <- names(available.values())
     }
     
     # Handle "Select All" case
-    if("*" %in% selected.keys) {
-      selected.keys <- names(available.values)
+    if("*" %in% keys) {
+      keys <- names(available.values())
     }
+    
+    return(keys)
+    
+  })
+  
+  selected.values <- reactive({
     
     #' Depending on the user's selection apply union (OR) or intersect (AND) to 
     #' the list of strings in the values vector
@@ -97,14 +105,14 @@ filterSelectionValues_ <- function(input, output, session, values) {
     selected.strings <- c()
     
     if(input$operation == "AND") {
-      selected.strings <- Reduce(intersect, available.values[selected.keys])
+      selected.strings <- Reduce(intersect, available.values()[selected.keys()])
     }
     else if(input$operation == "OR") {
-      selected.strings <- Reduce(union, available.values[selected.keys])
+      selected.strings <- Reduce(union, available.values()[selected.keys()])
     }
     
     if(input$invert.selection) {
-      all.strings <- Reduce(union, available.values)
+      all.strings <- Reduce(union, available.values())
       selected.strings <- setdiff(all.strings, selected.strings)
     }
     
@@ -112,7 +120,7 @@ filterSelectionValues_ <- function(input, output, session, values) {
     
   })
   
-  return(selected.values)
+  return(reactive( { list(values = selected.values(), keys = selected.keys() ) } ))
   
 }
 
