@@ -12,6 +12,7 @@ source("classPlotSettings.R")
 #' @param id ID of the control
 #' @param custom.header.items Additional items to include into header bar
 #' @param custom.export.items Additional items in the export menu
+#' @param settings.panel An additional panel with settings that can be expanded
 #'
 #' @return
 #' @export
@@ -19,7 +20,9 @@ source("classPlotSettings.R")
 #' @examples
 downloadablePlotOutput <- function(id, 
                                    custom.header.items = NULL,
-                                   custom.export.items = NULL) {
+                                   custom.export.items = NULL,
+                                   settings.panel = NULL,
+                                   settings.panel.label = "Settings") {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -38,12 +41,20 @@ downloadablePlotOutput <- function(id,
     export.items <- tagAppendChildren(export.items, list = custom.export.items)
   }
   
+  settings.button <- if(!is.null(settings.panel)) { bsButton(ns("settings"), settings.panel.label, icon = icon("cog"), type = "toggle") } else NULL
+  
   return(tags$div(class = "downloadable-plot",
                    headerPanel(header = tags$span(class="headerbar-row",
+                                                  settings.button,
                                                   dropdownButton(ns("menu.export"), "Export image", 
                                                                  icon = icon("download"),
                                                                  export.items),
-                                                  custom.header.items),
+                                                  custom.header.items,
+                                                  conditionalPanel(conditionalPanel.equals(ns("settings"), "true"),
+                                                                   tags$div(class = "settings-panel",
+                                                                            hDivider(),
+                                                                            settings.panel))
+                                                  ),
                                plotOutput(ns("plot")))))
 }
 
@@ -90,6 +101,11 @@ downloadablePlot_ <- function(input,
     height <- out.height()
     
     if(!is.null(plot.settings.output)) {
+      
+      if(!is(plot.settings.output, "PlotSettings")) {
+        stop("Return value of exprplot must be NULL or a PlotSettings object!")
+      }
+      
       if(!is.na(plot.settings.output@width)) {
         width <- plot.settings.output@width
       }

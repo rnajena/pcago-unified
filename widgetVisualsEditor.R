@@ -88,9 +88,15 @@ visualsEditorUI <- function(id) {
 #' @export
 #'
 #' @examples
-visualsEditorValue_ <- function(input, output, session, conditions) {
+visualsEditorValue_ <- function(input, output, session, conditions, has.color = T, has.shape = T) {
   
-  variables <- reactiveValues(visuals.table = NULL)
+  variables <- reactiveValues(visuals.table = NULL, update.ui = 0)
+  
+  # Disable inputs that don't matter
+  observe({
+    if(!has.color) { shinyjs::hideElement("color") }
+    if(!has.shape) { shinyjs::hideElement("shape") }
+  })
   
   # Get the current visual table or make a new one based on the current conditions
   visual.table <- reactive({ 
@@ -98,7 +104,9 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
     validate(need(conditions(), "Cannot output visual parameters without conditions!"))
     
     if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), (conditions()))) {
-      variables$visuals.table <- generateDefaultConditionVisualsTable((conditions()))
+      variables$visuals.table <- generateDefaultConditionVisualsTable(conditions(), 
+                                                                      has.color = has.color, 
+                                                                      has.shape = has.shape)
     }
     
     return(variables$visuals.table)
@@ -116,32 +124,40 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
   
   # Based on selected choice update the current color and shape settings
   # Its own function as this is also used on importing
-  observe({
-    
-    validate(need(visual.table(), "No visual table to update input!"),
-             need(input$conditions, "No current condition!"),
-             need(input$conditions %in% rownames(visual.table()), "Condition not in visual table!"))
-    
-    condition <- input$conditions
-    color <- visual.table()[condition, "color"]
-    shape <- visual.table()[condition, "shape"]
-    name <- visual.table()[condition, "name"]
-    
-    if(is.null(color) || color == "") {
-      color <- "transparent"
-    }
-    if(!is.numeric(shape) || shape < 0) {
-      shape <- -1
-    }
-    
-    updateColourInput(session, "color", value = color)
-    updateSelectizeInput(session, "shape", selected = shape)
-    updateTextInput(session, "name", value = name)
+  # ! Only depend from conditions selection otherwise 
+  observeEvent({ 
+    input$conditions
+    variables$update.ui
+    },{
+      
+      validate(need(visual.table(), "No visual table to update input!"),
+               need(input$conditions, "No current condition!"),
+               need(input$conditions %in% rownames(visual.table()), "Condition not in visual table!"))
+      
+      condition <- input$conditions
+      color <- visual.table()[condition, "color"]
+      shape <- visual.table()[condition, "shape"]
+      name <- visual.table()[condition, "name"]
+      
+      if(is.null(color) || color == "") {
+        color <- "transparent"
+      }
+      if(!is.numeric(shape) || shape < 0) {
+        shape <- -1
+      }
+      
+      updateColourInput(session, "color", value = color)
+      updateSelectizeInput(session, "shape", selected = shape)
+      updateTextInput(session, "name", value = name)
     
   })
   
   # Change color/shape based on input
   observeEvent(input$color, {
+    
+    if(!has.color) {
+      return()
+    }
     
     validate(need(visual.table(), "No visual table to write to!"))
     
@@ -153,10 +169,15 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
     }
   
     variables$visuals.table[condition, "color"] <- color
+    variables$update.ui <- variables$update.ui + 1
     
   })
   
   observeEvent(input$shape, {
+    
+    if(!has.shape) {
+      return()
+    }
     
     validate(need(visual.table(), "No visual table to write to!"))
     
@@ -164,6 +185,7 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
     shape <- as.numeric(input$shape)
     
     variables$visuals.table[condition, "shape"] <- shape
+    variables$update.ui <- variables$update.ui + 1
     
   })
   
@@ -175,6 +197,7 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
     name <- input$name
     
     variables$visuals.table[condition, "name"] <- name
+    variables$update.ui <- variables$update.ui + 1
     
   })
   
@@ -223,6 +246,6 @@ visualsEditorValue_ <- function(input, output, session, conditions) {
 #' @export
 #'
 #' @examples
-visualsEditorValue <- function(id, conditions) {
-  return(callModule(visualsEditorValue_, id, conditions = conditions))
+visualsEditorValue <- function(id, conditions, has.color = T, has.shape = T) {
+  return(callModule(visualsEditorValue_, id, conditions = conditions, has.color = has.color, has.shape = has.shape))
 }

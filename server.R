@@ -96,7 +96,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(readcounts.top.variant(), {
     
-    validate(need(readcounts.top.variant(), "Cannot update input wihout read counts!"))
+    validate(need(readcounts.top.variant(), "Cannot update input without read counts!"))
     
     # New method: We know how many PCx we will get. So allow them. Remove them at plot step
     components <- sapply(1:ncol(readcounts.top.variant()), function(x) { paste0("PC", x) })
@@ -115,15 +115,99 @@ shinyServer(function(input, output, session) {
   # Render plots & tables
   #
   
-  # Tables
+  # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
   downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered)
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
+  
+  # Cell condition assingments
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
+  observeEvent(conditions(), {
+    
+    validate(need(conditions(), "No conditions available!"))
+    
+    available.conditions <- colnames(conditions())
+    selected.conditions <- if(length(available.conditions) > 0) available.conditions[1:min(5,length(available.conditions))] else c()
+    
+    updateSelectizeInput(session, "conditions.plot.sets", 
+                         choices = available.conditions, 
+                         selected = selected.conditions)
+    
+  })
+  
+  pca.conditions.plot.generalsettings <- generalPlotSettings("pca.conditions.plot.generalsettings")
+  pca.conditions.plot.visuals <- visualsEditorValue("pca.conditions.plot.visuals", reactive({colnames(conditions())}), has.shape = F)
+  
+  downloadablePlot("conditions.plot",
+                   plot.settings = pca.conditions.plot.generalsettings,
+                   exprplot = function(plot.settings, format, filename) {
+                     
+                     validate(need(conditions(), "No conditions to plot!"),
+                              need(pca.conditions.plot.visuals(), "No condition visuals available!"))
+                     selected.conditions <- input$conditions.plot.sets
+                     
+                     validate(need(selected.conditions, "No conditions selected!"),
+                              need(length(selected.conditions) > 0, "No conditions selected!"),
+                              need(length(selected.conditions) <= 5, "Too many conditions selected!"))
+                     
+                     x <- lapply(selected.conditions, function(x) { 
+                       
+                       indices <- conditions()[[x]]
+                       return(rownames(conditions())[indices]) 
+                       
+                       })
+                     names(x) <- selected.conditions
+                     
+                     plot.settings <- setNA(plot.settings, PlotSettings(
+                       width = 640,
+                       height = 480,
+                       dpi = 96,
+                       title = "Conditions",
+                       subtitle = "Sub"
+                     ))
+                     
+                     width <- plot.settings@width
+                     height <- plot.settings@height
+                     dpi <- plot.settings@dpi
+                     title <- plot.settings@title
+                     subtitle <- plot.settings@subtitle
+                     visuals <- na.omit(pca.conditions.plot.visuals()[selected.conditions,])
+                     
+                     validate(need(nrow(visuals) > 0, "No visual data!"))
+                     
+                     fill <- sapply(rownames(visuals), function(x) { if(visuals[x, "color"] == "") "black" else visuals[x, "color"] })
+                     name <- sapply(rownames(visuals), function(x) { if(visuals[x, "name"] == "") x else visuals[x, "name"] })
+                     
+                     venn.diagram(x, 
+                                  filename, 
+                                  width = width,
+                                  height = height,
+                                  resolution = dpi,
+                                  imagetype = format,
+                                  main = title,
+                                  sub = subtitle,
+                                  fill = as.vector(fill),
+                                  category.names = as.vector(name),
+                                  main.fontfamily = "sans",
+                                  main.fontface = 2,
+                                  main.cex = 1.2,
+                                  sub.fontfamily = "sans",
+                                  sub.cex = 1.1,
+                                  cat.fontfamily = "sans",
+                                  fontfamily = "sans",
+                                  ext.text = T,
+                                  euler.d = T,
+                                  scaled = T)
+                     
+                     return(plot.settings)
+                     
+                   })
+  
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.info.annotation))
   
+  # Gene filtering
   output$pca.pca.genes.set.count <- renderText({
     validate(need(readcounts.filtered(), "0 genes selected"))
     return(paste(nrow(readcounts.filtered()), "genes selected"))
@@ -153,7 +237,7 @@ shinyServer(function(input, output, session) {
                    plot.settings = pca.genes.variances.filtered.settings,
                    exprplot = function(plot.settings, format, filename) 
                    { 
-                     return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename, 
+                     return(saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename, 
                                                  logarithmic = input$pca.genes.variance.filtered.plot.log))
                    })
   

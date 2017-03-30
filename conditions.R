@@ -9,8 +9,6 @@ source("helpers.R")
 condition.default <- "{default}"
 
 # Importers for cell condition mappings
-# supportedCellConditionImporters <- c("CSV" = "csv",
-#                                         "TSV" = "tsv")
 supportedCellConditionImporters <- list(
   ImporterEntry(name = "csv", label = "CSV"),
   ImporterEntry(name = "tsv", label = "TSV")
@@ -82,7 +80,7 @@ importCellConditions <- function(filehandle, datatype, cells) {
 #' @export
 #'
 #' @examples
-importConditionVisuals <- function(filehandle, datatype, conditions) {
+importConditionVisuals <- function(filehandle, datatype, conditions, has.color = T, has.shape = T) {
   
   sep <- ","
   
@@ -97,24 +95,28 @@ importConditionVisuals <- function(filehandle, datatype, conditions) {
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
+  expected.columns <- c("name")
+  
+  if(has.color) { expected.columns <- c("color") }
+  if(has.shape) { expected.columns <- c("shape") }
   
   # Handle errors
   if(!setequal(conditions, rownames(data))) {
     stop("Imported visual definition has different set of conditions!")
   }
-  if(!setequal(c("color", "shape", "name"), colnames(data))) {
+  if(!setequal(expected.columns, colnames(data))) {
     stop("Imported visual definition doesn't have all columns!")
   }
   if(!is.character(data$name)) {
     stop("Imported visual definition has invalid names!")
   }
-  if(!is.character(data$color)) {
+  if(has.color && !is.character(data$color)) {
     stop("Imported visual definition has invalid colors!")
   }
-  if(!all(isColor(data$color[data$color != ""]))) {
+  if(has.color && !all(isColor(data$color[data$color != ""]))) {
     stop("Imported visual definition has invalid colors!")
   }
-  if(!is.numeric(data$shape)) {
+  if(has.shape && !is.numeric(data$shape)) {
     stop("Imported visual definition has invalid shapes!")
   }
   
@@ -200,22 +202,24 @@ generateConditionTable <- function(readcounts, sep = "_") {
 #' @param input 
 #' @param conditions List of condition names
 #'
-#' @return Data frame with columns for color ("color") and shape ("shape") where rows are the conditions
+#' @return Data frame with columns for color ("color") and shape ("shape"), name ("name") where rows are the conditions
 #' @export
 #'
 #' @examples
-generateDefaultConditionVisualsTable <- function(conditions) {
+generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.shape = T) {
   
   validate(need(conditions, "Need list of conditions to build visual table!"))
   
-  return(data.frame(
+  data <- (data.frame(
     row.names = conditions,
-    color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)),
-    shape = rep(-1, length(conditions)),
-    fill = rep("", length(conditions)),
     name = rep("", length(conditions)),
     stringsAsFactors = F
   ))
+  
+  if(has.color) { data$color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)) }
+  if(has.shape) { data$shape = rep(-1, length(conditions)) }
+  
+  return(data)
   
 }
 

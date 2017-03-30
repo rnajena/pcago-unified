@@ -1,5 +1,8 @@
 library(shiny)
 library(shinyBS)
+library(ggplot2)
+library(scatterplot3d)
+library(VennDiagram)
 
 #' Plots the principal component variances
 #'

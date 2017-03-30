@@ -15,7 +15,11 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-downloadableDataTableOutput <- function(id, ...) {
+downloadableDataTableOutput <- function(id, 
+                                        custom.header.items = NULL,
+                                        custom.export.items = NULL,
+                                        settings.panel = NULL,
+                                        settings.panel.label = "Settings") {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -23,10 +27,26 @@ downloadableDataTableOutput <- function(id, ...) {
   
   ns <- NS(id)
   
+  export.items <- tagList(
+    downloadButton(ns("export.csv"), "as *.csv"),
+    downloadButton(ns("export.tsv"), "as *.tsv"))
+  
+  if(!is.null(custom.export.items)) {
+    export.items <- tagAppendChildren(export.items, list = custom.export.items)
+  }
+  
+  settings.button <- if(!is.null(settings.panel)) { bsButton(ns("settings"), settings.panel.label, icon = icon("cog"), type = "toggle") } else NULL
+  
   return(headerPanel(header = tags$span(class="headerbar-row",
-                                        downloadButton(ns("export.csv"), "Export *.csv"),
-                                        downloadButton(ns("export.tsv"), "Export *.tsv"),
-                                        ...),
+                                        settings.button,
+                                        dropdownButton(ns("menu.export"), "Export data", 
+                                                       icon = icon("download"),
+                                                       export.items),
+                                        custom.header.items,
+                                        conditionalPanel(conditionalPanel.equals(ns("settings"), "true"),
+                                                         tags$div(class = "settings-panel",
+                                                                  hDivider(),
+                                                                  settings.panel))),
                      DT::dataTableOutput(ns("table"))))
 }
 

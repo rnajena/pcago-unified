@@ -103,10 +103,18 @@ uiPCASidebarPlot <- function() {
                                                       choices = c(),
                                                       multiple = T,
                                                       options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
-                       bsCollapsePanel("Visualization",
-                                       visualsEditorUI("pca.cells.plot.visuals")
-                       ),
+                       bsCollapsePanel("Visualization", visualsEditorUI("pca.cells.plot.visuals")),
                        bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cells.plot.generalsettings"))
+                     )),
+    # Cell conditions venn diagram plot
+    conditionalPanel("input['pca.nav'] == 'pca.conditions'",
+                     bsCollapse(
+                       bsCollapsePanel("Venn diagram",selectizeInput("conditions.plot.sets", "Displayed sets", 
+                                                                     choices = c(),
+                                                                     multiple = T,
+                                                                     options = list(maxItems = 5))),
+                       bsCollapsePanel("Visualization", visualsEditorUI("pca.conditions.plot.visuals")),
+                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.conditions.plot.generalsettings"))
                      )),
     # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'",

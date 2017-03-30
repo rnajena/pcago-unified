@@ -4,6 +4,7 @@
 
 * Annotations, GO terms, ...
 * Normalization
+* Help pages
 
 ## Code
 
@@ -11,7 +12,7 @@
 
 ## Bugs
 
-* Plot sizes buggy
+* No known
 
 ## Additional notes
 

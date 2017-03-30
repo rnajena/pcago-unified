@@ -92,6 +92,18 @@ strJoinLimited <- function(x, sep = ", ", limit = NULL) {
   
 }
 
+#' Creates a dropdown button for actionButtons
+#'
+#' @param id 
+#' @param label 
+#' @param content 
+#' @param icon 
+#' @param button.style 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dropdownButton <- function(id, label, content, icon = NULL, button.style = "btn-default") {
   
   wrapped <- lapply(content, function(x) { tags$li(x) })

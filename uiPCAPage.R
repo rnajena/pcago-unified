@@ -66,6 +66,7 @@ uiPCAPage <- function() {
                                     "----",
                                     "Conditions",
                                     tabPanel("Cell condition assignments", value = "pca.conditions",
+                                             downloadablePlotOutput("conditions.plot"),
                                              downloadableDataTableOutput("conditions"))
                                     ),
                          navbarMenu("PCA",
