@@ -10,9 +10,14 @@ additional.credits <- c(
 
 r.version <- sessionInfo()$R.version$version.string
 r.packages <- as.vector(sapply(sessionInfo()$otherPkgs, function(x) { paste(x$Package, ">=", x$Version) }))
-r.packages.install <- paste0("install.packages(c(", 
-                             paste(as.vector(sapply(sessionInfo()$otherPkgs, function(x) { paste0("\"", x$Package, "\"") }))
+
+r.packages.cran <- Filter(function(x) { "Repository" %in% names(x) && x$Repository == "CRAN" }, sessionInfo()$otherPkgs)
+r.packages.bioc <- Filter(function(x) { !("Repository" %in% names(x)) }, sessionInfo()$otherPkgs)
+r.packages.cran.install <- paste0("install.packages(c(", 
+                             paste(as.vector(sapply(r.packages.cran, function(x) { paste0("\"", x$Package, "\"") }))
                              ,collapse = ", "), "))")
+r.packages.bioc.install <-  paste0("biocLite(c(", paste(as.vector(sapply(r.packages.bioc, function(x) { paste0("\"", x$Package, "\"") })), collapse = ", ") ,
+                                   "), type = \"source\")")
 
 # Write data
 con <- file("README.md")
@@ -28,7 +33,14 @@ writeLines(
     paste("*", r.version),
     sapply(r.packages, function(x) { paste("*", x) }),
     "",
-    paste0("`", r.packages.install, "`"),
+    "```",
+    "# CRAN packages",
+    r.packages.cran.install,
+    "",
+    "# BioConductor packages",
+    "source(\"https://bioconductor.org/biocLite.R\")",
+    r.packages.bioc.install,
+    "```",
     "",
     paste("## Credits"),
     "",

@@ -5,6 +5,7 @@ Online tool to perform PCA on RNASeq results
 ## Requirements
 
 * R version 3.3.3 (2017-03-06)
+* BiocInstaller >= 1.24.0
 * VennDiagram >= 1.6.17
 * futile.logger >= 1.4.3
 * dplyr >= 0.5.0
@@ -31,7 +32,14 @@ Online tool to perform PCA on RNASeq results
 * shiny >= 1.0.0
 * biomaRt >= 2.30.0
 
-`install.packages(c("VennDiagram", "futile.logger", "dplyr", "ggplot2", "scatterplot3d", "Cairo", "stringi", "reshape2", "RColorBrewer", "colourpicker", "GO.db", "AnnotationDbi", "Biobase", "rtracklayer", "GenomicRanges", "GenomeInfoDb", "IRanges", "S4Vectors", "BiocGenerics", "matrixStats", "shinyjs", "shinyBS", "DT", "shiny", "biomaRt"))`
+```
+# CRAN packages
+install.packages(c("VennDiagram", "futile.logger", "dplyr", "ggplot2", "scatterplot3d", "Cairo", "stringi", "reshape2", "RColorBrewer", "colourpicker", "matrixStats", "shinyjs", "shinyBS", "DT", "shiny"))
+
+# BioConductor packages
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("BiocInstaller", "GO.db", "AnnotationDbi", "Biobase", "rtracklayer", "GenomicRanges", "GenomeInfoDb", "IRanges", "S4Vectors", "BiocGenerics", "biomaRt"), type = "source")
+```
 
 ## Credits
 
