@@ -5,7 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-
+library(markdown)
 library(DT)
 library(shiny)
 library(shinyBS)

@@ -1,0 +1,60 @@
+---
+title: "PCAGO"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+Online tool to perform PCA on RNASeq results.
+
+## Requirements
+
+PCAGO was developed on `r sessionInfo()$R.version$version.string` and also requires following packages to run:
+
+```{r, results = 'asis'}
+
+library(knitr)
+
+r.packages <- sessionInfo()$otherPkgs
+
+table <- data.frame(
+  Package = sapply(r.packages, function(x) { x$Package }),
+  URL = sapply(r.packages, function(x) { if("URL" %in% names(x)) stri_replace_all_fixed(x$URL, "\n", ", ") else "" }),
+  "Min. version" = sapply(r.packages, function(x) { x$Version }),
+  stringsAsFactors = F,
+  check.names = F,
+  row.names = NULL
+)
+
+kable(table, caption = "Required packages")
+
+```
+
+Use following command to install all required packages:
+
+```{r, comment=""}
+
+r.packages.cran <- Filter(function(x) { "Repository" %in% names(x) && x$Repository == "CRAN" }, sessionInfo()$otherPkgs)
+r.packages.bioc <- Filter(function(x) { !("Repository" %in% names(x)) }, sessionInfo()$otherPkgs)
+r.packages.cran.install <- paste0("install.packages(c(", 
+                             paste(as.vector(sapply(r.packages.cran, function(x) { paste0("\"", x$Package, "\"") }))
+                             ,collapse = ", "), "))")
+r.packages.bioc.install <-  paste0("biocLite(c(", paste(as.vector(sapply(r.packages.bioc, function(x) { paste0("\"", x$Package, "\"") })), collapse = ", ") ,
+                                   "), type = \"source\")")
+
+cat("# CRAN packages",
+  r.packages.cran.install,
+  "",
+  "# BioConductor packages",
+  "source(\"https://bioconductor.org/biocLite.R\")",
+  r.packages.bioc.install,
+  sep = "\n")
+
+```
+
+
+## Credits
+
+Uses code from https://github.com/daattali/advanced-shiny by Dean Attali. Licensed under the MIT license.
