@@ -97,8 +97,8 @@ importConditionVisuals <- function(filehandle, datatype, conditions, has.color =
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
   expected.columns <- c("name")
   
-  if(has.color) { expected.columns <- c("color") }
-  if(has.shape) { expected.columns <- c("shape") }
+  if(has.color) { expected.columns <- c(expected.columns, "color") }
+  if(has.shape) { expected.columns <- c(expected.columns, "shape") }
   
   # Handle errors
   if(!setequal(conditions, rownames(data))) {

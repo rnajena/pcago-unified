@@ -30,7 +30,7 @@ genericImporterInput <- function(id,
   ns <- NS(id)
   
   tags <- tagList(verticalLayout(
-    radioButtons(ns("source"), "Load from ...", c(), selected = "upload"),
+    radioButtons(ns("source"), "Load from ...", c("No available" = "none"), selected = "upload"),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
                      textAreaInput(ns("input"), "Manual input")),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'upload'"), 
@@ -125,6 +125,11 @@ genericImporterData_ <- function(input,
     }
     else {
       updateSelectizeInput(session, "generator", choices = c())
+    }
+    
+    # Radio button doesn't like empty choices
+    if(length(sources) == 0) {
+      sources <- c("No available" = "none")
     }
     
     # Hide choices that aren't supported
