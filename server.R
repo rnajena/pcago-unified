@@ -6,10 +6,8 @@
 #
 
 library(RColorBrewer)
-library(Cairo)
 library(scatterplot3d)
 library(ggplot2)
-library(dplyr)
 library(DT)
 library(shiny)
 library(shinyBS)
