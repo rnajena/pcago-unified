@@ -52,7 +52,7 @@ importReadcount <- function(filehandle, datatype, parameters) {
     stop(paste("Unsupported format", datatype))
   }
   
-  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
 
   if(nrow(data) == 0 || ncol(data) == 0) {
     stop("Read count table is empty!")
