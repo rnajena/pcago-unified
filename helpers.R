@@ -4,7 +4,20 @@
 
 library(shiny)
 library(reshape2)
-library(stringi)
+
+#' Generates a random string
+#' Src: http://stackoverflow.com/questions/42734547/generating-random-strings
+#'
+#' @param n 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+randomString <- function(n = 1, k = 5) {
+  a <- do.call(paste0, replicate(k, sample(LETTERS, n, TRUE), FALSE))
+  paste0(a, sprintf("%04d", sample(9999, n, TRUE)), sample(LETTERS, n, TRUE))
+}
 
 #' Returns logical vector indicating for each input element if they are a valid color
 #'
@@ -126,7 +139,7 @@ progressNotification <- function(message, id = NULL) {
 #' @examples
 withProgressNotification <- function(message, expr) {
   
-  id <- stringi::stri_rand_strings(1, 16)
+  id <- randomString(n = 1, k = 16)
   on.exit({
     removeNotification(id = id)
   })

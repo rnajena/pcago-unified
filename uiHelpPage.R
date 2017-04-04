@@ -9,9 +9,9 @@ library(shiny)
 #' @export
 #'
 #' @examples
-uiHelpPageEntry <- function(title, markdown) {
+uiHelpPageEntry <- function(title, filename) {
   
-  return(tabPanel(title, tags$div(class = "help-page", includeMarkdown(markdown))))
+  return(tabPanel(title, tags$div(class = "help-page", includeMarkdown(filename))))
   
 }
 

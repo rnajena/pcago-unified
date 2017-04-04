@@ -21,8 +21,8 @@ r.packages <- sessionInfo()$otherPkgs
 
 table <- data.frame(
   Package = sapply(r.packages, function(x) { x$Package }),
-  Author = sapply(r.packages, function(x) { if("Author" %in% names(x)) stri_replace_all_fixed(x$Author, "\n", "; ") else "" }),
-  URL = sapply(r.packages, function(x) { if("URL" %in% names(x)) stri_replace_all_fixed(x$URL, "\n", "; ") else "" }),
+  Author = sapply(r.packages, function(x) { if("Author" %in% names(x)) gsub("\n", "; ", x$Author) else "" }),
+  URL = sapply(r.packages, function(x) { if("URL" %in% names(x)) gsub("\n", "; ", x$URL, fixed = T) else "" }),
   "Min. version" = sapply(r.packages, function(x) { x$Version }),
   stringsAsFactors = F,
   check.names = F,
