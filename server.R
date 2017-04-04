@@ -204,7 +204,7 @@ shinyServer(function(input, output, session) {
       p <- p + geom_vline(xintercept = genes.count, color = "red")
       p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$logvar), ymax = logvar, x = 1:genes.count), fill = "#da4453")
       p <- p + geom_point()
-      p <- p + labs(x = "Top n-th variant gene", y = "log(σ²)")
+      p <- p + labs(x = "Top n-th variant gene", y = expression(log(sigma^2)))
       
       return(p)
     }
@@ -213,7 +213,7 @@ shinyServer(function(input, output, session) {
       p <- p + geom_vline(xintercept = genes.count, color = "red")
       p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$var), ymax = var, x = 1:genes.count), fill = "#da4453")
       p <- p + geom_point()
-      p <- p + labs(x = "Top n-th variant gene", y = "σ²")
+      p <- p + labs(x = "Top n-th variant gene", y = expression(sigma^2))
       
       return(p)
     }

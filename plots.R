@@ -89,7 +89,7 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
-  plot.y.label <- paste0("Relative variance (Σσ² = ", sum(pca$var), ")")
+  plot.y.label <- paste0("Relative variance (to ", sum(pca$var), ")")
   
   p <- ggplot(pca$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
   p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
@@ -135,7 +135,7 @@ saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename
   }
   
   plot.aes <- if(logarithmic) aes(x=1:nrow(gene.variances), y=log(var)) else aes(x=1:nrow(gene.variances), y=var)
-  plot.y.label <- if(logarithmic) "log(σ²)" else "σ²"
+  plot.y.label <- if(logarithmic) expression(log(sigma^2)) else expression(sigma^2)
   
   p <- ggplot(gene.variances, plot.aes) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = plot.y.label, title = title, subtitle = subtitle)
