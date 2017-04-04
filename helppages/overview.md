@@ -1,23 +1,20 @@
+PCAGO is a tool to analyze RNA-Seq results with principal component analysis.
+You can use it to ...
+
+* check if cells with the same treatment/condition cluster together
+* find out how including less and less variant genes affect this clustering
+* find sets of genes that explain most of the data
+
+PCAGO provides additional features that lets you do your tasks easier, like ...
+
+* filtering genes by *associated features*, *GO terms* and more
+* animating the clustering live when less and less variant genes are included
+* importing annotations directly from online databases like Ensembl BioMart
+
+
 ## Quick usage
 
 1. Go to the "Analyze" page
 2. Upload your read counts in `Sidebar > Data > Readcounts` or choose a sample
 3. Optionally (but advised) upload a gene annotation in `Sidebar > Data > Annotation`
 4. Click on `Cell plot` to view the PCA results
-
-## User interface
-
-The user interface of PCAGO is divided in two sections
-
-* The **sidebar** that lets you change settings
-* The **results** that lets you view input tables and (intermediate) results
-
-### Sidebar
-
-The sidebar is separated into three sections:
-
-* **Data** offers options to import and transform data such as read counts, gene annotations and cell conditions
-* **PCA** lets you change PCA parameters and select the genes that should be used for PCA of cells
-* **Plot** shows the settings of the currently viewed plot
-
-You can switch between those sections as you like. For example you can change the gene count that is used for the current plot.

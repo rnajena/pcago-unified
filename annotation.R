@@ -23,7 +23,7 @@ supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF"))
 supportedAnnotationGenerators <- list(ImporterEntry(name = "ensembl_go",
-                                                    label = "Ensembl GO terms",
+                                                    label = "Ensembl BioMart GO terms",
                                                     parameters = list(
                                                       ImporterParameter(name = "dataset", 
                                                                         label = "Dataset", 
@@ -31,7 +31,7 @@ supportedAnnotationGenerators <- list(ImporterEntry(name = "ensembl_go",
                                                                         select.values = bioMart.data.sets) 
                                                     )),
                                       ImporterEntry(name = "ensembl_sequence_info",
-                                                    label = "Ensembl sequence info",
+                                                    label = "Ensembl BioMart sequence info",
                                                     parameters = list(
                                                       ImporterParameter(name = "dataset", 
                                                                         label = "Dataset", 
