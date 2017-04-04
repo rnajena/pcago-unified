@@ -175,7 +175,12 @@ genericImporterData_ <- function(input,
             removeNotification(notification.id)
           }
           
-          output <- tagAppendChild(output, selectizeInput(ns(paste0("parameter.", param@name)), label = param@label, choices = select.values))
+          output <- tagAppendChild(output, selectizeInput(ns(paste0("parameter.", param@name)), 
+                                                          label = param@label, 
+                                                          choices = select.values,
+                                                          options = list(
+                                                            maxOptions = 1000000
+                                                          )))
         } 
         else {
           stop(paste("Unsupported type", param@type))

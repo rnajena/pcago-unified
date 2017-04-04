@@ -30,7 +30,8 @@ filterSelectionInput <- function(id, header = "") {
                                                                    selected = c("*"),
                                                                    options = list(
                                                                      render = I(includeText("scripts/filterSelectionInputSelectizeRender.js")),
-                                                                     plugins = list("remove_button", "drag_drop")
+                                                                     plugins = list("remove_button", "drag_drop"),
+                                                                     maxOptions = 1000000
                                                                    ))),
                   tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
                                                                      label = "Filter settings", 
