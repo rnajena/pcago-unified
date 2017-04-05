@@ -62,7 +62,7 @@ savePCACellPlotMovie <- function(filename,
                 visuals.conditions = visuals.conditions,
                 visuals.cell = visuals.cell,
                 axes = axes,
-                plot.settings = setNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
+                plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
                 format = "png",
                 filename = plot.filename)
     

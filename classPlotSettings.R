@@ -66,17 +66,17 @@ PlotSettings <- setClass(
 #' @param object.source A PlotSettings object
 #'
 #' @return
-#' @rdname setNA
+#' @rdname plotSettingsSetNA
 #' @export
 #'
 #' @examples
-setGeneric(name = "setNA",
+setGeneric(name = "plotSettingsSetNA",
            def = function(object.target, object.source) {
-             standardGeneric("setNA")
+             standardGeneric("plotSettingsSetNA")
            })
 
-#' @rdname setNA
-setMethod(f = "setNA",
+#' @rdname plotSettingsSetNA
+setMethod(f = "plotSettingsSetNA",
           signature = signature(object.target = "PlotSettings", object.source = "PlotSettings"),
           definition = function(object.target, object.source) {
             
@@ -98,17 +98,17 @@ setMethod(f = "setNA",
 #' @param object.source A PlotSettings object
 #'
 #' @return
-#' @rdname overwrite
+#' @rdname plotSettingsOverwrite
 #' @export
 #'
 #' @examples
-setGeneric(name = "overwrite",
+setGeneric(name = "plotSettingsOverwrite",
            def = function(object.target, object.source) {
-             standardGeneric("overwrite")
+             standardGeneric("plotSettingsOverwrite")
            })
 
-#' @rdname overwrite
-setMethod(f = "overwrite",
+#' @rdname plotSettingsOverwrite
+setMethod(f = "plotSettingsOverwrite",
           signature = signature(object.target = "PlotSettings", object.source = "PlotSettings"),
           definition = function(object.target, object.source) {
             

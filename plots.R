@@ -3,7 +3,64 @@ library(shinyBS)
 library(ggplot2)
 library(scatterplot3d)
 library(VennDiagram)
+library(dendextend)
 
+saveClusterPlot <- function(readcounts, plot.settings, cell.visuals, format, filename, method.distance = "euclidian", method.cluster = "average") {
+  
+  validate(need(readcounts(), "No data to plot!"),
+           need(cell.visuals(), "No cell visuals available!"))
+  
+  plot.settings <- plotSettingsSetNA(plot.settings, 
+                         PlotSettings(width = 640, 
+                                      height = 480,
+                                      dpi = 96,
+                                      title = "Custer Dendrogram",
+                                      subtitle = ""))
+  
+  width <- plot.settings@width
+  height <- plot.settings@height
+  dpi <- plot.settings@dpi
+  title <- plot.settings@title
+  subtitle <- plot.settings@subtitle
+  
+  palette.colors <- cell.visuals()$palette.colors
+  palette.shapes <- cell.visuals()$palette.shapes
+  
+  saveRPlot(width, height, dpi, filename, format, expr = function() {
+    
+    #plot(hclust(dist(t(readcounts()), method = method.distance), method = method.cluster))
+    dend <- t(readcounts()) %>% 
+      dist(method = method.distance) %>%
+      hclust(method = method.cluster) %>%
+      as.dendrogram
+      
+    dend.cells <- labels(dend)
+    dend.factors <- cell.visuals()$factors[dend.cells,]
+    
+    dend <- dend %>% dendextend::set("leaves_pch", palette.shapes[as.numeric(dend.factors$shape)]) %>%
+      dendextend::set("leaves_col", palette.colors[as.numeric(dend.factors$color)])
+    
+    par(mar = c(5,4,4,10))
+    dend %>% plot(main = title, sub = subtitle, horiz = T, cex = 0.6)
+    
+  })
+  
+  return(plot.settings)
+}
+
+#' Saves a Venn diagram of cell conditions
+#'
+#' @param selected.conditions 
+#' @param conditions 
+#' @param pca.conditions.plot.visuals 
+#' @param plot.settings 
+#' @param format 
+#' @param filename 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 saveCellConditionVennDiagramPlot <- function(selected.conditions, conditions, pca.conditions.plot.visuals, plot.settings, format, filename) {
   validate(need(conditions(), "No conditions to plot!"),
            need(pca.conditions.plot.visuals(), "No condition visuals available!"))
@@ -20,7 +77,7 @@ saveCellConditionVennDiagramPlot <- function(selected.conditions, conditions, pc
   })
   names(x) <- selected.conditions
   
-  plot.settings <- setNA(plot.settings, PlotSettings(
+  plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(
     width = 640,
     height = 480,
     dpi = 96,
@@ -76,7 +133,7 @@ saveCellConditionVennDiagramPlot <- function(selected.conditions, conditions, pc
 #'
 #' @examples
 savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
-  plot.settings <- setNA(plot.settings, 
+  plot.settings <- plotSettingsSetNA(plot.settings, 
                          PlotSettings(width = 640, 
                                       height = 480,
                                       dpi = 96,
@@ -115,7 +172,7 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
 #' @examples
 saveGeneVariancePlot <- function(gene.variances, plot.settings, format, filename, logarithmic = F){
   
-  plot.settings <- setNA(plot.settings, 
+  plot.settings <- plotSettingsSetNA(plot.settings, 
                          PlotSettings(width = 640, 
                          height = 480,
                          dpi = 96,
@@ -172,7 +229,7 @@ savePCACellPlot <- function(pca,
                             format,
                             filename ){
   
-  plot.settings <- setNA(plot.settings, 
+  plot.settings <- plotSettingsSetNA(plot.settings, 
                          PlotSettings(width = 640, 
                          height = 480,
                          dpi = 96,

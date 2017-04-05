@@ -95,6 +95,16 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
+    # Readcount clustering
+    conditionalPanel("input['pca.nav'] == 'pca.readcounts.raw'",
+                     bsCollapse(
+                       bsCollapsePanel("Clustering",
+                                       selectizeInput("readcounts.cluster.plot.method.distance", "Distance method", choices = dist.methodsSelection),
+                                       selectizeInput("readcounts.cluster.plot.method.clustering", "Clustering method", choices = hclust.methodsSelection)
+                                       ),
+                       bsCollapsePanel("Visualization", visualsEditorUI("readcounts.cluster.plot.visuals")),
+                       bsCollapsePanel("General settings", generalPlotSettingsInput("readcounts.cluster.plot.generalsettings"))
+                     )),
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'",
                      bsCollapse(

@@ -79,8 +79,9 @@ importReadcountSample <- function(sample, parameters) {
   }
   
   con <- file(paste0("sampledata/", sample), "r")
+  on.exit({ close(con) })
   data <- importReadcount(con, "csv")
-  close(con)
+  
   return(data)
   
 }

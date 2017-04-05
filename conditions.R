@@ -80,7 +80,7 @@ importCellConditions <- function(filehandle, datatype, cells) {
 #' @export
 #'
 #' @examples
-importConditionVisuals <- function(filehandle, datatype, conditions, has.color = T, has.shape = T) {
+importConditionVisuals <- function(filehandle, datatype, conditions, has.color = T, has.shape = T, has.name = T) {
   
   sep <- ","
   
@@ -95,10 +95,16 @@ importConditionVisuals <- function(filehandle, datatype, conditions, has.color =
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
-  expected.columns <- c("name")
   
+  expected.columns <- c()
+  
+  if(has.name) { expected.columns <- c(expected.columns, "name") }
   if(has.color) { expected.columns <- c(expected.columns, "color") }
   if(has.shape) { expected.columns <- c(expected.columns, "shape") }
+  
+  if(length(expected.columns) == 0) {
+    stop("No data stored!")
+  }
   
   # Handle errors
   if(!setequal(conditions, rownames(data))) {
@@ -107,7 +113,7 @@ importConditionVisuals <- function(filehandle, datatype, conditions, has.color =
   if(!setequal(expected.columns, colnames(data))) {
     stop("Imported visual definition doesn't have all columns!")
   }
-  if(!is.character(data$name)) {
+  if(has.name && !is.character(data$name)) {
     stop("Imported visual definition has invalid names!")
   }
   if(has.color && !is.character(data$color)) {
@@ -138,8 +144,10 @@ importConditionVisualsSample <- function(sample, conditions) {
   }
   
   con <- file(paste0("sampledata/", sample), "r")
+  on.exit({ close(con) })
+  
   data <- importConditionVisuals(con, "csv", conditions)
-  close(con)
+  
   return(data)
   
 }
@@ -206,16 +214,16 @@ generateConditionTable <- function(readcounts, sep = "_") {
 #' @export
 #'
 #' @examples
-generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.shape = T) {
+generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.shape = T, has.name = T) {
   
   validate(need(conditions, "Need list of conditions to build visual table!"))
   
   data <- (data.frame(
     row.names = conditions,
-    name = rep("", length(conditions)),
     stringsAsFactors = F
   ))
   
+  if(has.name) { data$name = rep("", length(conditions)) }
   if(has.color) { data$color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)) }
   if(has.shape) { data$shape = rep(-1, length(conditions)) }
   
@@ -247,5 +255,96 @@ conditionName <- function(visuals.conditions, conditions) {
     }
     
   }))
+  
+}
+
+#' 
+#'
+#' @param cells List of cells that is used to create visual parameters for
+#' @param conditions Maps a cell to a list of conditions
+#' @param visuals.conditions Maps a condtition to visual parameters
+#'
+#' @return
+#' @export
+#'
+#' @examples
+calculatCellVisuals <- function(cells, conditions, condition.visuals) {
+  
+  if(is.null(cells) || is.null(conditions) || is.null(condition.visuals)) {
+    return(NULL)
+  }
+  
+  # Setup output
+  factors <- data.frame(row.names = cells,
+                        color = rep("#000000", length(cells)),
+                        shape = rep(16, length(cells)),
+                        stringsAsFactors = F)
+  
+  palette.colors <- c()
+  palette.colors.conditions <- c()
+  palette.shapes <- c()
+  palette.shapes.conditions <- c()
+  
+  # Go through each cell and select the color & shape based on the first condition providing it
+  for(cell in cells) {
+    
+    color <- ""
+    color.condition <- ""
+    shape <- -1
+    shape.condition <- ""
+    
+    for(condition in rownames(condition.visuals)) {
+      
+      # Check if the cell has the condition. Otherwiese skip
+      if(!conditions[cell, condition]) {
+        next()
+      }
+      
+      if(color == "") {
+        mapping.color <- condition.visuals[condition, "color"]
+        
+        color <- mapping.color
+        color.condition <- condition
+      }
+      
+      if(shape == -1) {
+        shape <- condition.visuals[condition, "shape"]
+        shape.condition <- condition
+      }
+      
+    }
+    
+    if(color == "") {
+      color = "#000000"
+      color.condition <- condition.default
+    }
+    if(shape == -1) {
+      shape = 16
+      shape.condition <- condition.default
+    }
+    
+    factors[cell, "color"] <- color.condition # todo: user name for condition
+    factors[cell, "shape"] <- shape.condition
+    
+    if(!(color.condition %in% palette.colors.conditions)) { 
+      
+      palette.colors <- c(palette.colors, color) 
+      palette.colors.conditions <- c(palette.colors.conditions, color.condition)
+    }
+    if(!(shape.condition %in% palette.shapes.conditions)) {
+      
+      palette.shapes <- c(palette.shapes, shape) 
+      palette.shapes.conditions <- c(palette.shapes.conditions, shape.condition)
+    }
+    
+  }
+  
+  #Convert to factors
+  factors$color <- factor(factors$color, levels = palette.colors.conditions)
+  factors$shape <- factor(factors$shape, levels = palette.shapes.conditions)
+  
+  return(list("factors" = factors, 
+              "palette.colors" = palette.colors, 
+              "palette.shapes" = palette.shapes))
   
 }

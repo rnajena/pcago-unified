@@ -89,7 +89,7 @@ downloadablePlot_ <- function(input,
   
   # If the user didn't set any output sizes, overwrite them here
   plot.settings.defaults <- reactive({
-    return(setNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = 96) ))
+    return(plotSettingsSetNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = 96) ))
     })
   
   output$plot <- renderImage({

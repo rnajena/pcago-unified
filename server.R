@@ -48,6 +48,8 @@ shinyServer(function(input, output, session) {
                                     exprimport = importReadcount, 
                                     exprsample = importReadcountSample)
   
+ 
+  
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
@@ -83,7 +85,25 @@ shinyServer(function(input, output, session) {
   #' 3. Based on this determine the visual conditions for each cell
   conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
   visuals.conditions <- visualsEditorValue("pca.cells.plot.visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ serverGetCellVisualsTable(input, readcounts.processed, conditions, visuals.conditions) })
+  visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
+  
+  # Readcount cluster plot
+  readcounts.cluster.plot.generalsettings <- generalPlotSettings("readcounts.cluster.plot.generalsettings")
+  readcounts.cluster.plot.condition.visuals <- visualsEditorValue("readcounts.cluster.plot.visuals", reactive({colnames(conditions())}))
+  readcounts.cluster.plot.cell.visuals <-  reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), readcounts.cluster.plot.condition.visuals()) })
+  
+  downloadablePlot(id = "readcounts.cluster.plot",
+                   plot.settings = readcounts.cluster.plot.generalsettings,
+                   exprplot = function(plot.settings, format, filename) {
+                     plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(title = "Clustering based on raw read counts"))
+                     saveClusterPlot(readcounts, 
+                                     plot.settings, 
+                                     readcounts.cluster.plot.cell.visuals,
+                                     format, 
+                                     filename,
+                                     method.distance = input$readcounts.cluster.plot.method.distance,
+                                     method.cluster = input$readcounts.cluster.plot.method.clustering)
+                   })
   
   #
   # Update input elements
@@ -235,7 +255,7 @@ shinyServer(function(input, output, session) {
     validate(need(pca(), "No PCA results to plot!"),
              need(visuals.cell(), "No visual parameters!"))
     
-    plot.settings <- setNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
+    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
     
     return(savePCACellPlot(pca = pca(),
                 visuals.conditions = visuals.conditions(),
