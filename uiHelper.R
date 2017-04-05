@@ -70,6 +70,10 @@ hDivider <- function() {
   return(tags$div(class = "hdivider"))
 }
 
+inlineSubcategory <- function(category, entry) {
+  return(tags$span(category, icon("chevron-right"), entry))
+}
+
 #' Joins a vector to a string with a limit
 #' Use this for UI
 #'

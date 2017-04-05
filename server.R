@@ -87,23 +87,23 @@ shinyServer(function(input, output, session) {
   visuals.conditions <- visualsEditorValue("pca.cells.plot.visuals", reactive({colnames(conditions())}))
   visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
   
-  # Readcount cluster plot
-  readcounts.cluster.plot.generalsettings <- generalPlotSettings("readcounts.cluster.plot.generalsettings")
-  readcounts.cluster.plot.condition.visuals <- visualsEditorValue("readcounts.cluster.plot.visuals", reactive({colnames(conditions())}))
-  readcounts.cluster.plot.cell.visuals <-  reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), readcounts.cluster.plot.condition.visuals()) })
-  
-  downloadablePlot(id = "readcounts.cluster.plot",
-                   plot.settings = readcounts.cluster.plot.generalsettings,
-                   exprplot = function(plot.settings, format, filename) {
-                     plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(title = "Clustering based on raw read counts"))
-                     saveClusterPlot(readcounts, 
-                                     plot.settings, 
-                                     readcounts.cluster.plot.cell.visuals,
-                                     format, 
-                                     filename,
-                                     method.distance = input$readcounts.cluster.plot.method.distance,
-                                     method.cluster = input$readcounts.cluster.plot.method.clustering)
-                   })
+  # # Readcount cluster plot
+  # readcounts.cluster.plot.generalsettings <- generalPlotSettings("readcounts.cluster.plot.generalsettings")
+  # readcounts.cluster.plot.condition.visuals <- visualsEditorValue("readcounts.cluster.plot.visuals", reactive({colnames(conditions())}))
+  # readcounts.cluster.plot.cell.visuals <-  reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), readcounts.cluster.plot.condition.visuals()) })
+  # 
+  # downloadablePlot(id = "readcounts.cluster.plot",
+  #                  plot.settings = readcounts.cluster.plot.generalsettings,
+  #                  exprplot = function(plot.settings, format, filename) {
+  #                    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(title = "Clustering based on raw read counts"))
+  #                    saveClusterPlot(readcounts, 
+  #                                    plot.settings, 
+  #                                    readcounts.cluster.plot.cell.visuals,
+  #                                    format, 
+  #                                    filename,
+  #                                    method.distance = input$readcounts.cluster.plot.method.distance,
+  #                                    method.cluster = input$readcounts.cluster.plot.method.clustering)
+  #                  })
   
   #
   # Update input elements

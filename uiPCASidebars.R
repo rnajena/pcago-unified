@@ -95,16 +95,16 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
-    # Readcount clustering
-    conditionalPanel("input['pca.nav'] == 'pca.readcounts.raw'",
-                     bsCollapse(
-                       bsCollapsePanel("Clustering",
-                                       selectizeInput("readcounts.cluster.plot.method.distance", "Distance method", choices = dist.methodsSelection),
-                                       selectizeInput("readcounts.cluster.plot.method.clustering", "Clustering method", choices = hclust.methodsSelection)
-                                       ),
-                       bsCollapsePanel("Visualization", visualsEditorUI("readcounts.cluster.plot.visuals")),
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("readcounts.cluster.plot.generalsettings"))
-                     )),
+    # # Readcount clustering
+    # conditionalPanel("input['pca.nav'] == 'pca.cluster.readcounts.processed'",
+    #                  bsCollapse(
+    #                    bsCollapsePanel("Clustering",
+    #                                    selectizeInput("pca.cluster.readcounts.processed.plot.method.distance", "Distance method", choices = dist.methodsSelection),
+    #                                    selectizeInput("pca.cluster.readcounts.processed.plot.method.clustering", "Clustering method", choices = hclust.methodsSelection)
+    #                                    ),
+    #                    bsCollapsePanel("Visualization", visualsEditorUI("pca.cluster.readcounts.processed.plot.visuals")),
+    #                    bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cluster.readcounts.processed.plot.generalsettings"))
+    #                  )),
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'",
                      bsCollapse(

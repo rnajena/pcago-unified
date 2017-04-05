@@ -2,16 +2,17 @@
 
 ## Features
 
-* Annotations, GO terms, ...
-* Normalization
+* Normalization (!)
 * Help pages
-* Clustering based on PCA results
+* Clustering based on PCA results, read counts.
+* Cluster widget (multiple clustering methods)
+* Dendrogram export!
 * Custom selectors
-* Relative cell plot
 
 ## Code
 
 * Improve performance
+* Better variable names
 
 ## Bugs
 
