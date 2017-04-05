@@ -91,7 +91,8 @@ savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
   
   plot.y.label <- paste0("Relative variance (to ", sum(pca$var), ")")
   
-  p <- ggplot(pca$var, aes(x=rownames(pca$var), y=var.relative)) + geom_point()
+  
+  p <- ggplot(pca$var, aes(x=factor(rownames(pca$var), levels = rownames(pca$var)), y=var.relative)) + geom_point()
   p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
   ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
   

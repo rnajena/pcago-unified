@@ -20,6 +20,7 @@ library(shiny)
 #' @param gene.variances Gene variances
 #' @param pca.center Center data before PCA
 #' @param pca.scale Scale data before PCA
+#' @param pca.relative Make transformed cell coordinates relative
 #' @param updateProgress Function that takes progress input. Parameters are detail (current operation) and value (current progress)
 #'
 #' @return
@@ -36,6 +37,7 @@ savePCACellPlotMovie <- function(filename,
                              gene.variances,
                              pca.center,
                              pca.scale,
+                             pca.relative,
                              updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
@@ -55,7 +57,7 @@ savePCACellPlotMovie <- function(filename,
     readcounts.top.variant <- selectTopVariantGeneReadcounts(readcounts.filtered, gene.variances, genecounts[i])
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
-    pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale)
+    pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale, relative = pca.relative)
     savePCACellPlot(pca = pca,
                 visuals.conditions = visuals.conditions,
                 visuals.cell = visuals.cell,

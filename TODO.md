@@ -5,6 +5,9 @@
 * Annotations, GO terms, ...
 * Normalization
 * Help pages
+* Clustering based on PCA results
+* Custom selectors
+* Relative cell plot
 
 ## Code
 

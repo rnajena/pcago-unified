@@ -77,8 +77,9 @@ uiPCASidebarPCA <- function() {
                     
                     ),
     bsCollapsePanel("Settings",
-                    checkboxInput("pca.pca.settings.center", "Center data", value = T),
-                    checkboxInput("pca.pca.settings.scale", "Scale data", value = T))
+                    checkboxInput("pca.pca.settings.center", helpIconText("Center data", includeMarkdown("helptooltips/pca-pca-settings-center.md")), value = T),
+                    checkboxInput("pca.pca.settings.scale", helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), value = T),
+                    checkboxInput("pca.pca.settings.relative", helpIconText("Relative cell positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), value = F))
   ))
   
 }

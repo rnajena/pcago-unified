@@ -273,6 +273,7 @@ shinyServer(function(input, output, session) {
         gene.variances = gene.variances(),
         pca.center = input$pca.pca.settings.center,
         pca.scale = input$pca.pca.settings.scale,
+        pca.relative = input$pca.pca.settings.relative,
         updateProgress = updateProgress
       )
       

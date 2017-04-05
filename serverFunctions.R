@@ -228,13 +228,14 @@ serverPCA <- function(input, readcounts.top.variant) {
     no.constant <- "remove.constant" %in% input$pca.data.readcounts.processing
     center <-input$pca.pca.settings.center
     scale <- input$pca.pca.settings.scale
+    relative <- input$pca.pca.settings.relative
     
     validate(
       need(readcounts.top.variant(), "No data to apply PCA to!"),
       need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
     )
     
-    applyPCA(readcounts.top.variant(), center = center, scale = scale) 
+    applyPCA(readcounts.top.variant(), center = center, scale = scale, relative = relative) 
     
   }))
   

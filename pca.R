@@ -5,12 +5,15 @@
 #' Applies PCA to input data
 #'
 #' @param readcounts Read counts
+#' @param center Center data
+#' @param scale Apply variance scaling (no 0-variance genes allowed!)
+#' @param relative Makes the transformed cell coordinates relative
 #'
 #' @return List of transformed values (transformed), variances (var), principal components (pc)
 #' @export
 #'
 #' @examples
-applyPCA <- function(readcounts, center, scale) {
+applyPCA <- function(readcounts, center, scale, relative) {
   
   # Soft and hard parameter checking
   if(is.null(readcounts) || ncol(readcounts) == 0 || nrow(readcounts) == 0) {
@@ -40,11 +43,22 @@ applyPCA <- function(readcounts, center, scale) {
   transformed <- data.frame(result$x, row.names = cells)
   pc.names <- colnames(result$rotation)
   
+  # Optionally make the transformed coordinates relative.
+  # This makes them scale-invariant, but keeps the distance relation (which is the important part)
+  if(relative) {
+    for(pc in colnames(transformed)) {
+      pc.min <- min(transformed[[pc]])
+      pc.max <- max(transformed[[pc]])
+      transformed[[pc]] <- sapply(transformed[[pc]], function(x) { (x - pc.min) / (pc.max - pc.min) })
+    }
+  }
+  
   # Build the variance table
   variances <- (result$sdev)^2
   variances.table <- data.frame(var = variances, 
                                 var.relative = variances / sum(variances), 
                                 row.names = pc.names)
+  
   
   return(list("transformed" = transformed,
               "var" = variances.table,
