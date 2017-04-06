@@ -198,7 +198,6 @@ shinyServer(function(input, output, session) {
       
       return(p)
     }
-    
   })
   
   pca.variance.plot.settings <- generalPlotSettings("pca.pc.importance.generalsettings")
