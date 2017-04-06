@@ -4,7 +4,7 @@
 
 library(shiny)
 library(ggplot2)
-library(scatterplot3d)
+library(VennDiagram)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
 

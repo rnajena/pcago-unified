@@ -67,38 +67,3 @@ saveAgglomerativeClusterPlot <- function(readcounts,
   
   return(plot.settings)
 }
-
-#' Plots the principal component variances
-#'
-#' @param pca 
-#' @param plot.settings 
-#' @param format 
-#' @param filename 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-savePCAVariancePlot <- function(pca, plot.settings, format, filename) {
-  plot.settings <- plotSettingsSetNA(plot.settings, 
-                         PlotSettings(width = 640, 
-                                      height = 480,
-                                      dpi = 96,
-                                      title = "Principal component variances",
-                                      subtitle = ""))
-  
-  width <- plot.settings@width
-  height <- plot.settings@height
-  dpi <- plot.settings@dpi
-  title <- plot.settings@title
-  subtitle <- plot.settings@subtitle
-  
-  plot.y.label <- paste0("Relative variance (to ", sum(pca$var), ")")
-  
-  
-  p <- ggplot(pca$var, aes(x=factor(rownames(pca$var), levels = rownames(pca$var)), y=var.relative)) + geom_point()
-  p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
-  ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
-  
-  return(plot.settings)
-}
