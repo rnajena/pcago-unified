@@ -62,6 +62,11 @@ applyPCA <- function(readcounts, center, scale, relative) {
   
   return(list("transformed" = transformed,
               "var" = variances.table,
-              "pc" = result$rotation))
+              "pc" = result$rotation,
+              "params" = list(
+                "center" = center,
+                "scale" = scale,
+                "relative" = relative
+              )))
 }
 

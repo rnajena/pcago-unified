@@ -15,6 +15,7 @@ source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
 source("widgetIntegratingGenericImporter.R")
+source("plotCellPlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -108,17 +109,7 @@ uiPCASidebarPlot <- function() {
     #                    bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cluster.readcounts.processed.plot.generalsettings"))
     #                  )),
     # Cell plot
-    conditionalPanel("input['pca.nav'] == 'pca.cells.plot'",
-                     bsCollapse(
-                       bsCollapsePanel("Axes",
-                                       selectizeInput("pca.cells.plot.axes",
-                                                      "Visible axes (x, y, z)",
-                                                      choices = c(),
-                                                      multiple = T,
-                                                      options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
-                       bsCollapsePanel("Visualization", visualsEditorUI("pca.cells.plot.visuals")),
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cells.plot.generalsettings"))
-                     )),
+    conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
     conditionalPanel("input['pca.nav'] == 'pca.conditions'",
                      bsCollapse(

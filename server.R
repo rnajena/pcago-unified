@@ -12,6 +12,7 @@ library(DT)
 library(shiny)
 library(shinyBS)
 library(shinyjs)
+library(colourpicker)
 source("readcounts.R")
 source("annotation.R")
 source("conditions.R")
@@ -27,6 +28,7 @@ source("widgetExtendedSliderInput.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
+source("plotCellPlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -84,26 +86,6 @@ shinyServer(function(input, output, session) {
   #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
   #' 3. Based on this determine the visual conditions for each cell
   conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
-  visuals.conditions <- visualsEditorValue("pca.cells.plot.visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
-  
-  # # Readcount cluster plot
-  # readcounts.cluster.plot.generalsettings <- generalPlotSettings("readcounts.cluster.plot.generalsettings")
-  # readcounts.cluster.plot.condition.visuals <- visualsEditorValue("readcounts.cluster.plot.visuals", reactive({colnames(conditions())}))
-  # readcounts.cluster.plot.cell.visuals <-  reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), readcounts.cluster.plot.condition.visuals()) })
-  # 
-  # downloadablePlot(id = "readcounts.cluster.plot",
-  #                  plot.settings = readcounts.cluster.plot.generalsettings,
-  #                  exprplot = function(plot.settings, format, filename) {
-  #                    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(title = "Clustering based on raw read counts"))
-  #                    saveClusterPlot(readcounts, 
-  #                                    plot.settings, 
-  #                                    readcounts.cluster.plot.cell.visuals,
-  #                                    format, 
-  #                                    filename,
-  #                                    method.distance = input$readcounts.cluster.plot.method.distance,
-  #                                    method.cluster = input$readcounts.cluster.plot.method.clustering)
-  #                  })
   
   #
   # Update input elements
@@ -111,27 +93,6 @@ shinyServer(function(input, output, session) {
   
   # For navigation (links)
   serverNavigation(input, session)
-  
-  observeEvent(readcounts.top.variant(), {
-    
-    validate(need(readcounts.top.variant(), "Cannot update input without read counts!"))
-    
-    # New method: We know how many PCx we will get. So allow them. Remove them at plot step
-    components <- sapply(1:ncol(readcounts.top.variant()), function(x) { paste0("PC", x) })
-    selection <- input$pca.cells.plot.axes
-    
-    if(length(selection) == 0) {
-      selection <- intersect(c("PC1", "PC2"), components)
-    }
-    
-    updateSelectizeInput(session, "pca.cells.plot.axes", choices = components, selected = selection)
-    
-  })
-
- 
-  #
-  # Render plots & tables
-  #
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
@@ -248,57 +209,12 @@ shinyServer(function(input, output, session) {
     return(savePCAVariancePlot(pca(), plot.settings, format, filename))
   })
   
-  pca.cellplot.settings <- generalPlotSettings("pca.cells.plot.generalsettings")
-  
-  downloadablePlot("pca.cellplot", plot.settings = pca.cellplot.settings, exprplot = function( plot.settings, format, filename ){
-    
-    validate(need(pca(), "No PCA results to plot!"),
-             need(visuals.cell(), "No visual parameters!"))
-    
-    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
-    
-    return(savePCACellPlot(pca = pca(),
-                visuals.conditions = visuals.conditions(),
-                visuals.cell = visuals.cell(),
-                axes = input$pca.cells.plot.axes,
-                plot.settings = plot.settings,
-                format = format,
-                filename = filename))
-  })
-  
-  # Handler for movie export of cell plot
-  output$pca.cellplot.export.mp4 <- downloadHandler("cell.pca.mp4", function(file) {
-    
-    validate(
-      need(readcounts.filtered(), "No filtered read counts!")
-    )
-    
-    # Disable the export button, so the user doesn't spam it
-    on.exit({
-      shinyjs::enable("pca.cellplot.export.mp4")
-    })
-    shinyjs::disable("pca.cellplot.export.mp4")
-  
-    
-    withProgressCustom(function(updateProgress) {
-      
-      savePCACellPlotMovie(
-        filename = file,
-        animation.params = pca.gene.count(),
-        axes = input$pca.cells.plot.axes,
-        plot.settings = pca.cellplot.settings(),
-        visuals.conditions = visuals.conditions(),
-        visuals.cell = visuals.cell(),
-        readcounts.filtered = readcounts.filtered(),
-        gene.variances = gene.variances(),
-        pca.center = input$pca.pca.settings.center,
-        pca.scale = input$pca.pca.settings.scale,
-        pca.relative = input$pca.pca.settings.relative,
-        updateProgress = updateProgress
-      )
-      
-    }, message = "Creating movie")
-    
-  })
-
+  plotCellPlot("pca.cells.plot",
+               readcounts.processed = readcounts.processed,
+               readcounts.filtered = readcounts.filtered,
+               readcounts.top.variant = readcounts.top.variant,
+               gene.variances = gene.variances,
+               animation.params = pca.gene.count,
+               conditions = conditions,
+               pca = pca)
 })

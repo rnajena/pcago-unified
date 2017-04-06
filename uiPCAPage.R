@@ -10,6 +10,7 @@ source("widgetDownloadablePlot.R")
 source("widgetGenericImporter.R")
 source("uiHelper.R")
 source("uiPCASidebars.R")
+source("plotCellPlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -80,9 +81,7 @@ uiPCAPage <- function() {
                                     "Cells",
                                     tabPanel("Transformed values", value = "pca.cells.transformed",
                                              downloadableDataTableOutput("pca.transformed")),
-                                    tabPanel("Cell plot", value = "pca.cells.plot",
-                                             downloadablePlotOutput("pca.cellplot",
-                                                                    downloadButton("pca.cellplot.export.mp4", "Export *.mp4")))
+                                    tabPanel("Cell plot", value = "pca.cells.plot", plotCellPlotUI("pca.cells.plot"))
                                     ),
                          tabPanel(faIconText("link", "Cell plot"), value = "pca.cells.plot.quicklink")))
   )))
