@@ -12,6 +12,7 @@ source("uiHelper.R")
 source("uiPCASidebars.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
+source("plotConditionsVennDiagramPlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -54,7 +55,7 @@ uiPCAPage <- function() {
                                     "----",
                                     "Conditions",
                                     tabPanel("Cell condition assignments", value = "pca.conditions",
-                                             downloadablePlotOutput("conditions.plot"),
+                                             plotConditionsVennDiagramPlotUI("pca.conditions.plot"),
                                              downloadableDataTableOutput("conditions"))
                                     ),
                          navbarMenu("PCA",

@@ -29,6 +29,7 @@ source("helpers.R")
 source("classPlotSettings.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
+source("plotConditionsVennDiagramPlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -102,34 +103,7 @@ shinyServer(function(input, output, session) {
   
   # Cell condition assingments
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
-  observeEvent(conditions(), {
-    
-    validate(need(conditions(), "No conditions available!"))
-    
-    available.conditions <- colnames(conditions())
-    selected.conditions <- if(length(available.conditions) > 0) available.conditions[1:min(5,length(available.conditions))] else c()
-    
-    updateSelectizeInput(session, "conditions.plot.sets", 
-                         choices = available.conditions, 
-                         selected = selected.conditions)
-    
-  })
-  
-  pca.conditions.plot.generalsettings <- generalPlotSettings("pca.conditions.plot.generalsettings")
-  pca.conditions.plot.visuals <- visualsEditorValue("pca.conditions.plot.visuals", reactive({colnames(conditions())}), has.shape = F)
-  
-  downloadablePlot("conditions.plot",
-                   plot.settings = pca.conditions.plot.generalsettings,
-                   exprplot = function(plot.settings, format, filename) {
-                     return(saveCellConditionVennDiagramPlot(
-                       selected.conditions = input$conditions.plot.sets,
-                       conditions = conditions,
-                       pca.conditions.plot.visuals = pca.conditions.plot.visuals,
-                       plot.settings = plot.settings,
-                       format = format,
-                       filename = filename
-                     ))
-                   })
+  plotConditionsVennDiagramPlot("pca.conditions.plot", conditions)
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.info.annotation))

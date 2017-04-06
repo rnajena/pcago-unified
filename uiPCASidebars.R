@@ -17,6 +17,7 @@ source("widgetInPlaceHelp.R")
 source("widgetIntegratingGenericImporter.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
+source("plotConditionsVennDiagramPlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -102,15 +103,7 @@ uiPCASidebarPlot <- function() {
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
-    conditionalPanel("input['pca.nav'] == 'pca.conditions'",
-                     bsCollapse(
-                       bsCollapsePanel("Venn diagram",selectizeInput("conditions.plot.sets", "Displayed sets", 
-                                                                     choices = c(),
-                                                                     multiple = T,
-                                                                     options = list(maxItems = 5))),
-                       bsCollapsePanel("Visualization", visualsEditorUI("pca.conditions.plot.visuals")),
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.conditions.plot.generalsettings"))
-                     )),
+    conditionalPanel("input['pca.nav'] == 'pca.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.conditions.plot")),
     # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'", plotGeneVariancePlotSettingsUI("pca.genes.variances.plot")),
     # Gene variances plot (filtered genes)
