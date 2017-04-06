@@ -5,7 +5,6 @@ source("annotation.R")
 source("conditions.R")
 source("pca.R")
 source("plots.R")
-source("movie.R")
 source("widgetCellConditionImporter.R")
 
 #' Handles some server side navigation features

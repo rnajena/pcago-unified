@@ -11,6 +11,7 @@ source("widgetGenericImporter.R")
 source("uiHelper.R")
 source("uiPCASidebars.R")
 source("plotCellPlot.R")
+source("plotGeneVariancePlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -45,24 +46,10 @@ uiPCAPage <- function() {
                                     tabPanel("Annotation", value = "pca.genes.annotation",
                                              downloadableDataTableOutput("genes.annotation")),
                                     tabPanel("Variances", value = "pca.genes.variances",
-                                             downloadablePlotOutput("genes.variance.plot",
-                                                                    custom.header.items = tagList(
-                                                                      bsButton("genes.variance.plot.log", 
-                                                                               "Logarithmic",
-                                                                               icon = icon("superscript"),
-                                                                               type = "toggle",
-                                                                               value = T)
-                                                                    )),
+                                             plotGeneVariancePlotUI("pca.genes.variances.plot"),
                                              downloadableDataTableOutput("genes.variance")),
                                     tabPanel("Variances (filtered)", value = "pca.genes.variances.filtered",
-                                             downloadablePlotOutput("genes.variance.filtered.plot",
-                                                                    custom.header.items = tagList(
-                                                                      bsButton("pca.genes.variance.filtered.plot.log", 
-                                                                               "Logarithmic",
-                                                                               icon = icon("superscript"),
-                                                                               type = "toggle",
-                                                                               value = T)
-                                                                    ))
+                                             plotGeneVariancePlotUI("pca.genes.variances.filtered.plot")
                                              ),
                                     "----",
                                     "Conditions",

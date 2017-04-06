@@ -18,7 +18,6 @@ source("annotation.R")
 source("conditions.R")
 source("pca.R")
 source("plots.R")
-source("movie.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
@@ -29,6 +28,7 @@ source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
 source("plotCellPlot.R")
+source("plotGeneVariancePlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -150,23 +150,8 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
   downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
   
-  pca.genes.variances.settings <- generalPlotSettings("pca.genes.variances.generalsettings")
-  downloadablePlot("genes.variance.plot", 
-                   plot.settings = pca.genes.variances.settings, 
-                   exprplot = function(plot.settings, format, filename) 
-                   { 
-                     return(saveGeneVariancePlot(gene.variances(), plot.settings, format, filename, 
-                                                 logarithmic = input$genes.variance.plot.log))
-                   })
-  
-  pca.genes.variances.filtered.settings <- generalPlotSettings("pca.genes.variances.filtered.generalsettings")
-  downloadablePlot("genes.variance.filtered.plot",
-                   plot.settings = pca.genes.variances.filtered.settings,
-                   exprplot = function(plot.settings, format, filename) 
-                   { 
-                     return(saveGeneVariancePlot(gene.variances.filtered(), plot.settings, format, filename, 
-                                                 logarithmic = input$pca.genes.variance.filtered.plot.log))
-                   })
+  plotGeneVariancePlot("pca.genes.variances.plot", gene.variances = gene.variances)
+  plotGeneVariancePlot("pca.genes.variances.filtered.plot", gene.variances = gene.variances.filtered)
   
   output$pca.pca.genes.count.variance.plot <- renderPlot({
    

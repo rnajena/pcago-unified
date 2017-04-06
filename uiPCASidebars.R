@@ -16,6 +16,7 @@ source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
 source("widgetIntegratingGenericImporter.R")
 source("plotCellPlot.R")
+source("plotGeneVariancePlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -98,16 +99,6 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
-    # # Readcount clustering
-    # conditionalPanel("input['pca.nav'] == 'pca.cluster.readcounts.processed'",
-    #                  bsCollapse(
-    #                    bsCollapsePanel("Clustering",
-    #                                    selectizeInput("pca.cluster.readcounts.processed.plot.method.distance", "Distance method", choices = dist.methodsSelection),
-    #                                    selectizeInput("pca.cluster.readcounts.processed.plot.method.clustering", "Clustering method", choices = hclust.methodsSelection)
-    #                                    ),
-    #                    bsCollapsePanel("Visualization", visualsEditorUI("pca.cluster.readcounts.processed.plot.visuals")),
-    #                    bsCollapsePanel("General settings", generalPlotSettingsInput("pca.cluster.readcounts.processed.plot.generalsettings"))
-    #                  )),
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
@@ -121,15 +112,9 @@ uiPCASidebarPlot <- function() {
                        bsCollapsePanel("General settings", generalPlotSettingsInput("pca.conditions.plot.generalsettings"))
                      )),
     # Gene variances plot
-    conditionalPanel("input['pca.nav'] == 'pca.genes.variances'",
-                     bsCollapse(
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.genes.variances.generalsettings"))
-                     )),
+    conditionalPanel("input['pca.nav'] == 'pca.genes.variances'", plotGeneVariancePlotSettingsUI("pca.genes.variances.plot")),
     # Gene variances plot (filtered genes)
-    conditionalPanel("input['pca.nav'] == 'pca.genes.variances.filtered'",
-                     bsCollapse(
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.genes.variances.filtered.generalsettings"))
-                     )),
+    conditionalPanel("input['pca.nav'] == 'pca.genes.variances.filtered'", plotGeneVariancePlotSettingsUI("pca.genes.variances.filtered.plot")),
     # PCA PC variances
     conditionalPanel("input['pca.nav'] == 'pca.pc.importance'",
                      bsCollapse(
