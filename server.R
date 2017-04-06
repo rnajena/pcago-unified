@@ -30,6 +30,7 @@ source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
+source("plotGeneVarianceRangePlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -127,37 +128,7 @@ shinyServer(function(input, output, session) {
   plotGeneVariancePlot("pca.genes.variances.plot", gene.variances = gene.variances)
   plotGeneVariancePlot("pca.genes.variances.filtered.plot", gene.variances = gene.variances.filtered)
   
-  output$pca.pca.genes.count.variance.plot <- renderPlot({
-   
-    validate(need(gene.variances.filtered(), "No gene variances to display!"))
-    
-    logarithmic <- input$pca.genes.variance.filtered.plot.log # Use the setting from the equivalent plot
-    genes.count <- pca.gene.count()$value
-    data <- gene.variances.filtered()
-    data$logvar <- log(data$var)
-    data.selection <- data[1:genes.count,]
-    
-    
-    
-    if(logarithmic) {
-      p <- ggplot(data, aes(x=1:nrow(data), y=logvar))
-      p <- p + geom_vline(xintercept = genes.count, color = "red")
-      p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$logvar), ymax = logvar, x = 1:genes.count), fill = "#da4453")
-      p <- p + geom_point()
-      p <- p + labs(x = "Top n-th variant gene", y = expression(log(sigma^2)))
-      
-      return(p)
-    }
-    else {
-      p <- ggplot(data, aes(x=1:nrow(data), y=var))
-      p <- p + geom_vline(xintercept = genes.count, color = "red")
-      p <- p + geom_ribbon(data = data.selection, aes(ymin = min(data$var), ymax = var, x = 1:genes.count), fill = "#da4453")
-      p <- p + geom_point()
-      p <- p + labs(x = "Top n-th variant gene", y = expression(sigma^2))
-      
-      return(p)
-    }
-  })
+  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, gene.variances.filtered)
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   

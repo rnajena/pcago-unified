@@ -19,6 +19,7 @@ source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
+source("plotGeneVarianceRangePlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -78,7 +79,7 @@ uiPCASidebarPCA <- function() {
                     hDivider(),
                     textOutput("pca.pca.genes.set.count")),
     bsCollapsePanel("Gene count",
-                    plotOutput("pca.pca.genes.count.variance.plot", height = "120px"),
+                    plotGeneVarianceRangePlotUI("pca.pca.genes.count.variance.plot", height = "120px"),
                     extendedSliderInput("pca.genes.count", "Gene count")
                     
                     ),
