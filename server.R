@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
   gene.info.annotation <- serverGeneInfoAnnotation(readcounts)
   
   # Readcount processing
-  readcounts.processing.output <- serverReadCountProcessing(readcounts, input)
+  readcounts.processing.output <- serverReadCountProcessing(readcounts, gene.info.annotation, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
   
   # Obtain the list of genes the user wants to use

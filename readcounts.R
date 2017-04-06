@@ -29,6 +29,7 @@ supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "
 #'
 #' @param filehandle Either a filename or a connection
 #' @param datatype One value in supportedReadcountDataTypes
+#' @param parameters Additional parameters from the importer. Not used.
 #'
 #' @return Data frame containing the read data
 #' @export
@@ -86,20 +87,40 @@ importReadcountSample <- function(sample, parameters) {
   
 }
 
-#' Applies normalization to a read count table. The normalization algorithm is determined by normalizationtype
+#' Applies read count normalization (TPM) to readcounts
 #'
-#' @param rawdata Read count table
-#' @param normalizationtype One of supportedReadcountNormalizationTypes
+#' @param readcounts Read count data
+#' @param mu.fld Mean of fragment length distribution
+#' @param sequence.info Sequence info
 #'
-#' @return Normalized read count table
+#' @return
 #' @export
 #'
 #' @examples
-applyReadcountNormalization <- function(rawdata, normalizationtype) {
+applyReadcountNormalization.TPM <- function(readcounts, mu.fld, sequence.info) {
   
-  validate(need(rawdata, "No data to normalize!"))
+  if(!is.data.frame(readcounts) || !is.numeric(mu.fld) || !is.data.frame(sequence.info)) {
+    stop("Invalid arguments!")
+  }
   
-  return(rawdata) # todo
+  validate(need(mu.fld > 0, "Invalid mean fragment length!"),
+           need(sequence.info, "No sequence info available!"),
+           need(ncol(sequence.info) > 0 && nrow(sequence.info) > 0, "No sequence info available!"),
+           need(readcounts, "No read counts to process!"),
+           need(all(rownames(readcounts) %in% rownames(sequence.info)), "Not all genes annotated!"))
+  
+  sequence.info <- sequence.info[rownames(readcounts),]
+  sequence.info$effective.length <- sequence.info$length - mu.fld + 1
+  
+  
+  # Normalize sequence length
+  readcounts.rpk <- sweep(readcounts, 1, sequence.info$effective.length, "/")
+  
+  # Normalize by sequence depth
+  readcounts.tpm <- sweep(readcounts.rpk, 2, 10e6 / colSums(readcounts.rpk), "*")
+  
+  return(readcounts.tpm)
+  
 }
 
 #' Removes constant read count genes from the table.

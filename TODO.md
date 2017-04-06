@@ -6,7 +6,8 @@
 * Help pages
 * Clustering based on PCA results, read counts.
 * Cluster widget (multiple clustering methods)
-* Dendrogram export!
+* Dendrogram export?
+* Read count normalization result plots
 * Custom selectors
 
 ## Code

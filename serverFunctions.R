@@ -36,13 +36,14 @@ serverNavigation <- function(input, session) {
 #' Server function for processed read counts
 #'
 #' @param readcounts 
+#' @param gene.info.annotation Gene annotation object
 #' @param input 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverReadCountProcessing <- function(readcounts, input) {
+serverReadCountProcessing <- function(readcounts, gene.info.annotation, input) {
   
   return(reactive({
     
@@ -69,7 +70,15 @@ serverReadCountProcessing <- function(readcounts, input) {
     }
     
     # Apply normalization
-    output$readcounts <- applyReadcountNormalization(output$readcounts, input$pca.data.normalization)
+    if(input$pca.data.normalization == "tpm") {
+      
+      validate(need(gene.info.annotation(), "No annotation available!"),
+               need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"))
+      
+      output$readcounts <- applyReadcountNormalization.TPM(readcounts(), 
+                                                    input$pca.data.normalization.tpm.mufld,
+                                                    gene.info.annotation()@sequence.info)
+    }
     
     return(output)
     

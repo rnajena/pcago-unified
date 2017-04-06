@@ -41,7 +41,9 @@ uiPCASidebarData <- function() {
                                                    helpIconText("Apply read count normalization", 
                                                                 "If you already have normalized read counts, set this to 'None'.",
                                                                 "Read count normalization"),
-                                                   supportedReadcountNormalizationTypes))
+                                                   choices = supportedReadcountNormalizationTypes),
+                                      conditionalPanel("input['pca.data.normalization'] == 'tpm'",
+                                                       numericInput("pca.data.normalization.tpm.mufld", "Mean fragment length", value = 0)))
                     )
     ),
     bsCollapsePanel("Annotation",
