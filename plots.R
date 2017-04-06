@@ -5,7 +5,27 @@ library(scatterplot3d)
 library(VennDiagram)
 library(dendextend)
 
-saveClusterPlot <- function(readcounts, plot.settings, cell.visuals, format, filename, method.distance = "euclidian", method.cluster = "average") {
+#' Title
+#'
+#' @param readcounts 
+#' @param plot.settings 
+#' @param cell.visuals 
+#' @param format 
+#' @param filename 
+#' @param method.distance 
+#' @param method.cluster 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+saveAgglomerativeClusterPlot <- function(readcounts, 
+                                         plot.settings, 
+                                         cell.visuals, 
+                                         format, 
+                                         filename, 
+                                         method.distance = "euclidian", 
+                                         method.cluster = "average") {
   
   validate(need(readcounts(), "No data to plot!"),
            need(cell.visuals(), "No cell visuals available!"))
@@ -14,7 +34,7 @@ saveClusterPlot <- function(readcounts, plot.settings, cell.visuals, format, fil
                          PlotSettings(width = 640, 
                                       height = 480,
                                       dpi = 96,
-                                      title = "Custer Dendrogram",
+                                      title = "Cluster Dendrogram",
                                       subtitle = ""))
   
   width <- plot.settings@width

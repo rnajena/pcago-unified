@@ -14,6 +14,7 @@
 
 * Improve performance
 * Better variable names
+* Refactor: Main + Satellite UIs for plots
 
 ## Bugs
 
