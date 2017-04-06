@@ -13,6 +13,7 @@ source("uiPCASidebars.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
+source("plotPCAVariancePlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -63,7 +64,7 @@ uiPCAPage <- function() {
                                     tabPanel("Principal components", value = "pca.pc.pc",
                                              downloadableDataTableOutput("pca.pc")),
                                     tabPanel("Importance", value = "pca.pc.importance",
-                                             downloadablePlotOutput("pca.variance.plot"),
+                                             plotPCAVariancePlotUI("pca.variance.plot"),
                                              downloadableDataTableOutput("pca.variance")),
                                     "----",
                                     "Cells",

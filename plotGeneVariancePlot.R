@@ -66,9 +66,9 @@ plotGeneVariancePlot.save <- function(gene.variances, plot.settings, format, fil
 }
 
 plotGeneVariancePlot_ <- function(input, 
-                          output, 
-                          session, 
-                          gene.variances) {
+                                  output, 
+                                  session, 
+                                  gene.variances) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   downloadablePlot("plot", 
@@ -76,7 +76,7 @@ plotGeneVariancePlot_ <- function(input,
                    exprplot = function(plot.settings, format, filename) 
                    { 
                      return(plotGeneVariancePlot.save(gene.variances(), plot.settings, format, filename, 
-                                                 logarithmic = input$logarithmic))
+                                                      logarithmic = input$logarithmic))
                    })
   
 }

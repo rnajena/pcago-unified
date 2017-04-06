@@ -18,6 +18,7 @@ source("widgetIntegratingGenericImporter.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
+source("plotPCAVariancePlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -109,9 +110,6 @@ uiPCASidebarPlot <- function() {
     # Gene variances plot (filtered genes)
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances.filtered'", plotGeneVariancePlotSettingsUI("pca.genes.variances.filtered.plot")),
     # PCA PC variances
-    conditionalPanel("input['pca.nav'] == 'pca.pc.importance'",
-                     bsCollapse(
-                       bsCollapsePanel("General settings", generalPlotSettingsInput("pca.pc.importance.generalsettings"))
-                     ))
+    conditionalPanel("input['pca.nav'] == 'pca.pc.importance'", plotPCAVariancePlotSettingsUI("pca.variance.plot"))
   ))
 }

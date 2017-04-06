@@ -30,6 +30,7 @@ source("classPlotSettings.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
+source("plotPCAVariancePlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -159,13 +160,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  pca.variance.plot.settings <- generalPlotSettings("pca.pc.importance.generalsettings")
-  
-  downloadablePlot("pca.variance.plot", 
-                   plot.settings = pca.variance.plot.settings, 
-                   exprplot = function( plot.settings, format, filename ){
-    return(savePCAVariancePlot(pca(), plot.settings, format, filename))
-  })
+  plotPCAVariancePlot("pca.variance.plot", pca)
   
   plotCellPlot("pca.cells.plot",
                readcounts.processed = readcounts.processed,
