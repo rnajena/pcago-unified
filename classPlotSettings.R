@@ -80,13 +80,13 @@ setMethod(f = "plotSettingsSetNA",
           signature = signature(object.target = "PlotSettings", object.source = "PlotSettings"),
           definition = function(object.target, object.source) {
             
-            if(!is.na(object.source@width) && is.na(object.target@width)) { object.target@width <- object.source@width }
-            if(!is.na(object.source@height) && is.na(object.target@height)) { object.target@height <- object.source@height }
-            if(!is.na(object.source@dpi) && is.na(object.target@dpi)) { object.target@dpi <- object.source@dpi }
-            if(!is.na(object.source@title) && is.na(object.target@title)) { object.target@title <- object.source@title }
-            if(!is.na(object.source@subtitle) && is.na(object.target@subtitle)) { object.target@subtitle <- object.source@subtitle }
-            if(!is.na(object.source@legend.color) && is.na(object.target@legend.color)) { object.target@legend.color <- object.source@legend.color }
-            if(!is.na(object.source@legend.shape) && is.na(object.target@legend.shape)) { object.target@legend.shape <- object.source@legend.shape }
+            if(is.numeric(object.source@width) && is.na(object.target@width)) { object.target@width <- object.source@width }
+            if(is.numeric(object.source@height) && is.na(object.target@height)) { object.target@height <- object.source@height }
+            if(is.numeric(object.source@dpi) && is.na(object.target@dpi)) { object.target@dpi <- object.source@dpi }
+            if(is.character(object.source@title) && is.na(object.target@title)) { object.target@title <- object.source@title }
+            if(is.character(object.source@subtitle) && is.na(object.target@subtitle)) { object.target@subtitle <- object.source@subtitle }
+            if(is.character(object.source@legend.color) && is.na(object.target@legend.color)) { object.target@legend.color <- object.source@legend.color }
+            if(is.character(object.source@legend.shape) && is.na(object.target@legend.shape)) { object.target@legend.shape <- object.source@legend.shape }
             
             validObject(object.target)
             return(object.target)

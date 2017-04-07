@@ -55,7 +55,9 @@ downloadablePlotOutput <- function(id,
                                                                             hDivider(),
                                                                             settings.panel))
                                                   ),
-                               plotOutput(ns("plot")))))
+                               uiOutput(ns("plot.container"))
+                               # plotOutput(ns("plot"))
+                               )))
 }
 
 
@@ -92,7 +94,25 @@ downloadablePlot_ <- function(input,
     return(plotSettingsSetNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = 96) ))
     })
   
+  output$plot.container <- renderUI({
+    
+    width <- "100%"
+    height <- "400px"
+    
+    if(!is.na(plot.settings()@width)) {
+      width <- paste0(plot.settings()@width, "px")
+    }
+    if(!is.na(plot.settings()@height)) {
+      height <- paste0(plot.settings()@height, "px")
+    }
+    
+    return(plotOutput(session$ns("plot"), width = width, height = height))
+  })
+  
   output$plot <- renderImage({
+    
+    validate(need(out.width(), "No output width!"),
+             need(out.height(), "No output height!"))
     
     out.file <- tempfile(fileext=paste0(".", render.format))
     
