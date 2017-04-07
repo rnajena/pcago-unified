@@ -73,7 +73,7 @@ serverReadCountProcessing <- function(readcounts, gene.info.annotation, input) {
       validate(need(gene.info.annotation(), "No annotation available!"),
                need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"))
       
-      output$readcounts <- applyReadcountNormalization.TPM(readcounts(), 
+      output$readcounts <- applyReadcountNormalization.TPM(output$readcounts, 
                                                     input$pca.data.normalization.tpm.mufld,
                                                     gene.info.annotation()@sequence.info)
     }
@@ -155,6 +155,8 @@ serverGeneInfoAnnotation <- function(readcounts) {
 serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
   
   return(filterSelectionValues("pca.pca.genes.set",  reactive({
+    
+    validate(need(readcounts.processed(), "No readcounts to process!"))
     
     gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
     all.genes <- rownames(readcounts.processed())

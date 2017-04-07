@@ -4,17 +4,15 @@
 
 * Normalization (!)
 * Help pages
-* Clustering based on PCA results, read counts.
-* Cluster widget (multiple clustering methods)
-* Dendrogram export?
 * Read count normalization result plots
 * Custom selectors
+* Annotation overview
+* Better processing view
 
 ## Code
 
 * Improve performance
 * Better variable names
-* Refactor: Main + Satellite UIs for plots
 
 ## Bugs
 

@@ -24,7 +24,7 @@ cellConditionImporterUI <- function(id) {
   
   return(tagList(
     radioButtons(ns("mode"),
-                 "Source of cell conditions for visualization:",
+                 "Source of cell conditions:",
                  c("Column names" = "column",
                    "Extract from columns" = "extract",
                    "Upload" = "upload"),
