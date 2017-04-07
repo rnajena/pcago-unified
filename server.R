@@ -101,13 +101,13 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
   
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
-  plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed)
+  plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed, default.title = reactive({ "Processed read counts clustering" }))
   
   downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered)
-  plotAgglomerativeClusteringPlot("readcounts.filtered.hclust.plot", conditions, readcounts.filtered)
+  plotAgglomerativeClusteringPlot("readcounts.filtered.hclust.plot", conditions, readcounts.filtered, default.title = reactive({ "Filtered read counts clustering" }))
   
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
-  plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant)
+  plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
   
   # Cell condition assingments
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
@@ -139,7 +139,10 @@ shinyServer(function(input, output, session) {
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   
-  plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", conditions, reactive({ t(pca()$transformed) }))
+  plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", 
+                                  conditions, 
+                                  reactive({ t(pca()$transformed) }),
+                                  default.title = reactive({ "PCA transformed values clustering" }))
   
   plotCellPlot("pca.cells.plot",
                readcounts.processed = readcounts.processed,

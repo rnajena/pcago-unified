@@ -126,7 +126,8 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                                   output, 
                                   session, 
                                   conditions,
-                                  readcounts) {
+                                  readcounts,
+                                  default.title) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
@@ -136,7 +137,7 @@ plotAgglomerativeClusteringPlot_ <- function(input,
   downloadablePlot("plot", 
                    plot.settings = plot.settings, 
                    exprplot = function(plot.settings, format, filename) 
-                   { 
+                   {
                      distance.methods <- plotAgglomerativeClusteringPlotUI.dist.methodsSelection
                      clustering.methods <- plotAgglomerativeClusteringPlotUI.hclust.methodsSelection
                      
@@ -144,7 +145,8 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                      clustering.method.name <- names(clustering.methods)[clustering.methods == input$method.hclust]
                      
                      plot.settings <- plotSettingsSetNA(plot.settings,
-                                                        PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name)))
+                                                        PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name),
+                                                                     title = default.title()))
                      
                      return(plotAgglomerativeClusteringPlot.save(readcounts, 
                                                                  plot.settings, 
@@ -162,11 +164,12 @@ plotAgglomerativeClusteringPlot_ <- function(input,
   
 }
 
-plotAgglomerativeClusteringPlot <- function(id, conditions, readcounts) {
+plotAgglomerativeClusteringPlot <- function(id, conditions, readcounts, default.title = reactive({"Hierarchical clustering"})) {
   
   return(callModule(plotAgglomerativeClusteringPlot_, 
                     id, 
                     conditions = conditions,
-                    readcounts = readcounts))
+                    readcounts = readcounts,
+                    default.title = default.title))
   
 }
