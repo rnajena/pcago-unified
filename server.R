@@ -31,6 +31,7 @@ source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
+source("plotAgglomerativeClusteringPlot.R")
 
 shinyServer(function(input, output, session) {
   
@@ -98,9 +99,15 @@ shinyServer(function(input, output, session) {
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
+  
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
+  plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed)
+  
   downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered)
+  plotAgglomerativeClusteringPlot("readcounts.filtered.hclust.plot", conditions, readcounts.filtered)
+  
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
+  plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant)
   
   # Cell condition assingments
   downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
@@ -131,6 +138,8 @@ shinyServer(function(input, output, session) {
   plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, gene.variances.filtered)
   
   plotPCAVariancePlot("pca.variance.plot", pca)
+  
+  plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", conditions, reactive({ t(pca()$transformed) }))
   
   plotCellPlot("pca.cells.plot",
                readcounts.processed = readcounts.processed,

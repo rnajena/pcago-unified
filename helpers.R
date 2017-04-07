@@ -5,22 +5,6 @@
 library(shiny)
 library(reshape2)
 
-dist.methodsSelection <- c(
-  "Euclidean" = "euclidean",
-  "Maximum" = "maximum",
-  "Manhattan" = "manhattan",
-  "Canberra" = "canberra",
-  "Binary" = "binary",
-  "Minkowsky" = "minkowsky"
-)
-
-hclust.methodsSelection <- c(
-  "UPGMA/Average" = "average",
-  "WPGMA/McQuitty" = "mcquitty",
-  "WPGMC/Median" = "median",
-  "UPGMC/Centroid" = "centroid"
-)
-
 #' Generates a random string
 #' Src: http://stackoverflow.com/questions/42734547/generating-random-strings
 #'

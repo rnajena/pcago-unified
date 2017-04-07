@@ -1,0 +1,172 @@
+#' 
+#' Plot module for variance plot
+#' 
+
+library(shiny)
+library(ggplot2)
+library(dendextend)
+library(ctc)
+source("widgetVisualsEditor.R")
+source("widgetDownloadablePlot.R")
+
+plotAgglomerativeClusteringPlotUI.dist.methodsSelection <- c(
+  "Euclidean" = "euclidean",
+  "Maximum" = "maximum",
+  "Manhattan" = "manhattan",
+  "Canberra" = "canberra",
+  "Binary" = "binary",
+  "Minkowski" = "minkowski"
+)
+
+plotAgglomerativeClusteringPlotUI.hclust.methodsSelection <- c(
+  "UPGMA/Average" = "average",
+  "WPGMA/McQuitty" = "mcquitty",
+  "WPGMC/Median" = "median",
+  "UPGMC/Centroid" = "centroid",
+  "Ward D" = "ward.D",
+  "Ward D2" = "ward.D2",
+  "Single linkage" = "single",
+  "Complete linkage" = "complete"
+)
+
+plotAgglomerativeClusteringPlotUI <- function(id) {
+  
+  ns <- NS(id)
+  
+  export.tree.buttons <- tagList(
+    downloadButton(ns("export.newick"), "as *.newick")
+  )
+  
+  return(downloadablePlotOutput(ns("plot"),
+                                custom.header.items = dropdownButton(ns("export.tree"), 
+                                                                     "Export tree",
+                                                                     icon = icon("download"),
+                                                                     export.tree.buttons)))
+}
+
+plotAgglomerativeClusteringPlotSettingsUI <- function(id) {
+  
+  ns <- NS(id)
+  
+  return(bsCollapse(
+    bsCollapsePanel("Hierarchical clustering",
+                    selectizeInput(ns("method.dist"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
+                    selectizeInput(ns("method.hclust"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection)),
+    bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
+  ))
+  
+}
+
+plotAgglomerativeClusteringPlot.save <- function(readcounts, 
+                                                 plot.settings, 
+                                                 cell.visuals, 
+                                                 format, 
+                                                 filename, 
+                                                 method.distance = "euclidian", 
+                                                 method.cluster = "average"){
+  
+  validate(need(readcounts(), "No data to plot!"),
+           need(cell.visuals(), "No cell visuals available!"))
+  
+  plot.settings <- plotSettingsSetNA(plot.settings, 
+                                     PlotSettings(width = 640, 
+                                                  height = 480,
+                                                  dpi = 96,
+                                                  title = "Hierarchical Clustering",
+                                                  subtitle = ""))
+  
+  width <- plot.settings@width
+  height <- plot.settings@height
+  dpi <- plot.settings@dpi
+  title <- plot.settings@title
+  subtitle <- plot.settings@subtitle
+  
+  palette.colors <- cell.visuals()$palette.colors
+  palette.shapes <- cell.visuals()$palette.shapes
+  
+  saveRPlot(width, height, dpi, filename, format, expr = function() {
+    
+    dend <- t(readcounts()) %>% 
+      dist(method = method.distance) %>%
+      hclust(method = method.cluster) %>%
+      as.dendrogram
+    
+    dend.cells <- labels(dend)
+    dend.factors <- cell.visuals()$factors[dend.cells,]
+    
+    dend <- dend %>% dendextend::set("leaves_pch", palette.shapes[as.numeric(dend.factors$shape)]) %>%
+      dendextend::set("leaves_col", palette.colors[as.numeric(dend.factors$color)])
+    
+    par(mar = c(5,4,4,10))
+    dend %>% plot(main = title, sub = subtitle, horiz = T, cex = 0.6)
+    
+  })
+  
+  return(plot.settings)
+  
+}
+
+plotAgglomerativeClusteringPlot.saveNewick <- function(readcounts,
+                                           filename,
+                                           method.distance = "euclidian", 
+                                           method.cluster = "average") {
+  
+  validate(need(readcounts(), "No data to cluster!"))
+  
+  clust <- t(readcounts()) %>% 
+    dist(method = method.distance) %>%
+    hclust(method = method.cluster)
+  
+  write(ctc::hc2Newick(clust), file = filename)
+  
+}
+
+plotAgglomerativeClusteringPlot_ <- function(input, 
+                                  output, 
+                                  session, 
+                                  conditions,
+                                  readcounts) {
+  
+  plot.settings <- generalPlotSettings("plot.settings")
+  visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
+  visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
+  
+  # Plot
+  downloadablePlot("plot", 
+                   plot.settings = plot.settings, 
+                   exprplot = function(plot.settings, format, filename) 
+                   { 
+                     distance.methods <- plotAgglomerativeClusteringPlotUI.dist.methodsSelection
+                     clustering.methods <- plotAgglomerativeClusteringPlotUI.hclust.methodsSelection
+                     
+                     distance.method.name <- names(distance.methods)[distance.methods == input$method.dist]
+                     clustering.method.name <- names(clustering.methods)[clustering.methods == input$method.hclust]
+                     
+                     plot.settings <- plotSettingsSetNA(plot.settings,
+                                                        PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name)))
+                     
+                     return(plotAgglomerativeClusteringPlot.save(readcounts, 
+                                                                 plot.settings, 
+                                                                 format, 
+                                                                 filename,
+                                                                 cell.visuals = visuals.cell,
+                                                                 method.distance = input$method.dist,
+                                                                 method.cluster = input$method.hclust))
+                   })
+  
+  # Download tree as NEWICK
+  output$export.newick <- downloadHandler("clustering.newick", function(file) {
+    plotAgglomerativeClusteringPlot.saveNewick(readcounts, file, input$method.dist, input$method.hclust)
+  })
+  
+}
+
+plotAgglomerativeClusteringPlot <- function(id, conditions, readcounts) {
+  
+  return(callModule(plotAgglomerativeClusteringPlot_, 
+                    id, 
+                    conditions = conditions,
+                    readcounts = readcounts))
+  
+}

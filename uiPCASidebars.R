@@ -20,6 +20,7 @@ source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
+source("plotAgglomerativeClusteringPlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -102,6 +103,11 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
+    conditionalPanel("input['pca.nav'] == 'pca.readcounts.processed'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.processed.hclust.plot")),
+    conditionalPanel("input['pca.nav'] == 'pca.readcounts.filtered'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.filtered.hclust.plot")),
+    conditionalPanel("input['pca.nav'] == 'pca.readcounts.top.variant'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.top.variant.hclust.plot")),
+    # Clustering based on PCA
+    conditionalPanel("input['pca.nav'] == 'pca.cells.transformed'", plotAgglomerativeClusteringPlotSettingsUI("pca.transformed.hclust.plot")),
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot

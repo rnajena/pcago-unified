@@ -18,7 +18,8 @@
 
 ## Bugs
 
-* No known
+* NULL values in general plot settings  -> crash
+* Height of plots causes overlap
 
 ## Additional notes
 

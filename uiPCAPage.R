@@ -14,6 +14,7 @@ source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
+source("plotAgglomerativeClusteringPlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -38,10 +39,13 @@ uiPCAPage <- function() {
                                     tabPanel("Raw", value = "pca.readcounts.raw", downloadableDataTableOutput("readcounts")),
                                     tabPanel("Processed", value = "pca.readcounts.processed", 
                                              uiOutput("readcounts.processing.steps"),
+                                             plotAgglomerativeClusteringPlotUI("readcounts.processed.hclust.plot"),
                                              downloadableDataTableOutput("readcounts.processed")),
                                     tabPanel("Filtered", value = "pca.readcounts.filtered",
+                                             plotAgglomerativeClusteringPlotUI("readcounts.filtered.hclust.plot"),
                                              downloadableDataTableOutput("readcounts.filtered")),
                                     tabPanel("Top variant", value = "pca.readcounts.top.variant",
+                                             plotAgglomerativeClusteringPlotUI("readcounts.top.variant.hclust.plot"),
                                              downloadableDataTableOutput("readcounts.top.variant")),
                                     "----",
                                     "Genes",
@@ -69,6 +73,7 @@ uiPCAPage <- function() {
                                     "----",
                                     "Cells",
                                     tabPanel("Transformed values", value = "pca.cells.transformed",
+                                             plotAgglomerativeClusteringPlotUI("pca.transformed.hclust.plot"),
                                              downloadableDataTableOutput("pca.transformed")),
                                     tabPanel("Cell plot", value = "pca.cells.plot", plotCellPlotUI("pca.cells.plot"))
                                     ),
