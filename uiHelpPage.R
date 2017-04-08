@@ -24,13 +24,15 @@ uiHelpPageEntry <- function(title, filename) {
 uiHelpPage <- function() {
   return(navlistPanel(
     uiHelpPageEntry("Overview", "helppages/overview.md"),
-    uiHelpPageEntry("User Interface", "helppages/ui.md"),
     "Data",
     uiHelpPageEntry("Read counts", "helppages/data-readcounts.md"),
     uiHelpPageEntry("Annotations", "helppages/data-annotations.md"),
     uiHelpPageEntry("Conditions", "helppages/data-conditions.md"),
     "PCA",
     uiHelpPageEntry("Gene filtering", "helppages/pca-filter.md"),
-    uiHelpPageEntry("Top variant genes", "helppages/pca-top-variant-genes.md")
+    uiHelpPageEntry("Top variant genes", "helppages/pca-top-variant-genes.md"),
+    "User interface",
+    uiHelpPageEntry("Overview", "helppages/ui.md"),
+    uiHelpPageEntry("Plot visuals", "helppages/ui-plot-visuals.md")
   ))
 }

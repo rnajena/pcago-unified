@@ -22,6 +22,11 @@ Below the controls you can find the *animation parameters* that allow you to set
 * the **animation step** which decides by which step the current **n** is increased during the animation
 * the **animation speed** that determines the amount of *ms* to wait after each plot. Smaller numbers increase the animation speed.
 
-**Note:** Due to the live rendering the animation may be not as smooth as a rendered video file. The animation speed is additionally influenced by the server and network capabilities.
+<div class="well help-box">
+<label>Note</label> Due to the live rendering the animation may be not as smooth as a rendered video file.
+The animation speed is additionally influenced by the server and network capabilities.
+</div>
 
-**Tip:** Render a video file of the animation by clicking the **Export \*.mp4** button on top of the plot.
+<div class="well help-box">
+<label>Tip</label> Render a video file of the animation by clicking the <strong>Export *.mp4</strong> button on top of the plot.
+</div>

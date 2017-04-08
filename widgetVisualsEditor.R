@@ -98,27 +98,19 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     if(!has.shape) { shinyjs::hideElement("shape") }
   })
   
-  # Get the current visual table or make a new one based on the current conditions
-  visual.table <- reactive({ 
+
+  # Change the list of choices and visual table when the conditions update
+  observeEvent(conditions(), {
+    validate(need(conditions(), "Cannot output visual parameters withoout conditions!"))
+    updateRadioButtons(session, "conditions", choices = (conditions()))
     
-    validate(need(conditions(), "Cannot output visual parameters without conditions!"))
-    
+    # Rebuild table if conditions changed
     if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), (conditions()))) {
       variables$visuals.table <- generateDefaultConditionVisualsTable(conditions(), 
                                                                       has.color = has.color, 
                                                                       has.shape = has.shape)
+      print(variables$visuals.table)
     }
-    
-    return(variables$visuals.table)
-    
-  })
-
-  # Change the list of choices when the conditions update
-  observeEvent(conditions(), {
-    
-    validate(need(conditions(), "Cannot output visual parameters withoout conditions!"))
-    
-    updateRadioButtons(session, "conditions", choices = (conditions()))
     
   })
   
@@ -130,14 +122,14 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     variables$update.ui
     },{
       
-      validate(need(visual.table(), "No visual table to update input!"),
+      validate(need(variables$visuals.table, "No visual table to update input!"),
                need(input$conditions, "No current condition!"),
-               need(input$conditions %in% rownames(visual.table()), "Condition not in visual table!"))
+               need(input$conditions %in% rownames(variables$visuals.table), "Condition not in visual table!"))
       
       condition <- input$conditions
-      color <- visual.table()[condition, "color"]
-      shape <- visual.table()[condition, "shape"]
-      name <- visual.table()[condition, "name"]
+      color <- variables$visuals.table[condition, "color"]
+      shape <- variables$visuals.table[condition, "shape"]
+      name <- variables$visuals.table[condition, "name"]
       
       if(is.null(color) || color == "") {
         color <- "transparent"
@@ -159,7 +151,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
       return()
     }
     
-    validate(need(visual.table(), "No visual table to write to!"))
+    validate(need(variables$visuals.table, "No visual table to write to!"))
     
     condition <- input$conditions
     color <- input$color
@@ -173,23 +165,50 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     
   })
   
+  observeEvent(input$shape, {
+    
+    if(!has.shape) {
+      return()
+    }
+    
+    validate(need(variables$visuals.table, "No visual table to write to!"))
+    
+    condition <- input$conditions
+    shape <- as.numeric(input$shape)
+    
+    variables$visuals.table[condition, "shape"] <- shape
+    variables$update.ui <- variables$update.ui + 1
+    
+  })
+  
+  observeEvent(input$name, {
+    
+    validate(need(variables$visuals.table, "No visual table to write to!"))
+    
+    condition <- input$conditions
+    name <- input$name
+    
+    variables$visuals.table[condition, "name"] <- name
+    variables$update.ui <- variables$update.ui + 1
+    
+  })
+  
   # Observe the table and change the radio buttons with JS
   observeEvent({
-    visual.table()
+    variables$visuals.table
     input$conditions
-    variables$update.ui
     }, {
     
-    validate(need(visual.table(), "No visual table!"))
+    validate(need(variables$visuals.table, "No visual table!"))
     
     js <- c()
     control.name <- session$ns("conditions")
     
-    for(condition in rownames(visual.table())) {
+    for(condition in rownames(variables$visuals.table)) {
       
       if(has.color)
       {
-        color <- visual.table()[condition, "color"]
+        color <- variables$visuals.table[condition, "color"]
         
         if(color == "") {
           color <- "white"
@@ -204,6 +223,16 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
         js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"background-color\", \"%s\")", condition, control.name, color))
         js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"color\", \"%s\")", condition, control.name, inv.color))
       }
+      
+      if(has.shape) {
+        shape <- variables$visuals.table[condition, "shape"]
+        js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"border\", \"%s\")", condition, control.name, "2px solid #555"))
+        
+        if(shape >= 0) {
+          js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"border-left\", \"%s\")", condition, control.name, "10px solid #555"))
+        }
+        
+      }
     }
     
     if(length(js) > 0) {
@@ -212,39 +241,13 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     
   })
   
-  observeEvent(input$shape, {
-    
-    if(!has.shape) {
-      return()
-    }
-    
-    validate(need(visual.table(), "No visual table to write to!"))
-    
-    condition <- input$conditions
-    shape <- as.numeric(input$shape)
-    
-    variables$visuals.table[condition, "shape"] <- shape
-    variables$update.ui <- variables$update.ui + 1
-    
-  })
   
-  observeEvent(input$name, {
-    
-    validate(need(visual.table(), "No visual table to write to!"))
-    
-    condition <- input$conditions
-    name <- input$name
-    
-    variables$visuals.table[condition, "name"] <- name
-    variables$update.ui <- variables$update.ui + 1
-    
-  })
   
   #' Handler for download of current visuals table
   output$export.csv <- downloadHandler(filename = "visuals.csv",
                                        content = function(file)
                                        {
-                                         write.table(visual.table(),
+                                         write.table(variables$visuals.table,
                                                      file,
                                                      sep = ",",
                                                      row.names = T,
@@ -267,12 +270,13 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
   observeEvent(visual.table.imported(), {
     
     if(!is.null(visual.table.imported())) {
+      variables$update.ui <- isolate(variables$update.ui) + 1
       variables$visuals.table <- visual.table.imported()
     }
     
   })
   
-  return(visual.table)
+  return(reactive(variables$visuals.table))
   
 }
 
