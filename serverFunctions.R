@@ -128,9 +128,9 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                           go.genes <- intersect(geneFilterGenes(output@gene.go.terms), genes)
                                           
                                           names(choices) <- c(
-                                            if(length(sequence.info.genes) == 0) "Sequence info" else paste0("Sequence info (", length(sequence.info.genes), "/", length(genes), ")"),
-                                            if(length(feature.genes) == 0) "Associated features" else paste0("Associated features (", length(feature.genes), "/", length(genes), ")"),
-                                            if(length(go.genes) == 0) "GO terms" else paste0("GO terms (", length(go.genes), "/", length(genes), ")")
+                                            if(length(sequence.info.genes) == 0) "Sequence info" else sprintf("Sequence info (%d/%d)", length(sequence.info.genes), length(genes)),
+                                            if(length(feature.genes) == 0) "Associated features" else sprintf("Associated features (%d/%d)", length(feature.genes), length(genes)),
+                                            if(length(go.genes) == 0) "GO terms" else sprintf("GO terms (%d/%d)", length(go.genes), length(genes))
                                           )
                                           
                                           if(length(sequence.info.genes) > 0) { selected <- c(selected, "sequence.info") }

@@ -40,7 +40,7 @@ plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
-  plot.y.label <- paste0("Relative variance (to ", sum(pca$var), ")")
+  plot.y.label <- sprintf("Relative variance (to %s)", paste(sum(pca$var)))
   
   
   p <- ggplot(pca$var, aes(x=factor(rownames(pca$var), levels = rownames(pca$var)), y=var.relative)) + geom_point()
