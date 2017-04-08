@@ -1,3 +1,5 @@
+# Top variant genes
+
 PCAGO allows to restrict the filtered gene set (see `PCA > Gene filtering` help page)
 to only the top n most variant genes.
 

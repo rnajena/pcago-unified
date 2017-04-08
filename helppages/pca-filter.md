@@ -1,3 +1,5 @@
+# Gene filtering
+
 PCAGO allows you to filter the genes used a input for the PCA by different parameters.
 You can find the filter in `Sidebar > PCA > Filter Genes`. By default all
 available genes are selected.

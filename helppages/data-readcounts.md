@@ -1,3 +1,5 @@
+# Read counts
+
 To provide read counts, go to `Sidebar > Data > Readcounts > Import` and choose
 a sample data set or upload a file.
 

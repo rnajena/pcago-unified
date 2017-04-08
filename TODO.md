@@ -16,7 +16,7 @@
 
 ## Bugs
 
-* No known
+* Visual editor color update sometimes not triggering
 
 ## Additional notes
 

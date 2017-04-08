@@ -1,3 +1,5 @@
+# Conditions
+
 Each cell has a set of conditions that are useful for visualizing data.
 For example cells that have been treated with vitamins could have a different color
 in the plot than cells without any treatment.

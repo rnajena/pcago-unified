@@ -1,3 +1,5 @@
+# Annotations
+
 Using annotations of the genes provided in the read count table allows you
 to apply additional processing steps and to filter the genes used for the PCA.
 

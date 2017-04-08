@@ -173,6 +173,45 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     
   })
   
+  # Observe the table and change the radio buttons with JS
+  observeEvent({
+    visual.table()
+    input$conditions
+    variables$update.ui
+    }, {
+    
+    validate(need(visual.table(), "No visual table!"))
+    
+    js <- c()
+    control.name <- session$ns("conditions")
+    
+    for(condition in rownames(visual.table())) {
+      
+      if(has.color)
+      {
+        color <- visual.table()[condition, "color"]
+        
+        if(color == "") {
+          color <- "white"
+        }
+        
+        #' Calculate the best text color (or a good one at least)
+        #' We just take the mean of the inverse color and binarize it 
+        inv.color.value <- mean(255 - col2rgb(color))
+        inv.color.value <- if(inv.color.value < 255/2) 0 else 255
+        inv.color <- rgb(inv.color.value, inv.color.value, inv.color.value, maxColorValue = 255)
+        
+        js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"background-color\", \"%s\")", condition, control.name, color))
+        js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"color\", \"%s\")", condition, control.name, inv.color))
+      }
+    }
+    
+    if(length(js) > 0) {
+      shinyjs::runjs(paste(js, collapse = "; "))
+    }
+    
+  })
+  
   observeEvent(input$shape, {
     
     if(!has.shape) {

@@ -107,6 +107,37 @@
 		padding: 15px;
 }
 
+.help-page h1 {
+	color: #555;
+	border-bottom: 1px solid #ddd;
+}
+
+.help-page h2 {
+	color: #555;
+	font-size: 25px;
+	border-bottom: 1px dotted #ddd;
+}
+
+.help-page h3 {
+	color: #555;
+	font-size: 21px;
+	font-weight: bold;
+}
+
+.help-page .video-container {
+	margin-top: 30px;
+	margin-bottom: 30px;
+	text-align: center;
+}
+
+.help-page video {
+	display: block;
+	width: 80%;
+	height: auto;
+	margin: 0 auto;
+	border: 1px solid #ddd;
+}
+
 /**
 * A horizontal divider for some controls
 */

@@ -1,3 +1,5 @@
+# Overview
+
 PCAGO is a tool to analyze RNA-Seq results with principal component analysis.
 You can use it to ...
 
@@ -18,3 +20,10 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 2. Upload your read counts in `Sidebar > Data > Readcounts` or choose a sample
 3. Optionally (but advised) upload a gene annotation in `Sidebar > Data > Annotation`
 4. Click on `Cell plot` to view the PCA results
+
+<div class="video-container">
+<video controls>
+  <source src="helppages/overview.webm" type="video/webm"/>
+  Your browser does not support the video tag.
+</video>
+</div>

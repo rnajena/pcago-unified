@@ -1,3 +1,5 @@
+# User Interface
+
 The user interface of PCAGO is divided in two sections
 
 * The **sidebar** that lets you change settings
