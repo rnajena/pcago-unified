@@ -69,19 +69,18 @@ genericImporterInput <- function(id,
 genericImporterData.makeParameterInput <- function(ns, id, param, ...) {
   
   if(param@type == "select") {
-    
     select.values <- param@select.values
     
     if(is.reactive(select.values)) {
       
       notification.id <- progressNotification(paste("Loading available parametes for", param@label))
-      select.values <- select.values()
+      select.values <-  tryCatch(select.values(), error = function(e) { c() })
       removeNotification(notification.id)
     }
     else if(is.function(select.values)) {
       
       notification.id <- progressNotification(paste("Loading available parametes for", param@label))
-      select.values <- select.values(...)
+      select.values <- tryCatch(select.values(...), error = function(e) { c() })
       removeNotification(notification.id)
       
     }

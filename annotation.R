@@ -10,52 +10,18 @@ library(shiny)
 library(matrixStats)
 library(rtracklayer)
 library(biomaRt)
+library(AnnotationHub)
 source("classAnnotation.R")
 source("classImporterEntry.R")
-source("biomart.R")
-
-# A list of all read count data types that will be supported
-# The user selects one of those types, which will then invoke the corresponding importer
-
-bioMart.data.sets <- reactive(getBioMartDatsets()) # Make reactive to increase load performance
-
-test.select2.values <- function(first.data) {
-  return(sapply(1:5, function(x) { paste0(first.data, x) }))
-}
+source("annotationBioMart.R")
+source("annotationHub.R")
 
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF"))
-supportedAnnotationGenerators <- list(
-                                      ImporterEntry(name = "test",
-                                                    label = "Test",
-                                                    parameters = list(
-                                                      ImporterParameter(name = "param1",
-                                                                        label = "First parameter",
-                                                                        type = "select",
-                                                                        select.values = c("A", "B", "C")),
-                                                      ImporterParameter(name = "param2",
-                                                                        label = "Second parameter",
-                                                                        type = "select",
-                                                                        select.values = test.select2.values)
-                                                    )),
-                                      ImporterEntry(name = "ensembl_go",
-                                                    label = "Ensembl BioMart GO terms",
-                                                    parameters = list(
-                                                      ImporterParameter(name = "dataset", 
-                                                                        label = "Dataset", 
-                                                                        type = "select", 
-                                                                        select.values = bioMart.data.sets) 
-                                                    )),
-                                      ImporterEntry(name = "ensembl_sequence_info",
-                                                    label = "Ensembl BioMart sequence info",
-                                                    parameters = list(
-                                                      ImporterParameter(name = "dataset", 
-                                                                        label = "Dataset", 
-                                                                        type = "select", 
-                                                                        select.values = bioMart.data.sets) 
-                                                    ))
-                                      )
+supportedAnnotationGenerators <- list(annotationHub.importerEntry,
+                                      bioMart.importerEntry)
+                                      
 availableAnnotationSamples <- list(ImporterEntry(name = "vitamins.gff3",
                                                  label = "Vitamins"))
 
@@ -157,75 +123,6 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
   }
 }
 
-#' Builds an annotation of GO terms by searching the genes in Ensembl dataset
-#'
-#' @param dataset.string <BIOMART>@<DATASET> string
-#' @param readcounts 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-generateGeneInformation.EnsemblGO <- function(dataset.string, readcounts) {
-  
-  genes <- rownames(readcounts)
-  bio.mart <- getBioMartDataset(dataset.string)
-  go.terms.table <- getBioMartGOTerms(bio.mart, genes)
-  
-  if(is.null(go.terms.table)) {
-    stop("Data set does not contain even one of the requested genes! Did you choose a wrong data set?")
-  }
-  
-  # We have to transform the table with columns gene_id, term to term -> list of gene ids
-  go.terms.filter <- list()
-  
-  for(term in unique(go.terms.table$go_term)) {
-    
-    if(term == "") {
-      next()
-    }
-    
-    gene.indices <- term == go.terms.table$go_term
-    genes <- go.terms.table$ensembl_gene_id[gene.indices]
-    
-    go.terms.filter[[term]] <- genes
-    
-  }
-  
-  return(Annotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
-  
-}
-
-#' Builds an annotation of sequence info by searching the genes in Ensembl dataset
-#'
-#' @param dataset.string <BIOMART>@<DATASET> string
-#' @param readcounts 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-generateGeneInformation.EnsemblSequenceInfo <- function(dataset.string, readcounts) {
-  
-  genes <- rownames(readcounts)
-  bio.mart <- getBioMartDataset(dataset.string)
-  sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
-  
-  if(is.null(sequence.info)) {
-    stop("Data set does not contain even one of the requested genes! Did you choose a wrong data set?")
-  }
-  
-  # Extract scaffold filter
-  scaffolds <- list()
-  for(scaffold in unique(sequence.info$scaffold)) {
-    scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
-  }
-  
-  return(Annotation(sequence.info = sequence.info,
-                    gene.scaffold = GeneFilter(data = scaffolds)))
-  
-}
-
 #' Generates an annotation
 #'
 #' @param generator 
@@ -242,11 +139,8 @@ generateGeneInformation <- function(generator, parameters, readcounts) {
     stop("No readcounts to annotate!")
   }
   
-  if(generator == "ensembl_go") {
-    return(generateGeneInformation.EnsemblGO(parameters$dataset, readcounts))
-  }
-  else if(generator == "ensembl_sequence_info") {
-    return(generateGeneInformation.EnsemblSequenceInfo(parameters$dataset, readcounts))
+  if(generator == "ensembl_biomart") {
+    return(generateGeneInformation.EnsemblBioMart(parameters$data, parameters$database, parameters$species, readcounts))
   }
   else {
     stop(paste("Unkown generator", generator))
