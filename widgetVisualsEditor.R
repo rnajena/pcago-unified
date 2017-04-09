@@ -109,7 +109,6 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
       variables$visuals.table <- generateDefaultConditionVisualsTable(conditions(), 
                                                                       has.color = has.color, 
                                                                       has.shape = has.shape)
-      print(variables$visuals.table)
     }
     
   })

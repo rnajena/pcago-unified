@@ -19,10 +19,27 @@ source("biomart.R")
 
 bioMart.data.sets <- reactive(getBioMartDatsets()) # Make reactive to increase load performance
 
+test.select2.values <- function(first.data) {
+  return(sapply(1:5, function(x) { paste0(first.data, x) }))
+}
+
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF"))
-supportedAnnotationGenerators <- list(ImporterEntry(name = "ensembl_go",
+supportedAnnotationGenerators <- list(
+                                      ImporterEntry(name = "test",
+                                                    label = "Test",
+                                                    parameters = list(
+                                                      ImporterParameter(name = "param1",
+                                                                        label = "First parameter",
+                                                                        type = "select",
+                                                                        select.values = c("A", "B", "C")),
+                                                      ImporterParameter(name = "param2",
+                                                                        label = "Second parameter",
+                                                                        type = "select",
+                                                                        select.values = test.select2.values)
+                                                    )),
+                                      ImporterEntry(name = "ensembl_go",
                                                     label = "Ensembl BioMart GO terms",
                                                     parameters = list(
                                                       ImporterParameter(name = "dataset", 
