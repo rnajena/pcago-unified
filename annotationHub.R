@@ -61,3 +61,57 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                                            type = "select",
                                                            select.values = annotationHub.datasetChoices)
                                        ))
+
+generateGeneInformation.AnnotationHub <- function(datatype, species, dataset, readcounts) {
+  
+  if(!is.character(species) || species == "") {
+    stop("Invalid species!")
+  }
+  if(!is.character(dataset) || dataset == "") {
+    stop("Invalid data set!")
+  }
+  
+  genes <- rownames(readcounts)
+  
+  if(datatype == "sequence.info") {
+    
+    gr <- annotationHub.hub()[[dataset]]
+    gff <- mcols(gr)
+    meta.indices <- match(genes, gff$gene_id) # F: Index of gene in readcounts -> Index of gene in gff annotation
+    
+    if(any(is.na(meta.indices))) {
+      
+      # Remove genes that are NA. They will not appear in the annotation
+      na.genes <- genes[is.na(meta.indices)]
+      genes <- genes[!is.na(meta.indices)]
+      meta.indices <- na.omit(meta.indices)
+      
+      showNotification(type = "warning", 
+                       duration = NULL,
+                       paste("Could not find sequence information for all genes. Following genes are affected:", 
+                             strJoinLimited(na.genes, limit = 10)))
+      
+    }
+    
+    sequence.info <- data.frame(row.names = genes,
+                                scaffold = as.vector(seqnames(gr)[meta.indices]),
+                                start_position = start(gr)[meta.indices],
+                                end_position = end(gr)[meta.indices],
+                                length = width(gr)[meta.indices],
+                                stringsAsFactors = F)
+    
+    # As we have sequence info, extract scaffold filter
+    scaffolds <- list()
+    for(scaffold in unique(sequence.info$scaffold)) {
+      scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
+    }
+    
+    return(Annotation(sequence.info = sequence.info, 
+                      gene.scaffold = GeneFilter(data = scaffolds)))
+    
+  }
+  else {
+    stop("Unsupported data type!")
+  }
+  
+}

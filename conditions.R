@@ -295,8 +295,8 @@ calculatCellVisuals <- function(cells, conditions, condition.visuals) {
     
     for(condition in rownames(condition.visuals)) {
       
-      # Check if the cell has the condition. Otherwiese skip
-      if(!conditions[cell, condition]) {
+      # Check if the cell has the condition. Otherwise skip
+      if(!is.logical(conditions[cell, condition]) || !conditions[cell, condition]) {
         next()
       }
       

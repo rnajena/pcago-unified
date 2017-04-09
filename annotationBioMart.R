@@ -98,12 +98,12 @@ bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                        ))
 
 
-generateGeneInformation.EnsemblBioMart <- function(data, database, species, readcounts) {
+generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, readcounts) {
   
   genes <- rownames(readcounts)
   bio.mart <- biomaRt::useMart(database, species)
   
-  if(data == "go.terms") {
+  if(datatype == "go.terms") {
     
     go.terms.table <- getBioMartGOTerms(bio.mart, genes)
     
@@ -129,7 +129,7 @@ generateGeneInformation.EnsemblBioMart <- function(data, database, species, read
     
     return(Annotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
   }
-  else if(data == "sequence.info") {
+  else if(datatype == "sequence.info") {
     
     sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
     

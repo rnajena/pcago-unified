@@ -140,7 +140,10 @@ generateGeneInformation <- function(generator, parameters, readcounts) {
   }
   
   if(generator == "ensembl_biomart") {
-    return(generateGeneInformation.EnsemblBioMart(parameters$data, parameters$database, parameters$species, readcounts))
+    return(generateGeneInformation.EnsemblBioMart(parameters$datatype, parameters$database, parameters$species, readcounts))
+  }
+  else if(generator == "annotation_hub") {
+    return(generateGeneInformation.AnnotationHub(parameters$datatype, parameters$species, parameters$dataset, readcounts))
   }
   else {
     stop(paste("Unkown generator", generator))

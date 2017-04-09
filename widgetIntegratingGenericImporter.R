@@ -31,7 +31,8 @@ integratingGenericImporterInput <- function(id) {
     genericImporterInput(ns("importer"), 
                          reset.button = F,
                          additional.buttons = tagList(
-                           actionButton(ns("clear"), "Reset")
+                           actionButton(ns("clear"), "Clear"),
+                           actionButton(ns("remove.last"), "Remove last")
                          ),
                          additional.content =  uiOutput(ns("status")),
                          submit.button.text = "Add"
@@ -88,6 +89,16 @@ integratingGenericImporterData_ <- function(input,
   # Clear all data if user clicks clear button
   observeEvent(input$clear, {
     variables$data <- list()
+  })
+  
+  # Removes last entry
+  observeEvent(input$remove.last, {
+    if(length(variables$data) > 1) {
+      variables$data <- variables$data[[seq_len(length(variables$data) - 1)]]
+    }
+    else {
+      variables$data <- list()
+    }
   })
   
   # Output the callback from the integration

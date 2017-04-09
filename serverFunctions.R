@@ -333,7 +333,7 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
     if(nrow(sequence.info) > 0) {
       indices <- match(genes, rownames(sequence.info))
       
-      table$Sequence <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "scaffold"] })
+      table$Scaffold <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "scaffold"] })
       table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start_position"] })
       table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end_position"] })
       table$Length <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "length"] })

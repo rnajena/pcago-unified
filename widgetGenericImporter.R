@@ -282,7 +282,7 @@ genericImporterData_ <- function(input,
     
     for(i in seq_len(length(importer.object()@parameters))) {
       input.id <- paste0("parameter.slot", i, ".value")
-      param.name <- importer.object()@parameters[[i]]
+      param.name <- importer.object()@parameters[[i]]@name
       parameters[[param.name]] <- input[[input.id]]
     }
     

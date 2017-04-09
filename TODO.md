@@ -8,6 +8,7 @@
 * Custom selectors
 * Annotation overview
 * Better processing view
+* Annotation generator implementation
 
 ## Code
 
