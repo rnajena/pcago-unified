@@ -15,16 +15,18 @@ The setting for conditions can be found in `Sidebar > Data > Conditions`
 
 This is the default option and treats each cell individually.
 
-**Example**
-A cell `mono6_n2_ctr` has only one condition: `mono6_n2_ctr`
+<div class="well help-box">
+<label>Example</label> A cell <code>mono6_n2_ctr</code> has only one condition: <code>mono6_n2_ctr</code>
+</div>
 
 ### Extract from columns
 
 The column name is separated by a separator (default: `_`). A condition applies to a cell
 if it's in this list.
 
-**Example**
-A cell `mono6_n2_ctr` has following conditions: `mono6`, `n2` and `ctr`
+<div class="well help-box">
+<label>Example</label> A cell <code>mono6_n2_ctr</code> has following conditions: <code>mono6</code>, <code>n2</code> and <code>ctr</code>
+</div>
 
 ### Upload
 
@@ -38,33 +40,3 @@ You can also upload your own condition definition. Upload a table with following
 | ...   | ...           | ...        | ...        | ... |
 
 Cell1, Cell2, ... are the column names in your read count table.
-
-## Conditions and plot visuals
-
-For certain plots you can set visual parameters based on the conditions. For example you can
-color all cells red that have the conditions `ctr` or have all data points with condition `atra` diamond-shaped.
-
-To achieve this, you can either use the editor integrated in PCAGO or upload your own definition file.
-
-### Using the editor
-
-Select a condition and set a color or shape. If you don't provide a color or shape, this condition will be ignored.
-
-### Upload
-
-You can also upload your own condition visuals table. Upload a table with following format:
-
-| condition  | color                                               | shape                                    |
-|------------|-----------------------------------------------------|------------------------------------------|
-| Condition1 | Leave empty for no color, otherwise a valid R color | -1 for no shape, otherwise a valid R pch |
-| Condition2 | ...                                                 | ...                                      |
-| Condition3 | ...                                                 | ...                                      |
-| ...        | ...                                                 | ...                                      |
-
-Please note that the column names must exactly match those shown here.
-
-### Behavior on multiple applying conditions
-
-If you have cells where multiple conditions apply, the first condition providing a color or shape is chosen.
-The order is the one provided in the condition visuals table (*NOT* the condition definition table); if you are using
-the editor, this is the order of the buttons where you can choose the conditions.

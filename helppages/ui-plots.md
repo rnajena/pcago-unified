@@ -19,8 +19,8 @@ from the <strong>left most</strong> condition in the list.
 
 <div class="well help-box">
 <label>Example</label> With the conditions as seen in the screenshot, a cell with conditions
-<code>atra</code>, <code>asp</code> and <code>eco</code> gets the shape from <code>atra</code> and the color from <code>asp</code>.
-The <code>eco</code> condition is ignored, because both color and shape are already set.
+atra, asp and eco gets the shape from atra and the color from asp.
+The eco condition is ignored, because both color and shape are already set.
 </div>
 
 ## Importing

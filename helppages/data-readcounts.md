@@ -38,4 +38,6 @@ If your read counts are not normalized, it is advised to apply normalization.
 
 **TODO**
 
-**Important** We do not support normalization via RPKM. **PROVIDE LINKS**
+<div class="well help-box">
+<label>Info</label>  We chose to not include normalization via RPKM/FPKM. See <a href="http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/">here</a> and <a href="http://blog.nextgenetics.net/?e=51">here</a> for great articles that give a summary about read count normalization and the issues with RPKM/FPKM.
+</div>
