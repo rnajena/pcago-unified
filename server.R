@@ -5,6 +5,10 @@
 # http://shiny.rstudio.com
 #
 
+# For production environment:
+# require(compiler)
+# enableJIT(3)
+
 library(RColorBrewer)
 library(scatterplot3d)
 library(ggplot2)
