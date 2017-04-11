@@ -27,6 +27,7 @@ PlotSettings <- setClass(
     width = "numeric",
     height = "numeric",
     dpi = "numeric",
+    scale = "numeric",
     title = "character",
     subtitle = "character",
     legend.color = "character",
@@ -35,6 +36,7 @@ PlotSettings <- setClass(
   prototype = list(
     width = NA_integer_,
     height = NA_integer_,
+    scale = NA_real_,
     dpi = NA_integer_,
     title = NA_character_,
     subtitle = NA_character_,
@@ -54,6 +56,9 @@ PlotSettings <- setClass(
     }
     if(!is.na(object@dpi) && object@dpi <= 0) {
       return("Invalid dpi!")
+    }
+    if(!is.na(object@scale) && object@scale <= 0) {
+      return("Invalid scale!")
     }
     
     return(T)
@@ -83,6 +88,7 @@ setMethod(f = "plotSettingsSetNA",
             if(is.numeric(object.source@width) && is.na(object.target@width)) { object.target@width <- object.source@width }
             if(is.numeric(object.source@height) && is.na(object.target@height)) { object.target@height <- object.source@height }
             if(is.numeric(object.source@dpi) && is.na(object.target@dpi)) { object.target@dpi <- object.source@dpi }
+            if(is.numeric(object.source@scale) && is.na(object.target@scale)) { object.target@scale <- object.source@scale }
             if(is.character(object.source@title) && is.na(object.target@title)) { object.target@title <- object.source@title }
             if(is.character(object.source@subtitle) && is.na(object.target@subtitle)) { object.target@subtitle <- object.source@subtitle }
             if(is.character(object.source@legend.color) && is.na(object.target@legend.color)) { object.target@legend.color <- object.source@legend.color }
@@ -115,6 +121,7 @@ setMethod(f = "plotSettingsOverwrite",
             if(!is.na(object.source@width)) { object.target@width <- object.source@width }
             if(!is.na(object.source@height)) { object.target@height <- object.source@height }
             if(!is.na(object.source@dpi)) { object.target@dpi <- object.source@dpi }
+            if(!is.na(object.source@scale)) { object.target@scale <- object.source@scale }
             if(!is.na(object.source@title)) { object.target@title <- object.source@title }
             if(!is.na(object.source@subtitle)) { object.target@subtitle <- object.source@subtitle }
             if(!is.na(object.source@legend.color)) { object.target@legend.color <- object.source@legend.color }

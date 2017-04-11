@@ -38,12 +38,14 @@ plotGeneVariancePlot.save <- function(gene.variances, plot.settings, format, fil
                                      PlotSettings(width = 640, 
                                                   height = 480,
                                                   dpi = 96,
+                                                  scale = 1,
                                                   title = "Gene variances",
                                                   subtitle = ""))
   
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
+  scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
@@ -59,7 +61,7 @@ plotGeneVariancePlot.save <- function(gene.variances, plot.settings, format, fil
   
   p <- ggplot(gene.variances, plot.aes) + geom_point()
   p <- p + labs(x = "Top n-th variant gene", y = plot.y.label, title = title, subtitle = subtitle)
-  ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+  ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = scale, device = format)
   
   return(plot.settings)
   

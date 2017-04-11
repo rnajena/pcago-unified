@@ -174,9 +174,9 @@ getOrDefault.character <- function(input, default) {
 #' @export
 #'
 #' @examples
-saveRPlot <- function(width, height, dpi, filename, format, expr) {
+saveRPlot <- function(width, height, dpi, scale, filename, format, expr) {
   
-  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi)
+  if(!is.numeric(width) || !is.numeric(height) || !is.numeric(dpi) || !is.numeric(scale)
      || !is.character(filename) || !is.character(format) || missing(expr)) {
     stop("Invalid arguments!")
   } 
@@ -184,24 +184,28 @@ saveRPlot <- function(width, height, dpi, filename, format, expr) {
   if(format == "svg") {
     svg(filename = filename,
         width = width / dpi,
-        height = height / dpi)
+        height = height / dpi,
+        pointsize = 12 * scale)
+  }
+  else if(format == "pdf") {
+    pdf(filename = filename,
+        width = width / dpi,
+        height = height / dpi,
+        pointsize = 12 * scale)
   }
   else if(format == "png") {
     png(filename = filename,
         width = width,
         height = height,
+        pointsize = 12 * scale,
         units = "px",
         res = dpi)
-  }
-  else if(format == "pdf") {
-    svg(filename = filename,
-        width = width / dpi,
-        height = height / dpi)
   }
   else if(format == "tiff") {
     tiff(filename = filename,
          width = width,
          height = height,
+         pointsize = 12 * scale,
          units = "px",
          res = dpi)
   }

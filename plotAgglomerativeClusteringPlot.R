@@ -73,19 +73,21 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
                                      PlotSettings(width = 640, 
                                                   height = 480,
                                                   dpi = 96,
+                                                  scale = 1,
                                                   title = "Hierarchical Clustering",
                                                   subtitle = ""))
   
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
+  scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
   palette.colors <- cell.visuals()$palette.colors
   palette.shapes <- cell.visuals()$palette.shapes
   
-  saveRPlot(width, height, dpi, filename, format, expr = function() {
+  saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
     
     dend <- t(readcounts()) %>% 
       dist(method = method.distance) %>%

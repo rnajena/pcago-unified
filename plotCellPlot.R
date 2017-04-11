@@ -47,6 +47,7 @@ plotCellPlot.save <- function(pca,
                                      PlotSettings(width = 640, 
                                                   height = 480,
                                                   dpi = 96,
+                                                  scale = 1,
                                                   title = "Cell plot",
                                                   subtitle = "",
                                                   legend.color = "Color",
@@ -55,6 +56,7 @@ plotCellPlot.save <- function(pca,
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
+  scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   customlabel.color <- plot.settings@legend.color
@@ -119,7 +121,7 @@ plotCellPlot.save <- function(pca,
       p <- p + guides(color = F)
     }
     
-    ggsave(filename, p, width = width / dpi, height = height / dpi)
+    ggsave(filename, p, width = width / dpi, height = height / dpi, scale = scale)
     
   }
   else if(dimensions.plot == 2) {
@@ -153,11 +155,11 @@ plotCellPlot.save <- function(pca,
       p <- p + guides(shape = F)
     }
     
-    ggsave(filename, p, width = width / dpi, height = height / dpi)
+    ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = scale)
     
   }
   else if(dimensions.plot == 3) {
-    saveRPlot(width, height, dpi, filename, format, expr = function() {
+    saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
       par(oma = c(1,7,1,1))
       
       scatterplot3d(
@@ -171,7 +173,8 @@ plotCellPlot.save <- function(pca,
         zlab = pc.lab(dimensions.requested[3]),
         type = "h",
         main = title,
-        sub = subtitle
+        sub = subtitle,
+        pointsize = scale * 12
       )
       
       # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?

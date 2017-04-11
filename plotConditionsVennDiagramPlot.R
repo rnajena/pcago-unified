@@ -51,6 +51,7 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
     width = 640,
     height = 480,
     dpi = 96,
+    scale = 1,
     title = "Conditions",
     subtitle = ""
   ))
@@ -58,6 +59,7 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
+  scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   visuals <- na.omit(pca.conditions.plot.visuals()[selected.conditions,])
@@ -72,6 +74,7 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
                width = width,
                height = height,
                resolution = dpi,
+               pointsize = scale * 12,
                imagetype = format,
                main = title,
                sub = subtitle,

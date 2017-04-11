@@ -31,12 +31,14 @@ plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
                                      PlotSettings(width = 640, 
                                                   height = 480,
                                                   dpi = 96,
+                                                  scale = 1,
                                                   title = "Principal component variances",
                                                   subtitle = ""))
   
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
+  scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
@@ -45,7 +47,7 @@ plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
   
   p <- ggplot(pca$var, aes(x=factor(rownames(pca$var), levels = rownames(pca$var)), y=var.relative)) + geom_point()
   p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
-  ggsave(filename, p, width = width / dpi, height = height / dpi, device = format)
+  ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = scale, device = format)
   
   return(plot.settings)
   

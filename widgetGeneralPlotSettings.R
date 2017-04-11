@@ -19,7 +19,8 @@ generalPlotSettingsInput <- function(id) {
     hDivider(),
     numericInput(ns("width"), "Width", value = -1, min = -1, max = 10000),
     numericInput(ns("height"), "Height", value = -1, min = -1, max = 10000),
-    sliderInput(ns("dpi"), "DPI", min = 50, max = 300, value = 96)
+    sliderInput(ns("scale"), "Scale", min = 0.025, max = 2, value = 0.75, step = 0.025),
+    sliderInput(ns("dpi"), "DPI", min = 50, max = 300, value = 120)
   ))
   
 }
@@ -32,6 +33,7 @@ generalPlotSettings_ <- function(input, output, session) {
       width = if(is.numeric(input$width) && input$width > 0) input$width else NA_integer_,
       height = if(is.numeric(input$height) && input$height > 0) input$height else NA_integer_,
       dpi = if(is.numeric(input$dpi) && input$dpi > 0) input$dpi else NA_integer_,
+      scale = if(is.numeric(input$scale) && input$scale > 0) input$scale else NA_real_,
       title = if(nchar(input$title) > 0) input$title else NA_character_,
       subtitle = if(nchar(input$subtitle) > 0) input$subtitle else NA_character_,
       legend.color = if(nchar(input$legend.color) > 0) input$legend.color else NA_character_,
