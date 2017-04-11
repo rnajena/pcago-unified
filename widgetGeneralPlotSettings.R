@@ -19,7 +19,7 @@ generalPlotSettingsInput <- function(id) {
     hDivider(),
     numericInput(ns("width"), "Width", value = -1, min = -1, max = 10000),
     numericInput(ns("height"), "Height", value = -1, min = -1, max = 10000),
-    sliderInput(ns("scale"), "Scale", min = 0.025, max = 2, value = 0.75, step = 0.025),
+    sliderInput(ns("scale"), "Scale", min = 0.025, max = 2, value = 1, step = 0.025),
     sliderInput(ns("dpi"), "DPI", min = 50, max = 300, value = 120)
   ))
   

@@ -121,7 +121,7 @@ plotCellPlot.save <- function(pca,
       p <- p + guides(color = F)
     }
     
-    ggsave(filename, p, width = width / dpi, height = height / dpi, scale = scale)
+    ggsave(filename, p, width = width / dpi, height = height / dpi, scale = 0.75 / scale)
     
   }
   else if(dimensions.plot == 2) {
@@ -155,7 +155,7 @@ plotCellPlot.save <- function(pca,
       p <- p + guides(shape = F)
     }
     
-    ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = scale)
+    ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = 0.75 / scale)
     
   }
   else if(dimensions.plot == 3) {

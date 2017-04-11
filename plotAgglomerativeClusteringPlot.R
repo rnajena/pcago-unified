@@ -146,6 +146,11 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                      distance.method.name <- names(distance.methods)[distance.methods == input$method.dist]
                      clustering.method.name <- names(clustering.methods)[clustering.methods == input$method.hclust]
                      
+                     plot.height <- 400
+                     if(!is.na(plot.settings@dpi) && !is.na(plot.settings@scale)) {
+                       
+                     }
+                     
                      plot.settings <- plotSettingsSetNA(plot.settings,
                                                         PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name),
                                                                      title = default.title()))

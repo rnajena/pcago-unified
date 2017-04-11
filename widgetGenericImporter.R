@@ -40,10 +40,10 @@ genericImporterInput <- function(id,
     conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
                      selectInput(ns("sample"), "Sample data", c())),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'generate'"), 
-                     selectInput(ns("generator"), "Use generator", c())),
-    uiOutput(ns("parameter.slot1")),
-    uiOutput(ns("parameter.slot2")),
-    uiOutput(ns("parameter.slot3")),
+                     selectInput(ns("generator"), "Generator", c())),
+    subSubBox(uiOutput(ns("parameter.slot1")),
+              uiOutput(ns("parameter.slot2")),
+              uiOutput(ns("parameter.slot3"))),
     additional.content,
     fluidPage(fluidRow(
        actionButton(ns("submit"), submit.button.text),
@@ -79,7 +79,7 @@ genericImporterData.makeParameterInput <- function(ns, id, param, ...) {
     }
     else if(is.function(select.values)) {
       
-      notification.id <- progressNotification(paste("Loading available parametes for", param@label))
+      notification.id <- progressNotification(paste("Loading available parameters for", param@label))
       select.values <- tryCatch(select.values(...), error = function(e) { c() })
       removeNotification(notification.id)
       

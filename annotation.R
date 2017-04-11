@@ -13,6 +13,7 @@ library(biomaRt)
 library(AnnotationHub)
 source("classAnnotation.R")
 source("classImporterEntry.R")
+source("annotationGRanges.R")
 source("annotationBioMart.R")
 source("annotationHub.R")
 
@@ -45,58 +46,16 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   }
   
   # Load the data inside the GFF file
-  gr <- suppressWarnings(import.gff(filehandle)) # Suppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
-  gff <- mcols(gr)
-  
-  # Build table containing the sequence, start, stop & length
-  
+  # Suppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
+  gr <- suppressWarnings(import.gff(filehandle)) 
   genes <- rownames(readcounts)
-  meta.indices <- match(genes, gff$gene_id) # F: Index of gene in readcounts -> Index of gene in gff annotation
+ 
+  annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes)
+  annot.associated.features <- GRanges.extractAssociatedFeaturesAnnotation(gr, genes)
   
-  if(any(is.na(meta.indices))) {
-    
-    # Remove genes that are NA. They will not appear in the annotation
-    na.genes <- genes[is.na(meta.indices)]
-    genes <- genes[!is.na(meta.indices)]
-    meta.indices <- na.omit(meta.indices)
-    
-    showNotification(type = "warning", 
-                     duration = NULL,
-                     paste("Could not find sequence information for all genes. Following genes are affected:", 
-                           strJoinLimited(na.genes, limit = 10)))
-    
-  }
+  annot <- mergeAnnotation(annot.sequence.info, annot.associated.features)
   
-  sequence.info <- data.frame(row.names = genes,
-                              scaffold = as.vector(seqnames(gr)[meta.indices]),
-                              start_position = start(gr)[meta.indices],
-                              end_position = end(gr)[meta.indices],
-                              length = width(gr)[meta.indices],
-                              stringsAsFactors = F)
-  
-  # Extract features
-  features <- list()
-  
-  for(feature_type in unique(gff$type)) {
-    
-    ids <- unlist(gff[gff$type == feature_type,"Parent"])
-    gene_ids <- gff[match(ids, gff$ID),"gene_id"]
-    gene_ids <- intersect(gene_ids, rownames(readcounts)) # Reduce to genes that are actually present in read counts
-   
-    if(length(gene_ids) > 0) {
-      features[[feature_type]] <- gene_ids 
-    }
-  }
-  
-  # As we have sequence info, extract scaffold filter
-  scaffolds <- list()
-  for(scaffold in unique(sequence.info$scaffold)) {
-    scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
-  }
-  
-  return(Annotation(sequence.info = sequence.info, 
-                    gene.features = GeneFilter(data = features),
-                    gene.scaffold = GeneFilter(data = scaffolds)))
+  return(annot)
 }
 
 #' Extracts gene information from an annotation

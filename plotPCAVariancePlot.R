@@ -47,7 +47,7 @@ plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
   
   p <- ggplot(pca$var, aes(x=factor(rownames(pca$var), levels = rownames(pca$var)), y=var.relative)) + geom_point()
   p <- p + labs(x = "Principal component", y = plot.y.label, title = title, subtitle = subtitle)
-  ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = scale, device = format)
+  ggsave(filename, p, width = width / 72, height = height / 72, dpi = dpi, scale = 0.75 / scale, device = format)
   
   return(plot.settings)
   
