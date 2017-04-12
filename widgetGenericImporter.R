@@ -43,7 +43,8 @@ genericImporterInput <- function(id,
                      selectInput(ns("generator"), "Generator", c())),
     subSubBox(uiOutput(ns("parameter.slot1")),
               uiOutput(ns("parameter.slot2")),
-              uiOutput(ns("parameter.slot3"))),
+              uiOutput(ns("parameter.slot3")),
+              uiOutput(ns("parameter.slot4"))),
     additional.content,
     fluidPage(fluidRow(
        actionButton(ns("submit"), submit.button.text),
@@ -252,6 +253,23 @@ genericImporterData_ <- function(input,
       {
         param <- importer.object()@parameters[[3]]
         return(genericImporterData.makeParameterInput(ns, "parameter.slot3.value", param, input$parameter.slot1.value, input$parameter.slot2.value))
+      }
+      
+    }
+    return(tagList())
+  })
+  
+  output$parameter.slot4 <- renderUI({
+    
+    if(!is.null(importer.object())) {
+      
+      output <- tagList()
+      ns <- session$ns
+      
+      if(length(importer.object()@parameters) >= 4)
+      {
+        param <- importer.object()@parameters[[4]]
+        return(genericImporterData.makeParameterInput(ns, "parameter.slot4.value", param, input$parameter.slot1.value, input$parameter.slot2.value, input$parameter.slot3.value))
       }
       
     }

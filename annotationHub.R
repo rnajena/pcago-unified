@@ -5,7 +5,7 @@ source("annotationGRanges.R")
 
 annotationHub.hub <- reactive(AnnotationHub())
 
-annotationHub.speciesChoices <- function(datatype) {
+annotationHub.databaseChoices <- function(datatype) {
   
   ah <- annotationHub.hub()
   
@@ -14,7 +14,7 @@ annotationHub.speciesChoices <- function(datatype) {
   }
   
   if(datatype == "sequence.info" || datatype == "associated.features") {
-    return(unique(ah$species[ah$rdataclass == "GRanges"]))
+    return(c("", unique(ah$dataprovider[ah$rdataclass == "GRanges"])))
   }
   else {
     stop("Unknown data type!")
@@ -22,22 +22,46 @@ annotationHub.speciesChoices <- function(datatype) {
   
 }
 
-annotationHub.datasetChoices <- function(datatype, species) {
+annotationHub.speciesChoices <- function(datatype, database) {
   
   ah <- annotationHub.hub()
   
-  if(!is.character(datatype) || !is.character(species) || datatype == "" || species == "") {
+  if(!is.character(datatype) || datatype == "") {
+    return(c())
+  }
+  if(!is.character(database) || database == "") {
     return(c())
   }
   
   if(datatype == "sequence.info" || datatype == "associated.features") {
-    query.results <- AnnotationHub::query(ah, c("GRanges", "Ensembl", species))
+    
+    choices <- unique(ah$species[ah$rdataclass == "GRanges" & ah$dataprovider == database])
+    choices <- na.omit(choices)
+    
+    return(c("", choices))
+  }
+  else {
+    stop("Unknown data type!")
+  }
+  
+}
+
+annotationHub.datasetChoices <- function(datatype, database, species) {
+  
+  ah <- annotationHub.hub()
+  
+  if(!is.character(datatype) || !is.character(species) || !is.character(database) || datatype == "" || database == "" || species == "") {
+    return(c())
+  }
+  
+  if(datatype == "sequence.info" || datatype == "associated.features") {
+    query.results <- AnnotationHub::query(ah, c("GRanges", database, species))
     available.datasets <- mcols(query.results)
     
     choices <- rownames(available.datasets)
     names(choices) <- sapply(choices, function(x) { sprintf("%s (%s)", available.datasets[x, "title"], available.datasets[x, "genome"]) })
     
-    return(choices)
+    return(c("", choices))
   }
   else {
     stop("Unknown data type!")
@@ -52,8 +76,11 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                                            label = "Extract information",
                                                            type = "select",
                                                            select.values = c("Sequence info" = "sequence.info",
-                                                                             "Associated features" = "associated.features",
-                                                                             "GO terms" = "go.terms")),
+                                                                             "Associated features" = "associated.features")),
+                                         ImporterParameter(name = "database", 
+                                                           label = "Database", 
+                                                           type = "select", 
+                                                           select.values = annotationHub.databaseChoices),
                                          ImporterParameter(name = "species", 
                                                            label = "Species", 
                                                            type = "select", 
@@ -64,7 +91,7 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                                            select.values = annotationHub.datasetChoices)
                                        ))
 
-generateGeneInformation.AnnotationHub <- function(datatype, species, dataset, readcounts) {
+generateGeneInformation.AnnotationHub <- function(datatype, database, species, dataset, readcounts) {
   
   if(!is.character(species) || species == "") {
     stop("Invalid species!")

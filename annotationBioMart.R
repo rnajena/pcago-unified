@@ -66,17 +66,34 @@ getBioMartSequenceInfo <- function(mart, genes) {
 
 bioMart.databaseChoices <- function(datatype) {
   
+  if(!is.character(datatype) || datatype == "") {
+    return(c())
+  }
+  
   marts <- biomaRt::listMarts()
   choices <- marts$biomart
   names(choices) <- marts$version
   
-  return(choices)
+  return(c("", choices))
   
 }
 
 bioMart.speciesChoices <- function(datatype, database) {
-  stop("todo")
-  return(c())
+  
+  if(!is.character(datatype) || datatype == "") {
+    return(c())
+  }
+  if(!is.character(database) || database == "") {
+    return(c())
+  }
+  
+  mart <- biomaRt::useMart(database)
+  mart.datasets <- biomaRt::listDatasets(mart)
+  
+  choices <- mart.datasets$dataset
+  names(choices) <- mart.datasets$description
+  
+  return(choices)
 }
 
 bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
