@@ -64,6 +64,31 @@ getBioMartSequenceInfo <- function(mart, genes) {
   return(bm)
 }
 
+#' Returns a table with gene and gene 
+#'
+#' @param mart 
+#' @param genes 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getBioMartAssociatedFeatures <- function(mart, genes) {
+  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "gene_biotype"), 
+                       filters = c("ensembl_gene_id"),
+                       values = genes, 
+                       mart = mart)
+  
+  if(nrow(bm) == 0) {
+    return(NULL)
+  }
+  
+  colnames(bm) <- c("gene","type")
+  bm <- na.omit(bm)
+  
+  return(bm)
+}
+
 bioMart.databaseChoices <- function(datatype) {
   
   if(!is.character(datatype) || datatype == "") {
@@ -103,7 +128,8 @@ bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                                            label = "Extract information",
                                                            type = "select",
                                                            select.values = c("Sequence info" = "sequence.info",
-                                                                             "GO terms" = "go.terms")),
+                                                                             "GO terms" = "go.terms",
+                                                                             "Associated features" = "associated.features")),
                                          ImporterParameter(name = "database",
                                                            label = "Database",
                                                            type = "select",
@@ -163,6 +189,22 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
     return(Annotation(sequence.info = sequence.info,
                       gene.scaffold = GeneFilter(data = scaffolds)))
     
+  }
+  else if(datatype == "associated.features") {
+    
+    associated.features.table <- getBioMartAssociatedFeatures(bio.mart, genes)
+    
+    # Extract filter
+    associated.features <- list()
+    for(feature in unique(associated.features.table$type)) {
+      associated.features[[feature]] <- unique(associated.features.table$gene[associated.features.table$type == feature])
+    }
+    
+    return(Annotation(gene.features = GeneFilter(data = associated.features)))
+    
+  }
+  else {
+    stop("Unknown datatype!")
   }
   
   
