@@ -32,34 +32,32 @@ source("plotAgglomerativeClusteringPlot.R")
 uiPCASidebarData <- function() {
   
   return(bsCollapse(
-    bsCollapsePanel("Read counts",
-                    value = "readcounts",
-                    bsCollapse(
-                      bsCollapsePanel("Import",
-                                      genericImporterInput("pca.data.readcounts.importer")),
-                      bsCollapsePanel("Processing",
-                                      checkboxGroupInput("pca.data.readcounts.processing",
-                                                         helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
-                                                         choices = c("Transpose table" = "transpose",
-                                                                    "Remove genes with constant readcounts" = "remove.constant"),
-                                                         selected = c("remove.constant")),
-                                      radioButtons("pca.data.normalization",
-                                                   helpIconText("Apply read count normalization", 
-                                                                "If you already have normalized read counts, set this to 'None'.",
-                                                                "Read count normalization"),
-                                                   choices = supportedReadcountNormalizationTypes),
-                                      conditionalPanel("input['pca.data.normalization'] == 'tpm'",
-                                                       numericInput("pca.data.normalization.tpm.mufld", "Mean fragment length", value = 0)))
-                    )
-    ),
-    bsCollapsePanel("Annotation",
-                    value = "annotation",
+    bsCollapsePanel("Import read counts", 
+                    value = "data.readcounts.import",
+                    genericImporterInput("pca.data.readcounts.importer")),
+    bsCollapsePanel("Cell annotation",
+                    value = "data.cell.annotation",
+                    cellConditionImporterUI("conditions.importer")),
+    bsCollapsePanel("Read count processing",
+                    value = "data.readcounts.processing",
+                    checkboxGroupInput("pca.data.readcounts.processing",
+                                       helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
+                                       choices = c("Transpose table" = "transpose",
+                                                   "Remove genes with constant readcounts" = "remove.constant"),
+                                       selected = c("remove.constant")),
+                    radioButtons("pca.data.normalization",
+                                 helpIconText("Apply read count normalization", 
+                                              "If you already have normalized read counts, set this to 'None'.",
+                                              "Read count normalization"),
+                                 choices = supportedReadcountNormalizationTypes),
+                    conditionalPanel("input['pca.data.normalization'] == 'tpm'",
+                                     numericInput("pca.data.normalization.tpm.mufld", "Mean fragment length", value = 0))),
+  
+    bsCollapsePanel("Gene annotation",
+                    value = "data.gene.annotation",
                     integratingGenericImporterInput("pca.data.annotation.importer")
                     
-    ),
-    bsCollapsePanel("Conditions",
-                    value = "conditions",
-                    cellConditionImporterUI("conditions.importer"))
+    )
   ))
   
 }
