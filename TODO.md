@@ -2,14 +2,27 @@
 
 ## Features
 
-* Normalization (!)
+* Normalization ; DeSeq -> Need SummarizedExperiment!
 * Help pages
 * Read count normalization result plots
 * Custom selectors
 * Annotation overview
 * Better processing view
-* Annotation generator implementation
 * SMPFPP server implementation
+* Use SummarizedExperiment instead of read count data frame + sequence info
+* Multiple PCA scaling methods: Per dimension (current), All dimensions (global min/max), none
+
+## Theory/practice
+
+### Which genes are relevant?
+
+Already known to be useful: Gene variance as main criterium
+Where to set cutoff?
+
+* PCA transformed change rate (directly related to variance? Theory behind PCA?)
+* Cluster results? (problem: PCA based clustering sucks; at least if cell PCA is done)
+* Theoretical approach? Distribution of read counts? -> DeSeq/EdgeR papers!!! -> Statistical value!
+
 
 ## Code
 
