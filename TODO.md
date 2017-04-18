@@ -22,6 +22,7 @@ Where to set cutoff?
 * PCA transformed change rate (directly related to variance? Theory behind PCA?)
 * Cluster results? (problem: PCA based clustering sucks; at least if cell PCA is done)
 * Theoretical approach? Distribution of read counts? -> DeSeq/EdgeR papers!!! -> Statistical value!
+* Variance cutoff caused by problems with PCA? -> Look this up! Find ACTUAL cause! -> Derive better criterium!
 
 
 ## Code
