@@ -5,6 +5,19 @@
 library(shiny)
 library(reshape2)
 
+#' Checks if value is a valid choice
+#'
+#' @param value 
+#' @param choices 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+enum.contains <- function(value, choices) {
+  return(value %in% choices)
+}
+
 #' Generates a random string
 #' Src: http://stackoverflow.com/questions/42734547/generating-random-strings
 #'

@@ -7,7 +7,7 @@
 #' @param readcounts Read counts
 #' @param center Center data
 #' @param scale Apply variance scaling (no 0-variance genes allowed!)
-#' @param relative Makes the transformed cell coordinates relative
+#' @param relative Accepts none (Not relative), dimension (Per dimension) and global (Use global min and max)
 #'
 #' @return List of transformed values (transformed), variances (var), principal components (pc)
 #' @export
@@ -20,6 +20,9 @@ applyPCA <- function(readcounts, center, scale, relative) {
     return(NULL)
   }
   if(!is.logical(center) || !is.logical(scale)) {
+    stop("Invalid arguments!")
+  }
+  if(!is.character(relative) || !enum.contains(relative, c("none", "dimension", "global"))) {
     stop("Invalid arguments!")
   }
   
@@ -45,10 +48,18 @@ applyPCA <- function(readcounts, center, scale, relative) {
   
   # Optionally make the transformed coordinates relative.
   # This makes them scale-invariant, but keeps the distance relation (which is the important part)
-  if(relative) {
+  if(relative == "dimension") {
     for(pc in colnames(transformed)) {
       pc.min <- min(transformed[[pc]])
       pc.max <- max(transformed[[pc]])
+      transformed[[pc]] <- sapply(transformed[[pc]], function(x) { (x - pc.min) / (pc.max - pc.min) })
+    }
+  }
+  else if(relative == "global") {
+    pc.min <- min(result$x)
+    pc.max <- max(result$x)
+    
+    for(pc in colnames(transformed)) {
       transformed[[pc]] <- sapply(transformed[[pc]], function(x) { (x - pc.min) / (pc.max - pc.min) })
     }
   }

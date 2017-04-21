@@ -12,6 +12,10 @@
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * Multiple PCA scaling methods: Per dimension (current), All dimensions (global min/max), none
 
+### SummarizedExperiment
+
+Switch to SummarizedExperiment. Problem: How to include annotations?
+
 ## Theory/practice
 
 ### Which genes are relevant?
