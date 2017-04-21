@@ -41,6 +41,7 @@ integratingGenericImporterInput <- function(id) {
 }
 
 #' Gets integrated data from integrating generic importer. 
+#' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' exprintegrate: This function generates the output of this control it has following parameters:
 #' * data: List of data values to integrate

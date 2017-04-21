@@ -27,6 +27,7 @@ source("widgetDownloadablePlot.R")
 source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
+source("widgetProcessingSteps.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
@@ -126,11 +127,12 @@ shinyServer(function(input, output, session) {
     return(paste(nrow(readcounts.filtered()), "genes selected"))
   })
   
-  output$readcounts.processing.steps <- renderUI(serverReadCountsProcessingOutput(
-    input,
-    readcounts.processed,
-    readcounts.processing.output
-  ))
+  # output$readcounts.processing.steps <- renderUI(serverReadCountsProcessingOutput(
+  #   input,
+  #   readcounts.processed,
+  #   readcounts.processing.output
+  # ))
+  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.processing.output)
   
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))

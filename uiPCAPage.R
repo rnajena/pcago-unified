@@ -8,6 +8,7 @@ source("annotation.R")
 source("widgetDownloadableDataTable.R")
 source("widgetDownloadablePlot.R")
 source("widgetGenericImporter.R")
+source("widgetProcessingSteps.R")
 source("uiHelper.R")
 source("uiPCASidebars.R")
 source("plotCellPlot.R")
@@ -38,7 +39,8 @@ uiPCAPage <- function() {
                                     "Read counts",
                                     tabPanel("Raw", value = "pca.readcounts.raw", downloadableDataTableOutput("readcounts")),
                                     tabPanel("Processed", value = "pca.readcounts.processed", 
-                                             uiOutput("readcounts.processing.steps"),
+                                             #uiOutput("readcounts.processing.steps"),
+                                             processingStepsWidgetUI("readcounts.processing.steps", "Processing overview"),
                                              plotAgglomerativeClusteringPlotUI("readcounts.processed.hclust.plot"),
                                              downloadableDataTableOutput("readcounts.processed")),
                                     tabPanel("Filtered", value = "pca.readcounts.filtered",

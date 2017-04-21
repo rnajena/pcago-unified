@@ -10,11 +10,7 @@
 * Better processing view
 * SMPFPP server implementation
 * Use SummarizedExperiment instead of read count data frame + sequence info
-* Multiple PCA scaling methods: Per dimension (current), All dimensions (global min/max), none
-
-### SummarizedExperiment
-
-Switch to SummarizedExperiment. Problem: How to include annotations?
+* TPM normalization: Processing steps should give info!
 
 ## Theory/practice
 
@@ -33,6 +29,10 @@ Where to set cutoff?
 
 * Improve performance
 * Better variable names
+
+### SummarizedExperiment
+
+Switch to SummarizedExperiment. Problem: How to include annotations?
 
 ## Bugs
 

@@ -394,3 +394,10 @@
 	font-weight: normal;
 	font-style: italic;
 }
+
+/*
+* Style for processing steps widget
+*/
+
+/*.processing-steps-widget .shiny-html-output > .tabbable > ul > li {
+}*/

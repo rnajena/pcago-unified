@@ -259,38 +259,96 @@ serverPCA <- function(input, readcounts.top.variant) {
 #' @examples
 serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.processing.output) {
   
-  validate(need(readcounts.processed(), "No processed read counts available."),
-           need(readcounts.processing.output(), "No read count processing info available!"))
-  
-  panels <- list()
-  
-  # Transpose processing
-  if("transpose" %in% input$pca.data.readcounts.processing) {
-    panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Transpose table", "Read counts have been transposed.")
-  }
-  
-  # Remove constant reads processing
-  if("remove.constant" %in% input$pca.data.readcounts.processing) {
+  step.transpose <- reactive({
+    validate(need(readcounts.processed(), "No processed read counts available."),
+             need(readcounts.processing.output(), "No read count processing info available!"))
     
-    content <- "No genes have been removed."
-    removed.genes <- readcounts.processing.output()$removed.genes
-    
-    if(length(removed.genes) != 0) {
-      
-      genes <- paste0(removed.genes, collapse = ", ")
-      content <- paste(length(removed.genes) ,"genes have been removed:", genes)
+    if("transpose" %in% input$pca.data.readcounts.processing) {
+      return(list(title = "Transpose read counts",
+                  content = "Read counts have been transposed."))
+    }
+    else {
+      return(NULL)
     }
     
-    panels[[length(panels) + 1]] <- bsCollapsePanel(title = "Remove genes with constant read counts", content)
-  }
+  })
   
-  if(length(panels) == 0) {
-    return(tags$div)
-  }
-  else {
-    return(do.call(bsCollapse, panels))
-  }
+  step.remove.constant <- reactive({
+    
+    if("remove.constant" %in% input$pca.data.readcounts.processing) {
+
+      content <- "No genes have been removed."
+      removed.genes <- readcounts.processing.output()$removed.genes
+
+      if(length(removed.genes) != 0) {
+
+        genes <- paste0(removed.genes, collapse = ", ")
+        content <- paste(length(removed.genes) ,"genes have been removed:", genes)
+      }
+
+      return(list(title = "Remove constant read count genes",
+                  content = content))
+    }
+    else {
+      return(NULL)
+    }
+    
+  })
   
+  step.normalization <- reactive({
+    
+    if(input$pca.data.normalization == "tpm") {
+      
+      content <- tagList()
+      
+      # TODO: Table that shows that the read counts are normalized now (sum is same for all samples/cells)
+      
+      return(list(title = "Apply TPM normalization",
+                  content = content))
+      
+    }
+    else {
+      return(NULL)
+    }
+    
+  })
+  
+  processingStepsWidgetData("readcounts.processing.steps",
+                            step.transpose,
+                            step.remove.constant,
+                            step.normalization)
+  
+  # validate(need(readcounts.processed(), "No processed read counts available."),
+  #          need(readcounts.processing.output(), "No read count processing info available!"))
+  # 
+  # steps <- list()
+  # 
+  # # Transpose processing
+  # if("transpose" %in% input$pca.data.readcounts.processing) {
+  #   steps[[length(steps) + 1]] <- tabPanel(title = "Transpose table", paste0(length(steps), ". ", "Read counts have been transposed."))
+  # }
+  # 
+  # # Remove constant reads processing
+  # if("remove.constant" %in% input$pca.data.readcounts.processing) {
+  #   
+  #   content <- "No genes have been removed."
+  #   removed.genes <- readcounts.processing.output()$removed.genes
+  #   
+  #   if(length(removed.genes) != 0) {
+  #     
+  #     genes <- paste0(removed.genes, collapse = ", ")
+  #     content <- paste(length(removed.genes) ,"genes have been removed:", genes)
+  #   }
+  #   
+  #   steps[[length(steps) + 1]] <- tabPanel(title = paste0(length(steps), ". ","Remove genes with constant read counts"), content)
+  # }
+  # 
+  # parameters <- steps
+  # parameters$type = "pills"
+  # 
+  # return(bsCollapsePanel("Applied processing steps",
+  #                        do.call(tabsetPanel, parameters)))
+ 
 }
 
 serverGeneVarianceTableData <- function(gene.variances) {
