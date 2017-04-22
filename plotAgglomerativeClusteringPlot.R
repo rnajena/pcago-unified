@@ -76,7 +76,6 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
                                                   scale = 1,
                                                   title = "Hierarchical Clustering",
                                                   subtitle = ""))
-  
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
@@ -139,9 +138,27 @@ plotAgglomerativeClusteringPlot_ <- function(input,
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
   visuals.cell <- reactive({ calculateCellVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
   
+  # Provide plot height that scales with cell count
+  plot.settings.dynamic <- reactive({
+    
+    validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to build plot settings from!"))
+    
+    settings <- plotSettingsSetNA(plot.settings(),
+                                  PlotSettings(dpi = 96,
+                                               scale = 1))
+    
+    # Calculate the plot height based on the count of cells
+    height <- (1 + 0.4 * ncol(readcounts())) * settings@dpi * settings@scale
+    settings <- plotSettingsSetNA(plot.settings(),
+                                  PlotSettings(height = height))
+    
+    return(settings)
+    
+  })
+  
   # Plot
   downloadablePlot("plot", 
-                   plot.settings = plot.settings, 
+                   plot.settings = plot.settings.dynamic, 
                    exprplot = function(plot.settings, format, filename) 
                    {
                      distance.methods <- plotAgglomerativeClusteringPlotUI.dist.methodsSelection
@@ -149,11 +166,6 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                      
                      distance.method.name <- names(distance.methods)[distance.methods == input$method.dist]
                      clustering.method.name <- names(clustering.methods)[clustering.methods == input$method.hclust]
-                     
-                     plot.height <- 400
-                     if(!is.na(plot.settings@dpi) && !is.na(plot.settings@scale)) {
-                       
-                     }
                      
                      plot.settings <- plotSettingsSetNA(plot.settings,
                                                         PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name),
