@@ -318,37 +318,6 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
                             step.remove.constant,
                             step.normalization)
   
-  # validate(need(readcounts.processed(), "No processed read counts available."),
-  #          need(readcounts.processing.output(), "No read count processing info available!"))
-  # 
-  # steps <- list()
-  # 
-  # # Transpose processing
-  # if("transpose" %in% input$pca.data.readcounts.processing) {
-  #   steps[[length(steps) + 1]] <- tabPanel(title = "Transpose table", paste0(length(steps), ". ", "Read counts have been transposed."))
-  # }
-  # 
-  # # Remove constant reads processing
-  # if("remove.constant" %in% input$pca.data.readcounts.processing) {
-  #   
-  #   content <- "No genes have been removed."
-  #   removed.genes <- readcounts.processing.output()$removed.genes
-  #   
-  #   if(length(removed.genes) != 0) {
-  #     
-  #     genes <- paste0(removed.genes, collapse = ", ")
-  #     content <- paste(length(removed.genes) ,"genes have been removed:", genes)
-  #   }
-  #   
-  #   steps[[length(steps) + 1]] <- tabPanel(title = paste0(length(steps), ". ","Remove genes with constant read counts"), content)
-  # }
-  # 
-  # parameters <- steps
-  # parameters$type = "pills"
-  # 
-  # return(bsCollapsePanel("Applied processing steps",
-  #                        do.call(tabsetPanel, parameters)))
- 
 }
 
 serverGeneVarianceTableData <- function(gene.variances) {
