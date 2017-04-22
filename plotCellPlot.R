@@ -236,7 +236,7 @@ plotCellPlot.saveMovie <- function(filename,
                                  updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
-     !is.data.frame(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
+     !is.SummarizedExperiment(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
     stop("Invalid arguments!")
   }
   
@@ -293,7 +293,7 @@ plotCellPlot_ <- function(input,
                           pca) {
   
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
+  visuals.cell <- reactive({ calculateCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
   plot.settings <- generalPlotSettings("plot.settings")
   
   # Update the axis selectize
@@ -346,7 +346,7 @@ plotCellPlot_ <- function(input,
     
     withProgressCustom(function(updateProgress) {
       
-      savePCACellPlotMovie(
+      plotCellPlot.saveMovie(
         filename = file,
         animation.params = animation.params(),
         axes = input$axes,

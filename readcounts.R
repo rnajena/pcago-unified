@@ -3,6 +3,7 @@
 #' 
 
 library(shiny)
+library(SummarizedExperiment)
 source("classImporterEntry.R")
 
 #' A list of all read count data types that will be supported
@@ -58,11 +59,15 @@ importReadcount <- function(filehandle, datatype, parameters) {
   if(nrow(data) == 0 || ncol(data) == 0) {
     stop("Read count table is empty!")
   }
-  if(!all(apply(data, 1, function(x) { is.numeric(x) }))) {
-    stop("Read count table is not entirely numeric!")
-  }
   
-  return(data)
+  # if(!all(apply(data, 1, function(x) { is.numeric(x) }))) {
+  #   stop("Read count table is not entirely numeric!")
+  # }
+  
+  counts <- as.matrix(data)
+  experiment <- SummarizedExperiment(assays = list(counts = counts))
+  
+  return(experiment)
 }
 
 #' Imports sample with given sample id
@@ -99,7 +104,7 @@ importReadcountSample <- function(sample, parameters) {
 #' @examples
 applyReadcountNormalization.TPM <- function(readcounts, mu.fld, sequence.info) {
   
-  if(!is.data.frame(readcounts) || !is.numeric(mu.fld) || !is.data.frame(sequence.info)) {
+  if(!is.SummarizedExperiment(readcounts) || !is.numeric(mu.fld) || !is.data.frame(sequence.info)) {
     stop("Invalid arguments!")
   }
   
@@ -112,14 +117,17 @@ applyReadcountNormalization.TPM <- function(readcounts, mu.fld, sequence.info) {
   sequence.info <- sequence.info[rownames(readcounts),]
   sequence.info$effective.length <- sequence.info$length - mu.fld + 1
   
+  counts <- assay(readcounts)
+  
   
   # Normalize sequence length
-  readcounts.rpk <- sweep(readcounts, 1, sequence.info$effective.length, "/")
+  counts.rpk <- sweep(counts, 1, sequence.info$effective.length, "/")
   
   # Normalize by sequence depth
-  readcounts.tpm <- sweep(readcounts.rpk, 2, 10e6 / colSums(readcounts.rpk), "*")
+  counts.tpm <- sweep(counts.rpk, 2, 10e6 / colSums(counts.rpk), "*")
   
-  return(readcounts.tpm)
+  assay(readcounts) <- counts.tpm
+  return(readcounts)
   
 }
 
@@ -138,11 +146,13 @@ removeConstantReads <- function(readcounts) {
     return(NULL)
   }
   
-  invalid <- (do.call(pmin, readcounts) == do.call(pmax, readcounts))
-  readcounts.removed <- readcounts[which(!invalid),]
-  genes.removed <- rownames(readcounts)[invalid]
+  counts <- assay(readcounts)
+  invalid <- (apply(counts, 1, min) == apply(counts, 1, max))
   
-  return(list(readcounts = readcounts.removed, genes.removed = genes.removed))
+  genes.removed <- rownames(readcounts)[invalid]
+  readcounts <- readcounts[which(!invalid),]
+  
+  return(list(readcounts = readcounts, genes.removed = genes.removed))
   
 }
 
@@ -160,6 +170,7 @@ transposeReadCounts <- function(readcounts) {
     return(NULL)
   }
   
-  return(data.frame(t(readcounts)))
+  counts <- t(assay(readcounts))
+  return(SummarizedExperiment(assays = list(counts = counts)))
   
 }

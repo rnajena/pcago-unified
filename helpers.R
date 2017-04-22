@@ -4,6 +4,19 @@
 
 library(shiny)
 library(reshape2)
+library(SummarizedExperiment)
+
+#' Checks if object is a SummarizedExperiment
+#'
+#' @param object 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+is.SummarizedExperiment <- function(object) {
+  return(is(object, "SummarizedExperiment"))
+}
 
 #' Checks if value is a valid choice
 #'

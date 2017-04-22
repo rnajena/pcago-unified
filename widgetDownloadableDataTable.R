@@ -56,7 +56,7 @@ downloadableDataTableOutput <- function(id,
 #' @param input 
 #' @param output 
 #' @param session 
-#' @param data Data to be displayed. Should be a reactive
+#' @param data Data to be displayed. Should be a reactive. The reactive can return a data.frame, matrix or SummarizedExperiment
 #' @param export.filename Filename of the downloaded file
 #' @param export.rownames Export row names, too. Default = TRUE
 #' @param export.colnames Parameter of write.table.
@@ -70,9 +70,14 @@ downloadableDataTable_ <- function(input, output, session, data, export.filename
   table.data <- reactive({
     
     validate(need(data(), "No data to display!"),
-             need(is.data.frame(data()) || is.matrix(data()), "Data is not a data frame!"))
-    return(data())
+             need(is.data.frame(data()) || is.matrix(data()) || is.SummarizedExperiment(data()), "Data is not a data frame!"))
     
+    if(is.SummarizedExperiment(data())) {
+      return(assay(data()))
+    }
+    else {
+      return(data())
+    }
   })
   
   
@@ -103,7 +108,7 @@ downloadableDataTable_ <- function(input, output, session, data, export.filename
 
 #' Fills the data table with given data output.
 #' 
-#' @param data Data to be displayed. Should be a reactive
+#' @param data Data to be displayed. Should be a reactive. The reactive can return a data.frame, matrix or SummarizedExperiment.
 #' @param export.filename Filename of the downloaded file
 #' @param export.rownames Export row names, too. Default = TRUE
 #' @param export.colnames Parameter of write.table.

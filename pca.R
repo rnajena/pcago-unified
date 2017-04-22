@@ -2,6 +2,8 @@
 #' This file contains all PCA calculations
 #'
 
+library(SummarizedExperiment)
+
 #' Applies PCA to input data
 #'
 #' @param readcounts Read counts
@@ -16,7 +18,7 @@
 applyPCA <- function(readcounts, center, scale, relative) {
   
   # Soft and hard parameter checking
-  if(is.null(readcounts) || ncol(readcounts) == 0 || nrow(readcounts) == 0) {
+  if(is.null(readcounts)) {
     return(NULL)
   }
   if(!is.logical(center) || !is.logical(scale)) {
@@ -27,7 +29,7 @@ applyPCA <- function(readcounts, center, scale, relative) {
   }
   
   # Extract the data 
-  X <- readcounts
+  X <- assay(readcounts)
   X <- t(X) # We want to do PCA for our cells
   
   # Extract the cells for later use

@@ -38,7 +38,7 @@ availableAnnotationSamples <- list(ImporterEntry(name = "vitamins.gff3",
 #' @examples
 importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts) {
   
-  if(!is.data.frame(readcounts)) {
+  if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
   if(missing(filehandle)) {
@@ -70,7 +70,7 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
 #' @examples
 importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts) {
   
-  if(missing(filehandle) || !is.character(datatype) || !is.data.frame(readcounts)) {
+  if(missing(filehandle) || !is.character(datatype) || !is.SummarizedExperiment(readcounts)) {
     stop("Invalid arguments!")
   }
   
@@ -94,7 +94,7 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
 #' @examples
 generateGeneInformation <- function(generator, parameters, readcounts) {
   
-  if(!is.data.frame(readcounts)) {
+  if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
   
@@ -121,7 +121,7 @@ generateGeneInformation <- function(generator, parameters, readcounts) {
 #' @examples
 importSampleGeneInformation <- function(sample, readcounts) {
   
-  if(!is.data.frame(readcounts)) {
+  if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
   if(!is.character(sample)) {
@@ -152,12 +152,12 @@ importSampleGeneInformation <- function(sample, readcounts) {
 #' @examples
 buildGeneVarianceTable <- function(readcounts) {
   
-  if(is.null(readcounts) || ncol(readcounts) < 2 || nrow(readcounts) == 0) {
+  if(!is.SummarizedExperiment(readcounts) || ncol(readcounts) < 2 || nrow(readcounts) == 0) {
     return(NULL)
   }
   
   geneids <- rownames(readcounts)
-  gene.var <- rowVars(data.matrix(readcounts))
+  gene.var <- rowVars(assay(readcounts))
   
   variances.table <- data.frame(var = gene.var,
                           var.relative = gene.var / sum(gene.var),
@@ -181,7 +181,7 @@ buildGeneVarianceTable <- function(readcounts) {
 #' @examples
 selectTopVariantGeneReadcounts <- function(readcounts, gene.variances, top) {
   
-  if(!is.data.frame(readcounts) || !is.data.frame(gene.variances) || top <= 0) {
+  if(!is.SummarizedExperiment(readcounts) || !is.data.frame(gene.variances) || top <= 0) {
     return(NULL)
   }
   

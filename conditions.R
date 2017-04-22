@@ -168,7 +168,7 @@ generateConditionTable <- function(readcounts, sep = "_") {
     return(NULL)
   }
   
-  cells <- names(readcounts)
+  cells <- colnames(readcounts)
   result <- data.frame(row.names = cells, stringsAsFactors = F)
   
   # Go through all cells and determine which conditions apply to it
@@ -187,7 +187,7 @@ generateConditionTable <- function(readcounts, sep = "_") {
     
     for(cond in conditions) {
       
-      if( ncol(result) == 1 || !(cond %in% names(result))) {
+      if( ncol(result) == 0 || !(cond %in% colnames(result))) {
         
         result[[cond]] <- rep(F, nrow(result))
         
@@ -268,7 +268,7 @@ conditionName <- function(visuals.conditions, conditions) {
 #' @export
 #'
 #' @examples
-calculatCellVisuals <- function(cells, conditions, condition.visuals) {
+calculateCellVisuals <- function(cells, conditions, condition.visuals) {
   
   if(is.null(cells) || is.null(conditions) || is.null(condition.visuals)) {
     return(NULL)

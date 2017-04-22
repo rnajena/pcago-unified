@@ -58,11 +58,6 @@ shinyServer(function(input, output, session) {
                                     exprimport = importReadcount, 
                                     exprsample = importReadcountSample)
   
- 
-  
-  # Gene variances
-  gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
-  
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
   gene.info.annotation <- serverGeneInfoAnnotation(readcounts)
@@ -70,6 +65,9 @@ shinyServer(function(input, output, session) {
   # Readcount processing
   readcounts.processing.output <- serverReadCountProcessing(readcounts, gene.info.annotation, input)
   readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
+  
+  # Gene variances
+  gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
   # Obtain the list of genes the user wants to use
   genes.filtered <- serverFilteredGenes(readcounts.processed, gene.info.annotation)

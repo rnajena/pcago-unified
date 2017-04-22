@@ -66,7 +66,7 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
                                                  method.distance = "euclidian", 
                                                  method.cluster = "average"){
   
-  validate(need(readcounts(), "No data to plot!"),
+  validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to plot!"),
            need(cell.visuals(), "No cell visuals available!"))
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
@@ -89,7 +89,9 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
   
   saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
     
-    dend <- t(readcounts()) %>% 
+    X <- if(is.matrix(readcounts())) readcounts() else assay(readcounts())
+    
+    dend <- t(X) %>% 
       dist(method = method.distance) %>%
       hclust(method = method.cluster) %>%
       as.dendrogram
@@ -114,9 +116,11 @@ plotAgglomerativeClusteringPlot.saveNewick <- function(readcounts,
                                            method.distance = "euclidian", 
                                            method.cluster = "average") {
   
-  validate(need(readcounts(), "No data to cluster!"))
+  validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to cluster!"))
   
-  clust <- t(readcounts()) %>% 
+  X <- if(is.matrix(readcounts())) readcounts() else assay(readcounts())
+  
+  clust <- t(X) %>% 
     dist(method = method.distance) %>%
     hclust(method = method.cluster)
   
@@ -133,7 +137,7 @@ plotAgglomerativeClusteringPlot_ <- function(input,
   
   plot.settings <- generalPlotSettings("plot.settings")
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ calculatCellVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
+  visuals.cell <- reactive({ calculateCellVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
   
   # Plot
   downloadablePlot("plot", 
