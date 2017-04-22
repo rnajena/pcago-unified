@@ -40,16 +40,6 @@ source("plotAgglomerativeClusteringPlot.R")
 
 shinyServer(function(input, output, session) {
   
-  # observe({
-  #   showNotification("Test.Default", duration = NULL, type = "default")
-  #   showNotification("Test.Message", duration = NULL, type = "message")
-  #   showNotification("Test.Warning", duration = NULL, type = "warning")
-  #   showNotification("Test.Error", duration = NULL, type = "error")
-  #   progress <- shiny::Progress$new()
-  #   progress$set(message = "Test.Progress", value = 0.5)
-  #   progressNotification("test.progress.notify", "Test.ProgressNotify")
-  # })
-  
   # Read counts
   readcounts <- genericImporterData("pca.data.readcounts.importer", 
                                     importers = reactive(supportedReadcountImporters),
@@ -58,13 +48,16 @@ shinyServer(function(input, output, session) {
                                     exprimport = importReadcount, 
                                     exprsample = importReadcountSample)
   
+  # Readcount processing
+  readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts, input)
+  readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
+  
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
-  gene.info.annotation <- serverGeneInfoAnnotation(readcounts)
+  gene.info.annotation <- serverGeneInfoAnnotation(readcounts.preprocessed)
   
-  # Readcount processing
-  readcounts.processing.output <- serverReadCountProcessing(readcounts, gene.info.annotation, input)
-  readcounts.processed <- reactive({ readcounts.processing.output()$readcounts })
+  # Finish processing of read counts with normalization
+  readcounts.processed <- serverReadcountNormalization(readcounts.preprocessed, gene.info.annotation, input)
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
