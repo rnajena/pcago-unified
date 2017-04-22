@@ -126,7 +126,7 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
     
     selected <- intersect(input$conditioneditor, colnames(conditions()))
     
-    validate(need(length(selected) >= 2, "Not enough conditions selected!"))
+    validate(need(length(selected) >= 2, "here should be at least 2 conditions!"))
     
     return(conditions()[, selected])
   })

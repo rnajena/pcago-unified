@@ -88,7 +88,7 @@ uiPCASidebarPCA <- function() {
                                   value = T),
                     checkboxInput("pca.pca.settings.scale", 
                                   helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), 
-                                  value = T),
+                                  value = F),
                     radioButtons("pca.pca.settings.relative", 
                                  helpIconText("Relative cell positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
                                  choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global")))

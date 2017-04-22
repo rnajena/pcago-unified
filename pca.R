@@ -30,7 +30,7 @@ applyPCA <- function(readcounts, center, scale, relative) {
   
   # Extract the data 
   X <- assay(readcounts)
-  X <- t(X) # We want to do PCA for our cells
+  X <- t(X) # We want to do PCA for cells
   
   # Extract the cells for later use
   cells <- colnames(readcounts)
@@ -42,6 +42,8 @@ applyPCA <- function(readcounts, center, scale, relative) {
   # The eigenvalues are then the variances of the data in PCx direction -> we can rank them
   # We know how much a gene contributes to PCx just by looking at the values of the corresponding
   # eigenvector at the index of the gene.
+  # It is important to know that PCA only de*correlates* the data.
+  # Even if decorrelated, it may still be depend on each other
   
   # Using R's internal function for improved speed (and accuracy as they use SDV)
   result <- prcomp(X, center = center, scale = scale)
@@ -50,6 +52,7 @@ applyPCA <- function(readcounts, center, scale, relative) {
   
   # Optionally make the transformed coordinates relative.
   # This makes them scale-invariant, but keeps the distance relation (which is the important part)
+  # Either per dimension (might skew stuff) or global (should be always fine)
   if(relative == "dimension") {
     for(pc in colnames(transformed)) {
       pc.min <- min(transformed[[pc]])
