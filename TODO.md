@@ -12,6 +12,7 @@
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
 
+
 ## Theory/practice
 
 ### Which genes are relevant?
@@ -33,6 +34,10 @@ Where to set cutoff?
 ### SummarizedExperiment
 
 Switch to SummarizedExperiment. Problem: How to include annotations?
+
+* Done: Readcounts -> SummarizedExperiment
+* Pull conditions into SummarizedExperiment -> Pull into colData
+* Pull annotations into SummarizedExperiment
 
 ## Bugs
 
