@@ -5,6 +5,7 @@
 library(shiny)
 source("widgetGenericImporter.R")
 source("conditions.R")
+source("uiHelper.R")
 
 #' Creates a widget that allows the user to select a method of extracting cell conditions
 #'
@@ -24,10 +25,10 @@ cellConditionImporterUI <- function(id) {
   
   return(tagList(
     radioButtons(ns("mode"),
-                 "Source of cell conditions:",
+                 "Source of cell annotation:",
                  c("Column names" = "column",
                    "Extract from columns" = "extract",
-                   "Upload" = "upload"),
+                   "Import" = "upload"),
                  selected = "column"),
     conditionalPanel(conditionalPanel.equals(ns("mode"), "'extract'"),
                      selectizeInput(ns("separator"),
@@ -36,7 +37,15 @@ cellConditionImporterUI <- function(id) {
                                     selected = "_",
                                     options = list("create" = T))),
     conditionalPanel(conditionalPanel.equals(ns("mode"), "'upload'"),
-                     genericImporterInput(ns("importer")))
+                     genericImporterInput(ns("importer"))),
+    hDivider(),
+    selectizeInput(ns("conditioneditor"), 
+                   label = "Rearrange conditions", 
+                   choices = c(),
+                   multiple = T,
+                   options = list(
+                     plugins = c("drag_drop", "remove_button")
+                   ))
   ))
   
 }
@@ -60,16 +69,25 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
                                                   samples = reactive(availableCellConditionSamples),
                                                   generators = reactive(supportedConditionVisualsGenerators),
                                                   exprimport = function(con, importer, parameters) {
-    
-    validate(need(readcounts(), "Cannot import condition table without read counts!"))
-    
-    cells <- colnames(readcounts())
-    return(importCellConditions(con, importer, cells))
-  })
+                                                    
+                                                    validate(need(readcounts(), "Cannot import condition table without read counts!"))
+                                                    
+                                                    cells <- colnames(readcounts())
+                                                    return(importCellConditions(con, importer, cells))
+                                                  },
+                                                  exprsample = function(sample, parameters) {
+                                                    
+                                                    validate(need(readcounts(), "Cannot import condition table without read counts!"))
+                                                    cells <- colnames(readcounts())
+                                                    
+                                                    return(importCellConditionsSample(sample, cells))
+                                                    
+                                                  })
   
   observeEvent(cell.conditions.imported(), { })
   
-  return(reactive({
+  # Build conditions
+  conditions <- reactive({
     
     validate(need(readcounts(), "Cannot get condition table without read counts!"))
     
@@ -87,7 +105,33 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
       return(NULL)
     }
     
-  }))
+  })
+  
+  # Allow the conditions to be rearranged/changed
+  # Update the selectize that allows removing/rearranging conditions
+  observeEvent(conditions(), {
+    
+    validate(need(conditions(), "Need conditions to update UI!"))
+    
+    updateSelectInput(session, "conditioneditor", 
+                      choices = colnames(conditions()), 
+                      selected = colnames(conditions()))
+  })
+  
+  # Build new, reordered conditions
+  conditions.modified <- reactive({
+    
+    validate(need(conditions(), "No conditions loaded!"),
+             need(ncol(conditions()) >= 2, "There should be at least 2 conditions!"))
+    
+    selected <- intersect(input$conditioneditor, colnames(conditions()))
+    
+    validate(need(length(selected) >= 2, "Not enough conditions selected!"))
+    
+    return(conditions()[, selected])
+  })
+  
+  return(conditions.modified)
   
 }
 

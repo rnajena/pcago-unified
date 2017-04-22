@@ -36,7 +36,7 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
            need(pca.conditions.plot.visuals(), "No condition visuals available!"))
   
   validate(need(selected.conditions, "No conditions selected!"),
-           need(length(selected.conditions) > 0, "No conditions selected!"),
+           need(length(selected.conditions) > 1, "Not enough conditions selected!"),
            need(length(selected.conditions) <= 5, "Too many conditions selected!"))
   
   x <- lapply(selected.conditions, function(x) { 

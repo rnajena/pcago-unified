@@ -11,6 +11,7 @@
 * SMPFPP server implementation
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
+* Condition table importer that imports non-boolean condition tables (Where column is factor)
 
 
 ## Theory/practice

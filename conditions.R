@@ -10,10 +10,14 @@ condition.default <- "{default}"
 
 # Importers for cell condition mappings
 supportedCellConditionImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV"),
-  ImporterEntry(name = "tsv", label = "TSV")
+  ImporterEntry(name = "factor_csv", label = "Treatments CSV"),
+  ImporterEntry(name = "factor_tsv", label = "Treatments TSV"),
+  ImporterEntry(name = "boolean_csv", label = "Boolean CSV"),
+  ImporterEntry(name = "boolean_tsv", label = "Boolean TSV")
 )
-availableCellConditionSamples <- list()
+availableCellConditionSamples <- list(
+  ImporterEntry(name = "conditions.vitamins.large.csv", label = "Vitamins (Large)")
+)
 supportedCellConditionGenerators <- list()
 
 # Importers for condition visuals
@@ -26,8 +30,9 @@ availableConditionVisualSamples <- list(
   ImporterEntry(name = "visuals.vitamins.small.csv", label = "Vitamins (Small)"),
   ImporterEntry(name = "visuals.vitamins.large.csv", label = "Vitamins (Large)"))
 
-#' Imports cell condition assignments from filehandle with importer definded by datatype
-#'
+#' Imports cell condition assignments from filehandle
+#' This imports Boolean condition assignments (which assigns True/False to whether a cell has given conditions)
+#' 
 #' @param filehandle Either a filename or a connection
 #' @param datatype One value in supportedCellConditionFileTypes
 #' @param cells Vector of cell names that have to be explained by the table
@@ -36,24 +41,12 @@ availableConditionVisualSamples <- list(
 #' @export
 #'
 #' @examples
-importCellConditions <- function(filehandle, datatype, cells) {
+importCellConditions.Boolean <- function(filehandle, sep, cells) {
   
-  if(missing(filehandle) || !is.character(datatype) || !is.character(cells)) {
+  if(missing(filehandle) || !is.character(sep) || !is.character(cells)) {
     stop("Invalid arguments!")
   }
-  
-  sep <- ","
-  
-  if(datatype == "tsv") {
-    sep <- ""
-  }
-  else if(datatype == "csv") {
-    sep <- ","
-  }
-  else {
-    stop(paste("Unsupported format", datatype))
-  }
-  
+
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
   
   if(nrow(data) == 0 || ncol(data) == 0) {
@@ -69,6 +62,113 @@ importCellConditions <- function(filehandle, datatype, cells) {
   return(data)
 }
 
+#' Imports cell condition assignments from filehandle
+#' This imports the data from a Factor table.
+#' The imported table contains strings that represent the condition
+#' according to the column (e.g. Column says "Applied Vitamin"; Rows contain "Vitamin A", ...)
+#' 
+#' This function will convert the data into the boolean representation used by the
+#' other functions
+#'
+#' @param filehandle 
+#' @param sep 
+#' @param cells 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellConditions.Factor <- function(filehandle, sep, cells) {
+  
+  if(missing(filehandle) || !is.character(sep) || !is.character(cells)) {
+    stop("Invalid arguments!")
+  }
+  
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  
+  if(nrow(data) == 0 || ncol(data) == 0) {
+    stop("Cell condition table is empty!")
+  }
+  if(!setequal(rownames(data), cells)) {
+    stop("Data does not assign conditions to all cells!")
+  }
+  
+  output <- data.frame(row.names = rownames(data))
+  
+  for(treatment in colnames(data)) {
+    
+    for(i in seq_len(nrow(data))) {
+      
+      # The condition that is built from the factor
+      condition <- paste0(treatment, "_", data[i, treatment])
+      
+      if(ncol(output) == 0 || !(condition %in% colnames(output))) {
+        output[[condition]] <- rep(F, nrow(data))
+      }
+      
+      output[i, condition] <- T
+      
+    }
+    
+  }
+  
+  return(output)
+  
+}
+
+#' Imports cell condition assignments from filehandle with importer definded by datatype
+#'
+#' @param filehandle 
+#' @param datatype 
+#' @param cells 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellConditions <- function(filehandle, datatype, cells) {
+  
+  if(datatype == "boolean_csv") {
+    return(importCellConditions.Boolean(filehandle, ",", cells))
+  }
+  else if(datatype == "boolean_tsv") {
+    return(importCellConditions.Boolean(filehandle, "", cells))
+  }
+  else if(datatype == "factor_csv") {
+    return(importCellConditions.Factor(filehandle, ",", cells))
+  }
+  else if(datatype == "factor_tsv") {
+    return(importCellConditions.Factor(filehandle, "", cells))
+  }
+  else {
+    stop(paste("Unknown importer", datatype))
+  }
+  
+}
+
+#' Imports cell condition assignments from sample
+#'
+#' @param sample 
+#' @param cells 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellConditionsSample <- function(sample, cells) {
+  
+  if(!is.character(sample)) {
+    stop("Invalid arguments!")
+  }
+  
+  con <- file(paste0("sampledata/", sample), "r")
+  on.exit({ close(con) })
+  
+  data <- importCellConditions(con, "factor_csv", cells)
+  
+  return(data)
+  
+}
 
 #' Imports visual definitions from filehandle with importer defined by datatype
 #'
