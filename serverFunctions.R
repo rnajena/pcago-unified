@@ -280,11 +280,11 @@ serverPCA <- function(input, readcounts.top.variant) {
 #' @export
 #'
 #' @examples
-serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.processing.output) {
+serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.preprocessing.output) {
   
   step.transpose <- reactive({
     validate(need(readcounts.processed(), "No processed read counts available."),
-             need(readcounts.processing.output(), "No read count processing info available!"))
+             need(readcounts.preprocessing.output(), "No read count processing info available!"))
     
     if("transpose" %in% input$pca.data.readcounts.processing) {
       return(list(title = "Transpose read counts",
@@ -301,7 +301,7 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
     if("remove.constant" %in% input$pca.data.readcounts.processing) {
 
       content <- "No genes have been removed."
-      removed.genes <- readcounts.processing.output()$removed.genes
+      removed.genes <- readcounts.preprocessing.output()$removed.genes
 
       if(length(removed.genes) != 0) {
 

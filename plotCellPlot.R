@@ -272,11 +272,13 @@ plotCellPlot.saveMovie <- function(filename,
   fps <- 1 / spf
   
   
-  system(paste("ffmpeg",
+  system(paste("bash -lc '",
+               "ffmpeg",
                "-framerate", fps, 
                "-i", paste0(basefile, "_%d.png"), 
                "-c:v", "libx264",
-               filename))
+               filename,
+               "'"))
   
   showNotification("Your video file has been successfully rendered.", type = "message")
 }

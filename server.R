@@ -123,7 +123,7 @@ shinyServer(function(input, output, session) {
   #   readcounts.processed,
   #   readcounts.processing.output
   # ))
-  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.processing.output)
+  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.preprocessing.output)
   
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
