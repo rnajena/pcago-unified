@@ -95,9 +95,14 @@ serverReadcountNormalization <- function(readcounts, gene.info.annotation, input
       validate(need(gene.info.annotation(), "No annotation available!"),
                need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"))
       
-      readcounts <- applyReadcountNormalization.TPM(output$readcounts, 
+      readcounts <- applyReadcountNormalization.TPM(readcounts, 
                                                     input$pca.data.normalization.tpm.mufld,
                                                     gene.info.annotation()@sequence.info)
+    }
+    else if(input$pca.data.normalization == "deseq2") {
+      
+      readcounts <- applyReadcountNormalization.DESeq2(readcounts)
+      
     }
     
     return(readcounts)

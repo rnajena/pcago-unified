@@ -2,7 +2,6 @@
 
 ## Features
 
-* Normalization ; DeSeq -> Need SummarizedExperiment!
 * Help pages
 * Read count normalization result plots
 * Custom selectors
@@ -11,6 +10,8 @@
 * SMPFPP server implementation
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
+* TPM normalization is wrong; update it
+* DeSeq normalization
 
 
 ## Theory/practice

@@ -4,6 +4,7 @@
 
 library(shiny)
 library(SummarizedExperiment)
+library(DESeq2)
 source("classImporterEntry.R")
 
 #' A list of all read count data types that will be supported
@@ -23,7 +24,7 @@ availableReadcountSamples <- list(
 )
 
 #' Supported read count normalization types
-supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq", "TPM" = "tpm")
+supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq2", "TPM" = "tpm")
 
 
 #' Imports readcount from filehandle with importer definded by datatype
@@ -89,6 +90,24 @@ importReadcountSample <- function(sample, parameters) {
   data <- importReadcount(con, "csv")
   
   return(data)
+  
+}
+
+#' Applies read count normalization (DeSeq2) to readcounts
+#'
+#' @param readcounts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+applyReadcountNormalization.DESeq2 <- function(readcounts) {
+  
+  if(!is.SummarizedExperiment(readcounts)) {
+    stop("Invalid arguments!")
+  }
+  
+  stop("Not implemented")
   
 }
 
