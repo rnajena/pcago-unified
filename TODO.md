@@ -12,6 +12,7 @@
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
 * DeSeq normalization
+* Associated features -> Biotype + Redo how it's read from annotation -> unify!
 
 
 ## Theory/practice
