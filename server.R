@@ -52,12 +52,29 @@ shinyServer(function(input, output, session) {
   readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts, input)
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
   
+  #' Build a list of all visual parameters
+  #' 1. We have for each cell CELL -> Is in condition true/false? mapping (conditions)
+  #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
+  #' 3. Based on this determine the visual conditions for each cell
+  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
+  
+  observeEvent(conditions(), {
+    
+    validate(need(conditions(), "No conditions available!"))
+    
+    updateSelectizeInput(session, 
+                         "pca.data.normalization.deseq2.conditions",
+                         choices = colnames(conditions()),
+                         selected = colnames(conditions()))
+  })
+  
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
   gene.info.annotation <- serverGeneInfoAnnotation(readcounts.preprocessed)
   
   # Finish processing of read counts with normalization
-  readcounts.processed <- serverReadcountNormalization(readcounts.preprocessed, gene.info.annotation, input)
+  readcounts.normalization.output <- serverReadcountNormalization(readcounts.preprocessed, conditions, gene.info.annotation, input)
+  readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
@@ -79,12 +96,6 @@ shinyServer(function(input, output, session) {
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.top.variant)
-  
-  #' Build a list of all visual parameters
-  #' 1. We have for each cell CELL -> Is in condition true/false? mapping (conditions)
-  #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
-  #' 3. Based on this determine the visual conditions for each cell
-  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.processed)
   
   #
   # Update input elements
@@ -123,7 +134,7 @@ shinyServer(function(input, output, session) {
   #   readcounts.processed,
   #   readcounts.processing.output
   # ))
-  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.preprocessing.output)
+  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.preprocessing.output, readcounts.normalization.output)
   
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))

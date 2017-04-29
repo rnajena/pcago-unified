@@ -83,9 +83,11 @@ serverReadCountPreProcessing <- function(readcounts, input) {
 #' @export
 #'
 #' @examples
-serverReadcountNormalization <- function(readcounts, gene.info.annotation, input) {
+serverReadcountNormalization <- function(readcounts, conditions, gene.info.annotation, input) {
   
   return(reactive({
+    
+    validate(need(readcounts(), "No readcounts to process!"))
     
     readcounts <- readcounts()
     
@@ -93,19 +95,29 @@ serverReadcountNormalization <- function(readcounts, gene.info.annotation, input
     if(input$pca.data.normalization == "tpm") {
       
       validate(need(gene.info.annotation(), "No annotation available!"),
-               need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"))
+               need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"),
+               need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
       
-      readcounts <- applyReadcountNormalization.TPM(readcounts, 
-                                                    input$pca.data.normalization.tpm.mufld,
-                                                    gene.info.annotation()@sequence.info)
+      return(applyReadcountNormalization.TPM(readcounts, 
+                                            input$pca.data.normalization.tpm.mufld,
+                                            gene.info.annotation()@sequence.info))
     }
     else if(input$pca.data.normalization == "deseq2") {
       
-      readcounts <- applyReadcountNormalization.DESeq2(readcounts)
+      validate(need(conditions(), "No condition assignments available!"),
+               need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"),
+               need(length(setdiff(input$pca.data.normalization.deseq2.conditions ,colnames(conditions()))) == 0, "Wrong conditions selected!"),
+               need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
+      
+      return(applyReadcountNormalization.DESeq2(readcounts, 
+                                               conditions(), 
+                                               input$pca.data.normalization.deseq2.conditions))
       
     }
-    
-    return(readcounts)
+    else 
+    {
+      return(list(readcounts = readcounts))
+    }
     
   }))
   
@@ -285,7 +297,7 @@ serverPCA <- function(input, readcounts.top.variant) {
 #' @export
 #'
 #' @examples
-serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.preprocessing.output) {
+serverReadCountsProcessingOutput <- function(input, readcounts.processed, readcounts.preprocessing.output, readcounts.normalization.output) {
   
   step.transpose <- reactive({
     validate(need(readcounts.processed(), "No processed read counts available."),
@@ -332,6 +344,16 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
       # TODO: Table that shows that the read counts are normalized now (sum is same for all samples/cells)
       
       return(list(title = "Apply TPM normalization",
+                  content = content))
+      
+    }
+    else if(input$pca.data.normalization == "deseq2") {
+      
+      content <- tagList()
+      
+      # TODO: Table of conditions & parameters of DESeq2
+      
+      return(list(title = "Apply DESeq2 normalization",
                   content = content))
       
     }

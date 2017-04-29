@@ -6,6 +6,18 @@ library(shiny)
 library(reshape2)
 library(SummarizedExperiment)
 
+#' Returns TRUE if all data in x are integers
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+is.integer <- function(x) {
+  return(all(x == floor(x)))
+}
+
 #' Checks if object is a SummarizedExperiment
 #'
 #' @param object 

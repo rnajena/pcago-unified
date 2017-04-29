@@ -448,3 +448,24 @@ calculateCellVisuals <- function(cells, conditions, condition.visuals) {
               "palette.shapes" = palette.shapes))
   
 }
+
+#' Collapses the conditions for each cell in the condition table
+#' into a string.
+#'
+#' @param condition.table Table that determines if a cell has a condition
+#' @param conditions Vector of condition names that should be considered
+#'
+#' @return Vector of condition names
+#' @export
+#'
+#' @examples
+collapseConditions <- function(condition.table, conditions) {
+  
+  if(length(setdiff(conditions, colnames(condition.table))) > 0) {
+    stop("Conditions do not match condition table!")
+  }
+  
+  return(sapply(rownames(condition.table), function(cell) {
+    return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[cell, c]) c else "" })), collapse = "_"))
+  }))
+}

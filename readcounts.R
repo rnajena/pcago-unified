@@ -96,19 +96,41 @@ importReadcountSample <- function(sample, parameters) {
 #' Applies read count normalization (DeSeq2) to readcounts
 #'
 #' @param readcounts 
+#' @param condition.table Conditions table that associates each cell to the conditions it has
+#' @param selectedn.conditions Vector of conditions that should be used for normalization
 #'
 #' @return
 #' @export
 #'
 #' @examples
-applyReadcountNormalization.DESeq2 <- function(readcounts) {
+applyReadcountNormalization.DESeq2 <- function(readcounts, condition.table, selected.conditions) {
   
   if(!is.SummarizedExperiment(readcounts)) {
     stop("Invalid arguments!")
   }
   
-  stop("Not implemented")
+  progress <- progressNotification("Building DESeq2 data. This will take some time ...")
+  on.exit({
+    removeNotification(progress)
+  })
   
+  # Deseq expects that we assign a condition to each cell
+  # But we store a boolean condition array. Collapse it into strings.
+  collapsed.conditions <- collapseConditions(condition.table, selected.conditions)
+  
+  deseq.coldata <- data.frame(row.names = names(collapsed.conditions), condition = collapsed.conditions)
+  
+  deseq.dataset <- DESeqDataSetFromMatrix(countData = assay(readcounts),
+                                          colData = deseq.coldata,
+                                          design = ~ condition)
+  
+  deseq.obj <- DESeq(deseq.dataset)
+  normalized.counts <- counts(deseq.obj, normalized = T)
+  
+  assay(readcounts) <- normalized.counts
+  
+  # Return the readcounts and the conditions used for normalization
+  return(list(readcounts = readcounts, conditions = deseq.coldata))
 }
 
 #' Applies read count normalization (TPM) to readcounts
@@ -146,7 +168,7 @@ applyReadcountNormalization.TPM <- function(readcounts, mu.fld, sequence.info) {
   counts.tpm <- sweep(counts.rpk, 2, 10e6 / colSums(counts.rpk), "*")
   
   assay(readcounts) <- counts.tpm
-  return(readcounts)
+  return(list(readcounts = readcounts))
   
 }
 
