@@ -1,0 +1,1 @@
+ PCAGO helps you analyzing your RNA-Seq read counts with principal component analysis (PCA). We also included other helpful features like **read count normalization**, downloading **annotations** and **GO terms** for your genes and a tool to find a gene variance cut-off for PCA.

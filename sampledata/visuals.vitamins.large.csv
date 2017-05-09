@@ -1,12 +1,8 @@
-,color,shape,name
-vitd,,16,vitD
-atra,,5,atRA
-n2,,-1,
-n3,,-1,
-n5,,-1,
-n6,,-1,
-asp,#0004FF,-1,A. fumigatus
-can,#09AD00,-1,C. albicans
-eco,#FF00FF,-1,E. coli
-ctr,#FF9900,1,control
-mono6,#999999,15,
+"","name","color","shape"
+"Infection_control","No infection","#E86E1C",-1
+"Infection_asp","A. fumigatus","#0026FF",-1
+"Infection_can","C. albicans","#26BD42",-1
+"Infection_eco","E.coli","#EE00FF",-1
+"Vitamins_control","No treatment","",16
+"Vitamins_atra","atRA","",15
+"Vitamins_vitd","vitD","",17

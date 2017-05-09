@@ -3,6 +3,7 @@
 ## Features
 
 * Help pages
+* About page
 * Read count normalization result plots
 * Custom selectors
 * Annotation overview
@@ -11,9 +12,8 @@
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
-* DeSeq normalization
 * Associated features -> Biotype + Redo how it's read from annotation -> unify!
-
+* Input lag @ visual editor
 
 ## Theory/practice
 
@@ -47,6 +47,7 @@ Problem: Slicing with conditions!
 ## Bugs
 
 * Visual editor color update sometimes not triggering
+* Pointsize error in scatterplot3d (not supported!)
 
 ## Additional notes
 

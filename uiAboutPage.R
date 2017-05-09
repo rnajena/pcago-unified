@@ -4,6 +4,7 @@
 
 library(shiny)
 library(shinyBS)
+source("uiHelper.R")
 
 #' Creates the about page for the UI
 #'
@@ -12,12 +13,12 @@ library(shinyBS)
 #'
 #' @examples
 uiAboutPage <- function() {
-  return(fluidPage(
-    titlePanel("About PCAGO"),
-    
-    verticalLayout(
-      p("PCAGO is a tool to cluster cells based on RNASeq read counts."),
-      fluidRow(style = "text-align: center;", tags$div(class = "col-lg-1 col-centered", style = "display: inline-block;", bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large")))
-    )
-  ))
+  return(tags$div(class = "about-page",
+    tags$div(class="landing-header",
+             tags$img(class = "landing-header-logo", src = "logo.svg"),
+             tags$div(class = "container-fluid landing-header-action",
+                      fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"))),
+                      fluidRow(column(width = 1, offset = 5, bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))))
+    ))
+  )
 }
