@@ -409,6 +409,25 @@ Style for the about page
 .about-page {
 }
 
+.about-page .features .row {
+	margin-top: 30px;
+	padding-bottom: 30px;
+	border-bottom: 1px solid #ddd;
+}
+
+.about-page .features .row-right {
+	text-align: right;
+}
+
+.about-page .features h1 {
+	color: #555;
+}
+
+.about-page .features img {
+	width: 100%;
+	box-shadow: 1px 1px 10px #ddd;
+}
+
 .about-page .landing-header {
 	min-height: 500px;
 	background-image: url("aboutpage/header.jpg");
@@ -416,7 +435,7 @@ Style for the about page
 	margin-left: -15px;
 	margin-right: -15px;
 	margin-top: -25px;
-	padding-top: 30px;
+	padding-top: 60px;
 	color: #555;
 	box-shadow: 0px 5px 5px #ddd;
 	position: relative;

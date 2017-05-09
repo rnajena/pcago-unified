@@ -19,6 +19,7 @@ uiAboutPage <- function() {
              tags$div(class = "container-fluid landing-header-action",
                       fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"))),
                       fluidRow(column(width = 1, offset = 5, bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))))
-    ))
+    ),
+    tags$div(class="features", includeMarkdown("aboutpage/features.md")))
   )
 }
