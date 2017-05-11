@@ -169,7 +169,7 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                           
                                           names(choices) <- c(
                                             if(length(sequence.info.genes) == 0) "Sequence info" else sprintf("Sequence info (%d/%d)", length(sequence.info.genes), length(genes)),
-                                            if(length(feature.genes) == 0) "Associated features" else sprintf("Associated features (%d/%d)", length(feature.genes), length(genes)),
+                                            if(length(feature.genes) == 0) "Biotype" else sprintf("Biotype (%d/%d)", length(feature.genes), length(genes)),
                                             if(length(go.genes) == 0) "GO terms" else sprintf("GO terms (%d/%d)", length(go.genes), length(genes))
                                           )
                                           
@@ -208,10 +208,10 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
       
       {
         unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.features))
-        gene.criteria[["Associated features"]] <- annotation@gene.features@data
+        gene.criteria[["Biotype"]] <- annotation@gene.features@data
         
         if(length(unused.genes) > 0) {
-          gene.criteria[["Associated features"]][["No data"]] <- unused.genes
+          gene.criteria[["Biotype"]][["No data"]] <- unused.genes
         }
       }
       {
@@ -370,6 +370,14 @@ serverReadCountsProcessingOutput <- function(input, readcounts.processed, readco
   
 }
 
+#' Builds the data of the gene variance table.
+#'
+#' @param gene.variances 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 serverGeneVarianceTableData <- function(gene.variances) {
   return(reactive({
     validate(need(gene.variances(), "No annotation available!"))
@@ -384,7 +392,18 @@ serverGeneVarianceTableData <- function(gene.variances) {
   }))
 }
 
+#' Builds the data of the gene annotation table.
+#' This is needed, as annotations are stored to allow quick filtering and not for display
+#'
+#' @param readcounts 
+#' @param gene.info.annotation 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
+  
   return(reactive({
     validate(need(gene.info.annotation(), "No annotation available!"))
     
@@ -399,7 +418,7 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
                         "Start" = rep(NA, length(genes)),
                         "End" = rep(NA, length(genes)),
                         "Length" = rep(NA, length(genes)),
-                        "Features" = rep(NA, length(genes)))
+                        "Biotype" = rep(NA, length(genes)))
     
     sequence.info <- gene.info.annotation()@sequence.info
     features <- gene.info.annotation()@gene.features

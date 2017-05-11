@@ -30,22 +30,16 @@ applyPCA <- function(readcounts, center, scale, relative) {
   
   # Extract the data 
   X <- assay(readcounts)
-  X <- t(X) # We want to do PCA for cells
+  X <- t(X) # Transpose this as our read count matrix as R has dimensions as columns and not as rows (thanks, R!!!)
   
   # Extract the cells for later use
   cells <- colnames(readcounts)
   
-  # PCA works by diagonalizing the covariance matrix by transforming
-  # the data with a transform matrix consisting of the eigenvectors (as rows)
-  # This transformation also maximizes the distance between the data points
-  # and minimizes the error that happens if PCx dimensions are removed.
-  # The eigenvalues are then the variances of the data in PCx direction -> we can rank them
-  # We know how much a gene contributes to PCx just by looking at the values of the corresponding
-  # eigenvector at the index of the gene.
-  # It is important to know that PCA only de*correlates* the data.
-  # Even if decorrelated, it may still be depend on each other
-  
   # Using R's internal function for improved speed (and accuracy as they use SDV)
+  # Caution: R will not consider all eigenvectors (there are thousands of genes)
+  # Theoretically, we need to calculate ALL of them (we then obtain PC1, PC2, ... PCm with m dimensions = genes)
+  # But R will truncate it to PC1, PC2, ... PCn with n data points (if n < m), which is fast.
+  # Don't let this confuse you
   result <- prcomp(X, center = center, scale = scale)
   transformed <- data.frame(result$x, row.names = cells)
   pc.names <- colnames(result$rotation)

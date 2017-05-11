@@ -51,9 +51,9 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   genes <- rownames(readcounts)
  
   annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes)
-  annot.associated.features <- GRanges.extractAssociatedFeaturesAnnotation(gr, genes)
+  annot.biotype <- GRanges.extractBiotypeAnnotation(gr, genes)
   
-  annot <- mergeAnnotation(annot.sequence.info, annot.associated.features)
+  annot <- mergeAnnotation(annot.sequence.info, annot.biotype)
   
   return(annot)
 }

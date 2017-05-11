@@ -55,7 +55,7 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
   
 }
 
-#' Extracts associated features annotation from a GRanges object
+#' Extracts biotype annotation from a GRanges object
 #'
 #' @param gr 
 #' @param genes 
@@ -64,30 +64,16 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
 #' @export
 #'
 #' @examples
-GRanges.extractAssociatedFeaturesAnnotation <- function(gr, genes) {
+GRanges.extractBiotypeAnnotation <- function(gr, genes) {
   
   gff <- mcols(gr)
   
   features <- list()
   
-  for(feature_type in unique(gff$type)) {
+  for(feature_type in unique(gff$biotype)) {
     
-    gene_ids <- c()
-    
-    # Not standardized how those associations are built:
-    # There may be a "Parent" attribute or the gene ID is present for all entries
-    
-    if("Parent" %in% colnames(gff)) {
-      # Use "Parent" attribute
-      ids <- unlist(gff[gff$type == feature_type,"Parent"])
-      gene_ids <- gff[match(ids, gff$ID),"gene_id"]
-      gene_ids <- unique(intersect(gene_ids, genes)) # Reduce to genes that are actually present in requested gene list
-    }
-    else {
-      # Assume gene_id is present everywhere -> just list all gene ids
-      gene_ids <- unlist(gff[gff$type == feature_type,"gene_id"])
-      gene_ids <- unique(intersect(gene_ids, genes))
-    }
+    gene_ids <- unlist(gff[gff$biotype == feature_type,"gene_id"])
+    gene_ids <- unique(intersect(gene_ids, genes))
     
     if(length(gene_ids) > 0) {
       features[[feature_type]] <- gene_ids 

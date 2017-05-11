@@ -13,7 +13,7 @@ annotationHub.databaseChoices <- function(datatype) {
     return(c())
   }
   
-  if(datatype == "sequence.info" || datatype == "associated.features") {
+  if(datatype == "sequence.info" || datatype == "biotype") {
     return(c("", unique(ah$dataprovider[ah$rdataclass == "GRanges"])))
   }
   else {
@@ -33,7 +33,7 @@ annotationHub.speciesChoices <- function(datatype, database) {
     return(c())
   }
   
-  if(datatype == "sequence.info" || datatype == "associated.features") {
+  if(datatype == "sequence.info" || datatype == "biotype") {
     
     choices <- unique(ah$species[ah$rdataclass == "GRanges" & ah$dataprovider == database])
     choices <- na.omit(choices)
@@ -54,7 +54,7 @@ annotationHub.datasetChoices <- function(datatype, database, species) {
     return(c())
   }
   
-  if(datatype == "sequence.info" || datatype == "associated.features") {
+  if(datatype == "sequence.info" || datatype == "biotype") {
     query.results <- AnnotationHub::query(ah, c("GRanges", database, species))
     available.datasets <- mcols(query.results)
     
@@ -76,7 +76,7 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                                            label = "Extract information",
                                                            type = "select",
                                                            select.values = c("Sequence info" = "sequence.info",
-                                                                             "Associated features" = "associated.features")),
+                                                                             "Biotype" = "biotype")),
                                          ImporterParameter(name = "database", 
                                                            label = "Database", 
                                                            type = "select", 
@@ -106,9 +106,9 @@ generateGeneInformation.AnnotationHub <- function(datatype, database, species, d
     gr <- annotationHub.hub()[[dataset]]
     return(GRanges.extractSequenceInfoAnnotation(gr, genes))
   }
-  else if(datatype == "associated.features") {
+  else if(datatype == "biotype") {
     gr <- annotationHub.hub()[[dataset]]
-    return(GRanges.extractAssociatedFeaturesAnnotation(gr, genes))
+    return(GRanges.extractBiotypeAnnotation(gr, genes))
   }
   else {
     stop("Unsupported data type!")

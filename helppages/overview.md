@@ -9,7 +9,7 @@ You can use it to ...
 
 PCAGO provides additional features that lets you do your tasks easier, like ...
 
-* filtering genes by *associated features*, *GO terms* and more
+* filtering genes by *biotype*, *GO terms* and *scaffold*
 * animating the clustering live when less and less variant genes are included
 * importing annotations directly from online databases like Ensembl BioMart
 

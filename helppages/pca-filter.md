@@ -12,7 +12,7 @@ You can add filters by clicking on the filter field and selecting the keywords.
 
 The filter categories are extracted from the gene annotation (see `Data > Annotations` help page).
 
-* **Associated features** (Colored blue)
+* **Biotype** (Colored blue)
 * **GO terms** (Colored green)
 * **Scaffold** (Colored red)
 

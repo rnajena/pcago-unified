@@ -12,7 +12,6 @@
 * Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
-* Associated features -> Biotype + Redo how it's read from annotation -> unify!
 * Input lag @ visual editor
 
 ## Theory/practice

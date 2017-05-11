@@ -6,7 +6,7 @@ to apply additional processing steps and to filter the genes used for the PCA.
 PCAGO differentiates between following annotation types:
 
 * **Sequence info** provides the scaffold, start and stop positions of the gene
-* **Associated features** provides a list of associated feature types like "miRNA" for each gene
+* **Biotype** provides the biotype of this gene
 * **GO terms** provides a list of associated GO terms for each gene
 
 ## Providing annotations

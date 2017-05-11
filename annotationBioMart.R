@@ -73,7 +73,7 @@ getBioMartSequenceInfo <- function(mart, genes) {
 #' @export
 #'
 #' @examples
-getBioMartAssociatedFeatures <- function(mart, genes) {
+getBioMartBiotype <- function(mart, genes) {
   bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "gene_biotype"), 
                        filters = c("ensembl_gene_id"),
                        values = genes, 
@@ -129,7 +129,7 @@ bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                                            type = "select",
                                                            select.values = c("Sequence info" = "sequence.info",
                                                                              "GO terms" = "go.terms",
-                                                                             "Associated features" = "associated.features")),
+                                                                             "Biotype" = "biotype")),
                                          ImporterParameter(name = "database",
                                                            label = "Database",
                                                            type = "select",
@@ -190,17 +190,17 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
                       gene.scaffold = GeneFilter(data = scaffolds)))
     
   }
-  else if(datatype == "associated.features") {
+  else if(datatype == "biotype") {
     
-    associated.features.table <- getBioMartAssociatedFeatures(bio.mart, genes)
+    biotypes.table <- getBioMartBiotype(bio.mart, genes)
     
     # Extract filter
-    associated.features <- list()
+    biotypes <- list()
     for(feature in unique(associated.features.table$type)) {
-      associated.features[[feature]] <- unique(associated.features.table$gene[associated.features.table$type == feature])
+      biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
     }
     
-    return(Annotation(gene.features = GeneFilter(data = associated.features)))
+    return(Annotation(gene.features = GeneFilter(data = biotypes)))
     
   }
   else {

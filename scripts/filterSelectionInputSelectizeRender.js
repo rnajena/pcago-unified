@@ -7,7 +7,7 @@
     var item_label = item.label;
 
 		switch(item_type) {
-		case "Associated features":
+		case "Biotype":
 			bgr_color = "#3498db";
       fgr_color = "#fff";
 			break;
@@ -33,7 +33,7 @@
     var item_label = item.label;
 
 		switch(item_type) {
-		case "Associated features":
+		case "Biotype":
 			bgr_color = "#3498db";
       fgr_color = "#fff";
 			break;
