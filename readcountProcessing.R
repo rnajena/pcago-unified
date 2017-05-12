@@ -83,15 +83,13 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
   }))
 }
 
-readcountProcessing.step.filter <- function(readcounts.processed, genes.filtered) {
+readcountProcessing.step.filter <- function(readcounts.processed, readcounts.filtered, genes.filtered) {
   return(reactive({
-    
-    genes <- intersect(rownames(readcounts.processed()), genes.filtered()$values)
     
     # Summary of selected genes
     genesinfo <- tagList(
-      tags$p(paste(length(genes), "genes selected.")),
-      tags$textarea(paste(genes, collapse = "\n"), readonly = "readonly", style = css(width = "100%",
+      tags$p(paste0(nrow(readcounts.filtered()), "/", nrow(readcounts.processed()), " genes selected.")),
+      tags$textarea(paste(rownames(readcounts.filtered()), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
                                                               height = "200px"))
     )
     
@@ -127,6 +125,33 @@ readcountProcessing.step.filter <- function(readcounts.processed, genes.filtered
   }))
 }
 
+readcountProcessing.step.top.variant <- function(readcounts.filtered, readcounts.top.variant) {
+  return(reactive({
+    
+    # Summary of selected genes
+    genesinfo <- tagList(
+      tags$p(paste0(nrow(readcounts.top.variant()), "/", nrow(readcounts.filtered()), " top variant genes selected.")),
+      tags$textarea(paste(rownames(readcounts.top.variant()), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
+                                                                                                                height = "200px"))
+    )
+    
+    # Give summary of variance
+    var.filtered <- sum(rowVars(assay(readcounts.filtered())))
+    var.top.variant <- sum(rowVars(assay(readcounts.top.variant())))
+    
+    varianceinfo <- tagList(tags$p( paste0( (var.top.variant / var.filtered) * 100, "% of available variance." ) ))
+    
+    # Build final UI
+    content <- tagList(
+      genesinfo,
+      varianceinfo)
+    
+    return(list(title = "Filtered by variance cut-off",
+                content = content))
+    
+  }))
+}
+
 #' Summary of read count processing at the point when all read counts are processed
 #'
 #' @return
@@ -149,8 +174,15 @@ readcountProcessing.at.readcounts.processed <- function(input,
   
 }
 
+#' Summary of read count processing at the point when all read counts have been filtered with annotation criteria
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.at.readcounts.filtered <- function(input, 
                                                        readcounts.processed, 
+                                                       readcounts.filtered,
                                                        readcounts.preprocessing.output, 
                                                        readcounts.normalization.output,
                                                        genes.filtered) {
@@ -158,12 +190,41 @@ readcountProcessing.at.readcounts.filtered <- function(input,
   step.transpose <- readcountProcessing.step.transpose(input, readcounts.processed, readcounts.preprocessing.output)
   step.remove.constant <- readcountProcessing.step.remove.constant(input, readcounts.processed, readcounts.preprocessing.output)
   step.normalization <- readcountProcessing.step.normalization(input, readcounts.normalization.output)
-  step.filter <- readcountProcessing.step.filter(readcounts.processed, genes.filtered)
+  step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
   
   processingStepsWidgetData("readcounts.filtered.steps",
                             step.transpose,
                             step.remove.constant,
                             step.normalization,
                             step.filter)
+  
+}
+
+#' Summary of read count processing at the point when all read counts have been filtered with annotation criteria
+#'
+#' @return
+#' @export
+#'
+#' @examples
+readcountProcessing.at.readcounts.top.variant <- function(input, 
+                                                         readcounts.processed, 
+                                                         readcounts.filtered,
+                                                         readcounts.top.variant,
+                                                         readcounts.preprocessing.output, 
+                                                         readcounts.normalization.output,
+                                                         genes.filtered) {
+  
+  step.transpose <- readcountProcessing.step.transpose(input, readcounts.processed, readcounts.preprocessing.output)
+  step.remove.constant <- readcountProcessing.step.remove.constant(input, readcounts.processed, readcounts.preprocessing.output)
+  step.normalization <- readcountProcessing.step.normalization(input, readcounts.normalization.output)
+  step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
+  step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
+  
+  processingStepsWidgetData("readcounts.top.variant.steps",
+                            step.transpose,
+                            step.remove.constant,
+                            step.normalization,
+                            step.filter,
+                            step.top.variant)
   
 }

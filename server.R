@@ -137,6 +137,14 @@ shinyServer(function(input, output, session) {
                                               readcounts.normalization.output = readcounts.normalization.output)
   readcountProcessing.at.readcounts.filtered(input = input, 
                                              readcounts.processed = readcounts.processed, 
+                                             readcounts.filtered = readcounts.filtered,
+                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
+                                             readcounts.normalization.output = readcounts.normalization.output,
+                                             genes.filtered = genes.filtered)
+  readcountProcessing.at.readcounts.top.variant(input = input, 
+                                             readcounts.processed = readcounts.processed, 
+                                             readcounts.filtered = readcounts.filtered,
+                                             readcounts.top.variant = readcounts.top.variant,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
                                              genes.filtered = genes.filtered)
