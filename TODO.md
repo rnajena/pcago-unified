@@ -13,6 +13,8 @@
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
 * Input lag @ visual editor
+* BioMart: Use GRanges for seqinfo
+* Load annotation from data.frame / csv
 
 ## Theory/practice
 
@@ -47,6 +49,8 @@ Problem: Slicing with conditions!
 
 * Visual editor color update sometimes not triggering
 * Pointsize error in scatterplot3d (not supported!)
+* GRanges sequence info exon info generated without any infos
+* Sequence info intended behavior?
 
 ## Additional notes
 

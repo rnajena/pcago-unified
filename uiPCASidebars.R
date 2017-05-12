@@ -35,9 +35,12 @@ uiPCASidebarData <- function() {
     bsCollapsePanel("Import read counts", 
                     value = "data.readcounts.import",
                     genericImporterInput("pca.data.readcounts.importer")),
-    bsCollapsePanel("Cell annotation",
+    bsCollapsePanel("Import cell annotation",
                     value = "data.cell.annotation",
                     cellConditionImporterUI("conditions.importer")),
+    bsCollapsePanel("Import gene annotation",
+                    value = "data.gene.annotation",
+                    integratingGenericImporterInput("pca.data.annotation.importer")),
     bsCollapsePanel("Read count processing",
                     value = "data.readcounts.processing",
                     checkboxGroupInput("pca.data.readcounts.processing",
@@ -57,15 +60,31 @@ uiPCASidebarData <- function() {
                                                   helpIconText("Considered conditions", "You can choose which available conditions are considered during normalization."), 
                                                   choices = c(),
                                                   multiple = T,
-                                                  options = list(plugins = list("remove_button", "drag_drop"))))),
-  
-    bsCollapsePanel("Gene annotation",
-                    value = "data.gene.annotation",
-                    integratingGenericImporterInput("pca.data.annotation.importer")
+                                                  options = list(plugins = list("remove_button", "drag_drop")))))
+    
                     
     )
-  ))
+  )
   
+}
+
+#' Sidebar for filtering of genes based on various criteria
+#'
+#' @return
+#' @export
+#'
+#' @examples
+uiPCASidebarFilterGenes <- function() {
+  return(bsCollapse(
+    bsCollapsePanel("by annotation",
+                    filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
+                    hDivider(),
+                    textOutput("pca.pca.genes.set.count")),
+    bsCollapsePanel("by gene variance",
+                    plotGeneVarianceRangePlotUI("pca.pca.genes.count.variance.plot", height = "120px"),
+                    extendedSliderInput("pca.genes.count", "Gene variance cut-off")
+                    
+    )))
 }
 
 #' Creates definition for the "PCA" sidebar
@@ -79,22 +98,15 @@ uiPCASidebarData <- function() {
 uiPCASidebarPCA <- function() {
   
   return(bsCollapse(
-    bsCollapsePanel("Filter genes",
-                    filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
-                    hDivider(),
-                    textOutput("pca.pca.genes.set.count")),
-    bsCollapsePanel("Gene count",
-                    plotGeneVarianceRangePlotUI("pca.pca.genes.count.variance.plot", height = "120px"),
-                    extendedSliderInput("pca.genes.count", "Gene count")
-                    
-                    ),
-    bsCollapsePanel("Settings",
+    bsCollapsePanel("Data processing",
                     checkboxInput("pca.pca.settings.center", 
                                   helpIconText("Center data", includeMarkdown("helptooltips/pca-pca-settings-center.md")), 
                                   value = T),
                     checkboxInput("pca.pca.settings.scale", 
                                   helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), 
-                                  value = T),
+                                  value = T)
+                   ),
+    bsCollapsePanel("Output transformations",
                     radioButtons("pca.pca.settings.relative", 
                                  helpIconText("Relative cell positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
                                  choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global")))
@@ -121,7 +133,7 @@ uiPCASidebarPlot <- function() {
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
-    conditionalPanel("input['pca.nav'] == 'pca.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.conditions.plot")),
+    conditionalPanel("input['pca.nav'] == 'pca.cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.conditions.plot")),
     # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'", plotGeneVariancePlotSettingsUI("pca.genes.variances.plot")),
     # Gene variances plot (filtered genes)

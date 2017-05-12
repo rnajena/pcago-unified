@@ -24,12 +24,16 @@ GeneFilter <- setClass(
   ),
   validity = function(object) {
     
-    if(!is.null(names(object@data)) && !is.character(names(object@data))) {
-      return("Keys must be strings!")
+    if(length(object@data) == 0) {
+      return(T)
     }
     
-    if(any(unlist(lapply(object@data, function(x) { !is.character(x) })))) {
-      return("Data must have following structure: Filter maps to vector of gene names")
+    if(!is.null(names(object@data)) && (!is.character(names(object@data))) || any(is.na(names(object@data)))) {
+      return("Keys must be strings and not NA!")
+    }
+    
+    if(any(unlist(lapply(object@data, function(x) { !is.character(x)  || is.na(x) })))) {
+      return("Data must have following structure: Filter maps to vector of gene names that are not NA!")
     }
     
     return(T)

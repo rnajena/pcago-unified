@@ -5,6 +5,7 @@
 library(shiny)
 library(biomaRt)
 library(GO.db)
+library(GenomicRanges)
 
 #' Returns a table with gene id, GO term
 #' Note that a gene can have multiple GO terms, so there can be multiple
@@ -46,7 +47,15 @@ getBioMartGOTerms <- function(mart, genes) {
 #'
 #' @examples
 getBioMartSequenceInfo <- function(mart, genes) {
-  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "chromosome_name", "start_position", "end_position"), 
+  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", 
+                                      "chromosome_name", 
+                                      "start_position", 
+                                      "end_position",
+                                      "ensembl_exon_id",
+                                      "exon_chrom_start",
+                                      "exon_chrom_end",
+                                      "rank",
+                                      "external_gene_name"), 
                        filters = c("ensembl_gene_id"),
                        values = genes, 
                        mart = mart)
@@ -55,13 +64,25 @@ getBioMartSequenceInfo <- function(mart, genes) {
     return(NULL)
   }
   
-  colnames(bm) <- c("gene","scaffold", "start_position", "end_position")
-  rownames(bm) <- bm$gene
-  bm <- bm[,c("scaffold", "start_position", "end_position")]
-  bm <- na.omit(bm)
-  bm$length <- abs(bm$start_position - bm$end_position + 1)
+  # Build GRanges and parse with GRanges sequence info tool
+  bm.genes <- bm[match(unique(bm$ensembl_gene_id), bm$ensembl_gene_id),]
+  gr.genes <- GRanges(seqnames = bm.genes$chromosome_name, 
+                      ranges = IRanges(start = bm.genes$start_position, 
+                                       end = bm.genes$end_position))
+  mcols(gr.genes) <- data.frame(gene_id = bm.genes$ensembl_gene_id,
+                                type = rep("gene", nrow(bm.genes)))
   
-  return(bm)
+  gr.exons <- GRanges(seqnames = bm$chromosome_name, 
+                      ranges = IRanges(start = bm$exon_chrom_start, 
+                                       end = bm$exon_chrom_end))
+  mcols(gr.exons) <- data.frame(gene_id = bm$ensembl_gene_id,
+                                type = rep("exon", nrow(bm)))
+  
+  gr <- gr.genes
+  
+  stop("Not implemented!")
+  
+  return(gr)
 }
 
 #' Returns a table with gene and gene 
@@ -200,7 +221,7 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
       biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
     }
     
-    return(Annotation(gene.features = GeneFilter(data = biotypes)))
+    return(Annotation(gene.biotype = GeneFilter(data = biotypes)))
     
   }
   else {

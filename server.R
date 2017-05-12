@@ -117,8 +117,8 @@ shinyServer(function(input, output, session) {
   plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
   
   # Cell condition assingments
-  downloadableDataTable("conditions", export.filename = "conditions", data = conditions)
-  plotConditionsVennDiagramPlot("pca.conditions.plot", conditions)
+  downloadableDataTable("pca.cells.conditions", export.filename = "conditions", data = conditions)
+  plotConditionsVennDiagramPlot("pca.cells.conditions.plot", conditions)
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.info.annotation))

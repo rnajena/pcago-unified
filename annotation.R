@@ -19,7 +19,9 @@ source("annotationHub.R")
 
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
-                                                   label = "Ensembl GFF"))
+                                                   label = "Ensembl GFF (*.gff3)"),
+                                     ImporterEntry(name = "pcago_csv",
+                                                   label = "Tabular (*.csv)"))
 supportedAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
@@ -56,6 +58,27 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   annot <- mergeAnnotation(annot.sequence.info, annot.biotype)
   
   return(annot)
+}
+
+#' Imports the annotation from a table built by the annotation class
+#'
+#' @param filehandle 
+#' @param readcounts 
+#' @param sep 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcounts, sep = ",") {
+  
+  if(!is.SummarizedExperiment(readcounts)) {
+    stop("No readcounts to annotate!")
+  }
+  if(missing(filehandle)) {
+    stop("Invalid arguments!")
+  }
+  
 }
 
 #' Extracts gene information from an annotation

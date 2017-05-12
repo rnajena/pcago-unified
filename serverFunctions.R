@@ -164,7 +164,7 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                           }
                                           
                                           sequence.info.genes <- intersect(rownames(output@sequence.info), genes)
-                                          feature.genes <- intersect(geneFilterGenes(output@gene.features), genes)
+                                          feature.genes <- intersect(geneFilterGenes(output@gene.biotype), genes)
                                           go.genes <- intersect(geneFilterGenes(output@gene.go.terms), genes)
                                           
                                           names(choices) <- c(
@@ -207,8 +207,8 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
       annotation <- annotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
       
       {
-        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.features))
-        gene.criteria[["Biotype"]] <- annotation@gene.features@data
+        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))
+        gene.criteria[["Biotype"]] <- annotation@gene.biotype@data
         
         if(length(unused.genes) > 0) {
           gene.criteria[["Biotype"]][["No data"]] <- unused.genes
@@ -412,34 +412,7 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
       removeNotification(notification.id)
     })
     
-    genes <- rownames(readcounts())
-    table <- data.frame(row.names = genes,
-                        "Scaffold" = rep(NA, length(genes)),
-                        "Start" = rep(NA, length(genes)),
-                        "End" = rep(NA, length(genes)),
-                        "Length" = rep(NA, length(genes)),
-                        "Biotype" = rep(NA, length(genes)))
-    
-    sequence.info <- gene.info.annotation()@sequence.info
-    features <- gene.info.annotation()@gene.features
-    features.inv <- invertGeneFilter(features)
-    go.terms <- gene.info.annotation()@gene.go.terms
-    go.terms.inv <- invertGeneFilter(go.terms)
-    
-    if(nrow(sequence.info) > 0) {
-      indices <- match(genes, rownames(sequence.info))
-      
-      table$Scaffold <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "scaffold"] })
-      table$Start <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "start_position"] })
-      table$End <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "end_position"] })
-      table$Length <- sapply(indices, function(i) { if(is.na(i)) NA else sequence.info[i, "length"] })
-    }
-    
-    table$Features <- sapply(genes, function(x) { if(x %in% names(features.inv)) paste(features.inv[[x]], collapse = "; ") else NA })
-    table[["GO terms"]] <- sapply(genes, function(x) { if(x %in% names(go.terms.inv)) paste(go.terms.inv[[x]], collapse = "; ") else NA })
-    
-    
-    return(table)
+    return(annotationToTable(gene.info.annotation()))
     
   }))
 }

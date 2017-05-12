@@ -28,6 +28,7 @@ uiPCAPage <- function() {
   return(sidebarLayout(
     sidebarPanel(tabsetPanel(
       tabPanel("Data", uiPCASidebarData()),
+      tabPanel("Filter genes", uiPCASidebarFilterGenes()),
       tabPanel("PCA", uiPCASidebarPCA()),
       tabPanel("Plot", uiPCASidebarPlot()),
       type = "pills"
@@ -60,10 +61,12 @@ uiPCAPage <- function() {
                                              plotGeneVariancePlotUI("pca.genes.variances.filtered.plot")
                                              ),
                                     "----",
-                                    "Conditions",
-                                    tabPanel("Cell condition assignments", value = "pca.conditions",
-                                             plotConditionsVennDiagramPlotUI("pca.conditions.plot"),
-                                             downloadableDataTableOutput("conditions"))
+                                    "Cells",
+                                    tabPanel("Conditions", value = "pca.cells.conditions",
+                                             plotConditionsVennDiagramPlotUI("pca.cells.conditions.plot"),
+                                             downloadableDataTableOutput("pca.cells.conditions")),
+                                    tabPanel("Annotation", value = "pca.conditions",
+                                             downloadableDataTableOutput("pca.cells.annotation"))
                                     ),
                          navbarMenu("PCA",
                                     "Principal components",

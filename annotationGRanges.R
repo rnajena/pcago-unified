@@ -3,6 +3,7 @@
 #' 
 
 library(AnnotationDbi)
+library(GenomicFeatures)
 
 #' Extracts sequence info annotation and scaffold filter from a GRanges object
 #'
@@ -37,17 +38,31 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
     return(Annotation())
   }
   
+  # Extract available info directly from GRanges
+  
   sequence.info <- data.frame(row.names = genes,
                               scaffold = as.vector(seqnames(gr)[meta.indices]),
                               start_position = start(gr)[meta.indices],
                               end_position = end(gr)[meta.indices],
                               length = width(gr)[meta.indices],
+                              exonlength = rep(NA, length(genes)),
                               stringsAsFactors = F)
+  
+  # For normalization we need the exonic length
+  # https://www.biostars.org/p/83901/
+  txdb <- suppressWarnings(makeTxDbFromGRanges(gr))
+  exons.list.per.gene <- exonsBy(txdb,by="gene")
+  exonic.gene.sizes <- sum(width(reduce(exons.list.per.gene)))
+  
+  #browser()
+  
+  found.genes <- mcols(gr)[match(names(exonic.gene.sizes), gr$Name), "gene_id"]
+  sequence.info[found.genes, "exonlength"] <- exonic.gene.sizes # Txdb uses name instead of gene_id
   
   # As we have sequence info, extract scaffold filter
   scaffolds <- list()
-  for(scaffold in unique(sequence.info$scaffold)) {
-    scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
+  for(scaffold in na.omit(unique(sequence.info$scaffold))) {
+    scaffolds[[scaffold]] <- na.omit(rownames(sequence.info)[sequence.info$scaffold == scaffold])
   }
   
   return(Annotation(sequence.info = sequence.info, 
@@ -80,6 +95,6 @@ GRanges.extractBiotypeAnnotation <- function(gr, genes) {
     }
   }
   
-  return(Annotation(gene.features = GeneFilter(data = features)))
+  return(Annotation(gene.biotype = GeneFilter(data = features)))
   
 }
