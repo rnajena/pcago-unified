@@ -37,8 +37,7 @@ source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
-source("processingReadcountProcessing.R")
-source("processingGeneFilter.R")
+source("readcountProcessing.R")
 
 shinyServer(function(input, output, session) {
   
@@ -132,8 +131,17 @@ shinyServer(function(input, output, session) {
   })
  
   # Read count processing widget output
-  readcountProcessing.at.readcounts.processed(input, readcounts.processed, readcounts.preprocessing.output, readcounts.normalization.output)
+  readcountProcessing.at.readcounts.processed(input = input, 
+                                              readcounts.processed = readcounts.processed, 
+                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
+                                              readcounts.normalization.output = readcounts.normalization.output)
+  readcountProcessing.at.readcounts.filtered(input = input, 
+                                             readcounts.processed = readcounts.processed, 
+                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
+                                             readcounts.normalization.output = readcounts.normalization.output,
+                                             genes.filtered = genes.filtered)
   
+  # Fill tables & plots
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
   downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))

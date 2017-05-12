@@ -252,6 +252,10 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
 serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
   return(reactive({
     
+    validate(
+      need(genes.filtered(), "No genes selected!"),
+      need(length(genes.filtered()$values) > 0, "No genes selected!"))
+    
     keep.genes <- rownames(readcounts.processed())
     keep.genes <- intersect(keep.genes, genes.filtered()$values)
     
