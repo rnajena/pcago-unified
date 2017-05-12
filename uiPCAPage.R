@@ -56,11 +56,14 @@ uiPCAPage <- function() {
                                     "Genes",
                                     tabPanel("Annotation", value = "pca.genes.annotation",
                                              downloadableDataTableOutput("genes.annotation")),
-                                    tabPanel("Variances", value = "pca.genes.variances",
+                                    tabPanel("Variances (Processed counts)", value = "pca.genes.variances",
+                                             processingStepsWidgetUI("genes.variance.processing", "Processing overview"),
                                              plotGeneVariancePlotUI("pca.genes.variances.plot"),
                                              downloadableDataTableOutput("genes.variance")),
-                                    tabPanel("Variances (filtered)", value = "pca.genes.variances.filtered",
-                                             plotGeneVariancePlotUI("pca.genes.variances.filtered.plot")
+                                    tabPanel("Variances (Filtered counts)", value = "pca.genes.variances.filtered",
+                                             processingStepsWidgetUI("genes.variance.filtered.processing", "Processing overview"),
+                                             plotGeneVariancePlotUI("pca.genes.variances.filtered.plot"),
+                                             downloadableDataTableOutput("genes.variance.filtered")
                                              ),
                                     "----",
                                     "Cells",

@@ -4,16 +4,15 @@
     <div class = "col-md-8">
       <h1>Import and process your data</h1>
       Upload your read count data or choose one of our example data sets. If your data is not normalized,
-      you can use let our app do the normalization for you (TPM or DESeq2). Setup the cell conditions
-      and you
+      you can apply read count normalization with DESeq2 or TPM directly within the app.
+      You can view and export all generated data, as well as reports about the processing.
     </div>
   </div>
   <div class="row row-right">
     <div class = "col-md-8">
       <h1>Select the most interesting genes</h1>
-      Filter only genes that are interesting for your analysis. You can either upload
-      an annotation file or directly pull data from online databases such as Ensembl BioMart.
-      We also included support for filtering by associated GO terms.
+      You can filter the genes by scaffold, biotype or GO terms. Just upload an annotation or use the integrated feature
+      to extract data from online databases.
     </div>
     <div class = "col-md-4"><img src="aboutpage/annotations_thumb.jpg"/></div>
   </div>

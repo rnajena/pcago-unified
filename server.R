@@ -122,6 +122,7 @@ shinyServer(function(input, output, session) {
   plotConditionsVennDiagramPlot("pca.cells.conditions.plot", conditions)
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
+  downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))
   downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.info.annotation))
   
   # Gene filtering

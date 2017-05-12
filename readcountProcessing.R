@@ -10,6 +10,36 @@
 source("widgetProcessingSteps.R")
 library(htmltools)
 
+#' Returns information that input read counts are used
+#'
+#' @return
+#' @export
+#'
+#' @examples
+readcountProcessing.step.input.readcounts <- function() {
+  return(reactive({
+    return(list(
+      title = "Raw read counts",
+      content = "Processing begins using the raw read counts."
+    ))
+  }))
+}
+
+#' Returns information that variances of read counts are calculated
+#'
+#' @return
+#' @export
+#'
+#' @examples
+readcountProcessing.step.calculate.variance <- function() {
+  return(reactive({
+    return(list(
+      title = "Calculate gene variances",
+      content = "Calculate variance for each gene in read count table."
+    ))
+  }))
+}
+
 #' Returns information about read count pre-processing step: Transpose matrix
 #'
 #' @param input 
@@ -187,7 +217,7 @@ readcountProcessing.step.top.variant <- function(readcounts.filtered, readcounts
     var.filtered <- sum(rowVars(assay(readcounts.filtered())))
     var.top.variant <- sum(rowVars(assay(readcounts.top.variant())))
     
-    varianceinfo <- tagList(tags$p( paste0( (var.top.variant / var.filtered) * 100, "% of available variance." ) ))
+    varianceinfo <- tagList(tags$p( paste0( format((var.top.variant / var.filtered) * 100, digits = 2, scientific=F), "% of available variance." ) ))
     
     # Build final UI
     content <- tagList(
@@ -216,9 +246,16 @@ readcountProcessing.at.readcounts.processed <- function(input,
   step.normalization <- readcountProcessing.step.normalization(input, readcounts.normalization.output)
   
   processingStepsWidgetData("readcounts.processing.steps",
+                            readcountProcessing.step.input.readcounts(),
                             step.transpose,
                             step.remove.constant,
                             step.normalization)
+  processingStepsWidgetData("genes.variance.processing",
+                            readcountProcessing.step.input.readcounts(),
+                            step.transpose,
+                            step.remove.constant,
+                            step.normalization,
+                            readcountProcessing.step.calculate.variance())
   
 }
 
@@ -241,10 +278,18 @@ readcountProcessing.at.readcounts.filtered <- function(input,
   step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
   
   processingStepsWidgetData("readcounts.filtered.steps",
+                            readcountProcessing.step.input.readcounts(),
                             step.transpose,
                             step.remove.constant,
                             step.normalization,
                             step.filter)
+  processingStepsWidgetData("genes.variance.filtered.processing",
+                            readcountProcessing.step.input.readcounts(),
+                            step.transpose,
+                            step.remove.constant,
+                            step.normalization,
+                            step.filter,
+                            readcountProcessing.step.calculate.variance())
   
 }
 
@@ -269,6 +314,7 @@ readcountProcessing.at.readcounts.top.variant <- function(input,
   step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
   
   processingStepsWidgetData("readcounts.top.variant.steps",
+                            readcountProcessing.step.input.readcounts(),
                             step.transpose,
                             step.remove.constant,
                             step.normalization,
