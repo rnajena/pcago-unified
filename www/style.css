@@ -399,8 +399,16 @@
 * Style for processing steps widget
 */
 
-/*.processing-steps-widget .shiny-html-output > .tabbable > ul > li {
-}*/
+.processing-steps-widget h2 {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.processing-steps-widget h3 {
+	font-size: 14px;
+	font-weight: bold;
+	color: #555;
+}
 
 /*
 Style for the about page

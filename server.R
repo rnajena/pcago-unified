@@ -37,6 +37,8 @@ source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
+source("processingReadcountProcessing.R")
+source("processingGeneFilter.R")
 
 shinyServer(function(input, output, session) {
   
@@ -128,13 +130,9 @@ shinyServer(function(input, output, session) {
     validate(need(readcounts.filtered(), "0 genes selected"))
     return(paste(nrow(readcounts.filtered()), "genes selected"))
   })
-  
-  # output$readcounts.processing.steps <- renderUI(serverReadCountsProcessingOutput(
-  #   input,
-  #   readcounts.processed,
-  #   readcounts.processing.output
-  # ))
-  serverReadCountsProcessingOutput(input, readcounts.processed, readcounts.preprocessing.output, readcounts.normalization.output)
+ 
+  # Read count processing widget output
+  readcountProcessing.at.readcounts.processed(input, readcounts.processed, readcounts.preprocessing.output, readcounts.normalization.output)
   
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))

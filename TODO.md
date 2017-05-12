@@ -9,18 +9,18 @@
 * Annotation overview
 * Better processing view
 * SMPFPP server implementation
-* Use SummarizedExperiment instead of read count data frame + sequence info
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
 * Input lag @ visual editor
 * BioMart: Use GRanges for seqinfo
 * Load annotation from data.frame / csv
+* Document: annotation from data frame
 
 ## Theory/practice
 
 ### Which genes are relevant?
 
-Already known to be useful: Gene variance as main criterium
+Already known to be useful: Gene variance as main criterion
 Where to set cutoff?
 
 * PCA transformed change rate (directly related to variance? Theory behind PCA?)
@@ -34,20 +34,10 @@ Where to set cutoff?
 * Improve performance
 * Better variable names
 
-### SummarizedExperiment
-
-Switch to SummarizedExperiment.
-
-Problem: How to include annotations besides GRanges?
-Problem: Slicing with conditions!
-
-* Done: Readcounts -> SummarizedExperiment
-* Pull conditions into SummarizedExperiment -> Pull into colData
-* Pull annotations into SummarizedExperiment
-
 ## Bugs
 
 * Visual editor color update sometimes not triggering
+* Visual editor input lag due to reactivity
 * Pointsize error in scatterplot3d (not supported!)
 * GRanges sequence info exon info generated without any infos
 * Sequence info intended behavior?

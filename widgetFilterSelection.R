@@ -121,7 +121,11 @@ filterSelectionValues_ <- function(input, output, session, values) {
     
   })
   
-  return(reactive( { list(values = selected.values(), keys = selected.keys() ) } ))
+  return(reactive( { list(values = selected.values(), 
+                          keys = selected.keys(), 
+                          operation = input$operation, 
+                          input = input$values,
+                          invert = input$invert.selection ) } ))
   
 }
 
