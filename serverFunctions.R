@@ -288,7 +288,10 @@ serverPCA <- function(input, readcounts.top.variant) {
       need(!scale || no.constant, "Constant read count genes must be removed for scaling!")
     )
     
-    applyPCA(readcounts.top.variant(), center = center, scale = scale, relative = relative) 
+    return(applyPCA(readcounts.top.variant(), 
+                    center = center, 
+                    scale = scale, 
+                    relative = relative))
     
   }))
   

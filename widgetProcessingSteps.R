@@ -17,7 +17,20 @@ processingStepsWidgetUI <- function(id, title) {
   
   ns <- NS(id)
   
-  return(tags$div(class = "processing-steps-widget", bsCollapsePanel(title, uiOutput(ns("steps.ui")))))
+  export.buttons <- tagList(downloadButton(ns("export.html"), label = "as *.html"))
+  export.dropdown <- dropdownButton(ns("export"), "Export report", export.buttons, icon = icon("download"))
+  showdetails <- bsButton(ns("showdetails"), "Show details", type = "toggle", icon = icon("list-ul"))
+  
+  return(tags$div(class = "processing-steps-widget", headerPanel(header = tagList(export.dropdown,
+                                                                                  showdetails),
+                                                                 uiOutput(ns("steps.ui")))))
+  
+  # titlewidget <- tags$div(class = "header", title, export)
+  # 
+  # return(tags$div(class = "processing-steps-widget", bsCollapsePanel(title = title,
+  #                                                                    uiOutput(ns("steps.ui")),
+  #                                                                    hDivider(),
+  #                                                                    export)))
   
 }
 
@@ -39,6 +52,7 @@ processingStepsWidgetData_ <- function(input, output, session, ...) {
   output$steps.ui <- renderUI({
     
     steps <- list()
+    steps.titles <- c()
     
     for(processing.output in list(...)) {
       
@@ -47,15 +61,44 @@ processingStepsWidgetData_ <- function(input, output, session, ...) {
       if(!is.null(output)) {
         
         title <- paste0(length(steps) + 1, ". ", output$title)
-        steps[[length(steps) + 1]] <- tabPanel(title, wellPanel(output$content), icon = icon("chevron-right"))
+        content <- if(input$showdetails) wellPanel(output$content) else tags$div()
         
+        steps[[length(steps) + 1]] <- tabPanel(title, content, icon = icon("chevron-right"))
+        steps.titles[length(steps.titles) + 1] <- title
       }
       
     }
     
     parameters <- steps
     parameters$type <- "pills"
+    parameters$selected <- if(length(steps.titles) > 0) steps.titles[length(steps.titles)] else NULL
     return(do.call(tabsetPanel, parameters))
+    
+  })
+  
+  output$export.html <- downloadHandler("report.html", function(filename) {
+    
+    steps <- tagList()
+    
+    for(processing.output in list(...)) {
+      
+      output <- processing.output()
+      
+      if(!is.null(output)) {
+        
+        title <- paste0(length(steps) + 1, ". ", output$title)
+        steps <- tagAppendChild(steps, h1(title))
+        steps <- tagAppendChild(steps, output$content)
+      }
+      
+    }
+    
+    conn <- file(filename)
+    on.exit({
+      close(conn)
+    })
+    
+    writeLines(paste(steps), conn)
     
   })
   

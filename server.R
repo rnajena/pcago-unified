@@ -42,7 +42,7 @@ source("readcountProcessing.R")
 shinyServer(function(input, output, session) {
   
   # Read counts
-  readcounts <- genericImporterData("pca.data.readcounts.importer", 
+  readcounts.raw <- genericImporterData("pca.data.readcounts.importer", 
                                     importers = reactive(supportedReadcountImporters),
                                     samples = reactive(availableReadcountSamples),
                                     generators = reactive(supportedReadcountGenerators),
@@ -50,7 +50,7 @@ shinyServer(function(input, output, session) {
                                     exprsample = importReadcountSample)
   
   # Readcount processing
-  readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts, input)
+  readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
   
   #' Build a list of all visual parameters
@@ -133,22 +133,34 @@ shinyServer(function(input, output, session) {
  
   # Read count processing widget output
   readcountProcessing.at.readcounts.processed(input = input, 
+                                              readcounts.raw = readcounts.raw,
                                               readcounts.processed = readcounts.processed, 
                                               readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                               readcounts.normalization.output = readcounts.normalization.output)
   readcountProcessing.at.readcounts.filtered(input = input, 
+                                             readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
                                              readcounts.filtered = readcounts.filtered,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
                                              genes.filtered = genes.filtered)
   readcountProcessing.at.readcounts.top.variant(input = input, 
+                                                readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
                                              readcounts.filtered = readcounts.filtered,
                                              readcounts.top.variant = readcounts.top.variant,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
                                              genes.filtered = genes.filtered)
+  readcountProcessing.at.pca(input = input, 
+                             readcounts.raw = readcounts.raw,
+                            readcounts.processed = readcounts.processed, 
+                            readcounts.filtered = readcounts.filtered,
+                            readcounts.top.variant = readcounts.top.variant,
+                            readcounts.preprocessing.output = readcounts.preprocessing.output, 
+                            readcounts.normalization.output = readcounts.normalization.output,
+                            genes.filtered = genes.filtered,
+                             pca = pca)
   
   # Fill tables & plots
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
