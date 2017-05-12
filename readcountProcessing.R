@@ -10,6 +10,16 @@
 source("widgetProcessingSteps.R")
 library(htmltools)
 
+#' Returns information about read count pre-processing step: Transpose matrix
+#'
+#' @param input 
+#' @param readcounts.processed 
+#' @param readcounts.preprocessing.output 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.step.transpose <- function(input, readcounts.processed, readcounts.preprocessing.output) {
   return(reactive({
     validate(need(readcounts.processed(), "No processed read counts available."),
@@ -27,6 +37,16 @@ readcountProcessing.step.transpose <- function(input, readcounts.processed, read
   }))
 }
 
+#' Returns information about read count pre-processing step: Remove constant reads
+#'
+#' @param input 
+#' @param readcounts.processed 
+#' @param readcounts.preprocessing.output 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.step.remove.constant <- function(input, readcounts.processed, readcounts.preprocessing.output) {
   return(reactive({
     
@@ -53,6 +73,15 @@ readcountProcessing.step.remove.constant <- function(input, readcounts.processed
   }))
 }
 
+#' Returns information about normalizing read counts
+#'
+#' @param input 
+#' @param readcounts.normalization.output 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.step.normalization <- function(input, readcounts.normalization.output) {
   return(reactive({
     
@@ -83,6 +112,16 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
   }))
 }
 
+#' Returns information about filtering with annotation criteria
+#'
+#' @param readcounts.processed 
+#' @param readcounts.filtered 
+#' @param genes.filtered 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.step.filter <- function(readcounts.processed, readcounts.filtered, genes.filtered) {
   return(reactive({
     
@@ -125,6 +164,15 @@ readcountProcessing.step.filter <- function(readcounts.processed, readcounts.fil
   }))
 }
 
+#' Returns information about filtering by a variance cut-off
+#'
+#' @param readcounts.filtered 
+#' @param readcounts.top.variant 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 readcountProcessing.step.top.variant <- function(readcounts.filtered, readcounts.top.variant) {
   return(reactive({
     
