@@ -7,7 +7,6 @@
 * Read count normalization result plots
 * Custom selectors
 * Annotation overview
-* Better processing view
 * SMPFPP server implementation
 * TPM normalization: Processing steps should give info!
 * TPM normalization is wrong; update it
@@ -41,6 +40,7 @@ Where to set cutoff?
 * Pointsize error in scatterplot3d (not supported!)
 * GRanges sequence info exon info generated without any infos
 * Sequence info intended behavior?
+* Cell conditions venn diagram etc. broken
 
 ## Additional notes
 

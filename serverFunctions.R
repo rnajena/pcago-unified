@@ -1,8 +1,9 @@
 library(shiny)
 
 source("readcounts.R")
-source("annotation.R")
-source("conditions.R")
+source("geneAnnotation.R")
+source("cellAnnotation.R")
+source("cellAnnotationVisuals.R")
 source("pca.R")
 source("widgetCellConditionImporter.R")
 
@@ -148,7 +149,7 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                           return(generateGeneInformation(generator, parameters, readcounts()))
                                         },
                                         exprintegrate = function(data, callback) {
-                                          output <- Annotation()
+                                          output <- GeneAnnotation()
                                           genes <- rownames(readcounts())
                                           
                                           choices = c("sequence.info",
@@ -159,7 +160,7 @@ serverGeneInfoAnnotation <- function(readcounts) {
                                           # Merge data into output
                                           for(current.data in data) {
                                             if(!is.null(data)) {
-                                              output <- mergeAnnotation(output, current.data)
+                                              output <- mergeGeneAnnotation(output, current.data)
                                             }
                                           }
                                           
@@ -204,7 +205,7 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
     if(!is.null(gene.info.annotation())) {
       
       annotation <- gene.info.annotation()
-      annotation <- annotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
+      annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
       
       {
         unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))

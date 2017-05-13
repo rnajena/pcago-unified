@@ -16,8 +16,8 @@ source("classGeneFilter.R")
 #' @export
 #'
 #' @examples
-Annotation <- setClass(
-  "Annotation",
+GeneAnnotation <- setClass(
+  "GeneAnnotation",
   slots = signature(
     sequence.info = "data.frame",
     gene.biotype = "GeneFilter",
@@ -42,7 +42,7 @@ Annotation <- setClass(
 
 #' Loads an annotation from a data frame
 #'
-#' @param object Annotation object
+#' @param object GeneAnnotation object
 #'
 #' @return
 #' @export
@@ -65,21 +65,21 @@ setMethod(f = "annotationFromTable",
 
 #' Returns a data frame that contains the annotation data
 #'
-#' @param object Annotation object
+#' @param object GeneAnnotation object
 #'
 #' @return
 #' @export
-#' @rdname annotationToTable
+#' @rdname geneAnnotationToTable
 #'
 #' @examples
-setGeneric(name = "annotationToTable",
+setGeneric(name = "geneAnnotationToTable",
            def = function(object) {
-             standardGeneric("annotationToTable")
+             standardGeneric("geneAnnotationToTable")
            })
 
-#' @rdname annotationToTable
-setMethod(f = "annotationToTable",
-          signature = signature(object = "Annotation"),
+#' @rdname geneAnnotationToTable
+setMethod(f = "geneAnnotationToTable",
+          signature = signature(object = "GeneAnnotation"),
           definition = function(object) {
             
             genes <- unique(c(rownames(object@sequence.info),
@@ -122,24 +122,24 @@ setMethod(f = "annotationToTable",
             
           })
 
-#' Merges two Annotation objects
+#' Merges two GeneAnnotation objects
 #'
-#' @param object1 Annotation object
-#' @param object2 Annotation object
+#' @param object1 GeneAnnotation object
+#' @param object2 GeneAnnotation object
 #'
 #' @return
 #' @export
-#' @rdname mergeAnnotation
+#' @rdname mergeGeneAnnotation
 #'
 #' @examples
-setGeneric(name = "mergeAnnotation",
+setGeneric(name = "mergeGeneAnnotation",
            def = function(object1, object2) {
-             standardGeneric("mergeAnnotation")
+             standardGeneric("mergeGeneAnnotation")
            })
 
-#' @rdname mergeAnnotation
-setMethod(f = "mergeAnnotation",
-          signature = signature(object1 = "Annotation", object2 = "Annotation"),
+#' @rdname mergeGeneAnnotation
+setMethod(f = "mergeGeneAnnotation",
+          signature = signature(object1 = "GeneAnnotation", object2 = "GeneAnnotation"),
           definition = function(object1, object2) {
             
             
@@ -171,24 +171,24 @@ setMethod(f = "mergeAnnotation",
            
           })
 
-#' Returns a new Annotation object that only contains the genes defined in the restrict.genes vector
+#' Returns a new GeneAnnotation object that only contains the genes defined in the restrict.genes vector
 #'
-#' @param object Annotation object
+#' @param object GeneAnnotation object
 #' @param restrict.gene Vector of gene names
 #'
 #' @return
 #' @export
-#' @rdname annotationRestrictToGenes
+#' @rdname geneAnnotationRestrictToGenes
 #'
 #' @examples
-setGeneric(name = "annotationRestrictToGenes",
+setGeneric(name = "geneAnnotationRestrictToGenes",
            def = function(object, restrict.gene) {
-             standardGeneric("annotationRestrictToGenes")
+             standardGeneric("geneAnnotationRestrictToGenes")
            })
 
-#' @rdname annotationRestrictToGenes
-setMethod(f = "annotationRestrictToGenes",
-          signature = signature(object = "Annotation", restrict.gene = "character"),
+#' @rdname geneAnnotationRestrictToGenes
+setMethod(f = "geneAnnotationRestrictToGenes",
+          signature = signature(object = "GeneAnnotation", restrict.gene = "character"),
           definition = function(object, restrict.gene) {
             
             if(nrow(object@sequence.info) > 0) {

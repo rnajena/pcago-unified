@@ -191,7 +191,7 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
       
     }
     
-    return(Annotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
+    return(GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
   }
   else if(datatype == "sequence.info") {
     
@@ -207,7 +207,7 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
       scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
     }
     
-    return(Annotation(sequence.info = sequence.info,
+    return(GeneAnnotation(sequence.info = sequence.info,
                       gene.scaffold = GeneFilter(data = scaffolds)))
     
   }
@@ -221,7 +221,7 @@ generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, 
       biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
     }
     
-    return(Annotation(gene.biotype = GeneFilter(data = biotypes)))
+    return(GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
     
   }
   else {

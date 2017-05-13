@@ -1,7 +1,7 @@
 
 library(shiny)
 library(AnnotationHub)
-source("annotationGRanges.R")
+source("geneAnnotationGRanges.R")
 
 annotationHub.hub <- reactive(AnnotationHub())
 

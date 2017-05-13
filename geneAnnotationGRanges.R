@@ -35,7 +35,7 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
   }
   
   if(length(meta.indices) == 0) {
-    return(Annotation())
+    return(GeneAnnotation())
   }
   
   # Extract available info directly from GRanges
@@ -65,7 +65,7 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
     scaffolds[[scaffold]] <- na.omit(rownames(sequence.info)[sequence.info$scaffold == scaffold])
   }
   
-  return(Annotation(sequence.info = sequence.info, 
+  return(GeneAnnotation(sequence.info = sequence.info, 
                     gene.scaffold = GeneFilter(data = scaffolds)))
   
 }
@@ -95,6 +95,6 @@ GRanges.extractBiotypeAnnotation <- function(gr, genes) {
     }
   }
   
-  return(Annotation(gene.biotype = GeneFilter(data = features)))
+  return(GeneAnnotation(gene.biotype = GeneFilter(data = features)))
   
 }

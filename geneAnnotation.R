@@ -11,11 +11,11 @@ library(matrixStats)
 library(rtracklayer)
 library(biomaRt)
 library(AnnotationHub)
-source("classAnnotation.R")
+source("classGeneAnnotation.R")
 source("classImporterEntry.R")
-source("annotationGRanges.R")
-source("annotationBioMart.R")
-source("annotationHub.R")
+source("geneAnnotationGRanges.R")
+source("geneAnnotationBioMart.R")
+source("geneAnnotationHub.R")
 
 supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
@@ -55,7 +55,7 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes)
   annot.biotype <- GRanges.extractBiotypeAnnotation(gr, genes)
   
-  annot <- mergeAnnotation(annot.sequence.info, annot.biotype)
+  annot <- mergeGeneAnnotation(annot.sequence.info, annot.biotype)
   
   return(annot)
 }

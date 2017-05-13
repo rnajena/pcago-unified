@@ -8,7 +8,8 @@ library(shiny)
 library(colourpicker)
 library(RColorBrewer)
 source("uiHelper.R")
-source("conditions.R")
+source("cellAnnotation.R")
+source("cellAnnotationVisuals.R")
 source("widgetGenericImporter.R")
 
 visualsEditor.shapes <- c(
