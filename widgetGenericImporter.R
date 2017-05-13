@@ -29,7 +29,8 @@ genericImporterInput <- function(id,
   
   ns <- NS(id)
   
-  tags <- tagList(verticalLayout(
+  tags <- tags$div(class = "generic-importer", 
+                   verticalLayout(
     radioButtons(ns("source"), "Load from ...", c("No available" = "none"), selected = "upload"),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'manual'"), 
                      textAreaInput(ns("input"), "Manual input")),

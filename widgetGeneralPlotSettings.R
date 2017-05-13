@@ -28,16 +28,15 @@ generalPlotSettingsInput <- function(id) {
 generalPlotSettings_ <- function(input, output, session) {
   
   return(reactive({
-    
     return(PlotSettings(
       width = if(is.numeric(input$width) && input$width > 0) input$width else NA_integer_,
       height = if(is.numeric(input$height) && input$height > 0) input$height else NA_integer_,
       dpi = if(is.numeric(input$dpi) && input$dpi > 0) input$dpi else NA_integer_,
       scale = if(is.numeric(input$scale) && input$scale > 0) input$scale else NA_real_,
-      title = if(nchar(input$title) > 0) input$title else NA_character_,
-      subtitle = if(nchar(input$subtitle) > 0) input$subtitle else NA_character_,
-      legend.color = if(nchar(input$legend.color) > 0) input$legend.color else NA_character_,
-      legend.shape = if(nchar(input$legend.shape) > 0) input$legend.shape else NA_character_
+      title = if(is.character(input$title) && nchar(input$title) > 0) input$title else NA_character_,
+      subtitle = if(is.character(input$subtitle) && nchar(input$subtitle) > 0) input$subtitle else NA_character_,
+      legend.color = if(is.character(input$legend.color) && nchar(input$legend.color) > 0) input$legend.color else NA_character_,
+      legend.shape = if(is.character(input$legend.shape) && nchar(input$legend.shape) > 0) input$legend.shape else NA_character_
     ))
     
   }))

@@ -292,16 +292,6 @@
 }
 
 /*
-* Style for integrating generic importer
-*/
-.integrating-generic-importer .status .data-sets {
-	font-weight: bold;
-	margin-top: 5px;
-	margin-bottom: 5px;
-	color: #337ab7;
-}
-
-/*
 * Style for dropdown menu
 */
 .dropdown-button {
@@ -466,4 +456,15 @@ Style for the about page
 
 .about-page .landing-header .landing-header-action button {
 	margin-top: 15px;
+}
+
+/*
+Style for generic importer
+*/
+
+.generic-importer .integration-status .data-sets {
+	font-weight: bold;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	color: #337ab7;
 }

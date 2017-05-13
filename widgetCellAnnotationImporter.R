@@ -107,6 +107,13 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                        }
                                                      }
                                                      
+                                                     # Check if readcounts are matching the data
+                                                     if(!is.null(output$conditions)) {
+                                                       if(!setequal(colnames(readcounts()), rownames(output$conditions))) {
+                                                         stop("Cell conditions don't match with data in read count table!")
+                                                       }
+                                                     }
+                                                     
                                                      callback(choices, selected)
                                                      
                                                      return(output)

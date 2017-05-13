@@ -20,7 +20,7 @@ plotConditionsVennDiagramPlotSettingsUI <- function(id) {
   ns <- NS(id)
   
   return(bsCollapse(
-    bsCollapsePanel("Venn diagram",selectizeInput(ns("sets"), "Displayed sets", 
+    bsCollapsePanel("Venn diagram",selectizeInput(ns("conditions"), "Displayed sets", 
                                                   choices = c(),
                                                   multiple = T,
                                                   options = list(maxItems = 5))),
@@ -111,7 +111,12 @@ plotConditionsVennDiagramPlot_ <- function(input,
     available.conditions <- colnames(conditions())
     selected.conditions <- if(length(available.conditions) > 0) available.conditions[1:min(5,length(available.conditions))] else c()
     
-    updateSelectizeInput(session, "sets", 
+    print(available.conditions)
+    print(selected.conditions)
+    
+    updateSelectizeInput(session, 
+                         "conditions", 
+                         label = paste(available.conditions, collapse = ","),
                          choices = available.conditions, 
                          selected = selected.conditions)
     
@@ -123,7 +128,7 @@ plotConditionsVennDiagramPlot_ <- function(input,
                    exprplot = function(plot.settings, format, filename) 
                    { 
                      return(plotConditionsVennDiagramPlot.save(
-                       selected.conditions = input$sets,
+                       selected.conditions = input$conditions,
                        conditions = conditions,
                        pca.conditions.plot.visuals = visuals,
                        plot.settings = plot.settings,
