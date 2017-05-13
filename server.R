@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
   #' 1. We have for each cell CELL -> Is in condition true/false? mapping (conditions)
   #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
   #' 3. Based on this determine the visual conditions for each cell
-  conditions <- cellConditionImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
+  conditions <- cellAnnotationImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
   
   observeEvent(conditions(), {
     

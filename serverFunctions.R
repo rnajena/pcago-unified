@@ -5,7 +5,7 @@ source("geneAnnotation.R")
 source("cellAnnotation.R")
 source("cellAnnotationVisuals.R")
 source("pca.R")
-source("widgetCellConditionImporter.R")
+source("widgetCellAnnotationImporter.R")
 
 #' Handles some server side navigation features
 #'

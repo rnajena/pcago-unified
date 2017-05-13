@@ -17,7 +17,7 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-cellConditionImporterUI <- function(id) {
+cellAnnotationImporterUI <- function(id) {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -51,7 +51,7 @@ cellConditionImporterUI <- function(id) {
 #' @export
 #'
 #' @examples
-cellConditionImporterValue_ <- function(input, output, session, readcounts) {
+cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   
   cell.annotation.imported <- integratingGenericImporterData("importer",
                                                              importers = reactive(supportedCellAnnotationImporters),
@@ -163,8 +163,8 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
 #' @export
 #'
 #' @examples
-cellConditionImporterValue <- function(id, readcounts) {
+cellAnnotationImporterValue <- function(id, readcounts) {
   
-  return(callModule(cellConditionImporterValue_, id, readcounts = readcounts))
+  return(callModule(cellAnnotationImporterValue_, id, readcounts = readcounts))
   
 }
