@@ -24,6 +24,7 @@ PCAGO was developed on `r sessionInfo()$R.version$version.string` and also requi
 ```{r, results = 'asis'}
 
 library(knitr)
+library(rmarkdown)
 
 r.packages <- sessionInfo()$otherPkgs
 
