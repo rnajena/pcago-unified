@@ -156,7 +156,9 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
     return(conditions()[, selected])
   })
   
-  return(conditions.modified)
+  return(reactive({
+    return(list(conditions = conditions.modified(), fragmentlengths = cell.annotation.imported()$fragmentlengths))
+  }))
   
 }
 

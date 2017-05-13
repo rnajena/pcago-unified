@@ -111,9 +111,6 @@ plotConditionsVennDiagramPlot_ <- function(input,
     available.conditions <- colnames(conditions())
     selected.conditions <- if(length(available.conditions) > 0) available.conditions[1:min(5,length(available.conditions))] else c()
     
-    print(available.conditions)
-    print(selected.conditions)
-    
     updateSelectizeInput(session, 
                          "conditions", 
                          label = paste(available.conditions, collapse = ","),

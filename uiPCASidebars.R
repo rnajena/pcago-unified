@@ -132,7 +132,7 @@ uiPCASidebarPlot <- function() {
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
-    conditionalPanel("input['pca.nav'] == 'pca.cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.conditions.plot")),
+    conditionalPanel("input['pca.nav'] == 'pca.cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.cells.conditions.plot")),
     # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'pca.genes.variances'", plotGeneVariancePlotSettingsUI("pca.genes.variances.plot")),
     # Gene variances plot (filtered genes)

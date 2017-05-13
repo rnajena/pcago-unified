@@ -54,11 +54,12 @@ shinyServer(function(input, output, session) {
   readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
   
-  #' Build a list of all visual parameters
-  #' 1. We have for each cell CELL -> Is in condition true/false? mapping (conditions)
-  #' 2. Then we build a table that assigns visual parameters (shape, color, custom label, ...) to each condition
-  #' 3. Based on this determine the visual conditions for each cell
-  conditions <- cellAnnotationImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
+ 
+  cell.annotation <- cellAnnotationImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
+  conditions <- reactive({
+    validate(need(cell.annotation(), "No cell annotation available!"))
+    return(cell.annotation()$conditions)
+  })
   
   observeEvent(conditions(), {
     
@@ -120,7 +121,7 @@ shinyServer(function(input, output, session) {
   
   # Cell condition assingments
   downloadableDataTable("pca.cells.conditions", export.filename = "conditions", data = conditions)
-  plotConditionsVennDiagramPlot("pca.cells.conditions.plot", conditions)
+  plotConditionsVennDiagramPlot("pca.cells.conditions.plot", conditions = conditions)
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))
