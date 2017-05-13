@@ -53,44 +53,30 @@ cellConditionImporterUI <- function(id) {
 #' @examples
 cellConditionImporterValue_ <- function(input, output, session, readcounts) {
   
-  # cell.conditions.imported <- genericImporterData("importer",
-  #                                                 importers = reactive(supportedCellConditionImporters),
-  #                                                 samples = reactive(availableCellConditionSamples),
-  #                                                 generators = reactive(supportedConditionVisualsGenerators),
-  #                                                 exprimport = function(con, importer, parameters) {
-  # 
-  #                                                   validate(need(readcounts(), "Cannot import condition table without read counts!"))
-  # 
-  #                                                   cells <- colnames(readcounts())
-  #                                                   return(importCellConditions(con, importer, cells))
-  #                                                 },
-  #                                                 exprsample = function(sample, parameters) {
-  # 
-  #                                                   validate(need(readcounts(), "Cannot import condition table without read counts!"))
-  #                                                   cells <- colnames(readcounts())
-  # 
-  #                                                   return(importCellConditionsSample(sample, cells))
-  # 
-  #                                                 })
-  
   cell.annotation.imported <- integratingGenericImporterData("importer",
-                                                             importers = reactive(supportedCellConditionImporters),
-                                                             samples = reactive(availableCellConditionSamples),
-                                                             generators = reactive(supportedConditionVisualsGenerators),
+                                                             importers = reactive(supportedCellAnnotationImporters),
+                                                             samples = reactive(availableCellAnnotationSamples),
+                                                             generators = reactive(supportedCellAnnotationGenerators),
                                                              exprimport = function(con, importer, parameters) {
                                                                validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
                                                                cells <- colnames(readcounts())
-                                                               return(importCellConditions(con, importer, cells))
+                                                               
+                                                               return(importCellAnnotation(con, importer, cells))
                                                              },
                                                              exprsample = function(sample, parameters) {
                                                                
                                                                validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
                                                                cells <- colnames(readcounts())
-                                                               return(importCellConditionsSample(sample, cells))
+                                                               
+                                                               return(importCellAnnotationSample(sample, cells))
                                                                
                                                              },
                                                              exprgenerator = function(generator, parameters) {
-                                                               return(NULL)
+                                                               
+                                                               validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
+                                                               cells <- colnames(readcounts())
+                                                               
+                                                               return(importCellAnnotationFromGenerator(generator, cells))
                                                              },
                                                              exprintegrate = function(data, callback) {
                                                                

@@ -9,16 +9,16 @@ source("helpers.R")
 condition.default <- "{default}"
 
 # Importers for cell condition mappings
-supportedCellConditionImporters <- list(
+supportedCellAnnotationImporters <- list(
   ImporterEntry(name = "conditions_factor_csv", label = "Condititions treatments CSV"),
   ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV"),
   ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV"),
   ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV")
 )
-availableCellConditionSamples <- list(
+availableCellAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)")
 )
-supportedCellConditionGenerators <- list()
+supportedCellAnnotationGenerators <- list()
 
 
 
@@ -33,7 +33,7 @@ supportedCellConditionGenerators <- list()
 #' @export
 #'
 #' @examples
-importCellConditions.Boolean <- function(filehandle, sep, cells) {
+importCellAnnotation.Conditions.Boolean <- function(filehandle, sep, cells) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(cells)) {
     stop("Invalid arguments!")
@@ -70,7 +70,7 @@ importCellConditions.Boolean <- function(filehandle, sep, cells) {
 #' @export
 #'
 #' @examples
-importCellConditions.Factor <- function(filehandle, sep, cells) {
+importCellAnnotation.Conditions.Factor <- function(filehandle, sep, cells) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(cells)) {
     stop("Invalid arguments!")
@@ -118,19 +118,19 @@ importCellConditions.Factor <- function(filehandle, sep, cells) {
 #' @export
 #'
 #' @examples
-importCellConditions <- function(filehandle, datatype, cells) {
+importCellAnnotation <- function(filehandle, datatype, cells) {
   
-  if(datatype == "boolean_csv") {
-    return(importCellConditions.Boolean(filehandle, ",", cells))
+  if(datatype == "conditions_boolean_csv") {
+    return(importCellAnnotation.Conditions.Boolean(filehandle, ",", cells))
   }
-  else if(datatype == "boolean_tsv") {
-    return(importCellConditions.Boolean(filehandle, "", cells))
+  else if(datatype == "conditions_boolean_tsv") {
+    return(importCellAnnotation.Conditions.Boolean(filehandle, "", cells))
   }
-  else if(datatype == "factor_csv") {
-    return(importCellConditions.Factor(filehandle, ",", cells))
+  else if(datatype == "conditions_factor_csv") {
+    return(importCellAnnotation.Conditions.Factor(filehandle, ",", cells))
   }
-  else if(datatype == "factor_tsv") {
-    return(importCellConditions.Factor(filehandle, "", cells))
+  else if(datatype == "conditions_factor_tsv") {
+    return(importCellAnnotation.Conditions.Factor(filehandle, "", cells))
   }
   else {
     stop(paste("Unknown importer", datatype))
@@ -147,7 +147,7 @@ importCellConditions <- function(filehandle, datatype, cells) {
 #' @export
 #'
 #' @examples
-importCellConditionsSample <- function(sample, cells) {
+importCellAnnotationSample <- function(sample, cells) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
@@ -156,12 +156,30 @@ importCellConditionsSample <- function(sample, cells) {
   con <- file(paste0("sampledata/", sample), "r")
   on.exit({ close(con) })
   
-  data <- importCellConditions(con, "factor_csv", cells)
+  data <- importCellAnnotation(con, "conditions_factor_csv", cells)
   
   return(data)
   
 }
 
+#' Imports cell condition assignments from generator
+#'
+#' @param sample 
+#' @param cells 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellAnnotationFromGenerator <- function(generator, cells) {
+  
+  if(!is.character(sample)) {
+    stop("Invalid arguments!")
+  }
+  
+  return(NULL)
+  
+}
 
 #' Collapses the conditions for each cell in the condition table
 #' into a string.
