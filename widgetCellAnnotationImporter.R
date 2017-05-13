@@ -4,7 +4,6 @@
 
 library(shiny)
 source("widgetGenericImporter.R")
-source("widgetIntegratingGenericImporter.R")
 source("cellAnnotation.R")
 source("cellAnnotationVisuals.R")
 source("uiHelper.R")
@@ -26,7 +25,7 @@ cellAnnotationImporterUI <- function(id) {
   ns <- NS(id)
   
   return(tagList(
-    integratingGenericImporterInput(ns("importer")),
+    genericImporterInput(ns("importer")),
     hDivider(),
     selectizeInput(ns("conditioneditor"), 
                    label = "Rearrange conditions", 
@@ -53,66 +52,66 @@ cellAnnotationImporterUI <- function(id) {
 #' @examples
 cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   
-  cell.annotation.imported <- integratingGenericImporterData("importer",
-                                                             importers = reactive(supportedCellAnnotationImporters),
-                                                             samples = reactive(availableCellAnnotationSamples),
-                                                             generators = reactive(supportedCellAnnotationGenerators),
-                                                             exprimport = function(con, importer, parameters) {
-                                                               validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                               cells <- colnames(readcounts())
-                                                               
-                                                               return(importCellAnnotation(con, importer, cells))
-                                                             },
-                                                             exprsample = function(sample, parameters) {
-                                                               
-                                                               validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                               cells <- colnames(readcounts())
-                                                               
-                                                               return(importCellAnnotationSample(sample, cells))
-                                                               
-                                                             },
-                                                             exprgenerator = function(generator, parameters) {
-                                                               
-                                                               validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                               cells <- colnames(readcounts())
-                                                               
-                                                               return(importCellAnnotationFromGenerator(generator, cells, parameters))
-                                                             },
-                                                             exprintegrate = function(data, callback) {
-                                                               
-                                                               output <- list(conditions = NULL,
-                                                                              fragmentlengths = NULL)
-                                                               
-                                                               choices <- c("Conditions" = "conditions",
-                                                                            "Library fragment lengths" = "fragmentlengths")
-                                                               selected <- c()
-                                                               
-                                                               for(entry in data) {
-                                                                 
-                                                                 if(is.null(entry)) {
-                                                                   next()
-                                                                 }
-                                                                 
-                                                                 # We only allow one of each data type
-                                                                 if(entry$type == "conditions" || entry$type == "fragmentlengths") {
-                                                                   
-                                                                   if(entry$type %in% selected) {
-                                                                     stop(paste(entry$type, "already in set of data! Please remove the existing definition."))
-                                                                   }
-                                                                   
-                                                                   output[[entry$type]] <- entry$data
-                                                                   selected <- c(selected, entry$type)
-                                                                 }
-                                                                 else {
-                                                                   stop(paste("Unknown entry type", entry$type))
-                                                                 }
-                                                               }
-                                                               
-                                                               callback(choices, selected)
-                                                               
-                                                               return(output)
-                                                               
-                                                             })
+  cell.annotation.imported <- genericImporterData("importer",
+                                                   importers = reactive(supportedCellAnnotationImporters),
+                                                   samples = reactive(availableCellAnnotationSamples),
+                                                   generators = reactive(supportedCellAnnotationGenerators),
+                                                   exprimport = function(con, importer, parameters) {
+                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
+                                                     cells <- colnames(readcounts())
+                                                     
+                                                     return(importCellAnnotation(con, importer, cells))
+                                                   },
+                                                   exprsample = function(sample, parameters) {
+                                                     
+                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
+                                                     cells <- colnames(readcounts())
+                                                     
+                                                     return(importCellAnnotationSample(sample, cells))
+                                                     
+                                                   },
+                                                   exprgenerator = function(generator, parameters) {
+                                                     
+                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
+                                                     cells <- colnames(readcounts())
+                                                     
+                                                     return(importCellAnnotationFromGenerator(generator, cells, parameters))
+                                                   },
+                                                   exprintegrate = function(data, callback) {
+                                                     
+                                                     output <- list(conditions = NULL,
+                                                                    fragmentlengths = NULL)
+                                                     
+                                                     choices <- c("Conditions" = "conditions",
+                                                                  "Library fragment lengths" = "fragmentlengths")
+                                                     selected <- c()
+                                                     
+                                                     for(entry in data) {
+                                                       
+                                                       if(is.null(entry)) {
+                                                         next()
+                                                       }
+                                                       
+                                                       # We only allow one of each data type
+                                                       if(entry$type == "conditions" || entry$type == "fragmentlengths") {
+                                                         
+                                                         if(entry$type %in% selected) {
+                                                           stop(paste(entry$type, "already in set of data! Please remove the existing definition."))
+                                                         }
+                                                         
+                                                         output[[entry$type]] <- entry$data
+                                                         selected <- c(selected, entry$type)
+                                                       }
+                                                       else {
+                                                         stop(paste("Unknown entry type", entry$type))
+                                                       }
+                                                     }
+                                                     
+                                                     callback(choices, selected)
+                                                     
+                                                     return(output)
+                                                     
+                                                   })
   
   # Build conditions
   conditions <- reactive({

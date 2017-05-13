@@ -135,7 +135,7 @@ serverReadcountNormalization <- function(readcounts, conditions, gene.info.annot
 #' @examples
 serverGeneInfoAnnotation <- function(readcounts) {
   
-  return(integratingGenericImporterData("pca.data.annotation.importer", 
+  return(genericImporterData("pca.data.annotation.importer", 
                                         importers = reactive(supportedAnnotationImporters),
                                         samples = reactive(availableAnnotationSamples),
                                         generators = reactive(supportedAnnotationGenerators),

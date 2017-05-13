@@ -45,11 +45,15 @@ genericImporterInput <- function(id,
               uiOutput(ns("parameter.slot2")),
               uiOutput(ns("parameter.slot3")),
               uiOutput(ns("parameter.slot4"))),
-    additional.content,
+    tags$div(
+      id = ns("integration-panel"),
+      hDivider(),
+      selectizeInput(ns("integration.data"), options = list(plugins = list("remove_button")), multiple = T, choices = c(), label = "Currently imported data"),
+      uiOutput(ns("integration.status"))
+    ),
     fluidPage(fluidRow(
        actionButton(ns("submit"), submit.button.text),
-       if(reset.button) actionButton(ns("reset"), reset.button.text) else tagList(),
-       additional.buttons)
+       actionButton(ns("reset"), reset.button.text))
     )))
     
   return(tags)
@@ -112,7 +116,12 @@ genericImporterData.makeParameterInput <- function(ns, id, param, ...) {
 #' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer, parameters)
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample, parameters)
 #' @param exprgenerator install The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator, parameters)
-#'
+#' @param exprintegrate If not NULL, the widget will hold multiple data that then will be integrated with this function
+#' 
+#' exprintegrate: This function generates the output of this control it has following parameters:
+#' * data: List of data values to integrate
+#' * callback: Function with parameters choices, selected: Changes the list of collected data for user feedback
+#' 
 #' @return Data imported by the importer
 #' @export
 #'
@@ -125,13 +134,18 @@ genericImporterData_ <- function(input,
                                  generators,
                                  exprimport, 
                                  exprsample, 
-                                 exprgenerator) {
+                                 exprgenerator,
+                                 exprintegrate = NULL) {
   
   if(!is.reactive(importers) || !is.reactive(samples) || !is.reactive(generators)) {
     stop("Invalid arguments!")
   }
   
-  variables <- reactiveValues(data = NULL)
+  variables <- reactiveValues(data = list(),
+                              data.labels = list(),
+                              data.counter = 1,
+                              status.choices = c(), 
+                              status.selected = c())
   
   # Update the the UI based on available importers, generators & samples
   observe({ 
@@ -279,10 +293,25 @@ genericImporterData_ <- function(input,
   # Reset data to NULL if reset button is clicked
   observeEvent(input$reset, {
     
-    variables$data <- NULL
+    variables$data <- list()
+    variables$data.labels <- list()
     showNotification("Data has been reset.", type = "message")
     
   })
+  
+  # For QOL improvement
+  addData <- function(data, label) {
+    
+    variables$data.counter <- variables$data.counter + 1
+    variables$data[[length(variables$data) + 1]] <- data
+    
+    # Set label
+    data.labels <- variables$data.labels
+    data.labels[[length(data.labels) + 1]] <- paste("item", variables$data.counter)
+    names(data.labels)[length(data.labels)] <- label
+    variables$data.labels <- data.labels
+    
+  }
   
   # Import if the user clicks on the submit button
   observeEvent(input$submit, {
@@ -307,7 +336,11 @@ genericImporterData_ <- function(input,
     # Run the importers
     
     # Reset the old variable so we 100% trigger a change
-    variables$data <- NULL
+    # Do this only if we are not integrating
+    if(is.null(exprintegrate)) {
+      variables$data <- list()
+      variables$data.labels <- list()
+    }
     
     if(input$source == "upload") {
       inFile <- input$fileinput
@@ -328,13 +361,15 @@ genericImporterData_ <- function(input,
         close(con)
         
         if(!is.null(data)) {
+          
+          addData(data, paste0("Upload: ", basename(inFile$name)))
+          
           showNotification("Data has been successfully imported.", type = "message")
         } 
         else {
           showNotification("Error while importing the data", type = "error")
         }
         
-        variables$data <- data
       }
       else
       {
@@ -359,13 +394,16 @@ genericImporterData_ <- function(input,
       close(con)
       
       if(!is.null(data)) {
+        
+        addData(data, "Manual input")
+        
         showNotification("Data has been successfully imported.", type = "message")
       } 
       else {
         showNotification("Error while importing the data", type = "error")
       }
       
-      variables$data <- data
+     
     }
     else if(input$source == "sample") {
       
@@ -383,13 +421,14 @@ genericImporterData_ <- function(input,
                        })
       
       if(!is.null(data)) {
+        
+        addData(data, paste0("Sample: ", sample))
+        
         showNotification(paste("Loaded sample", sample), type = "message")
       } 
       else {
         showNotification("Error while importing sample!", type = "error")
       }
-      
-      variables$data <- data
       
     }
     else if(input$source == "generate") {
@@ -408,18 +447,107 @@ genericImporterData_ <- function(input,
                        })
       
       if(!is.null(data)) {
+        
+        addData(data, paste0("Generated data: ", generator))
+        
         showNotification(paste("Generated data using", generator), type = "message")
       } 
       else {
         showNotification("Error while importing sample!", type = "error")
       }
-      
-      variables$data <- data
-      
     }
 
   })
-  return(reactive( { variables$data } ))
+  
+  # Hide whole integration panel if no integration is enabled
+  if(is.null(exprintegrate)) {
+    shinyjs::hide("integration-panel")
+  }
+  
+  # Output the callback from the integration
+  output$integration.status <- renderUI({
+    
+    if(is.null(exprintegrate)) {
+      return(tagList())
+    }
+    
+    tag <- tags$div(
+      class = "integration-status"
+    )
+    
+    choices <- variables$status.choices
+    choices.names <- if(is.null(names(choices))) choices else names(choices)
+    
+    # Have to use numeric for as I cannot preserve that damn name /:
+    if(length(choices) > 0) {
+      for(i in 1:length(choices)) {
+        
+        choice <- choices[i]
+        choice.name <- choices.names[i]
+        
+        tag.icon <- if(choice %in% variables$status.selected) icon("check-square-o") else icon("square-o")
+        tag <- tagAppendChild(tag, tags$div(tags$span(tag.icon), tags$span(choice.name)))
+      }
+    }
+    
+    tag <- tagAppendChild(tag, tags$div(class = "data-sets",paste(length(variables$data), "data sets loaded.")))
+    
+    return(tag)
+  })
+  
+  # Update the labels in the "current data" selectize
+  observeEvent(variables$data.labels, {
+    updateSelectizeInput(session, "integration.data", choices = variables$data.labels, selected = variables$data.labels)
+  })
+  
+  # Let the user remove data by removing labels
+  observeEvent(input$integration.data, ignoreNULL = F, {
+    
+    # We have the selected data ids. Find data ids that are not in the selection. Then remove those from the list.
+    selected.indices <- isolate(variables$data.labels) %in% input$integration.data
+        
+    variables$data <- variables$data[selected.indices]
+    variables$data.labels <- variables$data.labels[selected.indices]
+    
+  })
+  
+  
+  # Define a callback function for integrate
+  integration.callback <- function(choices, selected) {
+    variables$status.choices <- choices
+    variables$status.selected <- selected
+  }
+  
+  # The data returned is generated by exprintegrate. It has a callback-function that lets the user see which data has been integrated
+  integrated.data <- reactive({
+    
+    if(is.null(exprintegrate)) {
+      if(length(variables$data) == 0) {
+        return(NULL)
+      }
+      else {
+        return(variables$data[[1]])
+      }
+    }
+    else {
+      
+      output <- tryCatch({exprintegrate(data = variables$data, callback = integration.callback)}, 
+                         error = function(e){
+                           showNotification(paste("[Integration] Error:", e), type = "error", duration = NULL)
+                           return(NULL)
+                         }, 
+                         warning = function(w)
+                         {
+                           showNotification(paste("[Integration] Warning:", w), type = "warning", duration = NULL)
+                           return(NULL)
+                         })
+      return(output)
+      
+    }
+    
+  })
+  
+  return(integrated.data)
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.
@@ -431,6 +559,11 @@ genericImporterData_ <- function(input,
 #' @param exprimport The expression to be called if the submit button is clicked. Parameters are (connection, importer, parameters)
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample, parameters)
 #' @param exprgenerator The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator, parameters)
+#' @param exprintegrate If not NULL, the widget will hold multiple data that then will be integrated with this function
+#' 
+#' exprintegrate: This function generates the output of this control it has following parameters:
+#' * data: List of data values to integrate
+#' * callback: Function with parameters choices, selected: Changes the list of collected data for user feedback
 #'
 #' @return Data imported by the importer
 #' @export
@@ -442,7 +575,8 @@ genericImporterData <- function(id,
                                 generators,
                                 exprimport, 
                                 exprsample, 
-                                exprgenerator) {
+                                exprgenerator,
+                                exprintegrate = NULL) {
   
   return(callModule(genericImporterData_, 
                     id, 
@@ -451,6 +585,7 @@ genericImporterData <- function(id,
                     generators = generators,
                     exprimport = exprimport, 
                     exprsample = exprsample, 
-                    exprgenerator = exprgenerator))
+                    exprgenerator = exprgenerator,
+                    exprintegrate = exprintegrate))
   
 }

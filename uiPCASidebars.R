@@ -14,7 +14,6 @@ source("widgetCellAnnotationImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
-source("widgetIntegratingGenericImporter.R")
 source("plotCellPlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
@@ -40,7 +39,7 @@ uiPCASidebarData <- function() {
                     cellAnnotationImporterUI("conditions.importer")),
     bsCollapsePanel("Import gene annotation",
                     value = "data.gene.annotation",
-                    integratingGenericImporterInput("pca.data.annotation.importer")),
+                    genericImporterInput("pca.data.annotation.importer")),
     bsCollapsePanel("Read count processing",
                     value = "data.readcounts.processing",
                     checkboxGroupInput("pca.data.readcounts.processing",

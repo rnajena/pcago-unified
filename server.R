@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
   serverNavigation(input, session)
   
   # Readcounts
-  downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts)
+  downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
   
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
   plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed, default.title = reactive({ "Processed read counts clustering" }))
