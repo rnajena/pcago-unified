@@ -4,13 +4,14 @@
 
 library(shiny)
 source("helpers.R")
+source("classImporterEntry.R")
 
 # Default condition for later use
 condition.default <- "{default}"
 
 # Importers for cell condition mappings
 supportedCellAnnotationImporters <- list(
-  ImporterEntry(name = "conditions_factor_csv", label = "Condititions treatments CSV"),
+  ImporterEntry(name = "conditions_factor_csv", label = "Conditions treatments CSV"),
   ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV"),
   ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV"),
   ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV")
@@ -18,7 +19,11 @@ supportedCellAnnotationImporters <- list(
 availableCellAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)")
 )
-supportedCellAnnotationGenerators <- list()
+supportedCellAnnotationGenerators <- list(
+  ImporterEntry(name = "conditions_split", label = "Conditions from cell names", parameters = list(
+    ImporterParameter(name = "separator", label = "Separator", type = "select", select.values = c("_","#","|",",",";"," ",""))
+  ))
+)
 
 
 
@@ -51,7 +56,7 @@ importCellAnnotation.Conditions.Boolean <- function(filehandle, sep, cells) {
     stop("Data does not assign conditions to all cells!")
   }
   
-  return(data)
+  return(list(type = "conditions", data = data))
 }
 
 #' Imports cell condition assignments from filehandle
@@ -104,7 +109,7 @@ importCellAnnotation.Conditions.Factor <- function(filehandle, sep, cells) {
     
   }
   
-  return(output)
+  return(list(type = "conditions", data = output))
   
 }
 
@@ -162,6 +167,50 @@ importCellAnnotationSample <- function(sample, cells) {
   
 }
 
+#' Generates cell condonditions assignment by splitting the cell names
+#'
+#' @param cells 
+#' @param sep 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellAnnotationFromGenerator.Conditions.SplitCellNames <- function(cells, sep) {
+  
+  result <- data.frame(row.names = cells, stringsAsFactors = F)
+  
+  # Go through all cells and determine which conditions apply to it
+  # if the condition is not known, yet -> Create a new column
+  # set the value for the corresponding cell/condition pair to true
+  for(i in 1:nrow(result)) {
+    
+    conditions <- c()
+    
+    if(sep == "" || !grepl(sep, cells[i], fixed = T)) {
+      conditions <- c(cells[i])
+    }
+    else {
+      conditions <- unlist(strsplit(cells[i], sep))
+    }
+    
+    for(cond in conditions) {
+      
+      if( ncol(result) == 0 || !(cond %in% colnames(result))) {
+        result[[cond]] <- rep(F, nrow(result))
+      }
+      
+      result[[cond]][i] <- T
+    }
+    
+  }
+  
+  # Order condition by variance
+  result <- result[,order(colVars(data.matrix(result)), decreasing = T)]
+  
+  return(list(type = "conditions", data = result))
+}
+
 #' Imports cell condition assignments from generator
 #'
 #' @param sample 
@@ -171,13 +220,18 @@ importCellAnnotationSample <- function(sample, cells) {
 #' @export
 #'
 #' @examples
-importCellAnnotationFromGenerator <- function(generator, cells) {
+importCellAnnotationFromGenerator <- function(generator, cells, parameters) {
   
-  if(!is.character(sample)) {
+  if(!is.character(generator)) {
     stop("Invalid arguments!")
   }
   
-  return(NULL)
+  if(generator == "conditions_split") {
+    return(importCellAnnotationFromGenerator.Conditions.SplitCellNames(cells, parameters$separator))
+  }
+  else {
+    stop(paste("Unknown generator", datatype))
+  }
   
 }
 

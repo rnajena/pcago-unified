@@ -14,6 +14,8 @@
 * BioMart: Use GRanges for seqinfo
 * Load annotation from data.frame / csv
 * Document: annotation from data frame
+* Cell annotation: Fragment lengths
+* Integrating importer: Selectize to remove datasets
 
 ## Theory/practice
 

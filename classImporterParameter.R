@@ -11,8 +11,8 @@ library(shiny)
 #'
 #' @slot name character. 
 #' @slot label character. 
-#' @slot type character. 
-#' @slot select.values A list, vector or a reactive that returns one of those 
+#' @slot type Currently supported: select (A selectize input)
+#' @slot select.values A list, vector or a reactive that returns one of those. Used if type = select
 #'
 #' @return
 #' @export

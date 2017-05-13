@@ -76,28 +76,53 @@ cellConditionImporterValue_ <- function(input, output, session, readcounts) {
                                                                validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
                                                                cells <- colnames(readcounts())
                                                                
-                                                               return(importCellAnnotationFromGenerator(generator, cells))
+                                                               return(importCellAnnotationFromGenerator(generator, cells, parameters))
                                                              },
                                                              exprintegrate = function(data, callback) {
                                                                
-                                                               if(length(data) == 0) {
-                                                                 return(NULL)
-                                                               }
-                                                               else {
-                                                                 return(data[[1]])
+                                                               output <- list(conditions = NULL,
+                                                                              fragmentlengths = NULL)
+                                                               
+                                                               choices <- c("Conditions" = "conditions",
+                                                                            "Library fragment lengths" = "fragmentlengths")
+                                                               selected <- c()
+                                                               
+                                                               for(entry in data) {
+                                                                 
+                                                                 if(is.null(entry)) {
+                                                                   next()
+                                                                 }
+                                                                 
+                                                                 # We only allow one of each data type
+                                                                 if(entry$type == "conditions" || entry$type == "fragmentlengths") {
+                                                                   
+                                                                   if(entry$type %in% selected) {
+                                                                     stop(paste(entry$type, "already in set of data! Please remove the existing definition."))
+                                                                   }
+                                                                   
+                                                                   output[[entry$type]] <- entry$data
+                                                                   selected <- c(selected, entry$type)
+                                                                 }
+                                                                 else {
+                                                                   stop(paste("Unknown entry type", entry$type))
+                                                                 }
                                                                }
                                                                
+                                                               callback(choices, selected)
+                                                               
+                                                               return(output)
+                                                               
                                                              })
-  
-  # observeEvent(cell.conditions.imported(), { })
   
   # Build conditions
   conditions <- reactive({
     
-    validate(need(readcounts(), "Cannot get condition table without read counts!"))
-    validate(need(cell.annotation.imported(), "No cell annotation available!"))
+    validate(need(readcounts(), "Cannot get condition table without read counts!"),
+             need(cell.annotation.imported(), "No cell annotation available!"))
     
-    return(cell.annotation.imported())
+    validate(need(cell.annotation.imported()$conditions, "No cell conditions available!"))
+    
+    return(cell.annotation.imported()$conditions)
     
   })
   
