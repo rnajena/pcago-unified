@@ -90,8 +90,6 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
     
     validate(need(readcounts(), "No readcounts to process!"))
     
-    readcounts <- readcounts()
-    
     # Apply normalization
     if(input$pca.data.normalization == "tpm") {
       
@@ -99,7 +97,7 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
               need(gene.annotation(), "No gene annotation available!"),
               need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
       
-      return(applyReadcountNormalization.TPM(readcounts = readcounts, 
+      return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
                                              use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
                                              use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
                                              gene.annotation = gene.annotation(),
@@ -113,14 +111,14 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
                need(length(setdiff(input$pca.data.normalization.deseq2.conditions ,colnames(conditions()))) == 0, "Wrong conditions selected!"),
                need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
       
-      return(applyReadcountNormalization.DESeq2(readcounts = readcounts, 
+      return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
                                                 condition.table = cell.annotation()@conditions, 
                                                 selected.conditions = input$pca.data.normalization.deseq2.conditions))
       
     }
     else 
     {
-      return(list(readcounts = readcounts))
+      return(list(readcounts = readcounts()))
     }
     
   }))
@@ -200,43 +198,38 @@ serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
   
   return(filterSelectionValues("pca.pca.genes.set",  reactive({
     
-    validate(need(readcounts.processed(), "No readcounts to process!"))
+    validate(need(readcounts.processed(), "No readcounts to process!"),
+             need(gene.annotation(), "No gene annotation available!"))
     
     gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
     all.genes <- rownames(readcounts.processed())
     
-    if(!is.null(gene.annotation())) {
+    annotation <- gene.annotation()
+    annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
+    
+    {
+      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))
+      gene.criteria[["Biotype"]] <- annotation@gene.biotype@data
       
-      annotation <- gene.annotation()
-      annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Biotype"]][["No data"]] <- unused.genes
+      }
+    }
+    {
+      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.go.terms))
+      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms@data
       
-      {
-        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))
-        gene.criteria[["Biotype"]] <- annotation@gene.biotype@data
-        
-        if(length(unused.genes) > 0) {
-          gene.criteria[["Biotype"]][["No data"]] <- unused.genes
-        }
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
       }
-      {
-        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.go.terms))
-        gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms@data
-        
-        if(length(unused.genes) > 0) {
-          gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
-        }
-        
-      }
-      {
-        unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.scaffold))
-        gene.criteria[["Scaffold"]] <- annotation@gene.scaffold@data
-        
-        if(length(unused.genes) > 0) {
-          gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
-        }
-       
-      }
+    }
+    {
+      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.scaffold))
+      gene.criteria[["Scaffold"]] <- annotation@gene.scaffold@data
       
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
+      }
     }
     
     return(gene.criteria)

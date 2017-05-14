@@ -121,9 +121,8 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   conditions <- reactive({
     
     validate(need(readcounts(), "Cannot get condition table without read counts!"),
-             need(cell.annotation.imported(), "No cell annotation available!"))
-    
-    validate(need(cell.annotation.imported()@conditions, "No cell conditions available!"))
+             need(cell.annotation.imported(), "No cell annotation available!"),
+             need(cellAnnotationHasConditions(cell.annotation.imported()), "No cell conditions available!"))
     
     return(cell.annotation.imported()@conditions)
     
