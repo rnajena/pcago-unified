@@ -79,39 +79,36 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                    },
                                                    exprintegrate = function(data, callback) {
                                                      
-                                                     output <- list(conditions = NULL,
-                                                                    fragmentlengths = NULL)
+                                                     output <- CellAnnotation()
                                                      
                                                      choices <- c("Conditions" = "conditions",
                                                                   "Library fragment lengths" = "fragmentlengths")
                                                      selected <- c()
+                                                     
+                                                     if(length(data) == 0) {
+                                                       callback(choices, selected)
+                                                       return(output)
+                                                     }
                                                      
                                                      for(entry in data) {
                                                        
                                                        if(is.null(entry)) {
                                                          next()
                                                        }
-                                                       
-                                                       # We only allow one of each data type
-                                                       if(entry$type == "conditions" || entry$type == "fragmentlengths") {
-                                                         
-                                                         if(entry$type %in% selected) {
-                                                           stop(paste(entry$type, "already in set of data! Please remove the existing definition."))
-                                                         }
-                                                         
-                                                         output[[entry$type]] <- entry$data
-                                                         selected <- c(selected, entry$type)
-                                                       }
-                                                       else {
-                                                         stop(paste("Unknown entry type", entry$type))
-                                                       }
+                                                      
+                                                       output <- mergeCellAnnotation(output, entry)
+                                                      
                                                      }
                                                      
+                                                     # Populate callback list
+                                                     if(cellAnnotationHasConditions(output)) {
+                                                       selected <- c(selected, "conditions")
+                                                     }
+                                                     
+                                                     
                                                      # Check if readcounts are matching the data
-                                                     if(!is.null(output$conditions)) {
-                                                       if(!setequal(colnames(readcounts()), rownames(output$conditions))) {
-                                                         stop("Cell conditions don't match with data in read count table!")
-                                                       }
+                                                     if(!cellAnnotationMatchesCells(output, colnames(readcounts()))) {
+                                                       stop("Cell annotation doesn't match with data in read count table!")
                                                      }
                                                      
                                                      callback(choices, selected)
@@ -126,9 +123,9 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
     validate(need(readcounts(), "Cannot get condition table without read counts!"),
              need(cell.annotation.imported(), "No cell annotation available!"))
     
-    validate(need(cell.annotation.imported()$conditions, "No cell conditions available!"))
+    validate(need(cell.annotation.imported()@conditions, "No cell conditions available!"))
     
-    return(cell.annotation.imported()$conditions)
+    return(cell.annotation.imported()@conditions)
     
   })
   
@@ -157,7 +154,7 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   })
   
   return(reactive({
-    return(list(conditions = conditions.modified(), fragmentlengths = cell.annotation.imported()$fragmentlengths))
+    return(mergeCellAnnotation(cell.annotation.imported(), CellAnnotation(conditions = conditions.modified())))
   }))
   
 }

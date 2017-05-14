@@ -5,6 +5,7 @@
 library(shiny)
 source("helpers.R")
 source("classImporterEntry.R")
+source("classCellAnnotation.R")
 
 # Default condition for later use
 condition.default <- "{default}"
@@ -56,7 +57,7 @@ importCellAnnotation.Conditions.Boolean <- function(filehandle, sep, cells) {
     stop("Data does not assign conditions to all cells!")
   }
   
-  return(list(type = "conditions", data = data))
+  return(CellAnnotation(conditions = data))
 }
 
 #' Imports cell condition assignments from filehandle
@@ -109,7 +110,7 @@ importCellAnnotation.Conditions.Factor <- function(filehandle, sep, cells) {
     
   }
   
-  return(list(type = "conditions", data = output))
+  return(CellAnnotation(conditions = output))
   
 }
 
@@ -208,7 +209,7 @@ importCellAnnotationFromGenerator.Conditions.SplitCellNames <- function(cells, s
   # Order condition by variance
   result <- result[,order(colVars(data.matrix(result)), decreasing = T)]
   
-  return(list(type = "conditions", data = result))
+  return(CellAnnotation(conditions = result))
 }
 
 #' Imports cell condition assignments from generator

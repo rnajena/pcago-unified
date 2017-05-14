@@ -40,6 +40,27 @@ GeneAnnotation <- setClass(
   }
 )
 
+#' Checks if a gene annotation has a sequence info table
+#'
+#' @param object GeneAnnotation object
+#'
+#' @return
+#' @export
+#' @rdname geneAnnotationHasSequenceInfo
+#'
+#' @examples
+setGeneric(name = "geneAnnotationHasSequenceInfo",
+           def = function(object) {
+             standardGeneric("geneAnnotationHasSequenceInfo")
+           })
+
+#' @rdname geneAnnotationHasSequenceInfo
+setMethod(f = "geneAnnotationHasSequenceInfo",
+          signature = signature(object = "GeneAnnotation"),
+          definition = function(object) {
+            return(nrow(object@sequence.info) > 0)
+          })
+
 #' Loads an annotation from a data frame
 #'
 #' @param object GeneAnnotation object
@@ -144,9 +165,9 @@ setMethod(f = "mergeGeneAnnotation",
             
             
             # Merge sequence info
-            if(nrow(object2@sequence.info) != 0) {
+            if(geneAnnotationHasSequenceInfo(object2)) {
               
-              if(nrow(object1@sequence.info) != 0) {
+              if(geneAnnotationHasSequenceInfo(object1)) {
                 
                 # overwritten.genes <- intersect(rownames(object1@sequence.info), rownames(object2@sequence.info))
                 # 
@@ -157,8 +178,9 @@ setMethod(f = "mergeGeneAnnotation",
                 
                 object1@sequence.info[rownames(object2@sequence.info),] <- object2@sequence.info[,]
               }
-              
-              object1@sequence.info <- object2@sequence.info
+              else {
+                object1@sequence.info <- object2@sequence.info
+              }
               
             }
             
@@ -191,7 +213,7 @@ setMethod(f = "geneAnnotationRestrictToGenes",
           signature = signature(object = "GeneAnnotation", restrict.gene = "character"),
           definition = function(object, restrict.gene) {
             
-            if(nrow(object@sequence.info) > 0) {
+            if(geneAnnotationHasGeneInfo(object)) {
               
               supported.genes <- intersect(rownames(object@sequence.info), restrict.gene)
               

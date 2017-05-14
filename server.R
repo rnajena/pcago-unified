@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
   cell.annotation <- cellAnnotationImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
   conditions <- reactive({
     validate(need(cell.annotation(), "No cell annotation available!"))
-    return(cell.annotation()$conditions)
+    return(cell.annotation()@conditions)
   })
   
   observeEvent(conditions(), {
@@ -73,17 +73,20 @@ shinyServer(function(input, output, session) {
   
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
-  gene.info.annotation <- serverGeneInfoAnnotation(readcounts.preprocessed)
+  gene.annotation <- serverGeneInfoAnnotation(readcounts.preprocessed)
   
   # Finish processing of read counts with normalization
-  readcounts.normalization.output <- serverReadcountNormalization(readcounts.preprocessed, conditions, gene.info.annotation, input)
+  readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
+                                                                  gene.annotation = gene.annotation, 
+                                                                  cell.annotation = cell.annotation,
+                                                                  input = input)
   readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
   # Obtain the list of genes the user wants to use
-  genes.filtered <- serverFilteredGenes(readcounts.processed, gene.info.annotation)
+  genes.filtered <- serverFilteredGenes(readcounts.processed, gene.annotation)
   
   # The filtered read counts just intersects the list of genes returned by each filter
   readcounts.filtered <- serverFilterReadcounts(genes.filtered, readcounts.processed)
@@ -125,7 +128,7 @@ shinyServer(function(input, output, session) {
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))
-  downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.info.annotation))
+  downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.annotation))
   
   # Gene filtering
   output$pca.pca.genes.set.count <- renderText({

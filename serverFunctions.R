@@ -35,7 +35,6 @@ serverNavigation <- function(input, session) {
 #' Does preprocessing steps
 #'
 #' @param readcounts 
-#' @param gene.info.annotation Gene annotation object
 #' @param input 
 #'
 #' @return
@@ -77,14 +76,15 @@ serverReadCountPreProcessing <- function(readcounts, input) {
 #' Applies read count normalization
 #'
 #' @param readcounts 
-#' @param gene.info.annotation 
+#' @param gene.annotation 
+#' @param cell.annotation
 #' @param input 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverReadcountNormalization <- function(readcounts, conditions, gene.info.annotation, input) {
+serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annotation, input) {
   
   return(reactive({
     
@@ -95,24 +95,27 @@ serverReadcountNormalization <- function(readcounts, conditions, gene.info.annot
     # Apply normalization
     if(input$pca.data.normalization == "tpm") {
       
-      validate(need(gene.info.annotation(), "No annotation available!"),
-               need(input$pca.data.normalization.tpm.mufld, "No mean sequence length set!"),
-               need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
+      validate(need(cell.annotation(), "No cell annotation available!"),
+              need(gene.annotation(), "No gene annotation available!"),
+              need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
       
-      return(applyReadcountNormalization.TPM(readcounts, 
-                                            input$pca.data.normalization.tpm.mufld,
-                                            gene.info.annotation()@sequence.info))
+      return(applyReadcountNormalization.TPM(readcounts = readcounts, 
+                                             use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
+                                             use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
+                                             gene.annotation = gene.annotation(),
+                                             cell.annotation = cell.annotation()))
     }
     else if(input$pca.data.normalization == "deseq2") {
       
-      validate(need(conditions(), "No condition assignments available!"),
+      validate(need(cell.annotation(), "No cell annotation available!"),
+               need(cell.annotation()@conditions, "No cell conditions available!"),
                need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"),
                need(length(setdiff(input$pca.data.normalization.deseq2.conditions ,colnames(conditions()))) == 0, "Wrong conditions selected!"),
                need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
       
-      return(applyReadcountNormalization.DESeq2(readcounts, 
-                                               conditions(), 
-                                               input$pca.data.normalization.deseq2.conditions))
+      return(applyReadcountNormalization.DESeq2(readcounts = readcounts, 
+                                                condition.table = cell.annotation()@conditions, 
+                                                selected.conditions = input$pca.data.normalization.deseq2.conditions))
       
     }
     else 
@@ -187,13 +190,13 @@ serverGeneInfoAnnotation <- function(readcounts) {
 #' Lets the user choose a set of genes based on the features
 #'
 #' @param readcounts.processed 
-#' @param gene.info.annotation 
+#' @param gene.annotation 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
+serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
   
   return(filterSelectionValues("pca.pca.genes.set",  reactive({
     
@@ -202,9 +205,9 @@ serverFilteredGenes <- function(readcounts.processed, gene.info.annotation) {
     gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
     all.genes <- rownames(readcounts.processed())
     
-    if(!is.null(gene.info.annotation())) {
+    if(!is.null(gene.annotation())) {
       
-      annotation <- gene.info.annotation()
+      annotation <- gene.annotation()
       annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
       
       {
@@ -324,23 +327,23 @@ serverGeneVarianceTableData <- function(gene.variances) {
 #' This is needed, as annotations are stored to allow quick filtering and not for display
 #'
 #' @param readcounts 
-#' @param gene.info.annotation 
+#' @param gene.annotation 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
+serverGeneAnnotationTableData <- function(readcounts, gene.annotation) {
   
   return(reactive({
-    validate(need(gene.info.annotation(), "No annotation available!"))
+    validate(need(gene.annotation(), "No annotation available!"))
     
     notification.id <- progressNotification("Building table data ...")
     on.exit({
       removeNotification(notification.id)
     })
     
-    return(geneAnnotationToTable(gene.info.annotation()))
+    return(geneAnnotationToTable(gene.annotation()))
     
   }))
 }
