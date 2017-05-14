@@ -241,7 +241,7 @@ readcountProcessing.step.pca <- function(readcounts.top.variant, pca) {
     
     content <- tagList(
       h2("Input"),
-      tags$p(paste0("Table with ", ncol(readcounts.top.variant()), " points with ", nrow(readcounts.top.variant()), " dimensions")),
+      tags$p(paste0(ncol(readcounts.top.variant()), " points with ", nrow(readcounts.top.variant()), " dimensions")),
       h2("PCA parameters"),
       tags$p(paste0("Center data: ", pca()$params$center)),
       tags$p(paste0("Scale data: ", pca()$params$scale)),

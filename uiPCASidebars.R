@@ -124,19 +124,19 @@ uiPCASidebarPCA <- function() {
 #' @examples
 uiPCASidebarPlot <- function() {
   return(verticalLayout(
-    conditionalPanel("input['pca.nav'] == 'pca.readcounts.processed'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.processed.hclust.plot")),
-    conditionalPanel("input['pca.nav'] == 'pca.readcounts.filtered'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.filtered.hclust.plot")),
-    conditionalPanel("input['pca.nav'] == 'pca.readcounts.top.variant'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.top.variant.hclust.plot")),
+    conditionalPanel("input['pca.nav'] == 'readcounts.processed'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.processed.hclust.plot")),
+    conditionalPanel("input['pca.nav'] == 'readcounts.filtered'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.filtered.hclust.plot")),
+    conditionalPanel("input['pca.nav'] == 'readcounts.top.variant'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.top.variant.hclust.plot")),
     # Clustering based on PCA
     conditionalPanel("input['pca.nav'] == 'pca.cells.transformed'", plotAgglomerativeClusteringPlotSettingsUI("pca.transformed.hclust.plot")),
     # Cell plot
     conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
     # Cell conditions venn diagram plot
-    conditionalPanel("input['pca.nav'] == 'pca.cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("pca.cells.conditions.plot")),
+    conditionalPanel("input['pca.nav'] == 'cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("cells.conditions.plot")),
     # Gene variances plot
-    conditionalPanel("input['pca.nav'] == 'pca.genes.variances'", plotGeneVariancePlotSettingsUI("pca.genes.variances.plot")),
+    conditionalPanel("input['pca.nav'] == 'genes.variances'", plotGeneVariancePlotSettingsUI("genes.variances.plot")),
     # Gene variances plot (filtered genes)
-    conditionalPanel("input['pca.nav'] == 'pca.genes.variances.filtered'", plotGeneVariancePlotSettingsUI("pca.genes.variances.filtered.plot")),
+    conditionalPanel("input['pca.nav'] == 'genes.variances.filtered'", plotGeneVariancePlotSettingsUI("genes.variances.filtered.plot")),
     # PCA PC variances
     conditionalPanel("input['pca.nav'] == 'pca.pc.importance'", plotPCAVariancePlotSettingsUI("pca.variance.plot"))
   ))

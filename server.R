@@ -121,7 +121,7 @@ shinyServer(function(input, output, session) {
   
   # Cell condition assingments
   downloadableDataTable("pca.cells.conditions", export.filename = "conditions", data = conditions)
-  plotConditionsVennDiagramPlot("pca.cells.conditions.plot", conditions = conditions)
+  plotConditionsVennDiagramPlot("cells.conditions.plot", conditions = conditions)
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))
@@ -169,8 +169,8 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
   downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
   
-  plotGeneVariancePlot("pca.genes.variances.plot", gene.variances = gene.variances)
-  plotGeneVariancePlot("pca.genes.variances.filtered.plot", gene.variances = gene.variances.filtered)
+  plotGeneVariancePlot("genes.variances.plot", gene.variances = gene.variances)
+  plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = gene.variances.filtered)
   
   plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, gene.variances.filtered)
   

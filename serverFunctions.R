@@ -340,7 +340,7 @@ serverGeneAnnotationTableData <- function(readcounts, gene.info.annotation) {
       removeNotification(notification.id)
     })
     
-    return(annotationToTable(gene.info.annotation()))
+    return(geneAnnotationToTable(gene.info.annotation()))
     
   }))
 }
