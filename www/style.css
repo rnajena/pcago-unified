@@ -407,23 +407,25 @@ Style for the about page
 .about-page {
 }
 
-.about-page .features .row {
+.about-page .features {
 	margin-top: 30px;
-	padding-bottom: 30px;
-	border-bottom: 1px solid #ddd;
 }
 
-.about-page .features .row-right {
-	text-align: right;
-}
-
-.about-page .features h1 {
+.about-page .features .feature-column {
+	/*border: 1px solid black;*/
+	text-align: center;
 	color: #555;
 }
 
-.about-page .features img {
-	width: 100%;
-	box-shadow: 1px 1px 10px #ddd;
+.about-page .features .feature-column img {
+	width: 80%;
+}
+
+.about-page .features .feature-column h1 {
+	color: #aaa;
+	font-size: 32px;
+	font-size: 2vw;
+	font-weight: lighter;
 }
 
 .about-page .landing-header {
@@ -452,6 +454,7 @@ Style for the about page
 	padding-bottom: 30px;
 	padding-top: 30px;
 	background-color: rgba(255, 255, 255, 0.75);
+	text-align: center;
 }
 
 .about-page .landing-header .landing-header-action button {

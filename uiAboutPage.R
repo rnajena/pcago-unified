@@ -17,9 +17,20 @@ uiAboutPage <- function() {
     tags$div(class="landing-header",
              tags$img(class = "landing-header-logo", src = "logo.svg"),
              tags$div(class = "container-fluid landing-header-action",
-                      fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"))),
-                      fluidRow(column(width = 1, offset = 5, bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))))
+                      fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"),
+                                      bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))))
     ),
-    tags$div(class="features", includeMarkdown("aboutpage/features.md")))
+    tags$div(class="features", 
+             fluidRow(
+               column(offset = 3, width = 2, tags$div(class = "feature-column", 
+                                                      tags$img(src = "aboutpage/quickfeatures_readcounts.svg"),
+                                                      includeMarkdown("aboutpage/quickfeatures_readcounts.md"))),
+               column(width = 2, tags$div(class = "feature-column", 
+                                          tags$img(src = "aboutpage/quickfeatures_filter.svg"),
+                                          includeMarkdown("aboutpage/quickfeatures_filter.md"))),
+               column(width = 2, tags$div(class = "feature-column", 
+                                          tags$img(src = "aboutpage/quickfeatures_pca.svg"),
+                                          includeMarkdown("aboutpage/quickfeatures_pca.md")))
+             )))
   )
 }
