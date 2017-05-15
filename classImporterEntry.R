@@ -20,12 +20,14 @@ ImporterEntry <- setClass(
   slots = signature(
     name = "character",
     label = "character",
-    parameters = "list"
+    parameters = "list",
+    sample.importer = "character"
   ),
   prototype = list(
     name = NA_character_,
     label = NA_character_,
-    parameters = list()
+    parameters = list(),
+    sample.importer = NA_character_
   ),
   validity = function(object) {
     

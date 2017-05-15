@@ -175,7 +175,7 @@ setMethod(f = "cellAnnotationAnnotatedCells",
           signature = signature(object = "CellAnnotation", annotation = "character"),
           definition = function(object, annotation) {
             
-            if(annotation %in% c("meanfragmentlengths")) {
+            if(annotation %in% c("meanfragmentlength")) {
               return(if(cellAnnotationHasCellInfo(object)) rownames(object@cell.info)[!is.na(object@cell.info[[annotation]])] else c())
             }
             else if(annotation == "conditions") {
@@ -184,5 +184,36 @@ setMethod(f = "cellAnnotationAnnotatedCells",
             else {
               stop(paste("Unknown annotation type ", annotation))
             }
+            
+          })
+
+#' Returns a data frame that contains the annotation data
+#'
+#' @param object CellAnnotation object
+#'
+#' @return
+#' @export
+#' @rdname cellAnnotationToTable
+#'
+#' @examples
+setGeneric(name = "cellAnnotationToTable",
+           def = function(object) {
+             standardGeneric("cellAnnotationToTable")
+           })
+
+#' @rdname cellAnnotationToTable
+setMethod(f = "cellAnnotationToTable",
+          signature = signature(object = "CellAnnotation"),
+          definition = function(object) {
+            
+            cells <- unique(c(rownames(object@cell.info)))
+            
+            table <- data.frame(row.names = cells,
+                                "meanfragmentlength" = rep(NA, length(cells)),
+                                check.names = F)
+            
+            table[rownames(object@cell.info), "meanfragmentlength"] <- object@cell.info$meanfragmentlength
+            
+            return(table)
             
           })

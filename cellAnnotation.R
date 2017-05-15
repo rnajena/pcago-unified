@@ -20,7 +20,8 @@ supportedCellAnnotationImporters <- list(
   ImporterEntry(name = "cell_info_tsv", label = "Cell info TSV")
 )
 availableCellAnnotationSamples <- list(
-  ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)")
+  ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)"),
+  ImporterEntry(name = "cell.annotation.vitamins.csv", label = "Cell info for Vitamins")
 )
 supportedCellAnnotationGenerators <- list(
   ImporterEntry(name = "conditions_split", label = "Conditions from cell names", parameters = list(
@@ -145,9 +146,9 @@ importCellAnnotation.CellInfo <- function(filehandle, sep, cells) {
   }
   
   # Restrict to set of cells by parameter
-  data <- data[cells,]
+  data <- data[cells,,drop=F]
   
-  return(data)
+  return(CellAnnotation(cell.info = data))
   
 }
 
@@ -205,7 +206,16 @@ importCellAnnotationSample <- function(sample, cells) {
   con <- file(paste0("sampledata/", sample), "r")
   on.exit({ close(con) })
   
-  data <- importCellAnnotation(con, "conditions_factor_csv", cells)
+  if(sample == "cell.annotation.vitamins.csv") {
+    data <- importCellAnnotation(con, "cell_info_csv", cells)
+  }
+  else if(sample == "conditions.vitamins.large.csv") {
+    data <- importCellAnnotation(con, "conditions_factor_csv", cells)
+  }
+  else {
+    stop(paste("Unknown sample", sample))
+  }
+  
   
   return(data)
   
@@ -300,33 +310,3 @@ collapseConditions <- function(condition.table, conditions) {
   }))
 }
 
-#' Returns a data frame that contains the annotation data
-#'
-#' @param object CellAnnotation object
-#'
-#' @return
-#' @export
-#' @rdname cellAnnotationToTable
-#'
-#' @examples
-setGeneric(name = "cellAnnotationToTable",
-           def = function(object) {
-             standardGeneric("cellAnnotationToTable")
-           })
-
-#' @rdname cellAnnotationToTable
-setMethod(f = "cellAnnotationToTable",
-          signature = signature(object = "CellAnnotation"),
-          definition = function(object) {
-            
-            cells <- unique(c(rownames(object@cell.info)))
-            
-            table <- data.frame(row.names = cells,
-                                "meanfragmentlength" = rep(NA, length(cells)),
-                                check.names = F)
-            
-            table[rownames(object@cell.info), "meanfragmentlength"] <- object@cell.info$meanfragmentlength
-          
-            return(table)
-            
-          })
