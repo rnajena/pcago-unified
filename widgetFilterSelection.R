@@ -73,7 +73,7 @@ filterSelectionValues_ <- function(input, output, session, values) {
     }
     
     choices[["Misc"]] <- append(choices[["Misc"]], list("All (*)" = "*"))
-    updateSelectInput(session, "values", choices = choices, selected = c("*"))
+    updateSelectizeInput(session, "values", choices = choices, selected = c("*"))
   })
   
   available.values <- reactive({
