@@ -79,6 +79,8 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcou
     stop("Invalid arguments!")
   }
   
+  stop("Not implemented") #TODO
+  
 }
 
 #' Extracts gene information from an annotation

@@ -69,7 +69,7 @@ uiPCAPage <- function() {
                                     "Cells",
                                     tabPanel("Conditions", value = "cells.conditions",
                                              plotConditionsVennDiagramPlotUI("cells.conditions.plot"),
-                                             downloadableDataTableOutput("pca.cells.conditions")),
+                                             downloadableDataTableOutput("cells.conditions")),
                                     tabPanel("Annotation", value = "cells.annotation",
                                              downloadableDataTableOutput("cells.annotation"))
                                     ),

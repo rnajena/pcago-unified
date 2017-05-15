@@ -124,9 +124,11 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
   plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
   
-  # Cell condition assingments
-  downloadableDataTable("pca.cells.conditions", export.filename = "conditions", data = conditions)
+  # Cell annotation
+  downloadableDataTable("cells.annotation", export.filename = "annotation", data = reactive({ cellAnnotationToTable(cell.annotation()) }))
+  downloadableDataTable("cells.conditions", export.filename = "conditions", data = conditions)
   plotConditionsVennDiagramPlot("cells.conditions.plot", conditions = conditions)
+  
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
   downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))

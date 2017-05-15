@@ -82,7 +82,7 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      output <- CellAnnotation()
                                                      
                                                      choices <- c("Conditions" = "conditions",
-                                                                  "Library fragment lengths" = "meanfragmentlengths")
+                                                                  "Mean fragment lengths" = "meanfragmentlengths")
                                                      selected <- c()
                                                      
                                                      if(length(data) == 0) {

@@ -15,7 +15,9 @@ supportedCellAnnotationImporters <- list(
   ImporterEntry(name = "conditions_factor_csv", label = "Conditions treatments CSV"),
   ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV"),
   ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV"),
-  ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV")
+  ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV"),
+  ImporterEntry(name = "cell_info_csv", label = "Cell info CSV"),
+  ImporterEntry(name = "cell_info_tsv", label = "Cell info TSV")
 )
 availableCellAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)")
@@ -88,7 +90,7 @@ importCellAnnotation.Conditions.Factor <- function(filehandle, sep, cells) {
     stop("Cell condition table is empty!")
   }
   if(!setequal(rownames(data), cells)) {
-    stop("Data does not assign conditions to all cells!")
+    stop("Table annotates a different set of cells!")
   }
   
   output <- data.frame(row.names = rownames(data))
@@ -111,6 +113,41 @@ importCellAnnotation.Conditions.Factor <- function(filehandle, sep, cells) {
   }
   
   return(CellAnnotation(conditions = output))
+  
+}
+
+#' Imports cell info annotation (e.g. mean fragment length) from CSV
+#'
+#' @param filehandle 
+#' @param sep 
+#' @param cells 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+importCellAnnotation.CellInfo <- function(filehandle, sep, cells) {
+  
+  if(missing(filehandle) || !is.character(sep) || !is.character(cells)) {
+    stop("Invalid arguments!")
+  }
+  
+  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
+  
+  if(nrow(data) == 0 || ncol(data) == 0) {
+    stop("Cell info table is empty!")
+  }
+  if(length(intersect(rownames(data), cells)) == 0) {
+    stop("Cell info table does not annotate even one cell!")
+  }
+  if(!setequal(colnames(data), c("meanfragmentlength"))) {
+    stop("Cell info table is missing columns!")
+  }
+  
+  # Restrict to set of cells by parameter
+  data <- data[cells,]
+  
+  return(data)
   
 }
 
@@ -137,6 +174,12 @@ importCellAnnotation <- function(filehandle, datatype, cells) {
   }
   else if(datatype == "conditions_factor_tsv") {
     return(importCellAnnotation.Conditions.Factor(filehandle, "", cells))
+  }
+  else if(datatype == "cell_info_csv") {
+    return(importCellAnnotation.CellInfo(filehandle, ",", cells))
+  }
+  else if(datatype == "cell_info_tsv") {
+    return(importCellAnnotation.CellInfo(filehandle, "", cells))
   }
   else {
     stop(paste("Unknown importer", datatype))
@@ -256,3 +299,34 @@ collapseConditions <- function(condition.table, conditions) {
     return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[cell, c]) c else "" })), collapse = "_"))
   }))
 }
+
+#' Returns a data frame that contains the annotation data
+#'
+#' @param object CellAnnotation object
+#'
+#' @return
+#' @export
+#' @rdname cellAnnotationToTable
+#'
+#' @examples
+setGeneric(name = "cellAnnotationToTable",
+           def = function(object) {
+             standardGeneric("cellAnnotationToTable")
+           })
+
+#' @rdname cellAnnotationToTable
+setMethod(f = "cellAnnotationToTable",
+          signature = signature(object = "CellAnnotation"),
+          definition = function(object) {
+            
+            cells <- unique(c(rownames(object@cell.info)))
+            
+            table <- data.frame(row.names = cells,
+                                "meanfragmentlength" = rep(NA, length(cells)),
+                                check.names = F)
+            
+            table[rownames(object@cell.info), "meanfragmentlength"] <- object@cell.info$meanfragmentlength
+          
+            return(table)
+            
+          })
