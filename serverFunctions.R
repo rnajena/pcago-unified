@@ -126,65 +126,6 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
   
 }
 
-#' Provides the gene annotation
-#'
-#' @param readcounts 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-serverGeneInfoAnnotation <- function(readcounts) {
-  
-  return(genericImporterData("pca.data.annotation.importer", 
-                                        importers = reactive(supportedAnnotationImporters),
-                                        samples = reactive(availableAnnotationSamples),
-                                        generators = reactive(supportedAnnotationGenerators),
-                                        exprimport = function(con, importer, parameters) {
-                                          return(importGeneInformationFromAnnotation(con, importer, readcounts()))
-                                        },
-                                        exprsample = function(sample, parameters) {
-                                          return(importSampleGeneInformation(sample, readcounts()))
-                                        },
-                                        exprgenerator = function(generator, parameters) {
-                                          return(generateGeneInformation(generator, parameters, readcounts()))
-                                        },
-                                        exprintegrate = function(data, callback) {
-                                          output <- GeneAnnotation()
-                                          genes <- rownames(readcounts())
-                                          
-                                          choices = c("sequence.info",
-                                                      "features", 
-                                                      "go")
-                                          selected = c()
-                                          
-                                          # Merge data into output
-                                          for(current.data in data) {
-                                            if(!is.null(data)) {
-                                              output <- mergeGeneAnnotation(output, current.data)
-                                            }
-                                          }
-                                          
-                                          sequence.info.genes <- intersect(rownames(output@sequence.info), genes)
-                                          feature.genes <- intersect(geneFilterGenes(output@gene.biotype), genes)
-                                          go.genes <- intersect(geneFilterGenes(output@gene.go.terms), genes)
-                                          
-                                          names(choices) <- c(
-                                            if(length(sequence.info.genes) == 0) "Sequence info" else sprintf("Sequence info (%d/%d)", length(sequence.info.genes), length(genes)),
-                                            if(length(feature.genes) == 0) "Biotype" else sprintf("Biotype (%d/%d)", length(feature.genes), length(genes)),
-                                            if(length(go.genes) == 0) "GO terms" else sprintf("GO terms (%d/%d)", length(go.genes), length(genes))
-                                          )
-                                          
-                                          if(length(sequence.info.genes) > 0) { selected <- c(selected, "sequence.info") }
-                                          if(length(feature.genes) > 0) { selected <- c(selected, "features") }
-                                          if(length(go.genes) > 0) { selected <- c(selected, "go") }
-                                          
-                                          callback(choices, selected)
-                                          return(output)
-                                        }))
-  
-}
-
 #' Lets the user choose a set of genes based on the features
 #'
 #' @param readcounts.processed 

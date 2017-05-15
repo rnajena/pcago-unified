@@ -82,7 +82,7 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      output <- CellAnnotation()
                                                      
                                                      choices <- c("Conditions" = "conditions",
-                                                                  "Library fragment lengths" = "fragmentlengths")
+                                                                  "Library fragment lengths" = "meanfragmentlengths")
                                                      selected <- c()
                                                      
                                                      if(length(data) == 0) {
@@ -101,13 +101,24 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      }
                                                      
                                                      # Populate callback list
-                                                     if(cellAnnotationHasConditions(output)) {
-                                                       selected <- c(selected, "conditions")
+                                                     cells <- colnames(readcounts())
+
+                                                     for(annotation.type in choices) {
+                                                       covered.cells <- intersect(cellAnnotationAnnotatedCells(output, annotation.type), cells)
+
+                                                       if(length(covered.cells) > 0) {
+                                                         names(choices)[choices == annotation.type] <- sprintf("%s (%d/%d)",
+                                                                                                               names(choices)[choices == annotation.type],
+                                                                                                               length(covered.cells),
+                                                                                                               length(cells))
+                                                         selected <- c(selected, annotation.type)
+                                                       }
+
                                                      }
                                                      
                                                      
                                                      # Check if readcounts are matching the data
-                                                     if(!cellAnnotationMatchesCells(output, colnames(readcounts()))) {
+                                                     if(!cellAnnotationMatchesCells(output, cells)) {
                                                        stop("Cell annotation doesn't match with data in read count table!")
                                                      }
                                                      
@@ -121,8 +132,9 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   conditions <- reactive({
     
     validate(need(readcounts(), "Cannot get condition table without read counts!"),
-             need(cell.annotation.imported(), "No cell annotation available!"),
-             need(cellAnnotationHasConditions(cell.annotation.imported()), "No cell conditions available!"))
+             need(cell.annotation.imported(), "No cell annotation available!"))
+    # ! Needs to be separate. Thanks, R Shiny for ALWAYS TESTING ALL F**** CHECKS!!!
+    validate(need(cellAnnotationHasConditions(cell.annotation.imported()), "No cell conditions available!"))
     
     return(cell.annotation.imported()@conditions)
     

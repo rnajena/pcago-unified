@@ -10,6 +10,7 @@ source("widgetInPlaceHelp.R")
 source("widgetFilterSelection.R")
 source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
+source("widgetGeneAnnotationImporter.R")
 source("widgetCellAnnotationImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
@@ -36,10 +37,10 @@ uiPCASidebarData <- function() {
                     genericImporterInput("pca.data.readcounts.importer")),
     bsCollapsePanel("Import cell annotation",
                     value = "data.cell.annotation",
-                    cellAnnotationImporterUI("conditions.importer")),
+                    cellAnnotationImporterUI("data.cell.annotation.importer")),
     bsCollapsePanel("Import gene annotation",
                     value = "data.gene.annotation",
-                    genericImporterInput("pca.data.annotation.importer")),
+                    geneAnnotationImporterUI("data.gene.annotation.importer")),
     bsCollapsePanel("Read count processing",
                     value = "data.readcounts.processing",
                     checkboxGroupInput("pca.data.readcounts.processing",

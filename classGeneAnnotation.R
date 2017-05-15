@@ -229,3 +229,38 @@ setMethod(f = "geneAnnotationRestrictToGenes",
             
             return(object)
           })
+
+#' Returns list of genes that are annotatated with given annotation type
+#'
+#' @param object GeneAnnotation object
+#' @param annotation scaffold, start_position, end_position, length, exonlength, biotype, go.terms
+#'
+#' @return
+#' @export
+#' @rdname geneAnnotationAnnotatedGenes
+#'
+#' @examples
+setGeneric(name = "geneAnnotationAnnotatedGenes",
+           def = function(object, annotation) {
+             standardGeneric("geneAnnotationAnnotatedGenes")
+           })
+
+#' @rdname geneAnnotationAnnotatedGenes
+setMethod(f = "geneAnnotationAnnotatedGenes",
+          signature = signature(object = "GeneAnnotation", annotation = "character"),
+          definition = function(object, annotation) {
+            
+            if(annotation %in% c("scaffold", "start_position", "end_position", "length", "exonlength")) {
+              return(if(geneAnnotationHasSequenceInfo(object)) rownames(object@sequence.info)[!is.na(object@sequence.info[[annotation]])] else c())
+            }
+            else if(annotation == "biotype") {
+              return(geneFilterGenes(object@gene.biotype))
+            }
+            else if(annotation == "go.terms") {
+              return(geneFilterGenes(object@gene.go.terms))
+            }
+            else {
+              stop(paste("Unknown annotation type ", annotation))
+            }
+            
+          })

@@ -29,6 +29,8 @@ source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
 source("widgetProcessingSteps.R")
+source("widgetCellAnnotationImporter.R")
+source("widgetGeneAnnotationImporter.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
@@ -55,7 +57,7 @@ shinyServer(function(input, output, session) {
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
   
  
-  cell.annotation <- cellAnnotationImporterValue("conditions.importer", readcounts = readcounts.preprocessed)
+  cell.annotation <- cellAnnotationImporterValue("data.cell.annotation.importer", readcounts = readcounts.preprocessed)
   conditions <- reactive({
     validate(need(cell.annotation(), "No cell annotation available!"))
     return(cell.annotation()@conditions)
@@ -73,7 +75,7 @@ shinyServer(function(input, output, session) {
   
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
-  gene.annotation <- serverGeneInfoAnnotation(readcounts.preprocessed)
+  gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", readcounts = readcounts.preprocessed)
   
   # Finish processing of read counts with normalization
   readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 

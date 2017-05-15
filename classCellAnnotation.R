@@ -154,3 +154,35 @@ setMethod(f = "mergeCellAnnotation",
             return(object1)
             
           })
+
+#' Returns list of cells that are annotatated with given annotation type
+#'
+#' @param object CellAnnotation object
+#' @param annotation conditions, meanfragmentlengths
+#'
+#' @return
+#' @export
+#' @rdname cellAnnotationAnnotatedCells
+#'
+#' @examples
+setGeneric(name = "cellAnnotationAnnotatedCells",
+           def = function(object, annotation) {
+             standardGeneric("cellAnnotationAnnotatedCells")
+           })
+
+#' @rdname cellAnnotationAnnotatedCells
+setMethod(f = "cellAnnotationAnnotatedCells",
+          signature = signature(object = "CellAnnotation", annotation = "character"),
+          definition = function(object, annotation) {
+            
+            if(annotation %in% c("meanfragmentlengths")) {
+              return(if(cellAnnotationHasCellInfo(object)) rownames(object@cell.info)[!is.na(object@cell.info[[annotation]])] else c())
+            }
+            else if(annotation == "conditions") {
+              return(rownames(object@conditions))
+            }
+            else {
+              stop(paste("Unknown annotation type ", annotation))
+            }
+            
+          })
