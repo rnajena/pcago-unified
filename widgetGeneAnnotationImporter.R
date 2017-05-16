@@ -88,7 +88,7 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                                                          names(choices)[choices == annotation.type],
                                                                                          length(covered.genes),
                                                                                          length(genes))
-                                   seleced <- c(selected, annotation.type)
+                                   selected <- c(selected, annotation.type)
                                  }
 
                                }
