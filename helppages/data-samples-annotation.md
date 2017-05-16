@@ -1,36 +1,61 @@
 # Samples annotation
 
-Each sample has a set of conditions that are useful for visualizing data.
-For example samples that have been treated with vitamins could have a different color
-in the plot than samples without any treatment.
+A read count sample has following annotations:
 
-PCAGO allows you to determine the conditions of each sample and set visual parameters for each one.
+* Conditions
+* Mean fragment length
 
-## Conditions applying to a sample
+The **conditions** annotation defines the conditions/treatments of each sample,
+which are needed for DESeq2 normalization and visual representation of the data.
+The **mean fragment length** is needed for TPM normalization (see `Data > Read count processing` help page).
 
-You have different options to determine which conditions apply to each sample.
-The setting for conditions can be found in `Sidebar > Data > Conditions`
+## Conditions annotation
 
-### Column names
+The condition annotation determines for each sample if it is in a condition or has a specific treatment.
+It is a generalization of factorized treatment tables like the following:
 
-This is the default option and treats each sample individually.
+| Sample | Vitamin | Infection |
+|--------|---------|-----------|
+| S1     | C       | E. coli   |
+| S2     | C       | Control   |
+| S3     | Control | E. coli   |
 
-<div class="well help-box">
-<label>Example</label> A sample <code>mono6_n2_ctr</code> has only one condition: <code>mono6_n2_ctr</code>
-</div>
+Instead of having factors like "Vitamin" or "Infection", the general approach of the condition table
+stores only boolean values (true or false)
 
-### Extract from columns
+| Sample | Vitamin_C | Vitamin_Control | Infection_EColi | Infection_Control |
+|--------|-----------|-----------------|-----------------|-------------------|
+| S1     | TRUE      | FALSE           | TRUE            | FALSE             |
+| S2     | TRUE      | FALSE           | FALSE           | TRUE              |
+| S3     | FALSE     | TRUE            | TRUE            | FALSE             |
 
-The column name is separated by a separator (default: `_`). A condition applies to a sample
-if it's in this list.
+## Mean fragment length
 
-<div class="well help-box">
-<label>Example</label> A sample <code>mono6_n2_ctr</code> has following conditions: <code>mono6</code>, <code>n2</code> and <code>ctr</code>
-</div>
+The mean fragment length of a sample can be obtained from the read analysis step.
 
-### Upload
+## Importing data
 
-You can also upload your own condition definition. Upload a table with following format:
+You can upload multiple sample annotations per upload widget (see `Appendix > Upload widget` for more information).
+The data will be integrated into a final sample annotation. You can upload multiple data for the same type.
+The sample info annotation will be merged, while the conditions are completely overwritten. Newer data overwrites
+old data.
+
+## Conditions
+
+Following importers are available:
+
+* **Conditions boolean CSV.** Import from a boolean table (CSV format)
+* **Conditions boolean TSV.** Import from a boolean table (TSV format)
+* **Conditions treatments CSV.** Import from a *treatments* table (CSV format)
+* **Conditions treatments TSV.** Import from a *treatments* table (TSV format)
+
+See `Appendix > File formats` for more information about file formats.
+
+Following generators are available:
+
+* **Conditions from sample names.** Generates the conditions table by splitting the sample names by a **separator** (additional parameter)
+
+### General format of a boolean table
 
 |       | Condition1    | Condition2 | Condition3 | ... |
 |-------|---------------|------------|------------|-----|
@@ -40,3 +65,32 @@ You can also upload your own condition definition. Upload a table with following
 | ...   | ...           | ...        | ...        | ... |
 
 Sample1, Sample2, ... are the column names in your read count table.
+
+### General format of a treatment table
+
+| Sample  | Treatment1        | Treatment2 | ... |
+|---------|-------------------|------------|-----|
+| Sample1 | Treatment factors | ...        | ... |
+| Sample2 | ...               | ...        | ... |
+| ...     | ...               | ...        | ... |
+
+Sample1, Sample2, ... are the column names in your read count table.
+
+## Mean fragment length
+
+For future development, the mean fragment length is part of the **sample info**
+annotation that may contain additional information about each same similar to
+gene annotations.
+
+Following importers are available:
+
+* **Sample info CSV.** Import from a CSV file
+* **Sample info TSV.** Import from a TSV file
+
+### General format of a sample info table
+
+| ID      | meanfragmentlength |
+|---------|--------------------|
+| Sample1 | ...                |
+| Sample2 | ...                |
+| ...     | ...                |

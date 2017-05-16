@@ -18,7 +18,7 @@ Following table
 | G1 | 4,54 | 242 | 121 |
 | G2 | 122 |     | 454 |
 
-in CSV can be written as following:
+can be written as following in CSV format:
 
 ```
 ID,A,B,C
@@ -28,7 +28,8 @@ G2,122,,454
 
 ## TSV
 Tab Separated Value (TSV) is like CSV, but separated with a tabulator space or
-a normal whitespace.
+a normal whitespace. TSV files are saved with the filename extension **\*.csv**
+instead of \*.tsv.
 
 **Example**
 
@@ -39,7 +40,7 @@ Following table
 | G1 | 454 | 242 | 121 |
 | G2 | 122 |     | 454 |
 
-in TSV can be written as following:
+can be written as following in TSV format:
 
 ```
 ID A B C
