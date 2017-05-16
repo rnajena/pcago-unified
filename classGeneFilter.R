@@ -40,6 +40,46 @@ GeneFilter <- setClass(
   }
 )
 
+#' Builds a gene filter from a named vector where the names are the criteria
+#'
+#' @param vector named character vector
+#'
+#' @return
+#' @export
+#' @rdname buildGeneFilter
+#'
+#' @examples
+setGeneric(name = "buildGeneFilter",
+           def = function(vector) {
+             standardGeneric("buildGeneFilter")
+           })
+
+#' @rdname buildGeneFilter
+setMethod(f = "buildGeneFilter",
+          signature = signature(vector = "character"),
+          definition = function(vector) {
+            
+            output <- list()
+            
+            for(crit in names(vector)) {
+              
+              if(is.na(crit)) {
+                next()
+              }
+              
+              values <- na.omit(vector[names(vector) == crit])
+              
+              if(length(values) > 0) {
+                output[[setNames(crit, NULL)]] <- as.vector(setNames(values, NULL))
+              }
+              
+              
+            }
+            
+            return(GeneFilter(data = output))
+            
+          })
+
 #' Merges two GeneFilter objects
 #'
 #' @param object1 GeneFilter object

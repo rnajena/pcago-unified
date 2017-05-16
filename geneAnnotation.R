@@ -21,12 +21,16 @@ supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF (*.gff3)"),
                                      ImporterEntry(name = "pcago_csv",
-                                                   label = "Tabular (*.csv)"))
+                                                   label = "Tabular CSV (*.csv)"),
+                                     ImporterEntry(name = "pcago_tsv",
+                                                  label = "Tabular TSV (*.csv)"))
 supportedAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
-availableAnnotationSamples <- list(ImporterEntry(name = "vitamins.gff3",
-                                                 label = "Vitamins"))
+availableAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
+                                                 label = "Vitamins (Tabular CSV)"),
+                                   ImporterEntry(name = "vitamins.gff3",
+                                                 label = "Vitamins (Ensembl GFF)"))
 
 #' Extracts gene information from an Ensembl GFF file
 #' See importGeneInformationFromAnnotation for more info
@@ -79,8 +83,11 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcou
     stop("Invalid arguments!")
   }
   
-  stop("Not implemented") #TODO
+  data <- read.csv(filehandle, header = T, row.names = 1, sep = sep, stringsAsFactors = F)
+  annot <- geneAnnotationFromTable(data)
+  annot <- geneAnnotationRestrictToGenes(annot, rownames(readcounts))
   
+  return(annot)
 }
 
 #' Extracts gene information from an annotation
@@ -101,6 +108,12 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
   
   if(datatype == "gff_ensembl") {
     return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts))
+  }
+  if(datatype == "pcago_csv") {
+    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, ","))
+  }
+  if(datatype == "pcago_tsv") {
+    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, ""))
   }
   else {
     stop(paste("Unknown datatype", datatype))
@@ -153,13 +166,18 @@ importSampleGeneInformation <- function(sample, readcounts) {
     stop("Invalid arguments!")
   }
   
-  if(sample == "vitamins.gff3") {
-    
-    con <- file("sampledata/vitamins.gff3", "r")
-    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts)
+  con <- file("sampledata/vitamins.gff3", "r")
+  on.exit({
     close(con)
+  })
+  
+  if(sample == "vitamins.gff3") {
+    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts)
     return(data)
-    
+  }
+  else if(sample == "genes.annotation.vitamins.csv") {
+    data <- importGeneInformationFromAnnotation(con, "pcago_csv", readcounts)
+    return(data)
   }
   else {
     stop(paste("Unknown sample", sample))

@@ -32,7 +32,9 @@ GeneAnnotation <- setClass(
   ),
   validity = function(object) {
     
-    if(nrow(object@sequence.info) > 0 && colnames(object@sequence.info) != c("scaffold", "start_position", "end_position", "length", "exonlength")) {
+    if(nrow(object@sequence.info) > 0 && 
+       ncol(object@sequence.info) > 0 && 
+       colnames(object@sequence.info) != c("scaffold", "start_position", "end_position", "length", "exon_length")) {
       return("Invalid sequence info object")
     }
     
@@ -58,7 +60,7 @@ setGeneric(name = "geneAnnotationHasSequenceInfo",
 setMethod(f = "geneAnnotationHasSequenceInfo",
           signature = signature(object = "GeneAnnotation"),
           definition = function(object) {
-            return(nrow(object@sequence.info) > 0)
+            return(nrow(object@sequence.info) > 0 && ncol(object@sequence.info) > 0)
           })
 
 #' Loads an annotation from a data frame
@@ -67,20 +69,71 @@ setMethod(f = "geneAnnotationHasSequenceInfo",
 #'
 #' @return
 #' @export
-#' @rdname annotationFromTable
+#' @rdname geneAnnotationFromTable
 #'
 #' @examples
-setGeneric(name = "annotationFromTable",
+setGeneric(name = "geneAnnotationFromTable",
            def = function(table) {
-             standardGeneric("annotationFromTable")
+             standardGeneric("geneAnnotationFromTable")
            })
 
-#' @rdname annotationFromTable
-setMethod(f = "annotationFromTable",
+#' @rdname geneAnnotationFromTable
+setMethod(f = "geneAnnotationFromTable",
           signature = signature(table = "data.frame"),
           definition = function(table) {
             
-            stop("Not implemented")
+            genes <- rownames(table)
+            
+            # Load sequence info
+            sequence.info <- data.frame(row.names = genes)
+            
+            for(col in c("scaffold", "start_position", "end_position", "length", "exon_length")) {
+              if(col %in% colnames(table)) {
+                sequence.info[,col] <- table[,col]
+              }
+            }
+            
+            if(ncol(sequence.info) == 0) {
+              sequence.info = data.frame()
+            }
+            
+            # Build gene filters
+            gene.biotype = if("biotype" %in% colnames(table)) buildGeneFilter(setNames(rownames(table), table$biotype)) else GeneFilter()
+            gene.scaffold = if("scaffold" %in% colnames(table)) buildGeneFilter(setNames(rownames(table), table$scaffold)) else GeneFilter()
+            
+            # GO terms are special: The annotation stores a list of GO terms, so we cannot use the handy build function
+            gene.go.terms <- GeneFilter()
+            
+            if("go_terms" %in% colnames(table)) {
+
+              # Problem: We have Gene -> List of GO terms. But we want GO term -> list of genes.
+              # Solution: Build Gene -> List of GO terms and invert it.
+
+              data <- list()
+              for(gene in rownames(table)) {
+                cell.value <- table[gene, "go_terms"]
+                
+                go.terms <- if(!is.na(cell.value)) na.omit(unlist(strsplit(cell.value, "|", fixed = T))) else c()
+
+                if(length(go.terms) > 0) {
+                  data[[gene]] <- go.terms
+                }
+
+              }
+              
+              data <- invertGeneFilter(GeneFilter(data = data))
+              gene.go.terms <- GeneFilter(data = data)
+
+            }
+            
+            
+            
+            return(GeneAnnotation(
+              sequence.info = sequence.info,
+              gene.biotype = gene.biotype,
+              gene.go.terms = gene.go.terms,
+              gene.scaffold = gene.scaffold
+            ))
             
           })
 
@@ -110,26 +163,26 @@ setMethod(f = "geneAnnotationToTable",
             
             table <- data.frame(row.names = genes,
                                 "scaffold" = rep(NA, length(genes)),
-                                "start" = rep(NA, length(genes)),
-                                "end" = rep(NA, length(genes)),
+                                "start_position" = rep(NA, length(genes)),
+                                "end_position" = rep(NA, length(genes)),
                                 "length" = rep(NA, length(genes)),
-                                "exonlength" = rep(NA, length(genes)),
+                                "exon_length" = rep(NA, length(genes)),
                                 "biotype" = rep(NA, length(genes)),
-                                "goterms" = rep(NA, length(genes)),
+                                "go_terms" = rep(NA, length(genes)),
                                 check.names = F)
             
             table[rownames(object@sequence.info), "scaffold"] <- object@sequence.info$scaffold
-            table[rownames(object@sequence.info), "start"] <- object@sequence.info$start
-            table[rownames(object@sequence.info), "end"] <- object@sequence.info$end
+            table[rownames(object@sequence.info), "start_position"] <- object@sequence.info$start
+            table[rownames(object@sequence.info), "end_position"] <- object@sequence.info$end
             table[rownames(object@sequence.info), "length"] <- object@sequence.info$length
-            table[rownames(object@sequence.info), "exonlength"] <- object@sequence.info$exonlength
+            table[rownames(object@sequence.info), "exon_length"] <- object@sequence.info$exon_length
             
             # Extract data from filters. They need to be inverted.
             gene.go.terms.inv <- invertGeneFilter(object@gene.go.terms)
             gene.biotype.inv <- invertGeneFilter(object@gene.biotype)
             
             if(length(gene.go.terms.inv) > 0) {
-              table[names(gene.go.terms.inv), "goterms"] <- sapply(names(gene.go.terms.inv), function(x) {
+              table[names(gene.go.terms.inv), "go_terms"] <- sapply(names(gene.go.terms.inv), function(x) {
                 return(paste(gene.go.terms.inv[[x]], collapse = "|"))
               }) 
             }
@@ -233,7 +286,7 @@ setMethod(f = "geneAnnotationRestrictToGenes",
 #' Returns list of genes that are annotatated with given annotation type
 #'
 #' @param object GeneAnnotation object
-#' @param annotation scaffold, start_position, end_position, length, exonlength, biotype, go.terms
+#' @param annotation scaffold, start_position, end_position, length, exon_length, biotype, go_terms
 #'
 #' @return
 #' @export
@@ -250,7 +303,7 @@ setMethod(f = "geneAnnotationAnnotatedGenes",
           signature = signature(object = "GeneAnnotation", annotation = "character"),
           definition = function(object, annotation) {
             
-            if(annotation %in% c("scaffold", "start_position", "end_position", "length", "exonlength")) {
+            if(annotation %in% c("scaffold", "start_position", "end_position", "length", "exon_length")) {
               return(if(geneAnnotationHasSequenceInfo(object)) rownames(object@sequence.info)[!is.na(object@sequence.info[[annotation]])] else c())
             }
             else if(annotation == "biotype") {

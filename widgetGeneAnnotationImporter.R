@@ -75,7 +75,7 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                            "Start position" = "start_position",
                                            "End position" = "end_position",
                                            "Length" =  "length",
-                                           "Exon length" =  "exonlength",
+                                           "Exon length" =  "exon_length",
                                            "Biotype" =  "biotype", 
                                            "GO terms" =  "go.terms")
                                selected <- c()

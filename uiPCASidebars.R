@@ -35,7 +35,7 @@ uiPCASidebarData <- function() {
     bsCollapsePanel("Import read counts", 
                     value = "data.readcounts.import",
                     genericImporterInput("pca.data.readcounts.importer")),
-    bsCollapsePanel("Import sample annotation",
+    bsCollapsePanel("Import samples annotation",
                     value = "data.sample.annotation",
                     sampleAnnotationImporterUI("data.sample.annotation.importer")),
     bsCollapsePanel("Import gene annotation",

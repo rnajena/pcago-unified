@@ -45,7 +45,7 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
                               start_position = start(gr)[meta.indices],
                               end_position = end(gr)[meta.indices],
                               length = width(gr)[meta.indices],
-                              exonlength = rep(NA, length(genes)),
+                              exon_length = rep(NA, length(genes)),
                               stringsAsFactors = F)
   
   # For normalization we need the exonic length
