@@ -151,6 +151,14 @@
 	padding: 3px 3px 3px 3px;
 }
 
+.help-page img {
+	border: 1px solid #ddd;
+	display: block;
+  margin: 0 auto;
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
 /**
 * A horizontal divider for some controls
 */

@@ -1,4 +1,4 @@
-# Conditions
+# Samples annotation
 
 Each sample has a set of conditions that are useful for visualizing data.
 For example samples that have been treated with vitamins could have a different color

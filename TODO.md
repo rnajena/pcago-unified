@@ -8,14 +8,13 @@
 * Custom selectors
 * Annotation overview
 * SMPFPP server implementation
-* TPM normalization: Processing steps should give info!
-* TPM normalization is wrong; update it
 * Input lag @ visual editor
 * BioMart: Use GRanges for seqinfo
 * Load annotation from data.frame / csv
 * Document: annotation from data frame
 * Sample annotation: Fragment lengths
 * Integrating importer: Selectize to remove datasets
+* General plot settings; disable features
 
 ## Theory/practice
 

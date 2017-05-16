@@ -26,13 +26,18 @@ uiHelpPage <- function() {
     uiHelpPageEntry("Overview", "helppages/overview.md"),
     "Data",
     uiHelpPageEntry("Read counts", "helppages/data-readcounts.md"),
-    uiHelpPageEntry("Annotations", "helppages/data-annotations.md"),
-    uiHelpPageEntry("Conditions", "helppages/data-conditions.md"),
+    uiHelpPageEntry("Sample annotation", "helppages/data-samples-annotation.md"),
+    uiHelpPageEntry("Gene annotation", "helppages/data-gene-annotation.md"),
+    uiHelpPageEntry("Read count processing", "helppages/data-readcount-processing.md"),
+    "Filter genes",
+    uiHelpPageEntry("By annotation", "helppages/filter-genes-annotation.md"),
+    uiHelpPageEntry("By gene variance", "helppages/filter-genes-gene-variance.md"),
     "PCA",
-    uiHelpPageEntry("Gene filtering", "helppages/pca-filter.md"),
-    uiHelpPageEntry("Top variant genes", "helppages/pca-top-variant-genes.md"),
-    "User interface",
-    uiHelpPageEntry("Overview", "helppages/ui.md"),
-    uiHelpPageEntry("Plot visuals", "helppages/ui-plot-visuals.md")
+    uiHelpPageEntry("Data processing", "helppages/pca-data-processing.md"),
+    uiHelpPageEntry("Output settings", "helppages/pca-output-settings.md"),
+    "Appendix",
+    uiHelpPageEntry("Upload widget", "helppages/appendix-uploader-widget.md"),
+    uiHelpPageEntry("Visuals editor widget", "helppages/appendix-visual-editor.md"),
+    uiHelpPageEntry("File formats", "helppages/appendix-fileformats.md")
   ))
 }
