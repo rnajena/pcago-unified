@@ -94,26 +94,46 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
     if(input$pca.data.normalization == "tpm") {
       
       validate(need(cell.annotation(), "No cell annotation available!"),
-              need(gene.annotation(), "No gene annotation available!"),
-              need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
+              need(gene.annotation(), "No gene annotation available!"))
       
-      return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
-                                             use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
-                                             use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
-                                             gene.annotation = gene.annotation(),
-                                             cell.annotation = cell.annotation()))
+      normalization.results <- tryCatch({
+        return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
+                                        use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
+                                        use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
+                                        gene.annotation = gene.annotation(),
+                                        cell.annotation = cell.annotation()))
+      },
+      error = function(e) {
+        showNotification(paste(e), type = "error", duration = NULL)
+        return(NULL)
+      },
+      warning = function(w) {
+        showNotification(paste(w), type = "warning", duration = NULL)
+        return(NULL)
+      })
+      
+      return(normalization.results)
     }
     else if(input$pca.data.normalization == "deseq2") {
       
       validate(need(cell.annotation(), "No cell annotation available!"),
-               need(cell.annotation()@conditions, "No cell conditions available!"),
-               need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"),
-               need(length(setdiff(input$pca.data.normalization.deseq2.conditions ,colnames(conditions()))) == 0, "Wrong conditions selected!"),
-               need(is.integer(assay(readcounts)), "The read counts must be integers to be able to normalize them!"))
+               need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"))
       
-      return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
-                                                condition.table = cell.annotation()@conditions, 
-                                                selected.conditions = input$pca.data.normalization.deseq2.conditions))
+      normalization.results <- tryCatch({
+        return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
+                                           cell.annotation = cell.annotation(), 
+                                           selected.conditions = input$pca.data.normalization.deseq2.conditions))
+      },
+      error = function(e) {
+        showNotification(paste(e), type = "error", duration = NULL)
+        return(NULL)
+      },
+      warning = function(w) {
+        showNotification(paste(w), type = "warning", duration = NULL)
+        return(NULL)
+      })
+      
+      return(normalization.results)
       
     }
     else 
