@@ -173,7 +173,8 @@ readcountProcessing.step.filter <- function(readcounts.processed, readcounts.fil
       })
       
       keysinfo <- tagAppendChild(keysinfo, h3(criterion))
-      keysinfo <- tagAppendChild(keysinfo, tags$textarea( readonly="readonly", paste(selection, collapse = "\n")))
+      keysinfo <- tagAppendChild(keysinfo, tags$textarea( readonly="readonly", paste(selection, collapse = "\n"), style = css(width = "100%",
+                                                                                                                              height = "200px")))
     }
     
     # Summary of filter settings

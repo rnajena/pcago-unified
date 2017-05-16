@@ -25,7 +25,7 @@ extendedSliderInput <- function(id, header = "") {
   ns <- NS(id)
   
   return(tagList(sliderInput(ns("count"), header, min = 0, max = 0, value = 0, step = 1, round = T),
-                 fluidRow(style = "text-align: center;", tags$div(class = "col-centered", style = "display: inline-block;",
+                 fluidRow(style = css("text-align" = "center"), tags$div(class = "col-centered", style = css(display = "inline-block"),
                                                                   actionButton(ns("large.step.increase"), label = "", icon = icon("fast-backward")),
                                                                   actionButton(ns("small.step.increase"), label = "", icon = icon("step-backward")),
                                                                   bsButton(ns("play"), label = tags$span(tags$span(class = "play", icon("play")), tags$span(class = "pause", icon("pause"))), type = "toggle", style = "play-pause"),
