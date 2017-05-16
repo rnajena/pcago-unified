@@ -1,10 +1,10 @@
 #' 
-#' Functions for handling cell annotation visuals
+#' Functions for handling sample annotation visuals
 #' 
 
 library(shiny)
 source("helpers.R")
-source("cellAnnotation.R")
+source("sampleAnnotation.R")
 
 # Importers for condition visuals
 supportedConditionVisualsImporters <- list(
@@ -153,24 +153,24 @@ conditionName <- function(visuals.conditions, conditions) {
 
 #' 
 #'
-#' @param cells List of cells that is used to create visual parameters for
-#' @param conditions Maps a cell to a list of conditions
+#' @param samples List of samples that is used to create visual parameters for
+#' @param conditions Maps a sample to a list of conditions
 #' @param visuals.conditions Maps a condtition to visual parameters
 #'
 #' @return
 #' @export
 #'
 #' @examples
-calculateCellVisuals <- function(cells, conditions, condition.visuals) {
+calculateSampleVisuals <- function(samples, conditions, condition.visuals) {
   
-  if(is.null(cells) || is.null(conditions) || is.null(condition.visuals)) {
+  if(is.null(samples) || is.null(conditions) || is.null(condition.visuals)) {
     return(NULL)
   }
   
   # Setup output
-  factors <- data.frame(row.names = cells,
-                        color = rep("#000000", length(cells)),
-                        shape = rep(16, length(cells)),
+  factors <- data.frame(row.names = samples,
+                        color = rep("#000000", length(samples)),
+                        shape = rep(16, length(samples)),
                         stringsAsFactors = F)
   
   palette.colors <- c()
@@ -178,8 +178,8 @@ calculateCellVisuals <- function(cells, conditions, condition.visuals) {
   palette.shapes <- c()
   palette.shapes.conditions <- c()
   
-  # Go through each cell and select the color & shape based on the first condition providing it
-  for(cell in cells) {
+  # Go through each sample and select the color & shape based on the first condition providing it
+  for(sample in samples) {
     
     color <- ""
     color.condition <- ""
@@ -188,8 +188,8 @@ calculateCellVisuals <- function(cells, conditions, condition.visuals) {
     
     for(condition in rownames(condition.visuals)) {
       
-      # Check if the cell has the condition. Otherwise skip
-      if(!is.logical(conditions[cell, condition]) || !conditions[cell, condition]) {
+      # Check if the sample has the condition. Otherwise skip
+      if(!is.logical(conditions[sample, condition]) || !conditions[sample, condition]) {
         next()
       }
       
@@ -216,8 +216,8 @@ calculateCellVisuals <- function(cells, conditions, condition.visuals) {
       shape.condition <- condition.default
     }
     
-    factors[cell, "color"] <- color.condition # todo: user name for condition
-    factors[cell, "shape"] <- shape.condition
+    factors[sample, "color"] <- color.condition # todo: user name for condition
+    factors[sample, "shape"] <- shape.condition
     
     if(!(color.condition %in% palette.colors.conditions)) { 
       

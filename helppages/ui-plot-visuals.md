@@ -18,7 +18,7 @@ from the <strong>left most</strong> condition in the list.
 </div>
 
 <div class="well help-box">
-<label>Example</label> With the conditions as seen in the screenshot, a cell with conditions
+<label>Example</label> With the conditions as seen in the screenshot, a sample with conditions
 <code>atra</code>, <code>asp</code> and <code>eco</code> gets the shape from <code>atra</code> and the color from <code>asp</code>.
 The <code>eco</code> condition is ignored, because both color and shape are already set.
 </div>

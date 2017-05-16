@@ -2,10 +2,10 @@ library(shiny)
 
 source("readcounts.R")
 source("geneAnnotation.R")
-source("cellAnnotation.R")
-source("cellAnnotationVisuals.R")
+source("sampleAnnotation.R")
+source("sampleAnnotationVisuals.R")
 source("pca.R")
-source("widgetCellAnnotationImporter.R")
+source("widgetSampleAnnotationImporter.R")
 
 #' Handles some server side navigation features
 #'
@@ -26,8 +26,8 @@ serverNavigation <- function(input, session) {
   # Navigation quick links
   # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
   observeEvent(input$pca.nav, {
-    if(input$pca.nav == "pca.cells.plot.quicklink") {
-      updateNavbarPage(session, "pca.nav", selected = "pca.cells.plot")
+    if(input$pca.nav == "pca.samples.plot.quicklink") {
+      updateNavbarPage(session, "pca.nav", selected = "pca.samples.plot")
     }
   })
 }
@@ -54,9 +54,9 @@ serverReadCountPreProcessing <- function(readcounts, input) {
       output$readcounts <- transposeReadCounts(output$readcounts)
     }
     
-    # Prevent too many cells
+    # Prevent too many samples
     if(ncol(output$readcounts) > 100) {
-      showNotification("There are over 100 cells! I won't calculate with that! Maybe you need to transpose your data?", type = "error")
+      showNotification("There are over 100 samples! I won't calculate with that! Maybe you need to transpose your data?", type = "error")
       return(NULL)
     }
     
@@ -77,14 +77,14 @@ serverReadCountPreProcessing <- function(readcounts, input) {
 #'
 #' @param readcounts 
 #' @param gene.annotation 
-#' @param cell.annotation
+#' @param sample.annotation
 #' @param input 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annotation, input) {
+serverReadcountNormalization <- function(readcounts, gene.annotation, sample.annotation, input) {
   
   return(reactive({
     
@@ -93,7 +93,7 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
     # Apply normalization
     if(input$pca.data.normalization == "tpm") {
       
-      validate(need(cell.annotation(), "No cell annotation available!"),
+      validate(need(sample.annotation(), "No sample annotation available!"),
               need(gene.annotation(), "No gene annotation available!"))
       
       normalization.results <- tryCatch({
@@ -101,7 +101,7 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
                                         use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
                                         use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
                                         gene.annotation = gene.annotation(),
-                                        cell.annotation = cell.annotation()))
+                                        sample.annotation = sample.annotation()))
       },
       error = function(e) {
         showNotification(paste(e), type = "error", duration = NULL)
@@ -116,12 +116,12 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, cell.annot
     }
     else if(input$pca.data.normalization == "deseq2") {
       
-      validate(need(cell.annotation(), "No cell annotation available!"),
+      validate(need(sample.annotation(), "No sample annotation available!"),
                need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"))
       
       normalization.results <- tryCatch({
         return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
-                                           cell.annotation = cell.annotation(), 
+                                           sample.annotation = sample.annotation(), 
                                            selected.conditions = input$pca.data.normalization.deseq2.conditions))
       },
       error = function(e) {

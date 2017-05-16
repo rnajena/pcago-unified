@@ -19,8 +19,8 @@ library(shinyjs)
 library(colourpicker)
 source("readcounts.R")
 source("geneAnnotation.R")
-source("cellAnnotation.R")
-source("cellAnnotationVisuals.R")
+source("sampleAnnotation.R")
+source("sampleAnnotationVisuals.R")
 source("pca.R")
 source("widgetGenericImporter.R")
 source("widgetDownloadableDataTable.R")
@@ -29,12 +29,12 @@ source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetExtendedSliderInput.R")
 source("widgetProcessingSteps.R")
-source("widgetCellAnnotationImporter.R")
+source("widgetSampleAnnotationImporter.R")
 source("widgetGeneAnnotationImporter.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
-source("plotCellPlot.R")
+source("plotSamplePlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
@@ -57,10 +57,10 @@ shinyServer(function(input, output, session) {
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
   
  
-  cell.annotation <- cellAnnotationImporterValue("data.cell.annotation.importer", readcounts = readcounts.preprocessed)
+  sample.annotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", readcounts = readcounts.preprocessed)
   conditions <- reactive({
-    validate(need(cell.annotation(), "No cell annotation available!"))
-    return(cell.annotation()@conditions)
+    validate(need(sample.annotation(), "No sample annotation available!"))
+    return(sample.annotation()@conditions)
   })
   
   observeEvent(conditions(), {
@@ -80,7 +80,7 @@ shinyServer(function(input, output, session) {
   # Finish processing of read counts with normalization
   readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
                                                                   gene.annotation = gene.annotation, 
-                                                                  cell.annotation = cell.annotation,
+                                                                  sample.annotation = sample.annotation,
                                                                   input = input)
   readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
   
@@ -124,10 +124,10 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant)
   plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
   
-  # Cell annotation
-  downloadableDataTable("cells.annotation", export.filename = "annotation", data = reactive({ cellAnnotationToTable(cell.annotation()) }))
-  downloadableDataTable("cells.conditions", export.filename = "conditions", data = conditions)
-  plotConditionsVennDiagramPlot("cells.conditions.plot", conditions = conditions)
+  # Sample annotation
+  downloadableDataTable("samples.annotation", export.filename = "annotation", data = reactive({ sampleAnnotationToTable(sample.annotation()) }))
+  downloadableDataTable("samples.conditions", export.filename = "conditions", data = conditions)
+  plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
   
   
   downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
@@ -188,7 +188,7 @@ shinyServer(function(input, output, session) {
                                   reactive({ t(pca()$transformed) }),
                                   default.title = reactive({ "PCA transformed values clustering" }))
   
-  plotCellPlot("pca.cells.plot",
+  plotSamplePlot("pca.samples.plot",
                readcounts.processed = readcounts.processed,
                readcounts.filtered = readcounts.filtered,
                readcounts.top.variant = readcounts.top.variant,

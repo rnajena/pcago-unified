@@ -96,20 +96,20 @@ importReadcountSample <- function(sample, parameters) {
 #' Applies read count normalization (DeSeq2) to readcounts
 #'
 #' @param readcounts 
-#' @param condition.table Conditions table that associates each cell to the conditions it has
+#' @param condition.table Conditions table that associates each sample to the conditions it has
 #' @param selectedn.conditions Vector of conditions that should be used for normalization
 #'
 #' @return
 #' @export
 #'
 #' @examples
-applyReadcountNormalization.DESeq2 <- function(readcounts, cell.annotation, selected.conditions) {
+applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, selected.conditions) {
   
-  if(!is.SummarizedExperiment(readcounts) || !is(cell.annotation, "CellAnnotation") || !is.character(selected.conditions)) {
+  if(!is.SummarizedExperiment(readcounts) || !is(sample.annotation, "SampleAnnotation") || !is.character(selected.conditions)) {
     stop("Invalid arguments!")
   }
-  if(!cellAnnotationHasConditions(cell.annotation)) {
-    stop("Cell annotation has no condition table!")
+  if(!sampleAnnotationHasConditions(sample.annotation)) {
+    stop("Sample annotation has no condition table!")
   }
   if(!is.integer(assay(readcounts))) {
     stop("Read counts need to be integers!")
@@ -120,9 +120,9 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, cell.annotation, sele
     removeNotification(progress)
   })
   
-  condition.table <- cell.annotation@conditions
+  condition.table <- sample.annotation@conditions
   
-  # Deseq expects that we assign a condition to each cell
+  # Deseq expects that we assign a condition to each sample
   # But we store a boolean condition array. Collapse it into strings.
   collapsed.conditions <- collapseConditions(condition.table, selected.conditions)
   
@@ -146,7 +146,7 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, cell.annotation, sele
 #' @param readcounts Read count data
 #' @param use.fragment.effectivelength Calculate the effective length instead of using the feature length (preferred)
 #' @param use.feature.exonlength Use the exon length of a feature instead of the feature length (preferred)
-#' @param cell.annotation Annotation of cells
+#' @param sample.annotation Annotation of samples
 #' @param gene.annotation Annotation of genes
 #'
 #' @return
@@ -154,7 +154,7 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, cell.annotation, sele
 #'
 #' @examples
 applyReadcountNormalization.TPM <- function(readcounts,
-                                            cell.annotation, 
+                                            sample.annotation, 
                                             gene.annotation, 
                                             use.feature.exonlength = T, 
                                             use.fragment.effectivelength = T) {
@@ -174,8 +174,8 @@ applyReadcountNormalization.TPM <- function(readcounts,
   if(!geneAnnotationHasSequenceInfo(gene.annotation)) {
     stop("No sequence info available!")
   }
-  if(use.fragment.effectivelength && !cellAnnotationHasCellInfo(cell.annotation)) {
-    stop("No cell info available!")
+  if(use.fragment.effectivelength && !sampleAnnotationHasSampleInfo(sample.annotation)) {
+    stop("No sample info available!")
   }
   
   counts <- assay(readcounts)
@@ -191,7 +191,7 @@ applyReadcountNormalization.TPM <- function(readcounts,
   # Go through each sample
   for(i in seq_len(ncol(counts))) {
     
-    cell <- colnames(readcounts)[i]
+    sample <- colnames(readcounts)[i]
     
     # First, we need to calculate the effective length of each feature
     # It depends on the mean fragment length of that sample and the feature length.
@@ -203,10 +203,10 @@ applyReadcountNormalization.TPM <- function(readcounts,
     
     if(use.fragment.effectivelength) {
       
-      mean.fragmentlength <- cell.annotation@cell.info[cell, "meanfragmentlength"]
+      mean.fragmentlength <- sample.annotation@sample.info[sample, "meanfragmentlength"]
       
       if(is.na(mean.fragmentlength) || !is.numeric(mean.fragmentlength)) {
-        stop("All cells need a mean fragment length annotation!")
+        stop("All samples need a mean fragment length annotation!")
       }
       
       feature.effectivelength <- feature.lengths - mean.fragmentlength + 1

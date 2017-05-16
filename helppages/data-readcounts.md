@@ -10,10 +10,10 @@ Choose the *importer* according to the file you want to upload.
 
 The read count table should have following form:
 
-| ID    | Cell1                       | Cell2                       | Cell3 | ... |
+| ID    | Sample1                       | Sample2                       | Sample3 | ... |
 |-------|-----------------------------|-----------------------------|-------|-----|
-| Gene1 | Read count of Gene1 in Cell1 | Read count of Gene1 in Cell2 | ...   | ... |
-| Gene2 | Read count of Gene2 in Cell1 | ...                         | ...   | ... |
+| Gene1 | Read count of Gene1 in Sample1 | Read count of Gene1 in Sample2 | ...   | ... |
+| Gene2 | Read count of Gene2 in Sample1 | ...                         | ...   | ... |
 | Gene3 | ...                         | ...                         | ...   | ... |
 | ...   | ...                         | ...                         | ...   | ... |
 
@@ -30,7 +30,7 @@ genes with constant read counts have a variance of zero.
 ### Transpose matrix
 
 You can use this option if you provided a transposed table (where the genes are the columns
-  and the cells are the rows).
+  and the samples are the rows).
 
 ## Read count normalization
 

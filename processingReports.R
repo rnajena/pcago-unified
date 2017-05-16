@@ -119,7 +119,7 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
       
       content <- tagList()
       
-      # TODO: Table that shows that the read counts are normalized now (sum is same for all samples/cells)
+      # TODO: Table that shows that the read counts are normalized now (sum is same for all samples)
       
       return(list(title = "Apply TPM normalization",
                   content = content))

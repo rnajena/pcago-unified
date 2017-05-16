@@ -60,14 +60,14 @@ plotAgglomerativeClusteringPlotSettingsUI <- function(id) {
 
 plotAgglomerativeClusteringPlot.save <- function(readcounts, 
                                                  plot.settings, 
-                                                 cell.visuals, 
+                                                 sample.visuals, 
                                                  format, 
                                                  filename, 
                                                  method.distance = "euclidian", 
                                                  method.cluster = "average"){
   
   validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to plot!"),
-           need(cell.visuals(), "No cell visuals available!"))
+           need(sample.visuals(), "No sample visuals available!"))
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
                                      PlotSettings(width = 640, 
@@ -83,8 +83,8 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
   
-  palette.colors <- cell.visuals()$palette.colors
-  palette.shapes <- cell.visuals()$palette.shapes
+  palette.colors <- sample.visuals()$palette.colors
+  palette.shapes <- sample.visuals()$palette.shapes
   
   saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
     
@@ -95,8 +95,8 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
       hclust(method = method.cluster) %>%
       as.dendrogram
     
-    dend.cells <- labels(dend)
-    dend.factors <- cell.visuals()$factors[dend.cells,]
+    dend.samples <- labels(dend)
+    dend.factors <- sample.visuals()$factors[dend.samples,]
     
     dend <- dend %>% dendextend::set("leaves_pch", palette.shapes[as.numeric(dend.factors$shape)]) %>%
       dendextend::set("leaves_col", palette.colors[as.numeric(dend.factors$color)])
@@ -136,9 +136,9 @@ plotAgglomerativeClusteringPlot_ <- function(input,
   
   plot.settings <- generalPlotSettings("plot.settings")
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ calculateCellVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
+  visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts()), conditions(), visuals.conditions()) })
   
-  # Provide plot height that scales with cell count
+  # Provide plot height that scales with sample count
   plot.settings.dynamic <- reactive({
     
     validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to build plot settings from!"))
@@ -147,7 +147,7 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                                   PlotSettings(dpi = 96,
                                                scale = 1))
     
-    # Calculate the plot height based on the count of cells
+    # Calculate the plot height based on the count of samples
     height <- (1 + 0.4 * ncol(readcounts())) * settings@dpi * settings@scale
     settings <- plotSettingsSetNA(plot.settings(),
                                   PlotSettings(height = height))
@@ -175,7 +175,7 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                                                                  plot.settings, 
                                                                  format, 
                                                                  filename,
-                                                                 cell.visuals = visuals.cell,
+                                                                 sample.visuals = visuals.sample,
                                                                  method.distance = input$method.dist,
                                                                  method.cluster = input$method.hclust))
                    })

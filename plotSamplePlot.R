@@ -1,5 +1,5 @@
 #' 
-#' Plot module for PCA cell plot
+#' Plot module for PCA sample plot
 #' 
 
 library(shiny)
@@ -8,7 +8,7 @@ library(scatterplot3d)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
 
-plotCellPlotUI <- function(id) {
+plotSamplePlotUI <- function(id) {
   
   ns <- NS(id)
   
@@ -18,7 +18,7 @@ plotCellPlotUI <- function(id) {
                                 )))
 }
 
-plotCellPlotSettingsUI <- function(id) {
+plotSamplePlotSettingsUI <- function(id) {
   
   ns <- NS(id)
   
@@ -35,9 +35,9 @@ plotCellPlotSettingsUI <- function(id) {
   
 }
 
-plotCellPlot.save <- function(pca, 
+plotSamplePlot.save <- function(pca, 
                             visuals.conditions, 
-                            visuals.cell, 
+                            visuals.sample, 
                             axes, 
                             plot.settings,
                             format,
@@ -48,7 +48,7 @@ plotCellPlot.save <- function(pca,
                                                   height = 480,
                                                   dpi = 96,
                                                   scale = 1,
-                                                  title = "Cell plot",
+                                                  title = "PCA samples plot",
                                                   subtitle = "",
                                                   legend.color = "Color",
                                                   legend.shape = "Shape"))
@@ -67,7 +67,7 @@ plotCellPlot.save <- function(pca,
     need(pca, "No PCA results available!"),
     need(axes, "No axes to draw!"),
     need(visuals.conditions, "No condition visual parameters available!"),
-    need(visuals.cell, "No cell visual parameters available!"))
+    need(visuals.sample, "No sample visual parameters available!"))
   
   if(!is.character(format) || !is.character(filename)) {
     stop("Invalid arguments!")
@@ -90,11 +90,11 @@ plotCellPlot.save <- function(pca,
            need(dimensions.plot <= 3, "Too many axes to draw!"))
   
   # Add visual properties to the variables
-  pca.transformed$color <- visuals.cell$factors$color
-  pca.transformed$shape <- visuals.cell$factors$shape
+  pca.transformed$color <- visuals.sample$factors$color
+  pca.transformed$shape <- visuals.sample$factors$shape
   
-  palette.colors <- visuals.cell$palette.colors
-  palette.shapes <- visuals.cell$palette.shapes
+  palette.colors <- visuals.sample$palette.colors
+  palette.shapes <- visuals.sample$palette.shapes
   
   label.color <- if(customlabel.color == "") "Color" else customlabel.color
   label.shape <- if(customlabel.shape == "") "Shape" else customlabel.shape
@@ -204,30 +204,30 @@ plotCellPlot.save <- function(pca,
   
 }
 
-#' Renders a movie showing the PCA cell plot over increasing amount of top variant genes
+#' Renders a movie showing the PCA sample plot over increasing amount of top variant genes
 #'
 #' @param filename File name of the rendered video
 #' @param animation.params Animation parameters
 #' @param axes Vector of displayed axes (PC1, PC2, ...). 
 #' @param visuals.conditions Visual definitions for each condition
-#' @param visuals.cell Visual definitions for each cell
+#' @param visuals.sample Visual definitions for each sample
 #' @param readcounts.filtered Filtered read counts. Contains read counts with specific set of genes
 #' @param gene.variances Gene variances
 #' @param pca.center Center data before PCA
 #' @param pca.scale Scale data before PCA
-#' @param pca.relative Make transformed cell coordinates relative
+#' @param pca.relative Make transformed sample coordinates relative
 #' @param updateProgress Function that takes progress input. Parameters are detail (current operation) and value (current progress)
 #'
 #' @return
 #' @export
 #'
 #' @examples
-plotCellPlot.saveMovie <- function(filename,
+plotSamplePlot.saveMovie <- function(filename,
                                  plot.settings,
                                  animation.params,
                                  axes, 
                                  visuals.conditions,
-                                 visuals.cell,
+                                 visuals.sample,
                                  readcounts.filtered,
                                  gene.variances,
                                  pca.center,
@@ -235,7 +235,7 @@ plotCellPlot.saveMovie <- function(filename,
                                  pca.relative,
                                  updateProgress = NULL) {
   
-  if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.cell) ||
+  if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.sample) ||
      !is.SummarizedExperiment(readcounts.filtered) || !is.data.frame(gene.variances) || !is.logical(pca.center) || !is.logical(pca.scale)) {
     stop("Invalid arguments!")
   }
@@ -253,9 +253,9 @@ plotCellPlot.saveMovie <- function(filename,
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
     
     pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale, relative = pca.relative)
-    plotCellPlot.save(pca = pca,
+    plotSamplePlot.save(pca = pca,
                     visuals.conditions = visuals.conditions,
-                    visuals.cell = visuals.cell,
+                    visuals.sample = visuals.sample,
                     axes = axes,
                     plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
                     format = "png",
@@ -283,7 +283,7 @@ plotCellPlot.saveMovie <- function(filename,
   showNotification("Your video file has been successfully rendered.", type = "message")
 }
 
-plotCellPlot_ <- function(input, 
+plotSamplePlot_ <- function(input, 
                           output, 
                           session, 
                           readcounts.processed, 
@@ -295,7 +295,7 @@ plotCellPlot_ <- function(input,
                           pca) {
   
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
-  visuals.cell <- reactive({ calculateCellVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
+  visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
   plot.settings <- generalPlotSettings("plot.settings")
   
   # Update the axis selectize
@@ -319,13 +319,13 @@ plotCellPlot_ <- function(input,
   downloadablePlot("plot", plot.settings = plot.settings, exprplot = function( plot.settings, format, filename ){
     
     validate(need(pca(), "No PCA results to plot!"),
-             need(visuals.cell(), "No visual parameters!"))
+             need(visuals.sample(), "No visual parameters!"))
     
     plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
     
-    return(plotCellPlot.save(pca = pca(),
+    return(plotSamplePlot.save(pca = pca(),
                             visuals.conditions = visuals.conditions(),
-                            visuals.cell = visuals.cell(),
+                            visuals.sample = visuals.sample(),
                             axes = input$axes,
                             plot.settings = plot.settings,
                             format = format,
@@ -333,7 +333,7 @@ plotCellPlot_ <- function(input,
   })
   
   # Download mp4 movie
-  output$export.mp4 <- downloadHandler("cell-plot-movie.mp4", function(file) {
+  output$export.mp4 <- downloadHandler("sample-plot-movie.mp4", function(file) {
     
     validate(
       need(readcounts.filtered(), "No filtered read counts!")
@@ -348,13 +348,13 @@ plotCellPlot_ <- function(input,
     
     withProgressCustom(function(updateProgress) {
       
-      plotCellPlot.saveMovie(
+      plotSamplePlot.saveMovie(
         filename = file,
         animation.params = animation.params(),
         axes = input$axes,
         plot.settings = plot.settings(),
         visuals.conditions = visuals.conditions(),
-        visuals.cell = visuals.cell(),
+        visuals.sample = visuals.sample(),
         readcounts.filtered = readcounts.filtered(),
         gene.variances = gene.variances(),
         pca.center = pca()$params$center,
@@ -368,7 +368,7 @@ plotCellPlot_ <- function(input,
   })
 }
 
-plotCellPlot <- function(id, 
+plotSamplePlot <- function(id, 
                          readcounts.processed, 
                          readcounts.filtered, 
                          readcounts.top.variant, 
@@ -377,7 +377,7 @@ plotCellPlot <- function(id,
                          conditions, 
                          pca) {
   
-  return(callModule(plotCellPlot_, 
+  return(callModule(plotSamplePlot_, 
                     id, 
                     readcounts.processed = readcounts.processed,
                     readcounts.filtered = readcounts.filtered, 

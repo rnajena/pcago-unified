@@ -11,11 +11,11 @@ source("widgetFilterSelection.R")
 source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetGeneAnnotationImporter.R")
-source("widgetCellAnnotationImporter.R")
+source("widgetSampleAnnotationImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
-source("plotCellPlot.R")
+source("plotSamplePlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
@@ -35,9 +35,9 @@ uiPCASidebarData <- function() {
     bsCollapsePanel("Import read counts", 
                     value = "data.readcounts.import",
                     genericImporterInput("pca.data.readcounts.importer")),
-    bsCollapsePanel("Import cell annotation",
-                    value = "data.cell.annotation",
-                    cellAnnotationImporterUI("data.cell.annotation.importer")),
+    bsCollapsePanel("Import sample annotation",
+                    value = "data.sample.annotation",
+                    sampleAnnotationImporterUI("data.sample.annotation.importer")),
     bsCollapsePanel("Import gene annotation",
                     value = "data.gene.annotation",
                     geneAnnotationImporterUI("data.gene.annotation.importer")),
@@ -109,7 +109,7 @@ uiPCASidebarPCA <- function() {
                    ),
     bsCollapsePanel("Output transformations",
                     radioButtons("pca.pca.settings.relative", 
-                                 helpIconText("Relative cell positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
+                                 helpIconText("Relative sample positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
                                  choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global")))
   ))
   
@@ -130,11 +130,11 @@ uiPCASidebarPlot <- function() {
     conditionalPanel("input['pca.nav'] == 'readcounts.filtered'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.filtered.hclust.plot")),
     conditionalPanel("input['pca.nav'] == 'readcounts.top.variant'", plotAgglomerativeClusteringPlotSettingsUI("readcounts.top.variant.hclust.plot")),
     # Clustering based on PCA
-    conditionalPanel("input['pca.nav'] == 'pca.cells.transformed'", plotAgglomerativeClusteringPlotSettingsUI("pca.transformed.hclust.plot")),
-    # Cell plot
-    conditionalPanel("input['pca.nav'] == 'pca.cells.plot'", plotCellPlotSettingsUI("pca.cells.plot")),
-    # Cell conditions venn diagram plot
-    conditionalPanel("input['pca.nav'] == 'cells.conditions'", plotConditionsVennDiagramPlotSettingsUI("cells.conditions.plot")),
+    conditionalPanel("input['pca.nav'] == 'pca.samples.transformed'", plotAgglomerativeClusteringPlotSettingsUI("pca.transformed.hclust.plot")),
+    # Sample plot
+    conditionalPanel("input['pca.nav'] == 'pca.samples.plot'", plotSamplePlotSettingsUI("pca.samples.plot")),
+    # Sample conditions venn diagram plot
+    conditionalPanel("input['pca.nav'] == 'samples.conditions'", plotConditionsVennDiagramPlotSettingsUI("samples.conditions.plot")),
     # Gene variances plot
     conditionalPanel("input['pca.nav'] == 'genes.variances'", plotGeneVariancePlotSettingsUI("genes.variances.plot")),
     # Gene variances plot (filtered genes)

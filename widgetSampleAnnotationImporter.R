@@ -4,11 +4,11 @@
 
 library(shiny)
 source("widgetGenericImporter.R")
-source("cellAnnotation.R")
-source("cellAnnotationVisuals.R")
+source("sampleAnnotation.R")
+source("sampleAnnotationVisuals.R")
 source("uiHelper.R")
 
-#' Creates a widget that allows the user to select a method of extracting cell conditions
+#' Creates a widget that allows the user to select a method of extracting sample conditions
 #'
 #' @param id 
 #'
@@ -16,7 +16,7 @@ source("uiHelper.R")
 #' @export
 #'
 #' @examples
-cellAnnotationImporterUI <- function(id) {
+sampleAnnotationImporterUI <- function(id) {
   
   if(!is.character(id)) {
     stop("Invalid arguments!")
@@ -38,7 +38,7 @@ cellAnnotationImporterUI <- function(id) {
   
 }
 
-#' Extracts the cell conditions based on the user input.
+#' Extracts the sample conditions based on the user input.
 #' This function is supposed to be called by callModule. Use the one without an underscore for easier access.
 #'
 #' @param input 
@@ -50,36 +50,36 @@ cellAnnotationImporterUI <- function(id) {
 #' @export
 #'
 #' @examples
-cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
+sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   
-  cell.annotation.imported <- genericImporterData("importer",
-                                                   importers = reactive(supportedCellAnnotationImporters),
-                                                   samples = reactive(availableCellAnnotationSamples),
-                                                   generators = reactive(supportedCellAnnotationGenerators),
+  sample.annotation.imported <- genericImporterData("importer",
+                                                   importers = reactive(supportedSampleAnnotationImporters),
+                                                   samples = reactive(availableSampleAnnotationSamples),
+                                                   generators = reactive(supportedSampleAnnotationGenerators),
                                                    exprimport = function(con, importer, parameters) {
-                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                     cells <- colnames(readcounts())
+                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     samples <- colnames(readcounts())
                                                      
-                                                     return(importCellAnnotation(con, importer, cells))
+                                                     return(importSampleAnnotation(con, importer, samples))
                                                    },
                                                    exprsample = function(sample, parameters) {
                                                      
-                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                     cells <- colnames(readcounts())
+                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     samples <- colnames(readcounts())
                                                      
-                                                     return(importCellAnnotationSample(sample, cells))
+                                                     return(importSampleAnnotationSample(sample, samples))
                                                      
                                                    },
                                                    exprgenerator = function(generator, parameters) {
                                                      
-                                                     validate(need(readcounts(), "Cannot import cell annotation without read counts!"))
-                                                     cells <- colnames(readcounts())
+                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     samples <- colnames(readcounts())
                                                      
-                                                     return(importCellAnnotationFromGenerator(generator, cells, parameters))
+                                                     return(importSampleAnnotationFromGenerator(generator, samples, parameters))
                                                    },
                                                    exprintegrate = function(data, callback) {
                                                      
-                                                     output <- CellAnnotation()
+                                                     output <- SampleAnnotation()
                                                      
                                                      choices <- c("Conditions" = "conditions",
                                                                   "Mean fragment lengths" = "meanfragmentlength")
@@ -96,21 +96,21 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                          next()
                                                        }
                                                       
-                                                       output <- mergeCellAnnotation(output, entry)
+                                                       output <- mergeSampleAnnotation(output, entry)
                                                       
                                                      }
                                                      
                                                      # Populate callback list
-                                                     cells <- colnames(readcounts())
+                                                     samples <- colnames(readcounts())
 
                                                      for(annotation.type in choices) {
-                                                       covered.cells <- intersect(cellAnnotationAnnotatedCells(output, annotation.type), cells)
+                                                       covered.samples <- intersect(sampleAnnotationAnnotatedSamples(output, annotation.type), samples)
 
-                                                       if(length(covered.cells) > 0) {
+                                                       if(length(covered.samples) > 0) {
                                                          names(choices)[choices == annotation.type] <- sprintf("%s (%d/%d)",
                                                                                                                names(choices)[choices == annotation.type],
-                                                                                                               length(covered.cells),
-                                                                                                               length(cells))
+                                                                                                               length(covered.samples),
+                                                                                                               length(samples))
                                                          selected <- c(selected, annotation.type)
                                                        }
 
@@ -118,8 +118,8 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      
                                                      
                                                      # Check if readcounts are matching the data
-                                                     if(!cellAnnotationMatchesCells(output, cells)) {
-                                                       stop("Cell annotation doesn't match with data in read count table!")
+                                                     if(!sampleAnnotationMatchesSamples(output, samples)) {
+                                                       stop("Sample annotation doesn't match with data in read count table!")
                                                      }
                                                      
                                                      callback(choices, selected)
@@ -132,11 +132,11 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   conditions <- reactive({
     
     validate(need(readcounts(), "Cannot get condition table without read counts!"),
-             need(cell.annotation.imported(), "No cell annotation available!"))
+             need(sample.annotation.imported(), "No sample annotation available!"))
     # ! Needs to be separate. Thanks, R Shiny for ALWAYS TESTING ALL F**** CHECKS!!!
-    validate(need(cellAnnotationHasConditions(cell.annotation.imported()), "No cell conditions available!"))
+    validate(need(sampleAnnotationHasConditions(sample.annotation.imported()), "No sample conditions available!"))
     
-    return(cell.annotation.imported()@conditions)
+    return(sample.annotation.imported()@conditions)
     
   })
   
@@ -165,12 +165,12 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   })
   
   return(reactive({
-    return(mergeCellAnnotation(cell.annotation.imported(), CellAnnotation(conditions = conditions.modified())))
+    return(mergeSampleAnnotation(sample.annotation.imported(), SampleAnnotation(conditions = conditions.modified())))
   }))
   
 }
 
-#' Extracts the cell conditions based on the user input.
+#' Extracts the sample conditions based on the user input.
 #'
 #' @param id 
 #' @param readcounts 
@@ -179,8 +179,8 @@ cellAnnotationImporterValue_ <- function(input, output, session, readcounts) {
 #' @export
 #'
 #' @examples
-cellAnnotationImporterValue <- function(id, readcounts) {
+sampleAnnotationImporterValue <- function(id, readcounts) {
   
-  return(callModule(cellAnnotationImporterValue_, id, readcounts = readcounts))
+  return(callModule(sampleAnnotationImporterValue_, id, readcounts = readcounts))
   
 }

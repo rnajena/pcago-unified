@@ -11,7 +11,7 @@ source("widgetGenericImporter.R")
 source("widgetProcessingSteps.R")
 source("uiHelper.R")
 source("uiPCASidebars.R")
-source("plotCellPlot.R")
+source("plotSamplePlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
@@ -35,7 +35,7 @@ uiPCAPage <- function() {
     )),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
-                         selected = "pca.cells.plot",
+                         selected = "pca.samples.plot",
                          navbarMenu("Data",
                                     "Read counts",
                                     tabPanel("Raw", value = "readcounts.raw", downloadableDataTableOutput("readcounts")),
@@ -66,12 +66,12 @@ uiPCAPage <- function() {
                                              downloadableDataTableOutput("genes.variance.filtered")
                                              ),
                                     "----",
-                                    "Cells",
-                                    tabPanel("Conditions", value = "cells.conditions",
-                                             plotConditionsVennDiagramPlotUI("cells.conditions.plot"),
-                                             downloadableDataTableOutput("cells.conditions")),
-                                    tabPanel("Annotation", value = "cells.annotation",
-                                             downloadableDataTableOutput("cells.annotation"))
+                                    "Samples",
+                                    tabPanel("Conditions", value = "samples.conditions",
+                                             plotConditionsVennDiagramPlotUI("samples.conditions.plot"),
+                                             downloadableDataTableOutput("samples.conditions")),
+                                    tabPanel("Annotation", value = "samples.annotation",
+                                             downloadableDataTableOutput("samples.annotation"))
                                     ),
                          navbarMenu("PCA",
                                     "Principal components",
@@ -83,13 +83,13 @@ uiPCAPage <- function() {
                                              plotPCAVariancePlotUI("pca.variance.plot"),
                                              downloadableDataTableOutput("pca.variance")),
                                     "----",
-                                    "Cells",
-                                    tabPanel("Transformed values", value = "pca.cells.transformed",
+                                    "Samples",
+                                    tabPanel("Transformed values", value = "pca.samples.transformed",
                                              processingStepsWidgetUI("pca.transformed.processing", "Processing overview"),
                                              plotAgglomerativeClusteringPlotUI("pca.transformed.hclust.plot"),
                                              downloadableDataTableOutput("pca.transformed")),
-                                    tabPanel("Cell plot", value = "pca.cells.plot", plotCellPlotUI("pca.cells.plot"))
+                                    tabPanel("PCA samples plot", value = "pca.samples.plot", plotSamplePlotUI("pca.samples.plot"))
                                     ),
-                         tabPanel(faIconText("link", "Cell plot"), value = "pca.cells.plot.quicklink")))
+                         tabPanel(faIconText("link", "Samples plot"), value = "pca.samples.plot.quicklink")))
   )))
 }

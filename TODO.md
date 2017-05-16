@@ -14,7 +14,7 @@
 * BioMart: Use GRanges for seqinfo
 * Load annotation from data.frame / csv
 * Document: annotation from data frame
-* Cell annotation: Fragment lengths
+* Sample annotation: Fragment lengths
 * Integrating importer: Selectize to remove datasets
 
 ## Theory/practice
@@ -25,7 +25,7 @@ Already known to be useful: Gene variance as main criterion
 Where to set cutoff?
 
 * PCA transformed change rate (directly related to variance? Theory behind PCA?)
-* Cluster results? (problem: PCA based clustering sucks; at least if cell PCA is done)
+* Cluster results? (problem: PCA based clustering sucks; at least if sample PCA is done)
 * Theoretical approach? Distribution of read counts? -> DeSeq/EdgeR papers!!! -> Statistical value!
 * Variance cutoff caused by problems with PCA? -> Look this up! Find ACTUAL cause! -> Derive better criterium!
 

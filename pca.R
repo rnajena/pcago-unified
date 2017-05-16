@@ -32,8 +32,8 @@ applyPCA <- function(readcounts, center, scale, relative) {
   X <- assay(readcounts)
   X <- t(X) # Transpose this as our read count matrix as R has dimensions as columns and not as rows (thanks, R!!!)
   
-  # Extract the cells for later use
-  cells <- colnames(readcounts)
+  # Extract the samples for later use
+  samples <- colnames(readcounts)
   
   # Using R's internal function for improved speed (and accuracy as they use SDV)
   # Caution: R will not consider all eigenvectors (there are thousands of genes)
@@ -41,7 +41,7 @@ applyPCA <- function(readcounts, center, scale, relative) {
   # But R will truncate it to PC1, PC2, ... PCn with n data points (if n < m), which is fast.
   # Don't let this confuse you
   result <- prcomp(X, center = center, scale = scale)
-  transformed <- data.frame(result$x, row.names = cells)
+  transformed <- data.frame(result$x, row.names = samples)
   pc.names <- colnames(result$rotation)
   
   # Optionally make the transformed coordinates relative.
