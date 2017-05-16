@@ -213,7 +213,7 @@ setMethod(f = "geneAnnotationRestrictToGenes",
           signature = signature(object = "GeneAnnotation", restrict.gene = "character"),
           definition = function(object, restrict.gene) {
             
-            if(geneAnnotationHasGeneInfo(object)) {
+            if(geneAnnotationHasSequenceInfo(object)) {
               
               supported.genes <- intersect(rownames(object@sequence.info), restrict.gene)
               
