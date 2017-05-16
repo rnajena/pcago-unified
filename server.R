@@ -40,7 +40,7 @@ source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
-source("readcountProcessing.R")
+source("processingReports.R")
 
 shinyServer(function(input, output, session) {
   
