@@ -168,9 +168,9 @@ applyReadcountNormalization.TPM <- function(readcounts,
   if(nrow(readcounts) == 0 || ncol(readcounts) == 0) {
     stop("No read counts to process!")
   }
-  # if(!is.integer(assay(readcounts))) {
-  #   stop("Read counts need to be integers!")
-  # }
+  if(!is.integer(assay(readcounts))) {
+    stop("Read counts need to be integers!")
+  }
   if(!geneAnnotationHasSequenceInfo(gene.annotation)) {
     stop("No sequence info available!")
   }
@@ -182,7 +182,7 @@ applyReadcountNormalization.TPM <- function(readcounts,
   
   # Fetch feature information from annotation
   genes <- rownames(readcounts)
-  feature.lengths <- if(use.feature.exonlength) gene.annotation@sequence.info[genes, "exonlength"] else gene.annotation@sequence.info[genes, "length"]
+  feature.lengths <- if(use.feature.exonlength) gene.annotation@sequence.info[genes, "exon_length"] else gene.annotation@sequence.info[genes, "length"]
   
   if(any(is.na(feature.lengths)) || any(!is.numeric(feature.lengths))) {
     stop("Not all features have an annotation!")

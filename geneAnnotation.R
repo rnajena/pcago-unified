@@ -166,7 +166,7 @@ importSampleGeneInformation <- function(sample, readcounts) {
     stop("Invalid arguments!")
   }
   
-  con <- file("sampledata/vitamins.gff3", "r")
+  con <- file(paste0("sampledata/", sample), "r")
   on.exit({
     close(con)
   })
