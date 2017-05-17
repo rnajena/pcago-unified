@@ -534,12 +534,19 @@ genericImporterData_ <- function(input,
       
       output <- tryCatch({exprintegrate(data = variables$data, callback = integration.callback)}, 
                          error = function(e){
-                           showNotification(paste("[Integration] Error:", e), type = "error", duration = NULL)
+                           # Note: Notifications only when user acts. Integration can be triggered by reactive and thus not only by user.
+                           #showNotification(paste("[Integration] Error:", e), type = "error", duration = NULL)
+                           
+                           validate(need(F, paste("Error while integrating data:", e$message)))
+                           
                            return(NULL)
                          }, 
                          warning = function(w)
                          {
-                           showNotification(paste("[Integration] Warning:", w), type = "warning", duration = NULL)
+                           #showNotification(paste("[Integration] Warning:", w), type = "warning", duration = NULL)
+                           
+                           validate(need(F, paste("Error while integrating data:", w$message)))
+                           
                            return(NULL)
                          })
       return(output)
