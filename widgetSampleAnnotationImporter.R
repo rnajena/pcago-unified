@@ -57,14 +57,14 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                    samples = reactive(availableSampleAnnotationSamples),
                                                    generators = reactive(supportedSampleAnnotationGenerators),
                                                    exprimport = function(con, importer, parameters) {
-                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      samples <- colnames(readcounts())
                                                      
                                                      return(importSampleAnnotation(con, importer, samples))
                                                    },
                                                    exprsample = function(sample, parameters) {
                                                      
-                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      samples <- colnames(readcounts())
                                                      
                                                      return(importSampleAnnotationSample(sample, samples))
@@ -72,7 +72,7 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                    },
                                                    exprgenerator = function(generator, parameters) {
                                                      
-                                                     validate(need(readcounts(), "Cannot import sample annotation without read counts!"))
+                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      samples <- colnames(readcounts())
                                                      
                                                      return(importSampleAnnotationFromGenerator(generator, samples, parameters))
@@ -131,10 +131,10 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   # Build conditions
   conditions <- reactive({
     
-    validate(need(readcounts(), "Cannot get condition table without read counts!"),
-             need(sample.annotation.imported(), "No sample annotation available!"))
+    validate(need(readcounts(), "[Sample Annotation] Cannot get condition table without read counts!"),
+             need(sample.annotation.imported(), "[Sample Annotation] No sample annotation available!"))
     # ! Needs to be separate. Thanks, R Shiny for ALWAYS TESTING ALL F**** CHECKS!!!
-    validate(need(sampleAnnotationHasConditions(sample.annotation.imported()), "No sample conditions available!"))
+    validate(need(sampleAnnotationHasConditions(sample.annotation.imported()), "[Sample Annotation] No sample conditions available!"))
     
     return(sample.annotation.imported()@conditions)
     
@@ -144,7 +144,7 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   # Update the selectize that allows removing/rearranging conditions
   observeEvent(conditions(), {
     
-    validate(need(conditions(), "Need conditions to update UI!"))
+    validate(need(conditions(), "[Sample Annotation] Need conditions to update UI!"))
     
     updateSelectInput(session, "conditioneditor", 
                       choices = colnames(conditions()), 
@@ -154,12 +154,12 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   # Build new, reordered conditions
   conditions.modified <- reactive({
     
-    validate(need(conditions(), "No conditions loaded!"),
-             need(ncol(conditions()) >= 2, "There should be at least 2 conditions!"))
+    validate(need(conditions(), "[Sample Annotation] No conditions loaded!"),
+             need(ncol(conditions()) >= 2, "[Sample Annotation] There should be at least 2 conditions!"))
     
     selected <- intersect(input$conditioneditor, colnames(conditions()))
     
-    validate(need(length(selected) >= 2, "here should be at least 2 conditions!"))
+    validate(need(length(selected) >= 2, "[Sample Annotation] There should be at least 2 conditions!"))
     
     return(conditions()[, selected])
   })

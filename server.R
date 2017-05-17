@@ -59,13 +59,13 @@ shinyServer(function(input, output, session) {
  
   sample.annotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", readcounts = readcounts.preprocessed)
   conditions <- reactive({
-    validate(need(sample.annotation(), "No sample annotation available!"))
+    validate(need(sample.annotation(), "No samples annotation available!"))
     return(sample.annotation()@conditions)
   })
   
   observeEvent(conditions(), {
     
-    validate(need(conditions(), "No conditions available!"))
+    validate(need(conditions(), "No sample conditions available!"))
     
     updateSelectizeInput(session, 
                          "pca.data.normalization.deseq2.conditions",

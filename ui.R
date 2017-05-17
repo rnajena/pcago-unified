@@ -6,11 +6,13 @@
 #
 
 library(markdown)
+library(htmltools)
 library(DT)
 library(shiny)
 library(shinyBS)
 library(shinyjs)
 library(colourpicker)
+
 source("uiAboutPage.R")
 source("uiPCAPage.R")
 source("uiHelpPage.R")

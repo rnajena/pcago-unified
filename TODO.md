@@ -10,24 +10,9 @@
 * SMPFPP server implementation
 * Input lag @ visual editor
 * BioMart: Use GRanges for seqinfo
-* Load annotation from data.frame / csv
-* Document: annotation from data frame
 * Sample annotation: Fragment lengths
 * Integrating importer: Selectize to remove datasets
 * General plot settings; disable features
-
-## Theory/practice
-
-### Which genes are relevant?
-
-Already known to be useful: Gene variance as main criterion
-Where to set cutoff?
-
-* PCA transformed change rate (directly related to variance? Theory behind PCA?)
-* Cluster results? (problem: PCA based clustering sucks; at least if sample PCA is done)
-* Theoretical approach? Distribution of read counts? -> DeSeq/EdgeR papers!!! -> Statistical value!
-* Variance cutoff caused by problems with PCA? -> Look this up! Find ACTUAL cause! -> Derive better criterium!
-
 
 ## Code
 
@@ -37,7 +22,7 @@ Where to set cutoff?
 ## Bugs
 
 * Visual editor color update sometimes not triggering
-* Visual editor input lag due to reactivity
+* Visual editor input lag due to reactivity -> only trigger on external events (table changed from outside?)
 * Pointsize error in scatterplot3d (not supported!)
 * GRanges sequence info exon info generated without any infos
 * Sequence info intended behavior?
@@ -52,3 +37,16 @@ Where to set cutoff?
 
 * RStudio downloads don't overwrite files correctly
 * R 3.3.3 compile rtracklayer etc. from source https://support.bioconductor.org/p/93347/#93373
+
+## Theory/practice
+
+### Which genes are relevant?
+
+Already known to be useful: Gene variance as main criterion
+Where to set cutoff?
+
+* PCA transformed change rate (directly related to variance? Theory behind PCA?)
+* Cluster results? (problem: PCA based clustering sucks; at least if sample PCA is done)
+* Theoretical approach? Distribution of read counts? -> DeSeq/EdgeR papers!!! -> Statistical value!
+* Variance cutoff caused by problems with PCA? -> Look this up! Find ACTUAL cause! -> Derive better criterium!
+* SNR as criterion?

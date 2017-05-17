@@ -32,12 +32,12 @@ plotConditionsVennDiagramPlotSettingsUI <- function(id) {
 
 plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, pca.conditions.plot.visuals, plot.settings, format, filename){
   
-  validate(need(conditions(), "No conditions to plot!"),
-           need(pca.conditions.plot.visuals(), "No condition visuals available!"))
+  validate(need(conditions(), "No sample conditions to plot!"),
+           need(pca.conditions.plot.visuals(), "No sample condition visuals available!"))
   
-  validate(need(selected.conditions, "No conditions selected!"),
-           need(length(selected.conditions) > 1, "Not enough conditions selected!"),
-           need(length(selected.conditions) <= 5, "Too many conditions selected!"))
+  validate(need(selected.conditions, "No sample conditions selected!"),
+           need(length(selected.conditions) > 1, "Not enough sample conditions selected!"),
+           need(length(selected.conditions) <= 5, "Too many sample conditions selected!"))
   
   x <- lapply(selected.conditions, function(x) { 
     

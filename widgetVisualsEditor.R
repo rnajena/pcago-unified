@@ -102,7 +102,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
 
   # Change the list of choices and visual table when the conditions update
   observeEvent(conditions(), {
-    validate(need(conditions(), "Cannot output visual parameters withoout conditions!"))
+    validate(need(conditions(), "[Visuals editor] Cannot output visual parameters withoout conditions!"))
     updateRadioButtons(session, "conditions", choices = (conditions()))
     
     # Rebuild table if conditions changed
@@ -122,9 +122,9 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     variables$update.ui
     },{
       
-      validate(need(variables$visuals.table, "No visual table to update input!"),
-               need(input$conditions, "No current condition!"),
-               need(input$conditions %in% rownames(variables$visuals.table), "Condition not in visual table!"))
+      validate(need(variables$visuals.table, "[Visuals editor] No visual table to update input!"),
+               need(input$conditions, "[Visuals editor] No current condition!"),
+               need(input$conditions %in% rownames(variables$visuals.table), "[Visuals editor] Condition not in visual table!"))
       
       condition <- input$conditions
       color <- variables$visuals.table[condition, "color"]
@@ -171,7 +171,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
       return()
     }
     
-    validate(need(variables$visuals.table, "No visual table to write to!"))
+    validate(need(variables$visuals.table, "[Visuals editor] No visual table to write to!"))
     
     condition <- input$conditions
     shape <- as.numeric(input$shape)
@@ -183,7 +183,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
   
   observeEvent(input$name, {
     
-    validate(need(variables$visuals.table, "No visual table to write to!"))
+    validate(need(variables$visuals.table, "[Visuals editor] No visual table to write to!"))
     
     condition <- input$conditions
     name <- input$name
@@ -199,7 +199,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     input$conditions
     }, {
     
-    validate(need(variables$visuals.table, "No visual table!"))
+    validate(need(variables$visuals.table, "[Visuals editor] No visual table!"))
     
     js <- c()
     control.name <- session$ns("conditions")
