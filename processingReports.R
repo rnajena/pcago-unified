@@ -117,9 +117,18 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
     
     if(input$pca.data.normalization == "tpm") {
       
-      content <- tagList()
+      output <- readcounts.normalization.output()
       
-      # TODO: Table that shows that the read counts are normalized now (sum is same for all samples)
+      content <- tagList(
+        tags$p("Applied read count normalization with TPM method."),
+        tags$p(paste("Use non-overlapping sum of exon lengths:", output$use.feature.exonlength)),
+        tags$p(paste("Calculate effective length:", output$use.fragment.effectivelength)),
+        h2("Sum of normalized sample counts"),
+        tags$table(
+          do.call(tags$tr, lapply(names(output$sample.sum),function(x) { tags$td(x) })),
+          do.call(tags$tr, lapply(as.vector(output$sample.sum),function(x) { tags$td(x) }))
+        )
+      )
       
       return(list(title = "Apply TPM normalization",
                   content = content))

@@ -56,9 +56,11 @@ importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples) 
   if(!all(apply(data, 1, function(x) { is.logical(x) }))) {
     stop("Sample condition table is not entirely boolean!")
   }
-  if(!setequal(rownames(data), samples)) {
+  if(length(setdiff(samples, rownames(data))) > 0) {
     stop("Data does not assign conditions to all samples!")
   }
+  
+  data <- data[samples,,drop=F]
   
   return(SampleAnnotation(conditions = data))
 }
@@ -90,9 +92,11 @@ importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples) {
   if(nrow(data) == 0 || ncol(data) == 0) {
     stop("Sample condition table is empty!")
   }
-  if(!setequal(rownames(data), samples)) {
-    stop("Table annotates a different set of samples!")
+  if(length(setdiff(samples, rownames(data))) > 0) {
+    stop("Data does not assign conditions to all samples!")
   }
+  
+  data <- data[samples,,drop=F]
   
   output <- data.frame(row.names = rownames(data))
   

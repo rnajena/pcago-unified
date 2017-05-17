@@ -108,12 +108,10 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, se
   if(!is.SummarizedExperiment(readcounts) || !is(sample.annotation, "SampleAnnotation") || !is.character(selected.conditions)) {
     stop("Invalid arguments!")
   }
-  if(!sampleAnnotationHasConditions(sample.annotation)) {
-    stop("Sample annotation has no condition table!")
-  }
-  if(!is.integer(assay(readcounts))) {
-    stop("Read counts need to be integers!")
-  }
+  
+  validate(need(nrow(readcounts) > 0 && ncol(readcounts) > 0, "No read counts to process!"),
+           need(sampleAnnotationHasConditions(sample.annotation), "Sample annotation has no condition table!"),
+           need(is.integer(assay(readcounts)), "Read counts need to be integers!"))
   
   progress <- progressNotification("Building DESeq2 data. This will take some time ...")
   on.exit({
@@ -165,28 +163,20 @@ applyReadcountNormalization.TPM <- function(readcounts,
      !is(gene.annotation, "GeneAnnotation")) {
     stop("Invalid arguments!")
   }
-  if(nrow(readcounts) == 0 || ncol(readcounts) == 0) {
-    stop("No read counts to process!")
-  }
-  if(!is.integer(assay(readcounts))) {
-    stop("Read counts need to be integers!")
-  }
-  if(!geneAnnotationHasSequenceInfo(gene.annotation)) {
-    stop("No sequence info available!")
-  }
-  if(use.fragment.effectivelength && !sampleAnnotationHasSampleInfo(sample.annotation)) {
-    stop("No sample info available!")
-  }
   
-  counts <- assay(readcounts)
+  validate(need(nrow(readcounts) > 0 && ncol(readcounts) > 0, "No read counts to process!"),
+           need(geneAnnotationHasSequenceInfo(gene.annotation), "No sequence info available!"),
+           need(!use.fragment.effectivelength || sampleAnnotationHasSampleInfo(sample.annotation), "No sample info available!"),
+           need(is.integer(assay(readcounts)), "Read counts need to be integers!"))
+  
+   counts <- assay(readcounts)
   
   # Fetch feature information from annotation
   genes <- rownames(readcounts)
   feature.lengths <- if(use.feature.exonlength) gene.annotation@sequence.info[genes, "exon_length"] else gene.annotation@sequence.info[genes, "length"]
   
-  if(any(is.na(feature.lengths)) || any(!is.numeric(feature.lengths))) {
-    stop("Not all features have an annotation!")
-  }
+  validate(need(all(!is.na(feature.lengths)), paste("Missing feature length annotations: ", paste(genes[is.na(feature.lengths)], collapse = ", "))),
+           need(!use.fragment.effectivelength || all(!is.na(sample.annotation@sample.info$meanfragmentlength)), "All samples need a mean fragment length annotation!"))
   
   # Go through each sample
   for(i in seq_len(ncol(counts))) {
@@ -204,10 +194,6 @@ applyReadcountNormalization.TPM <- function(readcounts,
     if(use.fragment.effectivelength) {
       
       mean.fragmentlength <- sample.annotation@sample.info[sample, "meanfragmentlength"]
-      
-      if(is.na(mean.fragmentlength) || !is.numeric(mean.fragmentlength)) {
-        stop("All samples need a mean fragment length annotation!")
-      }
       
       feature.effectivelength <- feature.lengths - mean.fragmentlength + 1
     } else {
@@ -230,8 +216,15 @@ applyReadcountNormalization.TPM <- function(readcounts,
   
   assay(readcounts) <- counts
   
+  # Make some additional statistics
+  sample.sum <- colSums(assay(readcounts))
+  names(sample.sum) <- colnames(readcounts)
+  
   # Output the assay and parameters
-  return(list(readcounts = readcounts))
+  return(list(readcounts = readcounts, 
+              sample.sum = sample.sum, 
+              use.fragment.effectivelength = use.fragment.effectivelength, 
+              use.feature.exonlength = use.feature.exonlength))
   
 }
 

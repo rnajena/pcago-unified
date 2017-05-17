@@ -96,44 +96,20 @@ serverReadcountNormalization <- function(readcounts, gene.annotation, sample.ann
       validate(need(sample.annotation(), "[Read count processing] No sample annotation available!"),
               need(gene.annotation(), "[Read count processing] No gene annotation available!"))
       
-      normalization.results <- tryCatch({
-        return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
-                                        use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
-                                        use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
-                                        gene.annotation = gene.annotation(),
-                                        sample.annotation = sample.annotation()))
-      },
-      error = function(e) {
-        showNotification(paste(e), type = "error", duration = NULL)
-        return(NULL)
-      },
-      warning = function(w) {
-        showNotification(paste(w), type = "warning", duration = NULL)
-        return(NULL)
-      })
-      
-      return(normalization.results)
+      return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
+                                             use.feature.exonlength = input$pca.data.normalization.tpm.exonlength,
+                                             use.fragment.effectivelength = input$pca.data.normalization.tpm.effectivelength,
+                                             gene.annotation = gene.annotation(),
+                                             sample.annotation = sample.annotation()))
     }
     else if(input$pca.data.normalization == "deseq2") {
       
       validate(need(sample.annotation(), "No sample annotation available!"),
                need(input$pca.data.normalization.deseq2.conditions, "No conditions selected!"))
       
-      normalization.results <- tryCatch({
-        return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
-                                           sample.annotation = sample.annotation(), 
-                                           selected.conditions = input$pca.data.normalization.deseq2.conditions))
-      },
-      error = function(e) {
-        showNotification(paste(e), type = "error", duration = NULL)
-        return(NULL)
-      },
-      warning = function(w) {
-        showNotification(paste(w), type = "warning", duration = NULL)
-        return(NULL)
-      })
-      
-      return(normalization.results)
+      return(applyReadcountNormalization.DESeq2(readcounts = readcounts(), 
+                                                sample.annotation = sample.annotation(), 
+                                                selected.conditions = input$pca.data.normalization.deseq2.conditions))
       
     }
     else 

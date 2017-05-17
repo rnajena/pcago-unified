@@ -33,6 +33,15 @@ stores only boolean values (true or false)
 
 The mean fragment length of a sample can be obtained from the read analysis step.
 
+## Managing conditions
+
+Other components like the visual editor use the condition table to determine cell properties.
+The order of the conditions within the table may change the output depending on the component.
+You can disable and move conditions by using the **Rearrange conditions** control at
+the below the samples annotation importer.
+
+![Condition rearrangement tool](helppages/samplesAnnotationConditionEditor.png)
+
 ## Importing data
 
 You can upload multiple sample annotations per upload widget (see `Appendix > Upload widget` for more information).
