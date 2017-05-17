@@ -11,8 +11,8 @@ source("classImporterEntry.R")
 #' The user selects one of those types, which will then invoke the corresponding importer
 
 supportedReadcountImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV"),
-  ImporterEntry(name = "tsv", label = "TSV")
+  ImporterEntry(name = "csv", label = "CSV read count table (*.csv)"),
+  ImporterEntry(name = "tsv", label = "TSV read count table (*.csv)")
 )
 
 supportedReadcountGenerators <- list()

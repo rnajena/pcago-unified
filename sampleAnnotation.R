@@ -12,12 +12,12 @@ condition.default <- "{default}"
 
 # Importers for sample condition mappings
 supportedSampleAnnotationImporters <- list(
-  ImporterEntry(name = "conditions_factor_csv", label = "Conditions treatments CSV"),
-  ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV"),
-  ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV"),
-  ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV"),
-  ImporterEntry(name = "sample_info_csv", label = "Sample info CSV"),
-  ImporterEntry(name = "sample_info_tsv", label = "Sample info TSV")
+  ImporterEntry(name = "conditions_factor_csv", label = "Conditions treatments CSV (*.csv)"),
+  ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV (*.csv)"),
+  ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV (*.csv)"),
+  ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV (*.csv)"),
+  ImporterEntry(name = "sample_info_csv", label = "Sample info CSV (*.csv)"),
+  ImporterEntry(name = "sample_info_tsv", label = "Sample info TSV (*.csv)")
 )
 availableSampleAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)"),

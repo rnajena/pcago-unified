@@ -8,8 +8,8 @@ source("sampleAnnotation.R")
 
 # Importers for condition visuals
 supportedConditionVisualsImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV"),
-  ImporterEntry(name = "tsv", label = "TSV")
+  ImporterEntry(name = "csv", label = "CSV visuals settings (*.csv)"),
+  ImporterEntry(name = "tsv", label = "TSV visuals settings (*.csv)")
 )
 supportedConditionVisualsGenerators <- list()
 availableConditionVisualSamples <- list(
