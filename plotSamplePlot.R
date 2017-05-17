@@ -173,8 +173,7 @@ plotSamplePlot.save <- function(pca,
         zlab = pc.lab(dimensions.requested[3]),
         type = "h",
         main = title,
-        sub = subtitle,
-        pointsize = scale * 12
+        sub = subtitle
       )
       
       # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?

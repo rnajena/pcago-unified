@@ -189,7 +189,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     name <- input$name
     
     variables$visuals.table[condition, "name"] <- name
-    variables$update.ui <- variables$update.ui + 1
+    #variables$update.ui <- variables$update.ui + 1
     
   })
   

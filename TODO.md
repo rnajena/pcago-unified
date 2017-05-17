@@ -8,7 +8,6 @@
 * Custom selectors
 * Annotation overview
 * SMPFPP server implementation
-* Input lag @ visual editor
 * BioMart: Use GRanges for seqinfo
 * Sample annotation: Fragment lengths
 * Integrating importer: Selectize to remove datasets
@@ -22,8 +21,6 @@
 ## Bugs
 
 * Visual editor color update sometimes not triggering
-* Visual editor input lag due to reactivity -> only trigger on external events (table changed from outside?)
-* Pointsize error in scatterplot3d (not supported!)
 * GRanges sequence info exon info generated without any infos
 * Sequence info intended behavior?
 
