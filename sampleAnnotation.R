@@ -11,20 +11,49 @@ source("classSampleAnnotation.R")
 condition.default <- "{default}"
 
 # Importers for sample condition mappings
+
+supportedSampleAnnotationImporters.imported_data.conditions <- ImporterParameter(name = "imported_data",
+                                                                                 label = "Imported data",
+                                                                                 type = "checkboxes",
+                                                                                 checkboxes.options = c("Conditions" = "conditions"),
+                                                                                 checkboxes.selected = c("Conditions" = "conditions"))
+supportedSampleAnnotationImporters.imported_data.sample_info <- ImporterParameter(name = "imported_data",
+                                                                                 label = "Imported data",
+                                                                                 type = "checkboxes",
+                                                                                 checkboxes.options = c("Mean fragment lengths" = "meanfragmentlength"),
+                                                                                 checkboxes.selected = c("Mean fragment lengths" = "meanfragmentlength"))
+
 supportedSampleAnnotationImporters <- list(
-  ImporterEntry(name = "conditions_factor_csv", label = "Conditions treatments CSV (*.csv)"),
-  ImporterEntry(name = "conditions_factor_tsv", label = "Conditions treatments TSV (*.csv)"),
-  ImporterEntry(name = "conditions_boolean_csv", label = "Conditions boolean CSV (*.csv)"),
-  ImporterEntry(name = "conditions_boolean_tsv", label = "Conditions boolean TSV (*.csv)"),
-  ImporterEntry(name = "sample_info_csv", label = "Sample info CSV (*.csv)"),
-  ImporterEntry(name = "sample_info_tsv", label = "Sample info TSV (*.csv)")
+  ImporterEntry(name = "conditions_factor_csv", 
+                label = "Conditions treatments CSV (*.csv)", 
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+  ImporterEntry(name = "conditions_factor_tsv", 
+                label = "Conditions treatments TSV (*.csv)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+  ImporterEntry(name = "conditions_boolean_csv", 
+                label = "Conditions boolean CSV (*.csv)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+  ImporterEntry(name = "conditions_boolean_tsv", 
+                label = "Conditions boolean TSV (*.csv)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+  ImporterEntry(name = "sample_info_csv", 
+                label = "Sample info CSV (*.csv)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info)),
+  ImporterEntry(name = "sample_info_tsv", 
+                label = "Sample info TSV (*.csv)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info))
 )
 availableSampleAnnotationSamples <- list(
-  ImporterEntry(name = "conditions.vitamins.large.csv", label = "Conditions for Vitamins (Large)"),
-  ImporterEntry(name = "sample.annotation.vitamins.csv", label = "Sample info for Vitamins")
+  ImporterEntry(name = "conditions.vitamins.large.csv", 
+                label = "Conditions for Vitamins (Large)",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+  ImporterEntry(name = "sample.annotation.vitamins.csv", 
+                label = "Sample info for Vitamins",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info))
 )
 supportedSampleAnnotationGenerators <- list(
   ImporterEntry(name = "conditions_split", label = "Conditions from sample names", parameters = list(
+    supportedSampleAnnotationImporters.imported_data.conditions,
     ImporterParameter(name = "separator", label = "Separator", type = "lineedit", lineedit.default = "_")
   ))
 )
@@ -42,10 +71,13 @@ supportedSampleAnnotationGenerators <- list(
 #' @export
 #'
 #' @examples
-importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples) {
+importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, imported_data) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(samples)) {
     stop("Invalid arguments!")
+  }
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
   }
 
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
@@ -81,10 +113,13 @@ importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples) 
 #' @export
 #'
 #' @examples
-importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples) {
+importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples, imported_data) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(samples)) {
     stop("Invalid arguments!")
+  }
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
@@ -131,10 +166,13 @@ importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples) {
 #' @export
 #'
 #' @examples
-importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples) {
+importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples, imported_data) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(samples)) {
     stop("Invalid arguments!")
+  }
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
   }
   
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F)
@@ -166,25 +204,25 @@ importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples) {
 #' @export
 #'
 #' @examples
-importSampleAnnotation <- function(filehandle, datatype, samples) {
+importSampleAnnotation <- function(filehandle, datatype, samples, parameters) {
   
   if(datatype == "conditions_boolean_csv") {
-    return(importSampleAnnotation.Conditions.Boolean(filehandle, ",", samples))
+    return(importSampleAnnotation.Conditions.Boolean(filehandle, ",", samples, parameters$imported_data))
   }
   else if(datatype == "conditions_boolean_tsv") {
-    return(importSampleAnnotation.Conditions.Boolean(filehandle, "", samples))
+    return(importSampleAnnotation.Conditions.Boolean(filehandle, "", samples, parameters$imported_data))
   }
   else if(datatype == "conditions_factor_csv") {
-    return(importSampleAnnotation.Conditions.Factor(filehandle, ",", samples))
+    return(importSampleAnnotation.Conditions.Factor(filehandle, ",", samples, parameters$imported_data))
   }
   else if(datatype == "conditions_factor_tsv") {
-    return(importSampleAnnotation.Conditions.Factor(filehandle, "", samples))
+    return(importSampleAnnotation.Conditions.Factor(filehandle, "", samples, parameters$imported_data))
   }
   else if(datatype == "sample_info_csv") {
-    return(importSampleAnnotation.SampleInfo(filehandle, ",", samples))
+    return(importSampleAnnotation.SampleInfo(filehandle, ",", samples, parameters$imported_data))
   }
   else if(datatype == "sample_info_tsv") {
-    return(importSampleAnnotation.SampleInfo(filehandle, "", samples))
+    return(importSampleAnnotation.SampleInfo(filehandle, "", samples, parameters$imported_data))
   }
   else {
     stop(paste("Unknown importer", datatype))
@@ -201,7 +239,7 @@ importSampleAnnotation <- function(filehandle, datatype, samples) {
 #' @export
 #'
 #' @examples
-importSampleAnnotationSample <- function(sample, samples) {
+importSampleAnnotationSample <- function(sample, samples, parameters) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
@@ -211,10 +249,10 @@ importSampleAnnotationSample <- function(sample, samples) {
   on.exit({ close(con) })
   
   if(sample == "sample.annotation.vitamins.csv") {
-    data <- importSampleAnnotation(con, "sample_info_csv", samples)
+    data <- importSampleAnnotation(con, "sample_info_csv", samples, parameters)
   }
   else if(sample == "conditions.vitamins.large.csv") {
-    data <- importSampleAnnotation(con, "conditions_factor_csv", samples)
+    data <- importSampleAnnotation(con, "conditions_factor_csv", samples, parameters)
   }
   else {
     stop(paste("Unknown sample", sample))
@@ -234,7 +272,11 @@ importSampleAnnotationSample <- function(sample, samples) {
 #' @export
 #'
 #' @examples
-importSampleAnnotationFromGenerator.Conditions.SplitSampleNames <- function(samples, sep) {
+importSampleAnnotationFromGenerator.Conditions.SplitSampleNames <- function(samples, sep, imported_data) {
+  
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
+  }
   
   result <- data.frame(row.names = samples, stringsAsFactors = F)
   
@@ -285,7 +327,7 @@ importSampleAnnotationFromGenerator <- function(generator, samples, parameters) 
   }
   
   if(generator == "conditions_split") {
-    return(importSampleAnnotationFromGenerator.Conditions.SplitSampleNames(samples, parameters$separator))
+    return(importSampleAnnotationFromGenerator.Conditions.SplitSampleNames(samples, parameters$separator, parameters$imported_data))
   }
   else {
     stop(paste("Unknown generator", datatype))

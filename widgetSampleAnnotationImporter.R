@@ -60,14 +60,13 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      samples <- colnames(readcounts())
                                                      
-                                                     return(importSampleAnnotation(con, importer, samples))
+                                                     return(importSampleAnnotation(con, importer, samples, parameters))
                                                    },
                                                    exprsample = function(sample, parameters) {
                                                      
                                                      validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      samples <- colnames(readcounts())
-                                                     
-                                                     return(importSampleAnnotationSample(sample, samples))
+                                                     return(importSampleAnnotationSample(sample, samples, parameters))
                                                      
                                                    },
                                                    exprgenerator = function(generator, parameters) {
@@ -81,8 +80,7 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      
                                                      output <- SampleAnnotation()
                                                      
-                                                     choices <- c("Conditions" = "conditions",
-                                                                  "Mean fragment lengths" = "meanfragmentlength")
+                                                     choices <- SampleAnnotationNames
                                                      selected <- c()
                                                      
                                                      if(length(data) == 0) {

@@ -4,6 +4,9 @@
 
 library(shiny)
 
+SampleAnnotationNames <- c("Conditions" = "conditions",
+                           "Mean fragment lengths" = "meanfragmentlength")
+
 #' Contains the annotation of various samples
 #'
 #' @slot conditions Table that determines if a sample (row) is in a condition condition (column)
