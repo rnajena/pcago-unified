@@ -14,6 +14,12 @@ GeneAnnotationEntryNames <- c("Scaffold" = "scaffold",
                               "Biotype" =  "biotype", 
                               "GO terms" =  "go_terms")
 
+# Gene annotation names that are represented in sequence info table
+GeneAnnotationEntryNames.sequence.info <- c("Start position" = "start_position",
+                                            "End position" = "end_position",
+                                            "Length" =  "length",
+                                            "Exon length" =  "exon_length")
+
 #' Contains the annotation of various genes
 #'
 #' @slot sequence.info data.frame. 
@@ -81,13 +87,13 @@ setMethod(f = "geneAnnotationRestrictContentTypes",
             }
            
             # Restrict sequence info table
-            keep.sequence.info <- intersect(content_types, c("start_position", "end_position", "length", "exon_length"))
+            keep.sequence.info <- intersect(content_types, GeneAnnotationEntryNames.sequence.info)
             
             if(length(keep.sequence.info) == 0) {
               object@sequence.info <- data.frame()
             }
             else {
-              to.remove <- setdiff(c("start_position", "end_position", "length", "exon_length"), content_types)
+              to.remove <- setdiff(GeneAnnotationEntryNames.sequence.info, content_types)
               
               if(length(to.remove) > 0) {
                 object@sequence.info[,to.remove] <- NA

@@ -164,10 +164,6 @@ genericImporterData.makeParameterInput <- function(input, ns, importer.object, s
         }
         
         return(do.call(genericImporterData.makeParameterInputUI, parameters))
-        
-        # input$parameter.slot1.value
-        
-        #return(genericImporterData.makeParameterInputUI(ns, "parameter.slot1.value", param))
       }
       
     }

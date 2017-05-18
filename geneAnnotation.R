@@ -77,8 +77,11 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
   # Suppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
   gr <- suppressWarnings(import.gff(filehandle)) 
   genes <- rownames(readcounts)
+  
+  # Remove "Name" annotation as this disturbs getting the exon length (Name is preferred over gene_id)
+  mcols(gr)$Name <- NULL
  
-  annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes)
+  annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes, imported_data)
   annot.biotype <- if("biotype" %in% imported_data) GRanges.extractBiotypeAnnotation(gr, genes) else GeneAnnotation()
   annot.scaffold <- if("scaffold" %in% imported_data) GRanges.extractScaffoldAnnotation(gr, genes) else GeneAnnotation()
   

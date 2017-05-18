@@ -6,6 +6,7 @@ source("geneAnnotationGRanges.R")
 annotationHub.hub <- reactive(AnnotationHub())
 
 annotationHub.databaseChoices <- function() {
+  ah <- annotationHub.hub()
   return(c("", unique(ah$dataprovider[ah$rdataclass == "GRanges"])))
 }
 
@@ -13,7 +14,7 @@ annotationHub.speciesChoices <- function(database) {
   
   ah <- annotationHub.hub()
  
-  if(!is.character(database) || database == "") {
+  if(!is.character(database) || length(database) != 1 || database == "") {
     return(c())
   }
  
@@ -27,23 +28,17 @@ annotationHub.datasetChoices <- function(database, species) {
   
   ah <- annotationHub.hub()
   
-  if(!is.character(species) || !is.character(database) || database == "" || species == "") {
+  if(!is.character(species) || !is.character(database) || length(database) != 1 || length(species) != 1 || database == "" || species == "") {
     return(c())
   }
   
-  if(datatype == "sequence.info" || datatype == "biotype") {
-    query.results <- AnnotationHub::query(ah, c("GRanges", database, species))
-    available.datasets <- mcols(query.results)
-    
-    choices <- rownames(available.datasets)
-    names(choices) <- sapply(choices, function(x) { sprintf("%s (%s)", available.datasets[x, "title"], available.datasets[x, "genome"]) })
-    
-    return(c("", choices))
-  }
-  else {
-    stop("Unknown data type!")
-  }
+  query.results <- AnnotationHub::query(ah, c("GRanges", database, species))
+  available.datasets <- mcols(query.results)
   
+  choices <- rownames(available.datasets)
+  names(choices) <- sapply(choices, function(x) { sprintf("%s (%s)", available.datasets[x, "title"], available.datasets[x, "genome"]) })
+  
+  return(c("", choices))
 }
 
 annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
@@ -76,19 +71,26 @@ generateGeneInformation.AnnotationHub <- function(database, species, dataset, im
   if(!is.character(dataset) || dataset == "") {
     stop("Invalid data set!")
   }
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
+  }
   
   genes <- rownames(readcounts)
   
-  if(datatype == "sequence.info") {
-    gr <- annotationHub.hub()[[dataset]]
-    return(GRanges.extractSequenceInfoAnnotation(gr, genes))
+  output <- GeneAnnotation()
+  gr <- annotationHub.hub()[[dataset]]
+  
+  if("biotype" %in% imported_data) {
+    output <- mergeGeneAnnotation(output, GRanges.extractBiotypeAnnotation(gr, genes))
   }
-  else if(datatype == "biotype") {
-    gr <- annotationHub.hub()[[dataset]]
-    return(GRanges.extractBiotypeAnnotation(gr, genes))
+  if("scaffold" %in% imported_data) {
+    output <- mergeGeneAnnotation(output, GRanges.extractScaffoldAnnotation(gr, genes))
   }
-  else {
-    stop("Unsupported data type!")
+  if(length(intersect(GeneAnnotationEntryNames.sequence.info, imported_data)) > 0) {
+    output <- mergeGeneAnnotation(output, GRanges.extractSequenceInfoAnnotation(gr, genes, imported_data))
   }
   
+  output <- geneAnnotationRestrictContentTypes(output, imported_data)
+  
+  return(output)
 }

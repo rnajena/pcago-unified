@@ -135,7 +135,7 @@ getBioMartScaffold <- function(mart, genes) {
   return(bm)
 }
 
-bioMart.databaseChoices <- function(datatype) {
+bioMart.databaseChoices <- function() {
   
   if(!is.character(datatype) || datatype == "") {
     return(c())
@@ -149,12 +149,9 @@ bioMart.databaseChoices <- function(datatype) {
   
 }
 
-bioMart.speciesChoices <- function(datatype, database) {
-  
-  if(!is.character(datatype) || datatype == "") {
-    return(c())
-  }
-  if(!is.character(database) || database == "") {
+bioMart.speciesChoices <- function(database) {
+ 
+  if(!is.character(database) || length(database) != 1 || database == "") {
     return(c())
   }
   
@@ -255,7 +252,7 @@ generateGeneInformation.EnsemblBioMart <- function(database, species, imported_d
     
   }
   
-  if(length(intersect(imported_data, c("start_position", "end_position", "length", "exon_length"))) > 0) {
+  if(length(intersect(imported_data, GeneAnnotationEntryNames.sequence.info)) > 0) {
     sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
     
     if(!is.null(sequence.info)) {

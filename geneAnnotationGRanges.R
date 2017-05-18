@@ -14,7 +14,7 @@ library(GenomicFeatures)
 #' @export
 #'
 #' @examples
-GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
+GRanges.extractSequenceInfoAnnotation <- function(gr, genes, imported_data) {
   
   gff <- mcols(gr)
   
@@ -40,16 +40,21 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
                               exon_length = rep(NA, length(genes)),
                               stringsAsFactors = F)
   
-  # For normalization we need the exonic length
-  # https://www.biostars.org/p/83901/
-  txdb <- suppressWarnings(makeTxDbFromGRanges(gr))
-  exons.list.per.gene <- exonsBy(txdb,by="gene")
-  exonic.gene.sizes <- sum(width(reduce(exons.list.per.gene)))
-  
-  #browser()
-  
-  found.genes <- mcols(gr)[match(names(exonic.gene.sizes), gr$Name), "gene_id"]
-  sequence.info[found.genes, "exon_length"] <- exonic.gene.sizes # Txdb uses name instead of gene_id
+  if("exon_length" %in% imported_data) {
+    # For normalization we need the exonic length
+    # https://www.biostars.org/p/83901/
+    txdb <- suppressWarnings(makeTxDbFromGRanges(gr))
+    exons.list.per.gene <- exonsBy(txdb,by="gene")
+    exonic.gene.sizes <- sum(width(reduce(exons.list.per.gene)))
+    
+    #found.genes <- mcols(gr)[match(names(exonic.gene.sizes), gr$Name), "gene_id"] # Txdb uses name instead of gene_id
+    found.genes <- intersect(names(exonic.gene.sizes), genes)
+    
+    if(length(found.genes) > 0) {
+      sequence.info[found.genes, "exon_length"] <- exonic.gene.sizes[found.genes]
+    }
+    
+  }
   
   return(GeneAnnotation(sequence.info = sequence.info))
   

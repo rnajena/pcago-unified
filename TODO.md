@@ -11,6 +11,7 @@
 * BioMart: Use GRanges for seqinfo
 * Integrating importer: Selectize to remove datasets
 * General plot settings; disable features
+* Fix generators for gene annotation
 
 ## Code
 
