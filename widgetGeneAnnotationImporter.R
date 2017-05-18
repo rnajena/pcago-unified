@@ -51,13 +51,13 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                              samples = reactive(availableGeneAnnotationSamples),
                              generators = reactive(supportedGeneAnnotationGenerators),
                              exprimport = function(con, importer, parameters) {
-                               return(importGeneInformationFromAnnotation(con, importer, readcounts()))
+                               return(importGeneInformationFromAnnotation(con, importer, readcounts(), parameters))
                              },
                              exprsample = function(sample, parameters) {
-                               return(importSampleGeneInformation(sample, readcounts()))
+                               return(importSampleGeneInformation(sample, readcounts(), parameters))
                              },
                              exprgenerator = function(generator, parameters) {
-                               return(generateGeneInformation(generator, parameters, readcounts()))
+                               return(generateGeneInformation(generator, readcounts(), parameters))
                              },
                              exprintegrate = function(data, callback) {
                                output <- GeneAnnotation()

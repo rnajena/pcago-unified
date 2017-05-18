@@ -17,20 +17,36 @@ source("geneAnnotationGRanges.R")
 source("geneAnnotationBioMart.R")
 source("geneAnnotationHub.R")
 
+geneAnnotationImporterParameter.imported_data.pcago_csv <- ImporterParameter(name = "imported_data",
+                                                                             label = "Imported data",
+                                                                             type = "checkboxes",
+                                                                             checkboxes.options = GeneAnnotationEntryNames,
+                                                                             checkboxes.selected = GeneAnnotationEntryNames)
+geneAnnotationImporterParameter.imported_data.gff_ensembl <- ImporterParameter(name = "imported_data",
+                                                                             label = "Imported data",
+                                                                             type = "checkboxes",
+                                                                             checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))],
+                                                                             checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))])
+
 supportedGeneAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
-                                                   label = "Ensembl GFF (*.gff3)"),
+                                                   label = "Ensembl GFF (*.gff3)",
+                                                   parameters = list(geneAnnotationImporterParameter.imported_data.gff_ensembl)),
                                      ImporterEntry(name = "pcago_csv",
-                                                   label = "Tabular CSV (*.csv)"),
+                                                   label = "Tabular CSV (*.csv)",
+                                                   parameters = list(geneAnnotationImporterParameter.imported_data.pcago_csv)),
                                      ImporterEntry(name = "pcago_tsv",
-                                                  label = "Tabular TSV (*.csv)"))
+                                                  label = "Tabular TSV (*.csv)",
+                                                  parameters = list(geneAnnotationImporterParameter.imported_data.pcago_csv)))
 supportedGeneAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
 availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
-                                                 label = "Vitamins (Tabular CSV)"),
+                                                 label = "Vitamins (Tabular CSV)",
+                                                 parameters = list(geneAnnotationImporterParameter.imported_data.pcago_csv)),
                                    ImporterEntry(name = "vitamins.gff3",
-                                                 label = "Vitamins (Ensembl GFF)"))
+                                                 label = "Vitamins (Ensembl GFF)",
+                                                 parameters = list(geneAnnotationImporterParameter.imported_data.gff_ensembl)))
 
 #' Extracts gene information from an Ensembl GFF file
 #' See importGeneInformationFromAnnotation for more info
@@ -42,7 +58,7 @@ availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vi
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts) {
+importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts, parameters) {
   
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
@@ -74,7 +90,7 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcounts, sep = ",") {
+importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcounts, sep = ",", parameters) {
   
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
@@ -100,20 +116,20 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcou
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts) {
+importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts, parameters) {
   
   if(missing(filehandle) || !is.character(datatype) || !is.SummarizedExperiment(readcounts)) {
     stop("Invalid arguments!")
   }
   
   if(datatype == "gff_ensembl") {
-    return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts))
+    return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts, parameters))
   }
   if(datatype == "pcago_csv") {
-    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, ","))
+    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, ",", parameters))
   }
   if(datatype == "pcago_tsv") {
-    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, ""))
+    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, "", parameters))
   }
   else {
     stop(paste("Unknown datatype", datatype))
@@ -130,7 +146,7 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
 #' @export
 #'
 #' @examples
-generateGeneInformation <- function(generator, parameters, readcounts) {
+generateGeneInformation <- function(generator, readcounts, parameters) {
   
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
@@ -157,7 +173,7 @@ generateGeneInformation <- function(generator, parameters, readcounts) {
 #' @export
 #'
 #' @examples
-importSampleGeneInformation <- function(sample, readcounts) {
+importSampleGeneInformation <- function(sample, readcounts, parameters) {
   
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
@@ -172,11 +188,11 @@ importSampleGeneInformation <- function(sample, readcounts) {
   })
   
   if(sample == "vitamins.gff3") {
-    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts)
+    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts, parameters)
     return(data)
   }
   else if(sample == "genes.annotation.vitamins.csv") {
-    data <- importGeneInformationFromAnnotation(con, "pcago_csv", readcounts)
+    data <- importGeneInformationFromAnnotation(con, "pcago_csv", readcounts, parameters)
     return(data)
   }
   else {
