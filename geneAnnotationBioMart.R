@@ -21,38 +21,43 @@ getBioMartSequenceInfo <- function(mart, genes) {
                                       "chromosome_name", 
                                       "start_position", 
                                       "end_position",
-                                      "ensembl_exon_id",
-                                      "exon_chrom_start",
-                                      "exon_chrom_end",
-                                      "rank",
-                                      "external_gene_name"), 
+                                      "ensembl_transcript_id",
+                                      "transcript_start",
+                                      "transcript_end",
+                                      "strand"), 
                        filters = c("ensembl_gene_id"),
                        values = genes, 
                        mart = mart)
   
   if(nrow(bm) == 0) {
-    return(NULL)
+    return(GeneAnnotation())
   }
   
   # Build GRanges and parse with GRanges sequence info tool
   bm.genes <- bm[match(unique(bm$ensembl_gene_id), bm$ensembl_gene_id),]
   gr.genes <- GRanges(seqnames = bm.genes$chromosome_name, 
+                      strand = bm.genes$strand,
                       ranges = IRanges(start = bm.genes$start_position, 
                                        end = bm.genes$end_position))
   mcols(gr.genes) <- data.frame(gene_id = bm.genes$ensembl_gene_id,
-                                type = rep("gene", nrow(bm.genes)))
+                                transcript_id = rep(NA, nrow(bm.genes)),
+                                type = rep("gene", nrow(bm.genes)),
+                                ID = sapply(bm.genes$ensembl_gene_id, function(x) { paste0("gene:", x) }),
+                                Parent = rep(NA, nrow(bm.genes)),
+                                stringsAsFactors = F)
   
-  gr.exons <- GRanges(seqnames = bm$chromosome_name, 
-                      ranges = IRanges(start = bm$exon_chrom_start, 
-                                       end = bm$exon_chrom_end))
-  mcols(gr.exons) <- data.frame(gene_id = bm$ensembl_gene_id,
-                                type = rep("exon", nrow(bm)))
+  gr.transcripts <- GRanges(seqnames = bm$chromosome_name, 
+                            strand = bm$strand,
+                            ranges = IRanges(start = bm$transcript_start, 
+                                             end = bm$transcript_end))
+  mcols(gr.transcripts) <- data.frame(gene_id = bm$ensembl_gene_id,
+                                      transcript_id = bm$ensembl_transcript_id,
+                                      type = rep("transcript", nrow(bm)),
+                                      ID = sapply(bm$ensembl_transcript_id, function(x) { paste0("transcript:", x) }),
+                                      Parent = sapply(bm$ensembl_gene_id, function(x) { paste0("gene:", x) }))
   
-  gr <- gr.genes
-  
-  stop("Not implemented!")
-  
-  return(gr)
+  gr <- c(gr.genes, gr.transcripts)
+  return(GRanges.extractSequenceInfoAnnotation(gr))
 }
 
 #' Returns a table with gene id, GO term
@@ -73,7 +78,7 @@ getBioMartGOTerms <- function(mart, genes) {
                        mart = mart)
   
   if(nrow(bm) == 0) {
-    return(NULL)
+    return(GeneAnnotation())
   }
   
   bm <- bm[bm$go_id != "",] # Seems to sometimes return empty GO-IDs
@@ -82,7 +87,23 @@ getBioMartGOTerms <- function(mart, genes) {
   bm$go_term <- go.terms$TERM
   bm <- na.omit(bm) # If the term wasn't found
   
-  return(bm)
+  # We have to transform the table with columns gene_id, term to term -> list of gene ids
+  go.terms.filter <- list()
+  
+  for(term in unique(bm$go_term)) {
+    
+    if(term == "") {
+      next()
+    }
+    
+    gene.indices <- term == bm$go_term
+    genes <- go.terms.table$ensembl_gene_id[gene.indices]
+    
+    go.terms.filter[[term]] <- genes
+    
+  }
+  
+  return(GeneAnnotation(genes.go.terms = GeneFilter(data = go.terms.filter)))
 }
 
 #' Returns a table with gene and biotype 
@@ -107,7 +128,13 @@ getBioMartBiotype <- function(mart, genes) {
   colnames(bm) <- c("gene","type")
   bm <- na.omit(bm)
   
-  return(bm)
+  # Extract filter
+  biotypes <- list()
+  for(feature in unique(bm$type)) {
+    biotypes[[feature]] <- unique(biotypes.table$gene[bm$type == feature])
+  }
+  
+  return(GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
 }
 
 #' Returns a table with gene and scaffold 
@@ -124,15 +151,22 @@ getBioMartScaffold <- function(mart, genes) {
                        filters = c("ensembl_gene_id"),
                        values = genes, 
                        mart = mart)
+  bm <- na.omit(bm)
   
   if(nrow(bm) == 0) {
-    return(NULL)
+    return(GeneAnnotation())
   }
   
   colnames(bm) <- c("gene","scaffold")
-  bm <- na.omit(bm)
+ 
   
-  return(bm)
+  # Extract filter
+  scaffold <- list()
+  for(feature in unique(bm$type)) {
+    scaffold[[feature]] <- unique(bm$gene[scaffold.table$type == feature])
+  }
+  
+  return(GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
 }
 
 bioMart.databaseChoices <- function() {
@@ -195,70 +229,19 @@ generateGeneInformation.EnsemblBioMart <- function(database, species, imported_d
   output <- GeneAnnotation()
   
   if("go_terms" %in% imported_data) {
-    
-    go.terms.table <- getBioMartGOTerms(bio.mart, genes)
-    
-    if(!is.null(go.terms.table)) {
-      # We have to transform the table with columns gene_id, term to term -> list of gene ids
-      go.terms.filter <- list()
-      
-      for(term in unique(go.terms.table$go_term)) {
-        
-        if(term == "") {
-          next()
-        }
-        
-        gene.indices <- term == go.terms.table$go_term
-        genes <- go.terms.table$ensembl_gene_id[gene.indices]
-        
-        go.terms.filter[[term]] <- genes
-        
-      }
-      
-      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
-    }
-    
+    output <- mergeGeneAnnotation(output, getBioMartGOTerms(bio.mart, genes))
   }
   
   if("biotype" %in% imported_data) {
-    
-    biotypes.table <- getBioMartBiotype(bio.mart, genes)
-    
-    if(!is.null(biotypes.table)) {
-      # Extract filter
-      biotypes <- list()
-      for(feature in unique(biotypes.table$type)) {
-        biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
-      }
-      
-      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
-    }
-    
+    output <- mergeGeneAnnotation(output, getBioMartBiotype(bio.mart, genes))
   }
   
   if("scaffold" %in% imported_data) {
-    
-    scaffold.table <- getBioMartScaffold(bio.mart, genes)
-    
-    if(!is.null(scaffold.table)) {
-      # Extract filter
-      scaffold <- list()
-      for(feature in unique(scaffold.table$type)) {
-        scaffold[[feature]] <- unique(scaffold.table$gene[scaffold.table$type == feature])
-      }
-      
-      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
-    }
-    
+    output <- mergeGeneAnnotation(output, getBioMartScaffold(bio.mart, genes))
   }
   
   if(length(intersect(imported_data, GeneAnnotationEntryNames.sequence.info)) > 0) {
-    sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
-    
-    if(!is.null(sequence.info)) {
-      output <- mergeGeneAnnotation(GeneAnnotation(sequence.info = sequence.info))
-    }
-    
+      output <- mergeGeneAnnotation(output, getBioMartSequenceInfo(bio.mart, genes))
   }
   
   output <- geneAnnotationRestrictContentTypes(output, imported_data)
