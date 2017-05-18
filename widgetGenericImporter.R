@@ -61,35 +61,50 @@ genericImporterInput <- function(id,
     
 }
 
-#' Builds UI for one parameter slot
+#' Resolves an ImportParameter option
 #'
-#' @param ns Session namespace
-#' @param id ID of the control
-#' @param param Importer parameter
-#' @param ... Arguments that are passed to select.values if it's a function
+#' @param option ImportParameter option
+#' @param label Label of the ImporterEntry
+#' @param ... Arguments if the parameter is a function
 #'
 #' @return
 #' @export
 #'
 #' @examples
-genericImporterData.makeParameterInput <- function(ns, id, param, ...) {
+genericImporterData.resolveParameterInputParameterOption <- function(option, label, ...) {
+  
+  if(is.reactive(option)) {
+    
+    notification.id <- progressNotification(paste("Loading available parametes for", label))
+    option <-  tryCatch(option(), error = function(e) { c() })
+    removeNotification(notification.id)
+  }
+  else if(is.function(option)) {
+    
+    notification.id <- progressNotification(paste("Loading available parameters for", label))
+    option <- tryCatch(option(...), error = function(e) { c() })
+    removeNotification(notification.id)
+  }
+  
+  return(option)
+}
+
+#' Builds UI for one parameter slot
+#'
+#' @param ns Session namespace
+#' @param id ID of the control
+#' @param param Importer parameter
+#' @param ... Arguments that are passed to the option if it's a function
+#'
+#' @return
+#' @export
+#'
+#' @examples
+genericImporterData.makeParameterInputUI <- function(ns, id, param, ...) {
   
   if(param@type == "select") {
-    select.values <- param@select.values
     
-    if(is.reactive(select.values)) {
-      
-      notification.id <- progressNotification(paste("Loading available parametes for", param@label))
-      select.values <-  tryCatch(select.values(), error = function(e) { c() })
-      removeNotification(notification.id)
-    }
-    else if(is.function(select.values)) {
-      
-      notification.id <- progressNotification(paste("Loading available parameters for", param@label))
-      select.values <- tryCatch(select.values(...), error = function(e) { c() })
-      removeNotification(notification.id)
-      
-    }
+    select.values <- genericImporterData.resolveParameterInputParameterOption(param@select.values, param@label, ...)
     
     return(selectizeInput(ns(id), 
                           label = param@label, 
@@ -99,10 +114,66 @@ genericImporterData.makeParameterInput <- function(ns, id, param, ...) {
                           )))
     
   } 
+  else if(param@type == "checkboxes") {
+    
+    checkboxes.options <- genericImporterData.resolveParameterInputParameterOption(param@checkboxes.options, param@label, ...)
+    checkboxes.selected <- genericImporterData.resolveParameterInputParameterOption(param@checkboxes.selected, param@label, ...)
+    
+    return(checkboxGroupInput(ns(id),
+                              label = param@label,
+                              choices = checkboxes.options,
+                              selected = checkboxes.selected))
+    
+  }
+  else if(param@type == "lineedit") {
+    
+    lineedit.default <- genericImporterData.resolveParameterInputParameterOption(param@lineedit.default, param@label, ...)
+    
+    return(textInput(ns(id),
+                     label = param@label,
+                     value = lineedit.default))
+    
+  }
   else {
     stop(paste("Unsupported type", param@type))
   }
   
+}
+
+genericImporterData.makeParameterInput <- function(input, ns, importer.object, slot.index) {
+  return(renderUI({
+    
+    if(!is.null(importer.object())) {
+      
+      output <- tagList()
+      
+      if(length(importer.object()@parameters) >= slot.index)
+      {
+        param <- importer.object()@parameters[[slot.index]]
+        ui.id <- paste0("parameter.slot", slot.index, ".value")
+        
+        parameters <- list(ns,
+                           ui.id,
+                           param)
+        
+        # Add the importer values from previous slots
+        if(slot.index > 1) {
+          for(i in 1:(slot.index - 1)) {
+            parameters[[length(parameters) + 1]] <- input[[paste0("parameter.slot", i,".value")]]
+          }
+        }
+        
+        return(do.call(genericImporterData.makeParameterInputUI, parameters))
+        
+        # input$parameter.slot1.value
+        
+        #return(genericImporterData.makeParameterInputUI(ns, "parameter.slot1.value", param))
+      }
+      
+    }
+    
+    return(tagList())
+  }))
 }
 
 #' Server function of generic importer. Use within callModule and reactive context.
@@ -222,74 +293,10 @@ genericImporterData_ <- function(input,
   #' build selection choices based on previous choices.
   #' Otherwise we would be forced to completely pre-occupy all possible selections
   
-  output$parameter.slot1 <- renderUI({
-    
-    if(!is.null(importer.object())) {
-      
-      output <- tagList()
-      ns <- session$ns
-      
-      if(length(importer.object()@parameters) >= 1)
-      {
-        param <- importer.object()@parameters[[1]]
-        return(genericImporterData.makeParameterInput(ns, "parameter.slot1.value", param))
-      }
-      
-    }
-    
-    return(tagList())
-  })
-  
-  output$parameter.slot2 <- renderUI({
-    
-    if(!is.null(importer.object())) {
-      
-      output <- tagList()
-      ns <- session$ns
-      
-      if(length(importer.object()@parameters) >= 2)
-      {
-        param <- importer.object()@parameters[[2]]
-        return(genericImporterData.makeParameterInput(ns, "parameter.slot2.value", param, input$parameter.slot1.value))
-      }
-      
-    }
-    return(tagList())
-  })
-  
-  output$parameter.slot3 <- renderUI({
-    
-    if(!is.null(importer.object())) {
-      
-      output <- tagList()
-      ns <- session$ns
-      
-      if(length(importer.object()@parameters) >= 3)
-      {
-        param <- importer.object()@parameters[[3]]
-        return(genericImporterData.makeParameterInput(ns, "parameter.slot3.value", param, input$parameter.slot1.value, input$parameter.slot2.value))
-      }
-      
-    }
-    return(tagList())
-  })
-  
-  output$parameter.slot4 <- renderUI({
-    
-    if(!is.null(importer.object())) {
-      
-      output <- tagList()
-      ns <- session$ns
-      
-      if(length(importer.object()@parameters) >= 4)
-      {
-        param <- importer.object()@parameters[[4]]
-        return(genericImporterData.makeParameterInput(ns, "parameter.slot4.value", param, input$parameter.slot1.value, input$parameter.slot2.value, input$parameter.slot3.value))
-      }
-      
-    }
-    return(tagList())
-  })
+  output$parameter.slot1 <- genericImporterData.makeParameterInput(input, session$ns, importer.object, 1)
+  output$parameter.slot2 <- genericImporterData.makeParameterInput(input, session$ns, importer.object, 2)
+  output$parameter.slot3 <- genericImporterData.makeParameterInput(input, session$ns, importer.object, 3)
+  output$parameter.slot4 <- genericImporterData.makeParameterInput(input, session$ns, importer.object, 4)
   
   # Reset data to NULL if reset button is clicked
   observeEvent(input$reset, {

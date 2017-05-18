@@ -12,6 +12,7 @@
 * Sample annotation: Fragment lengths
 * Integrating importer: Selectize to remove datasets
 * General plot settings; disable features
+* Gene annot importer, sample annot importer: let user select the imported data
 
 ## Code
 

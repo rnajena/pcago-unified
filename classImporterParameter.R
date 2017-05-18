@@ -11,8 +11,11 @@ library(shiny)
 #'
 #' @slot name character. 
 #' @slot label character. 
-#' @slot type Currently supported: select (A selectize input)
+#' @slot type Currently supported: select (A selectize input), checkboxes (Multiple checkboxes), lineedit (A text string editor)
 #' @slot select.values A list, vector or a reactive that returns one of those. Used if type = select
+#' @slot checkboxes.options A list, vector or a reactive that returns one of those. Options for type = checkboxes
+#' @slot checkboxes.selected A list, vector or a reactive that returns one of those. Selected options for type = checkboxes
+#' @slot lineedit.default A character string or a reactive that returns a character string. Default text for type = lineedit
 #'
 #' @return
 #' @export
@@ -24,13 +27,19 @@ ImporterParameter <- setClass(
     "name" = "character",
     "label" = "character",
     "type" = "character",
-    "select.values" = "ANY"
+    "select.values" = "ANY",
+    "checkboxes.options" = "ANY",
+    "checkboxes.selected" = "ANY",
+    "lineedit.default" = "ANY"
   ),
   prototype = list(
     "name" = NA_character_,
     "label" = NA_character_,
     "type" = NA_character_,
-    "select.values" = NA
+    "select.values" = NA,
+    "checkboxes.options" = NA,
+    "checkboxes.selected" = NA,
+    "lineedit.default" = ""
   ),
   validity = function(object) {
     
@@ -40,7 +49,7 @@ ImporterParameter <- setClass(
     if(is.na(object@label)) {
       return("No label defined!")
     }
-    if(!(object@type %in% c("select"))) {
+    if(!(object@type %in% c("select", "checkboxes", "lineedit"))) {
       return(paste("Unknown type", object@type))
     }
     

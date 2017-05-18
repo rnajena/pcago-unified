@@ -47,9 +47,9 @@ geneAnnotationImporterUI <- function(id) {
 geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   
   return(genericImporterData("importer", 
-                             importers = reactive(supportedAnnotationImporters),
-                             samples = reactive(availableAnnotationSamples),
-                             generators = reactive(supportedAnnotationGenerators),
+                             importers = reactive(supportedGeneAnnotationImporters),
+                             samples = reactive(availableGeneAnnotationSamples),
+                             generators = reactive(supportedGeneAnnotationGenerators),
                              exprimport = function(con, importer, parameters) {
                                return(importGeneInformationFromAnnotation(con, importer, readcounts()))
                              },
@@ -71,13 +71,7 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                }
                                
                                # Build our callback for the user
-                               choices = c("Scaffold" = "scaffold",
-                                           "Start position" = "start_position",
-                                           "End position" = "end_position",
-                                           "Length" =  "length",
-                                           "Exon length" =  "exon_length",
-                                           "Biotype" =  "biotype", 
-                                           "GO terms" =  "go.terms")
+                               choices = GeneAnnotationEntryNames
                                selected <- c()
                                
                                for(annotation.type in choices) {

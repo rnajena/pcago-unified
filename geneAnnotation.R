@@ -17,17 +17,17 @@ source("geneAnnotationGRanges.R")
 source("geneAnnotationBioMart.R")
 source("geneAnnotationHub.R")
 
-supportedAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
-supportedAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
+supportedGeneAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
+supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF (*.gff3)"),
                                      ImporterEntry(name = "pcago_csv",
                                                    label = "Tabular CSV (*.csv)"),
                                      ImporterEntry(name = "pcago_tsv",
                                                   label = "Tabular TSV (*.csv)"))
-supportedAnnotationGenerators <- list(annotationHub.importerEntry,
+supportedGeneAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
-availableAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
+availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
                                                  label = "Vitamins (Tabular CSV)"),
                                    ImporterEntry(name = "vitamins.gff3",
                                                  label = "Vitamins (Ensembl GFF)"))

@@ -6,6 +6,14 @@
 library(shiny)
 source("classGeneFilter.R")
 
+GeneAnnotationEntryNames <- c("Scaffold" = "scaffold",
+                              "Start position" = "start_position",
+                              "End position" = "end_position",
+                              "Length" =  "length",
+                              "Exon length" =  "exon_length",
+                              "Biotype" =  "biotype", 
+                              "GO terms" =  "go.terms")
+
 #' Contains the annotation of various genes
 #'
 #' @slot sequence.info data.frame. 
