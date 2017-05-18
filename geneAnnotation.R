@@ -25,8 +25,8 @@ geneAnnotationImporterParameter.imported_data.pcago_csv <- ImporterParameter(nam
 geneAnnotationImporterParameter.imported_data.gff_ensembl <- ImporterParameter(name = "imported_data",
                                                                              label = "Imported data",
                                                                              type = "checkboxes",
-                                                                             checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))],
-                                                                             checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))])
+                                                                             checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))],
+                                                                             checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))])
 
 supportedGeneAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
@@ -67,15 +67,25 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
     stop("Invalid arguments!")
   }
   
+  imported_data <- parameters$imported_data
+  
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
+  }
+  
   # Load the data inside the GFF file
   # Suppress warning here: Will warn that connection is rewound. Didn't find a way to make it like the connection
   gr <- suppressWarnings(import.gff(filehandle)) 
   genes <- rownames(readcounts)
  
   annot.sequence.info <- GRanges.extractSequenceInfoAnnotation(gr, genes)
-  annot.biotype <- GRanges.extractBiotypeAnnotation(gr, genes)
+  annot.biotype <- if("biotype" %in% imported_data) GRanges.extractBiotypeAnnotation(gr, genes) else GeneAnnotation()
+  annot.scaffold <- if("scaffold" %in% imported_data) GRanges.extractScaffoldAnnotation(gr, genes) else GeneAnnotation()
   
   annot <- mergeGeneAnnotation(annot.sequence.info, annot.biotype)
+  annot <- mergeGeneAnnotation(annot, annot.scaffold)
+  
+  annot <- geneAnnotationRestrictContentTypes(annot, imported_data)
   
   return(annot)
 }
@@ -99,9 +109,17 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcou
     stop("Invalid arguments!")
   }
   
+  imported_data <- parameters$imported_data
+  
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
+  }
+  
   data <- read.csv(filehandle, header = T, row.names = 1, sep = sep, stringsAsFactors = F)
+  
   annot <- geneAnnotationFromTable(data)
   annot <- geneAnnotationRestrictToGenes(annot, rownames(readcounts))
+  annot <- geneAnnotationRestrictContentTypes(annot, imported_data)
   
   return(annot)
 }
@@ -153,10 +171,10 @@ generateGeneInformation <- function(generator, readcounts, parameters) {
   }
   
   if(generator == "ensembl_biomart") {
-    return(generateGeneInformation.EnsemblBioMart(parameters$datatype, parameters$database, parameters$species, readcounts))
+    return(generateGeneInformation.EnsemblBioMart(parameters$database, parameters$species, parameters$imported_data, readcounts))
   }
   else if(generator == "annotation_hub") {
-    return(generateGeneInformation.AnnotationHub(parameters$datatype, parameters$database, parameters$species, parameters$dataset, readcounts))
+    return(generateGeneInformation.AnnotationHub(parameters$database, parameters$species, parameters$dataset, parameters$imported_data, readcounts))
   }
   else {
     stop(paste("Unkown generator", generator))

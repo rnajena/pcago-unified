@@ -5,52 +5,29 @@ source("geneAnnotationGRanges.R")
 
 annotationHub.hub <- reactive(AnnotationHub())
 
-annotationHub.databaseChoices <- function(datatype) {
-  
-  ah <- annotationHub.hub()
-  
-  if(!is.character(datatype) || datatype == "") {
-    return(c())
-  }
-  
-  if(datatype == "sequence.info" || datatype == "biotype") {
-    return(c("", unique(ah$dataprovider[ah$rdataclass == "GRanges"])))
-  }
-  else {
-    stop("Unknown data type!")
-  }
-  
+annotationHub.databaseChoices <- function() {
+  return(c("", unique(ah$dataprovider[ah$rdataclass == "GRanges"])))
 }
 
-annotationHub.speciesChoices <- function(datatype, database) {
+annotationHub.speciesChoices <- function(database) {
   
   ah <- annotationHub.hub()
-  
-  if(!is.character(datatype) || datatype == "") {
-    return(c())
-  }
+ 
   if(!is.character(database) || database == "") {
     return(c())
   }
+ 
+  choices <- unique(ah$species[ah$rdataclass == "GRanges" & ah$dataprovider == database])
+  choices <- na.omit(choices)
   
-  if(datatype == "sequence.info" || datatype == "biotype") {
-    
-    choices <- unique(ah$species[ah$rdataclass == "GRanges" & ah$dataprovider == database])
-    choices <- na.omit(choices)
-    
-    return(c("", choices))
-  }
-  else {
-    stop("Unknown data type!")
-  }
-  
+  return(c("", choices))
 }
 
-annotationHub.datasetChoices <- function(datatype, database, species) {
+annotationHub.datasetChoices <- function(database, species) {
   
   ah <- annotationHub.hub()
   
-  if(!is.character(datatype) || !is.character(species) || !is.character(database) || datatype == "" || database == "" || species == "") {
+  if(!is.character(species) || !is.character(database) || database == "" || species == "") {
     return(c())
   }
   
@@ -72,11 +49,6 @@ annotationHub.datasetChoices <- function(datatype, database, species) {
 annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                        label = "Annotation Hub",
                                        parameters = list(
-                                         ImporterParameter(name = "imported_data",
-                                                           label = "Imported data",
-                                                           type = "checkboxes",
-                                                           checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))],
-                                                           checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go.terms"))]),
                                          ImporterParameter(name = "database", 
                                                            label = "Database", 
                                                            type = "select", 
@@ -88,10 +60,15 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                          ImporterParameter(name = "dataset",
                                                            label = "Dataset",
                                                            type = "select",
-                                                           select.values = annotationHub.datasetChoices)
+                                                           select.values = annotationHub.datasetChoices),
+                                         ImporterParameter(name = "imported_data",
+                                                           label = "Imported data",
+                                                           type = "checkboxes",
+                                                           checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))],
+                                                           checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))])
                                        ))
 
-generateGeneInformation.AnnotationHub <- function(datatype, database, species, dataset, readcounts) {
+generateGeneInformation.AnnotationHub <- function(database, species, dataset, imported_data, readcounts) {
   
   if(!is.character(species) || species == "") {
     stop("Invalid species!")

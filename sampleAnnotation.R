@@ -25,7 +25,7 @@ availableSampleAnnotationSamples <- list(
 )
 supportedSampleAnnotationGenerators <- list(
   ImporterEntry(name = "conditions_split", label = "Conditions from sample names", parameters = list(
-    ImporterParameter(name = "separator", label = "Separator", type = "select", select.values = c("_","#","|",",",";"," ",""))
+    ImporterParameter(name = "separator", label = "Separator", type = "lineedit", lineedit.default = "_")
   ))
 )
 

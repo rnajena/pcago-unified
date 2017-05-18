@@ -7,36 +7,6 @@ library(biomaRt)
 library(GO.db)
 library(GenomicRanges)
 
-#' Returns a table with gene id, GO term
-#' Note that a gene can have multiple GO terms, so there can be multiple
-#'
-#' @param biomart.dataset 
-#' @param genes 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-getBioMartGOTerms <- function(mart, genes) {
-  
-  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "go_id", "chromosome_name", "start_position", "end_position"), 
-              filters = c("ensembl_gene_id"),
-              values = genes, 
-              mart = mart)
-  
-  if(nrow(bm) == 0) {
-    return(NULL)
-  }
-  
-  bm <- bm[bm$go_id != "",] # Seems to sometimes return empty GO-IDs
-  go.terms <- AnnotationDbi::select(GO.db, bm$go_id, c("TERM"))
-  
-  bm$go_term <- go.terms$TERM
-  bm <- na.omit(bm) # If the term wasn't found
-  
-  return(bm)
-}
-
 #' Returns a table with sequence info (gene ,scaffold, start_position, end_position, length) for each gene
 #'
 #' @param biomart.dataset 
@@ -85,7 +55,37 @@ getBioMartSequenceInfo <- function(mart, genes) {
   return(gr)
 }
 
-#' Returns a table with gene and gene 
+#' Returns a table with gene id, GO term
+#' Note that a gene can have multiple GO terms, so there can be multiple
+#'
+#' @param biomart.dataset 
+#' @param genes 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getBioMartGOTerms <- function(mart, genes) {
+  
+  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "go_id"), 
+                       filters = c("ensembl_gene_id"),
+                       values = genes, 
+                       mart = mart)
+  
+  if(nrow(bm) == 0) {
+    return(NULL)
+  }
+  
+  bm <- bm[bm$go_id != "",] # Seems to sometimes return empty GO-IDs
+  go.terms <- AnnotationDbi::select(GO.db, bm$go_id, c("TERM"))
+  
+  bm$go_term <- go.terms$TERM
+  bm <- na.omit(bm) # If the term wasn't found
+  
+  return(bm)
+}
+
+#' Returns a table with gene and biotype 
 #'
 #' @param mart 
 #' @param genes 
@@ -105,6 +105,31 @@ getBioMartBiotype <- function(mart, genes) {
   }
   
   colnames(bm) <- c("gene","type")
+  bm <- na.omit(bm)
+  
+  return(bm)
+}
+
+#' Returns a table with gene and scaffold 
+#'
+#' @param mart 
+#' @param genes 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getBioMartScaffold <- function(mart, genes) {
+  bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", "chromosome_name"), 
+                       filters = c("ensembl_gene_id"),
+                       values = genes, 
+                       mart = mart)
+  
+  if(nrow(bm) == 0) {
+    return(NULL)
+  }
+  
+  colnames(bm) <- c("gene","scaffold")
   bm <- na.omit(bm)
   
   return(bm)
@@ -145,11 +170,6 @@ bioMart.speciesChoices <- function(datatype, database) {
 bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                        label = "Ensembl BioMart",
                                        parameters = list(
-                                         ImporterParameter(name = "imported_data",
-                                                           label = "Imported data",
-                                                           type = "checkboxes",
-                                                           checkboxes.options = GeneAnnotationEntryNames,
-                                                           checkboxes.selected = GeneAnnotationEntryNames),
                                          ImporterParameter(name = "database",
                                                            label = "Database",
                                                            type = "select",
@@ -157,75 +177,95 @@ bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                          ImporterParameter(name = "species", 
                                                            label = "Species", 
                                                            type = "select", 
-                                                           select.values = bioMart.speciesChoices) 
+                                                           select.values = bioMart.speciesChoices),
+                                         ImporterParameter(name = "imported_data",
+                                                           label = "Imported data",
+                                                           type = "checkboxes",
+                                                           checkboxes.options = GeneAnnotationEntryNames,
+                                                           checkboxes.selected = GeneAnnotationEntryNames)
                                        ))
 
 
-generateGeneInformation.EnsemblBioMart <- function(datatype, database, species, readcounts) {
+generateGeneInformation.EnsemblBioMart <- function(database, species, imported_data, readcounts) {
+  
+  if(length(imported_data) == 0) {
+    stop("No data to be imported selected!")
+  }
   
   genes <- rownames(readcounts)
   bio.mart <- biomaRt::useMart(database, species)
   
-  if(datatype == "go.terms") {
+  output <- GeneAnnotation()
+  
+  if("go_terms" %in% imported_data) {
     
     go.terms.table <- getBioMartGOTerms(bio.mart, genes)
     
-    if(is.null(go.terms.table)) {
-      stop("Data set does not contain even one of the requested genes! Did you choose a wrong data set?")
-    }
-    
-    # We have to transform the table with columns gene_id, term to term -> list of gene ids
-    go.terms.filter <- list()
-    
-    for(term in unique(go.terms.table$go_term)) {
+    if(!is.null(go.terms.table)) {
+      # We have to transform the table with columns gene_id, term to term -> list of gene ids
+      go.terms.filter <- list()
       
-      if(term == "") {
-        next()
+      for(term in unique(go.terms.table$go_term)) {
+        
+        if(term == "") {
+          next()
+        }
+        
+        gene.indices <- term == go.terms.table$go_term
+        genes <- go.terms.table$ensembl_gene_id[gene.indices]
+        
+        go.terms.filter[[term]] <- genes
+        
       }
       
-      gene.indices <- term == go.terms.table$go_term
-      genes <- go.terms.table$ensembl_gene_id[gene.indices]
-      
-      go.terms.filter[[term]] <- genes
-      
+      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
     }
-    
-    return(GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
-  }
-  else if(datatype == "sequence.info") {
-    
-    sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
-    
-    if(is.null(sequence.info)) {
-      stop("Data set does not contain even one of the requested genes! Did you choose a wrong data set?")
-    }
-    
-    # Extract scaffold filter
-    scaffolds <- list()
-    for(scaffold in unique(sequence.info$scaffold)) {
-      scaffolds[[scaffold]] <- rownames(sequence.info)[sequence.info$scaffold == scaffold]
-    }
-    
-    return(GeneAnnotation(sequence.info = sequence.info,
-                      gene.scaffold = GeneFilter(data = scaffolds)))
     
   }
-  else if(datatype == "biotype") {
+  
+  if("biotype" %in% imported_data) {
     
     biotypes.table <- getBioMartBiotype(bio.mart, genes)
     
-    # Extract filter
-    biotypes <- list()
-    for(feature in unique(associated.features.table$type)) {
-      biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
+    if(!is.null(biotypes.table)) {
+      # Extract filter
+      biotypes <- list()
+      for(feature in unique(biotypes.table$type)) {
+        biotypes[[feature]] <- unique(biotypes.table$gene[biotypes.table$type == feature])
+      }
+      
+      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
     }
     
-    return(GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
-    
-  }
-  else {
-    stop("Unknown datatype!")
   }
   
+  if("scaffold" %in% imported_data) {
+    
+    scaffold.table <- getBioMartScaffold(bio.mart, genes)
+    
+    if(!is.null(scaffold.table)) {
+      # Extract filter
+      scaffold <- list()
+      for(feature in unique(scaffold.table$type)) {
+        scaffold[[feature]] <- unique(scaffold.table$gene[scaffold.table$type == feature])
+      }
+      
+      output <- mergeGeneAnnotation(output, GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
+    }
+    
+  }
+  
+  if(length(intersect(imported_data, c("start_position", "end_position", "length", "exon_length"))) > 0) {
+    sequence.info <- getBioMartSequenceInfo(bio.mart, genes)
+    
+    if(!is.null(sequence.info)) {
+      output <- mergeGeneAnnotation(GeneAnnotation(sequence.info = sequence.info))
+    }
+    
+  }
+  
+  output <- geneAnnotationRestrictContentTypes(output, imported_data)
+  
+  return(output)
   
 }

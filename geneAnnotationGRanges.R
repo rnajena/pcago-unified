@@ -21,17 +21,10 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
   meta.indices <- match(genes, gff$gene_id) # F: Index of gene in readcounts -> Index of gene in gff annotation
   
   if(any(is.na(meta.indices))) {
-    
     # Remove genes that are NA. They will not appear in the annotation
     na.genes <- genes[is.na(meta.indices)]
     genes <- genes[!is.na(meta.indices)]
     meta.indices <- na.omit(meta.indices)
-    
-    showNotification(type = "warning", 
-                     duration = NULL,
-                     paste("Could not find sequence information for all genes. Following genes are affected:", 
-                           strJoinLimited(na.genes, limit = 10)))
-    
   }
   
   if(length(meta.indices) == 0) {
@@ -41,7 +34,6 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
   # Extract available info directly from GRanges
   
   sequence.info <- data.frame(row.names = genes,
-                              scaffold = as.vector(seqnames(gr)[meta.indices]),
                               start_position = start(gr)[meta.indices],
                               end_position = end(gr)[meta.indices],
                               length = width(gr)[meta.indices],
@@ -57,16 +49,9 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes) {
   #browser()
   
   found.genes <- mcols(gr)[match(names(exonic.gene.sizes), gr$Name), "gene_id"]
-  sequence.info[found.genes, "exonlength"] <- exonic.gene.sizes # Txdb uses name instead of gene_id
+  sequence.info[found.genes, "exon_length"] <- exonic.gene.sizes # Txdb uses name instead of gene_id
   
-  # As we have sequence info, extract scaffold filter
-  scaffolds <- list()
-  for(scaffold in na.omit(unique(sequence.info$scaffold))) {
-    scaffolds[[scaffold]] <- na.omit(rownames(sequence.info)[sequence.info$scaffold == scaffold])
-  }
-  
-  return(GeneAnnotation(sequence.info = sequence.info, 
-                    gene.scaffold = GeneFilter(data = scaffolds)))
+  return(GeneAnnotation(sequence.info = sequence.info))
   
 }
 
@@ -97,4 +82,32 @@ GRanges.extractBiotypeAnnotation <- function(gr, genes) {
   
   return(GeneAnnotation(gene.biotype = GeneFilter(data = features)))
   
+}
+
+#' Extracts scaffold annotation from a GRanges object
+#'
+#' @param gr 
+#' @param genes 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+GRanges.extractScaffoldAnnotation <- function(gr, genes) {
+  
+  gff <- mcols(gr)
+  
+  scaffold <- list()
+  
+  for(type in unique(seqnames(gr))) {
+    
+    gene_ids <- unlist(gff[seqnames(gr) == type,"gene_id"])
+    gene_ids <- unique(intersect(gene_ids, genes))
+    
+    if(length(gene_ids) > 0) {
+      scaffold[[type]] <- gene_ids 
+    }
+  }
+  
+  return(GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
 }
