@@ -408,6 +408,23 @@
 	color: #555;
 }
 
+.processing-steps-widget tr {
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+}
+.processing-steps-widget td {
+	border-left: 1px solid #ddd;
+	padding: 3px;
+}
+
+/*
+Helper style
+*/
+
+.scrollable-x {
+	overflow-x: auto;
+}
+
 /*
 Style for the about page
 */

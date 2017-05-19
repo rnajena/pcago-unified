@@ -4,7 +4,6 @@
 
 * Help pages
 * About page
-* Read count normalization result plots
 * Custom selectors
 * Annotation overview
 * SMPFPP server implementation
@@ -22,7 +21,6 @@
 
 * Use notifications for importer messages
 * ggplot2 has slow performance (3x slower than scatterplot3d)
-* All annotation results won't necessary contain all genes and in order!
 
 ## R Quirks
 

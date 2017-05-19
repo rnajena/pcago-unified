@@ -124,10 +124,11 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
         tags$p(paste("Use non-overlapping sum of exon lengths:", output$use.feature.exonlength)),
         tags$p(paste("Calculate effective length:", output$use.fragment.effectivelength)),
         h2("Sum of normalized sample counts"),
-        tags$table(
-          do.call(tags$tr, lapply(names(output$sample.sum),function(x) { tags$td(x) })),
-          do.call(tags$tr, lapply(as.vector(output$sample.sum),function(x) { tags$td(x) }))
-        )
+        tags$div(class = "scrollable-x",
+                 tags$table(
+                   do.call(tags$tr, lapply(c("Sample", names(output$sample.sum)),function(x) { tags$td(x) })),
+                   do.call(tags$tr, lapply(c("Sum of norm. counts", as.vector(output$sample.sum)),function(x) { tags$td(x) }))
+                 ))
       )
       
       return(list(title = "Apply TPM normalization",
@@ -135,10 +136,19 @@ readcountProcessing.step.normalization <- function(input, readcounts.normalizati
       
     }
     else if(input$pca.data.normalization == "deseq2") {
+     
+      output <- readcounts.normalization.output()
       
-      content <- tagList()
-      
-      # TODO: Table of conditions & parameters of DESeq2
+      content <- tagList(
+        tags$p("Applied read count normalization with DESeq2 method."),
+        tags$p(paste("Design:", output$design)),
+        h2("Sample conditions"),
+        tags$div(class = "scrollable-x",
+                 tags$table(
+                   do.call(tags$tr, lapply(c("Sample", rownames(output$conditions)),function(x) { tags$td(x) })),
+                   do.call(tags$tr, lapply(c("Gen. condition", as.vector(output$conditions$condition)),function(x) { tags$td(x) }))
+                 ))
+      )
       
       return(list(title = "Apply DESeq2 normalization",
                   content = content))

@@ -136,7 +136,7 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, se
   assay(readcounts) <- normalized.counts
   
   # Return the readcounts and the conditions used for normalization
-  return(list(readcounts = readcounts, conditions = deseq.coldata))
+  return(list(readcounts = readcounts, conditions = deseq.coldata, design = "~condition"))
 }
 
 #' Applies read count normalization (TPM) to readcounts
