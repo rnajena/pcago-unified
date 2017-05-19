@@ -65,10 +65,13 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
 
 generateGeneInformation.AnnotationHub <- function(database, species, dataset, imported_data, readcounts) {
   
-  if(!is.character(species) || species == "") {
+  if(!is.character(database) || database == "" || length(database) != 1) {
+    stop("Invalid database!")
+  }
+  if(!is.character(species) || species == "" || length(species) != 1) {
     stop("Invalid species!")
   }
-  if(!is.character(dataset) || dataset == "") {
+  if(!is.character(dataset) || dataset == "" || length(dataset) != 1) {
     stop("Invalid data set!")
   }
   if(length(imported_data) == 0) {

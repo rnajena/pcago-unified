@@ -16,7 +16,7 @@ library(GenomicRanges)
 #' @export
 #'
 #' @examples
-getBioMartSequenceInfo <- function(mart, genes) {
+getBioMartSequenceInfo <- function(mart, genes, imported_data) {
   bm <- biomaRt::getBM(attributes = c("ensembl_gene_id", 
                                       "chromosome_name", 
                                       "start_position", 
@@ -57,7 +57,7 @@ getBioMartSequenceInfo <- function(mart, genes) {
                                       Parent = sapply(bm$ensembl_gene_id, function(x) { paste0("gene:", x) }))
   
   gr <- c(gr.genes, gr.transcripts)
-  return(GRanges.extractSequenceInfoAnnotation(gr))
+  return(GRanges.extractSequenceInfoAnnotation(gr, genes, imported_data))
 }
 
 #' Returns a table with gene id, GO term
@@ -97,13 +97,13 @@ getBioMartGOTerms <- function(mart, genes) {
     }
     
     gene.indices <- term == bm$go_term
-    genes <- go.terms.table$ensembl_gene_id[gene.indices]
+    genes <- bm$ensembl_gene_id[gene.indices]
     
     go.terms.filter[[term]] <- genes
     
   }
   
-  return(GeneAnnotation(genes.go.terms = GeneFilter(data = go.terms.filter)))
+  return(GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
 }
 
 #' Returns a table with gene and biotype 
@@ -131,7 +131,7 @@ getBioMartBiotype <- function(mart, genes) {
   # Extract filter
   biotypes <- list()
   for(feature in unique(bm$type)) {
-    biotypes[[feature]] <- unique(biotypes.table$gene[bm$type == feature])
+    biotypes[[feature]] <- unique(bm$gene[bm$type == feature])
   }
   
   return(GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
@@ -162,18 +162,14 @@ getBioMartScaffold <- function(mart, genes) {
   
   # Extract filter
   scaffold <- list()
-  for(feature in unique(bm$type)) {
-    scaffold[[feature]] <- unique(bm$gene[scaffold.table$type == feature])
+  for(feature in unique(bm$scaffold)) {
+    scaffold[[feature]] <- unique(bm$gene[bm$scaffold == feature])
   }
   
   return(GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
 }
 
 bioMart.databaseChoices <- function() {
-  
-  if(!is.character(datatype) || datatype == "") {
-    return(c())
-  }
   
   marts <- biomaRt::listMarts()
   choices <- marts$biomart
@@ -222,6 +218,12 @@ generateGeneInformation.EnsemblBioMart <- function(database, species, imported_d
   if(length(imported_data) == 0) {
     stop("No data to be imported selected!")
   }
+  if(!is.character(database) || length(database) != 1 || database == "") {
+    stop("Invalid database")
+  }
+  if(!is.character(species) || length(species) != 1 || species == "") {
+    stop("Invalid species")
+  }
   
   genes <- rownames(readcounts)
   bio.mart <- biomaRt::useMart(database, species)
@@ -241,7 +243,7 @@ generateGeneInformation.EnsemblBioMart <- function(database, species, imported_d
   }
   
   if(length(intersect(imported_data, GeneAnnotationEntryNames.sequence.info)) > 0) {
-      output <- mergeGeneAnnotation(output, getBioMartSequenceInfo(bio.mart, genes))
+      output <- mergeGeneAnnotation(output, getBioMartSequenceInfo(bio.mart, genes, imported_data))
   }
   
   output <- geneAnnotationRestrictContentTypes(output, imported_data)
