@@ -20,7 +20,9 @@ plotPCAVariancePlotSettingsUI <- function(id) {
   ns <- NS(id)
   
   return(bsCollapse(
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
+    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings"),
+                                                                 legend.color = F,
+                                                                 legend.shape = F))
   ))
   
 }

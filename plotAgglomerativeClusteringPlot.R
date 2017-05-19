@@ -53,7 +53,9 @@ plotAgglomerativeClusteringPlotSettingsUI <- function(id) {
                     selectizeInput(ns("method.dist"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
                     selectizeInput(ns("method.hclust"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection)),
     bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
+    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings"),
+                                                                 legend.color = F,
+                                                                 legend.shape = F))
   ))
   
 }

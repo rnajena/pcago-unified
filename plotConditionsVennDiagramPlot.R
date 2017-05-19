@@ -25,7 +25,9 @@ plotConditionsVennDiagramPlotSettingsUI <- function(id) {
                                                   multiple = T,
                                                   options = list(maxItems = 5))),
     bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
+    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings"),
+                                                                 legend.shape = F,
+                                                                 legend.color = F))
   ))
   
 }

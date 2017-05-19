@@ -479,3 +479,15 @@ Style for generic importer
 	margin-bottom: 5px;
 	color: #337ab7;
 }
+
+/*
+Style for the size rows in general plot settings
+*/
+.general-plot-settings-size .shiny-input-container label {
+	display: none;
+}
+
+.general-plot-settings-size button {
+	width: 100%;
+	min-width: 60px;
+}
