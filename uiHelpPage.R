@@ -38,6 +38,7 @@ uiHelpPage <- function() {
     "Appendix",
     uiHelpPageEntry("Upload widget", "helppages/appendix-uploader-widget.md"),
     uiHelpPageEntry("Visuals editor widget", "helppages/appendix-visual-editor.md"),
+    uiHelpPageEntry("Processing view widget", "helppages/appendix-processing-view.md"),
     uiHelpPageEntry("File formats", "helppages/appendix-fileformats.md")
   ))
 }

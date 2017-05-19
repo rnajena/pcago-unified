@@ -91,7 +91,10 @@ importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, 
   if(length(setdiff(samples, rownames(data))) > 0) {
     stop("Data does not assign conditions to all samples!")
   }
-  
+  if(any(grepl("^", colnames(data), fixed = T))) {
+    stop("Special character ^ in conditions! This is not allowed!")
+  }
+    
   data <- data[samples,,drop=F]
   
   return(SampleAnnotation(conditions = data))
@@ -129,6 +132,9 @@ importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples, i
   }
   if(length(setdiff(samples, rownames(data))) > 0) {
     stop("Data does not assign conditions to all samples!")
+  }
+  if(any(grepl("^", colnames(data), fixed = T))) {
+    stop("Special character ^ in conditions! This is not allowed!")
   }
   
   data <- data[samples,,drop=F]
@@ -352,7 +358,7 @@ collapseConditions <- function(condition.table, conditions) {
   }
   
   return(sapply(rownames(condition.table), function(sample) {
-    return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[sample, c]) c else "" })), collapse = "_"))
+    return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[sample, c]) c else "" })), collapse = "^"))
   }))
 }
 

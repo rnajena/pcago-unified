@@ -49,7 +49,7 @@ The data will be integrated into a final sample annotation. You can upload multi
 The sample info annotation will be merged, while the conditions are completely overwritten. Newer data overwrites
 old data.
 
-## Conditions
+## Importing conditions
 
 Following importers are available:
 
@@ -88,8 +88,8 @@ Sample1, Sample2, ... are the column names in your read count table.
 ## Mean fragment length
 
 For future development, the mean fragment length is part of the **sample info**
-annotation that may contain additional information about each same similar to
-gene annotations.
+annotation group that later may contain additional information about each sample similar to
+gene annotations. Currently, only the *mean fragment length* is supported.
 
 Following importers are available:
 

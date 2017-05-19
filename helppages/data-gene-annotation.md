@@ -25,6 +25,9 @@ Following importers are available:
 * **Tabular CSV.** Imports data from the table exported from the *output* in `Data > Genes > Annotation`
 * **Tabular TSV.** Like Tabular CSV, but with TSV format
 
+The **Imported data** parameter is available for all importers. Deselect a checkbox to
+exclude the associated annotation data from being imported.
+
 ### General format of tabular CSV/TSV
 
 | ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_terms |
@@ -43,20 +46,18 @@ You have access to two database providers:
 
 You need to input following parameters:
 
-1. **Extract information.** The information that should be extracted. You can choose between **biotype** and **sequence info** (scaffold,
-  start position, end position, length and exon length)
-2. Database
-3. Species
-4. Dataset
+1. **Database.** The database that is used as source for the annotation. *Please note that we only tested Ensembl. There may be problems if you want to use other sources.*
+2. **Species.** The species your data is generated from.
+3. **Dataset.** Choose one of the available data sets. *Use the documentation of the respective database to find out which dataset is the correct one for your data.*
+4. **Imported data.** You can restrict the loaded data by deselecting entries.
 
 ### Ensembl BioMart
 
 You need to input following parameters:
 
-1. **Extract information.** The information that should be extracted. You can choose between **biotype** and **sequence info** (scaffold,
-  start position, end position, length and exon length) or **GO terms**
-2. Database
-3. Species
+1. **Database.** The database that is used as source for the annotation. *Please note that we only tested Ensembl Gene 88. There may be problems if you want to use other sources.*
+2. **Species.** The species your data is generated from.
+3. **Imported data.** You can restrict the loaded data by deselecting entries.
 
 <div class="well help-box">
 <label>Info</label>  Getting data from online resources may take a long time or even fail/freeze if the online resources are under high demand.
