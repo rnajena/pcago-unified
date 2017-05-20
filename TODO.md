@@ -4,7 +4,6 @@
 
 * Help pages
 * About page
-* Annotation overview
 * SMPFPP server implementation
 
 ## Code
