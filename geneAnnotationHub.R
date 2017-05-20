@@ -41,6 +41,13 @@ annotationHub.datasetChoices <- function(database, species) {
   return(c("", choices))
 }
 
+GeneAnnotationEntryNames.annotation_hub <- c("Scaffold" = "scaffold",
+                                          "Start position" = "start_position",
+                                          "End position" = "end_position",
+                                          "Length" =  "length",
+                                          "Exon length" =  "exon_length",
+                                          "Biotype" =  "biotype")
+
 annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                        label = "Annotation Hub",
                                        parameters = list(
@@ -59,8 +66,8 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                          ImporterParameter(name = "imported_data",
                                                            label = "Imported data",
                                                            type = "checkboxes",
-                                                           checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))],
-                                                           checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))])
+                                                           checkboxes.options = GeneAnnotationEntryNames.annotation_hub,
+                                                           checkboxes.selected = GeneAnnotationEntryNames.annotation_hub)
                                        ))
 
 generateGeneInformation.AnnotationHub <- function(database, species, dataset, imported_data, readcounts) {

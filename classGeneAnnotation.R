@@ -12,7 +12,8 @@ GeneAnnotationEntryNames <- c("Scaffold" = "scaffold",
                               "Length" =  "length",
                               "Exon length" =  "exon_length",
                               "Biotype" =  "biotype", 
-                              "GO terms" =  "go_terms")
+                              "GO terms" =  "go_terms",
+                              "Custom" = "custom")
 
 # Gene annotation names that are represented in sequence info table
 GeneAnnotationEntryNames.sequence.info <- c("Start position" = "start_position",
@@ -36,13 +37,15 @@ GeneAnnotation <- setClass(
     sequence.info = "data.frame",
     gene.biotype = "GeneFilter",
     gene.go.terms = "GeneFilter",
-    gene.scaffold = "GeneFilter"
+    gene.scaffold = "GeneFilter",
+    gene.custom = "GeneFilter"
   ),
   prototype = list(
     sequence.info = data.frame(),
     gene.biotype = GeneFilter(),
     gene.go.terms = GeneFilter(),
-    gene.scaffold = GeneFilter()
+    gene.scaffold = GeneFilter(),
+    gene.custom = GeneFilter()
   ),
   validity = function(object) {
     
@@ -84,6 +87,9 @@ setMethod(f = "geneAnnotationRestrictContentTypes",
             }
             if(!("go_terms" %in% content_types)) {
               object@gene.go.terms <- GeneFilter()
+            }
+            if(!("custom" %in% content_types)) {
+              object@gene.custom <- GeneFilter()
             }
            
             # Restrict sequence info table
@@ -163,6 +169,7 @@ setMethod(f = "geneAnnotationFromTable",
             # Build gene filters
             gene.biotype = if("biotype" %in% colnames(table)) buildGeneFilter(setNames(rownames(table), table$biotype)) else GeneFilter()
             gene.scaffold = if("scaffold" %in% colnames(table)) buildGeneFilter(setNames(rownames(table), table$scaffold)) else GeneFilter()
+            gene.custom = if("custom" %in% colnames(table)) buildGeneFilter(setNames(rownames(table), table$custom)) else GeneFilter()
             
             # GO terms are special: The annotation stores a list of GO terms, so we cannot use the handy build function
             gene.go.terms <- GeneFilter()
@@ -188,14 +195,32 @@ setMethod(f = "geneAnnotationFromTable",
               gene.go.terms <- GeneFilter(data = data)
 
             }
-            
+            if("custom" %in% colnames(table)) {
+              
+              data <- list()
+              for(gene in rownames(table)) {
+                cell.value <- table[gene, "custom"]
+                
+                custom <- if(!is.na(cell.value)) na.omit(unlist(strsplit(cell.value, "|", fixed = T))) else c()
+                
+                if(length(go.terms) > 0) {
+                  data[[gene]] <- custom
+                }
+                
+              }
+              
+              data <- invertGeneFilter(GeneFilter(data = data))
+              gene.custom <- GeneFilter(data = data)
+              
+            }
             
             
             return(GeneAnnotation(
               sequence.info = sequence.info,
               gene.biotype = gene.biotype,
               gene.go.terms = gene.go.terms,
-              gene.scaffold = gene.scaffold
+              gene.scaffold = gene.scaffold,
+              gene.custom = gene.custom
             ))
             
           })
@@ -222,7 +247,8 @@ setMethod(f = "geneAnnotationToTable",
             genes <- unique(c(rownames(object@sequence.info),
                               geneFilterGenes(object@gene.biotype),
                               geneFilterGenes(object@gene.go.terms),
-                              geneFilterGenes(object@gene.scaffold)))
+                              geneFilterGenes(object@gene.scaffold),
+                              geneFilterGenes(object@gene.custom)))
             
             table <- data.frame(row.names = genes,
                                 "scaffold" = rep(NA, length(genes)),
@@ -232,6 +258,7 @@ setMethod(f = "geneAnnotationToTable",
                                 "exon_length" = rep(NA, length(genes)),
                                 "biotype" = rep(NA, length(genes)),
                                 "go_terms" = rep(NA, length(genes)),
+                                "custom" = rep(NA, length(genes)),
                                 check.names = F)
             
             table[rownames(object@sequence.info), "start_position"] <- object@sequence.info$start
@@ -243,6 +270,7 @@ setMethod(f = "geneAnnotationToTable",
             gene.go.terms.inv <- invertGeneFilter(object@gene.go.terms)
             gene.biotype.inv <- invertGeneFilter(object@gene.biotype)
             gene.scaffold.inv <- invertGeneFilter(object@gene.scaffold)
+            gene.custom.inv <- invertGeneFilter(object@gene.custom)
             
             if(length(gene.go.terms.inv) > 0) {
               table[names(gene.go.terms.inv), "go_terms"] <- sapply(names(gene.go.terms.inv), function(x) {
@@ -257,6 +285,11 @@ setMethod(f = "geneAnnotationToTable",
             if(length(gene.scaffold.inv) > 0) {
               table[names(gene.scaffold.inv), "scaffold"] <- sapply(names(gene.scaffold.inv), function(x) {
                 return(paste(gene.scaffold.inv[[x]], collapse = "|"))
+              }) 
+            }
+            if(length(gene.custom.inv) > 0) {
+              table[names(gene.custom.inv), "custom"] <- sapply(names(gene.custom.inv), function(x) {
+                return(paste(gene.custom.inv[[x]], collapse = "|"))
               }) 
             }
             
@@ -309,6 +342,7 @@ setMethod(f = "mergeGeneAnnotation",
             object1@gene.biotype <- mergeGeneFilter(object1@gene.biotype, object2@gene.biotype)
             object1@gene.go.terms <- mergeGeneFilter(object1@gene.go.terms, object2@gene.go.terms)
             object1@gene.scaffold <- mergeGeneFilter(object1@gene.scaffold, object2@gene.scaffold)
+            object1@gene.custom <- mergeGeneFilter(object1@gene.custom, object2@gene.custom)
             
             return(object1)
            
@@ -347,6 +381,7 @@ setMethod(f = "geneAnnotationRestrictToGenes",
             object@gene.biotype <- geneFilterRestrictToGenes(object@gene.biotype, restrict.gene)
             object@gene.go.terms <- geneFilterRestrictToGenes(object@gene.go.terms, restrict.gene)
             object@gene.scaffold <- geneFilterRestrictToGenes(object@gene.scaffold, restrict.gene)
+            object@gene.custom <- geneFilterRestrictToGenes(object@gene.custom, restrict.gene)
             
             return(object)
           })
@@ -382,6 +417,9 @@ setMethod(f = "geneAnnotationAnnotatedGenes",
             }
             else if(annotation == "go_terms") {
               return(geneFilterGenes(object@gene.go.terms))
+            }
+            else if(annotation == "custom") {
+              return(geneFilterGenes(object@gene.custom))
             }
             else {
               stop(paste("Unknown annotation type ", annotation))

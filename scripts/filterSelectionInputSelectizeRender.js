@@ -19,6 +19,10 @@
 			bgr_color = "#9b59b6";
       fgr_color = "#fff";
 			break;
+		case "Custom":
+  		bgr_color = "#d35400";
+      fgr_color = "#fff";
+		  break;
 		}
 
 		var style = 'display: inline-block; margin: 2px 5px 2px 5px ;border: 1px solid #ddd; border-radius: 3px; background-color: ' + bgr_color + '; color: ' + fgr_color;
@@ -43,6 +47,10 @@
 			break;
 		case "Scaffold":
 			bgr_color = "#9b59b6";
+			fgr_color = "#fff";
+			break;
+		case "Custom":
+			bgr_color = "#d35400";
 			fgr_color = "#fff";
 			break;
 		}

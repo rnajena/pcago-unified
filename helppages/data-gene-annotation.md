@@ -12,6 +12,7 @@ A gene has following annotations:
 * **Exon length.** Non overlapping exon length. Used for TPM read count normalization.
 * **Biotype.** Biotype of the gene.
 * **GO terms.** GO terms for filtering
+* **Custom.** An external selector that can be defined by the user.
 
 
 You can upload multiple gene annotations per upload widget (see `Appendix > Upload widget` for more information).
@@ -30,10 +31,10 @@ exclude the associated annotation data from being imported.
 
 ### General format of tabular CSV/TSV
 
-| ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_terms |
-|-------|----------|----------------|--------------|--------|------------|---------|----------|
-| Gene1 | ...      | ...            | ...          | ...    | ...        | ...     | term1|term2|...      |
-| ...   | ...      | ...            | ...          | ...    | ...        | ...     | ...      |
+| ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_terms | custom |
+|-------|----------|----------------|--------------|--------|------------|---------|----------|--------|
+| Gene1 | ...      | ...            | ...          | ...    | ...        | ...     | term1|term2|... | custom1|custom2|...      |
+| ...   | ...      | ...            | ...          | ...    | ...        | ...     | ...      | ... |
 
 ## Importing from online databases
 

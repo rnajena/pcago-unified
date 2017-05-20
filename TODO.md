@@ -4,7 +4,6 @@
 
 * Help pages
 * About page
-* Custom selectors
 * Annotation overview
 * SMPFPP server implementation
 

@@ -22,11 +22,19 @@ geneAnnotationImporterParameter.imported_data.pcago_csv <- ImporterParameter(nam
                                                                              type = "checkboxes",
                                                                              checkboxes.options = GeneAnnotationEntryNames,
                                                                              checkboxes.selected = GeneAnnotationEntryNames)
+
+GeneAnnotationEntryNames.gff_ensembl <- c("Scaffold" = "scaffold",
+                                          "Start position" = "start_position",
+                                          "End position" = "end_position",
+                                          "Length" =  "length",
+                                          "Exon length" =  "exon_length",
+                                          "Biotype" =  "biotype")
+
 geneAnnotationImporterParameter.imported_data.gff_ensembl <- ImporterParameter(name = "imported_data",
                                                                              label = "Imported data",
                                                                              type = "checkboxes",
-                                                                             checkboxes.options = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))],
-                                                                             checkboxes.selected = GeneAnnotationEntryNames[!(GeneAnnotationEntryNames %in% c("go_terms"))])
+                                                                             checkboxes.options = GeneAnnotationEntryNames.gff_ensembl,
+                                                                             checkboxes.selected = GeneAnnotationEntryNames.gff_ensembl)
 
 supportedGeneAnnotationFileTypes <- c("text/plain", ".gff", ".gff3")
 supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",

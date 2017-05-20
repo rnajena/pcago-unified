@@ -168,6 +168,14 @@ serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
         gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
       }
     }
+    {
+      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.custom))
+      gene.criteria[["Custom"]] <- annotation@gene.custom@data
+      
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Custom"]][["No data"]] <- unused.genes
+      }
+    }
     
     return(gene.criteria)
     
