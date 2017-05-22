@@ -42,8 +42,6 @@ importConditionVisuals <- function(filehandle, importer, parameters, conditions,
     stop(paste("Unknown importer", importer))
   }
   
-  browser()
-  
   expected.columns <- c()
   
   if(has.name) { expected.columns <- c(expected.columns, "name") }
