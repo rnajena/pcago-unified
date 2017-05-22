@@ -22,14 +22,13 @@ The data will be integrated into a final annotation. Older data will be overwrit
 
 Following importers are available:
 
-* **Ensembl GFF.** Imports data from a GFF annotation from Ensembl. GO terms are not supported.
-* **Tabular CSV.** Imports data from the table exported from the *output* in `Data > Genes > Annotation`
-* **Tabular TSV.** Like Tabular CSV, but with TSV format
+* **Ensembl GFF (\*.gff)** Imports data from a GFF annotation from Ensembl. GO terms are not supported.
+* **PCAGO gene annotation table (\*.csv)** Imports data from the table exported from the *output* in `Data > Genes > Annotation`
 
 The **Imported data** parameter is available for all importers. Deselect a checkbox to
 exclude the associated annotation data from being imported.
 
-### General format of tabular CSV/TSV
+### General format of PCAGO gene annotation table
 
 | ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_terms | custom |
 |-------|----------|----------------|--------------|--------|------------|---------|----------|--------|

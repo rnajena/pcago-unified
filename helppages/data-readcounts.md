@@ -10,8 +10,7 @@ Read counts are provided in tabular form.
 
 Following importers are available:
 
-* **CSV** Import from a table in CSV format
-* **TSV.** Import from a table in TSV format
+* **Read count table (\*.csv)** Import from a table in CSV format
 
 See `Appendix > File formats` for more information about file formats.
 

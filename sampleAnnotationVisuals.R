@@ -8,7 +8,7 @@ source("sampleAnnotation.R")
 
 # Importers for condition visuals
 supportedConditionVisualsImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV visuals settings (*.csv)", parameters = list(ImporterParameter.csv))
+  ImporterEntry(name = "csv", label = "PCAGO visuals CSV (*.csv)", parameters = list(ImporterParameter.csv))
 )
 supportedConditionVisualsGenerators <- list()
 availableConditionVisualSamples <- list(

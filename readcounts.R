@@ -12,7 +12,7 @@ source("helpers.R")
 #' The user selects one of those types, which will then invoke the corresponding importer
 
 supportedReadcountImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV read count table (*.csv)", parameters = list(ImporterParameter.csv))
+  ImporterEntry(name = "csv", label = "Read count table (*.csv)", parameters = list(ImporterParameter.csv))
 )
 
 supportedReadcountGenerators <- list()

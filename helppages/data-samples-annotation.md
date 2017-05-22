@@ -53,10 +53,8 @@ old data.
 
 Following importers are available:
 
-* **Conditions boolean CSV.** Import from a boolean table (CSV format)
-* **Conditions boolean TSV.** Import from a boolean table (TSV format)
-* **Conditions treatments CSV.** Import from a *treatments* table (CSV format)
-* **Conditions treatments TSV.** Import from a *treatments* table (TSV format)
+* **Sample conditions boolean table (\*.csv)** Import from a boolean table in CSV format
+* **Sample conditions factors table (\*.csv)** Import from a *factors* table in CSV format
 
 See `Appendix > File formats` for more information about file formats.
 
@@ -75,7 +73,7 @@ Following generators are available:
 
 Sample1, Sample2, ... are the column names in your read count table.
 
-### General format of a treatment table
+### General format of a factors table
 
 | Sample  | Treatment1        | Treatment2 | ... |
 |---------|-------------------|------------|-----|
@@ -93,8 +91,8 @@ gene annotations. Currently, only the *mean fragment length* is supported.
 
 Following importers are available:
 
-* **Sample info CSV.** Import from a CSV file
-* **Sample info TSV.** Import from a TSV file
+* **Sample info table (\*.csv)** Import sample info from a CSV table
+
 
 ### General format of a sample info table
 

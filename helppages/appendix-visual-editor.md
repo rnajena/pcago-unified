@@ -25,7 +25,11 @@ The <code>eco</code> condition is ignored, because both color and shape are alre
 
 ## Importing
 
-You can import your settings from a table, which must have following format.
+Following importers are available:
+
+* **PCAGO visuals CSV.**
+
+### General format of a PCAGO visuals table
 
 | Condition  | color                                               | shape                                    | name                    |
 |------------|-----------------------------------------------------|------------------------------------------|-------------------------|

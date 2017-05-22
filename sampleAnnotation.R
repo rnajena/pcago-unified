@@ -25,13 +25,13 @@ supportedSampleAnnotationImporters.imported_data.sample_info <- ImporterParamete
 
 supportedSampleAnnotationImporters <- list(
   ImporterEntry(name = "conditions_factor_csv", 
-                label = "Conditions treatments CSV (*.csv)", 
+                label = "Sample conditions factors table (*.csv)", 
                 parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
   ImporterEntry(name = "conditions_boolean_csv", 
-                label = "Conditions boolean CSV (*.csv)",
+                label = "Sample conditions boolean table (*.csv)",
                 parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
   ImporterEntry(name = "sample_info_csv", 
-                label = "Sample info CSV (*.csv)",
+                label = "Sample info table (*.csv)",
                 parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.sample_info))
 )
 availableSampleAnnotationSamples <- list(

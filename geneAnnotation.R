@@ -41,7 +41,7 @@ supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
                                                    label = "Ensembl GFF (*.gff3)",
                                                    parameters = list(geneAnnotationImporterParameter.imported_data.gff_ensembl)),
                                      ImporterEntry(name = "pcago_csv",
-                                                   label = "PCAGO annotation table CSV (*.csv)",
+                                                   label = "PCAGO gene annotation table (*.csv)",
                                                    parameters = list(ImporterParameter.csv, 
                                                                      geneAnnotationImporterParameter.imported_data.pcago_csv)))
 supportedGeneAnnotationGenerators <- list(annotationHub.importerEntry,
