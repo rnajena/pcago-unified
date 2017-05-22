@@ -26,22 +26,13 @@ supportedSampleAnnotationImporters.imported_data.sample_info <- ImporterParamete
 supportedSampleAnnotationImporters <- list(
   ImporterEntry(name = "conditions_factor_csv", 
                 label = "Conditions treatments CSV (*.csv)", 
-                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
-  ImporterEntry(name = "conditions_factor_tsv", 
-                label = "Conditions treatments TSV (*.csv)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+                parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
   ImporterEntry(name = "conditions_boolean_csv", 
                 label = "Conditions boolean CSV (*.csv)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
-  ImporterEntry(name = "conditions_boolean_tsv", 
-                label = "Conditions boolean TSV (*.csv)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+                parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
   ImporterEntry(name = "sample_info_csv", 
                 label = "Sample info CSV (*.csv)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info)),
-  ImporterEntry(name = "sample_info_tsv", 
-                label = "Sample info TSV (*.csv)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info))
+                parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.sample_info))
 )
 availableSampleAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", 
@@ -213,22 +204,13 @@ importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples, imported
 importSampleAnnotation <- function(filehandle, datatype, samples, parameters) {
   
   if(datatype == "conditions_boolean_csv") {
-    return(importSampleAnnotation.Conditions.Boolean(filehandle, ",", samples, parameters$imported_data))
-  }
-  else if(datatype == "conditions_boolean_tsv") {
-    return(importSampleAnnotation.Conditions.Boolean(filehandle, "", samples, parameters$imported_data))
+    return(importSampleAnnotation.Conditions.Boolean(filehandle, parameters$separator, samples, parameters$imported_data))
   }
   else if(datatype == "conditions_factor_csv") {
-    return(importSampleAnnotation.Conditions.Factor(filehandle, ",", samples, parameters$imported_data))
-  }
-  else if(datatype == "conditions_factor_tsv") {
-    return(importSampleAnnotation.Conditions.Factor(filehandle, "", samples, parameters$imported_data))
+    return(importSampleAnnotation.Conditions.Factor(filehandle, parameters$separator, samples, parameters$imported_data))
   }
   else if(datatype == "sample_info_csv") {
-    return(importSampleAnnotation.SampleInfo(filehandle, ",", samples, parameters$imported_data))
-  }
-  else if(datatype == "sample_info_tsv") {
-    return(importSampleAnnotation.SampleInfo(filehandle, "", samples, parameters$imported_data))
+    return(importSampleAnnotation.SampleInfo(filehandle, parameters$separator, samples, parameters$imported_data))
   }
   else {
     stop(paste("Unknown importer", datatype))
@@ -255,9 +237,11 @@ importSampleAnnotationSample <- function(sample, samples, parameters) {
   on.exit({ close(con) })
   
   if(sample == "sample.annotation.vitamins.csv") {
+    parameters$separator <- ","
     data <- importSampleAnnotation(con, "sample_info_csv", samples, parameters)
   }
   else if(sample == "conditions.vitamins.large.csv") {
+    parameters$separator <- ","
     data <- importSampleAnnotation(con, "conditions_factor_csv", samples, parameters)
   }
   else {

@@ -5,6 +5,7 @@
 library(shiny)
 library(reshape2)
 library(SummarizedExperiment)
+source("classImporterParameter.R")
 
 #' Returns TRUE if all data in x are integers
 #'
@@ -253,3 +254,14 @@ saveRPlot <- function(width, height, dpi, scale, filename, format, expr) {
   dev.off()
   
 }
+
+#' A importer parameter that handles CSV separators
+ImporterParameter.csv <- ImporterParameter(name = "separator",
+                                           label = "CSV Separator",
+                                           type = "select",
+                                           select.values = c(
+                                             "Comma" = ",",
+                                             "Semicolon" = ";",
+                                             "Tab" = "\t",
+                                             "Whitespace" = " "
+                                           ))

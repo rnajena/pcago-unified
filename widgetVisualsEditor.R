@@ -260,10 +260,19 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
                                                samples = reactive(availableConditionVisualSamples),
                                                generators = reactive(supportedConditionVisualsGenerators),
                                                exprimport = function(con, importer, parameters) {
-                                                 return(importConditionVisuals(con, importer, conditions()))
+                                                 return(importConditionVisuals(filehandle = con, 
+                                                                               importer = importer, 
+                                                                               parameters = parameters, 
+                                                                               conditions = conditions(), 
+                                                                               has.color = has.color,
+                                                                               has.shape = has.shape))
                                                },
                                                exprsample = function(sample, parameters) {
-                                                 return(importConditionVisualsSample(sample, conditions()))
+                                                 return(importConditionVisualsSample(sample = sample, 
+                                                                                     parameters = parameters, 
+                                                                                     conditions = conditions(),
+                                                                                     has.color = has.color,
+                                                                                     has.shape = has.shape))
                                                })
   
   #' When the user imports a visual table, apply it

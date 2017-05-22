@@ -8,13 +8,18 @@ source("sampleAnnotation.R")
 
 # Importers for condition visuals
 supportedConditionVisualsImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV visuals settings (*.csv)"),
-  ImporterEntry(name = "tsv", label = "TSV visuals settings (*.csv)")
+  ImporterEntry(name = "csv", label = "CSV visuals settings (*.csv)", parameters = list(ImporterParameter.csv))
 )
 supportedConditionVisualsGenerators <- list()
 availableConditionVisualSamples <- list(
   ImporterEntry(name = "visuals.vitamins.small.csv", label = "Vitamins (Small)"),
   ImporterEntry(name = "visuals.vitamins.large.csv", label = "Vitamins (Large)"))
+
+importConditionVisuals.CSV <- function(filehandle, parameters, conditions) {
+  
+  data <- read.csv(filehandle, sep = parameters$separator, row.names = 1, stringsAsFactors = F, check.names = F)
+  return(data)
+}
 
 #' Imports visual definitions from filehandle with importer defined by datatype
 #'
@@ -26,21 +31,18 @@ availableConditionVisualSamples <- list(
 #' @export
 #'
 #' @examples
-importConditionVisuals <- function(filehandle, datatype, conditions, has.color = T, has.shape = T, has.name = T) {
+importConditionVisuals <- function(filehandle, importer, parameters, conditions, has.color = T, has.shape = T, has.name = T) {
   
-  sep <- ","
+  data <- NULL
   
-  if(datatype == "tsv") {
-    sep <- ""
-  }
-  else if(datatype == "csv") {
-    sep <- ","
+  if(importer == "csv") {
+    data <- importConditionVisuals.CSV(filehandle, parameters, conditions)
   }
   else {
-    stop(paste("Unsupported format", datatype))
+    stop(paste("Unknown importer", importer))
   }
   
-  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
+  browser()
   
   expected.columns <- c()
   
@@ -83,7 +85,7 @@ importConditionVisuals <- function(filehandle, datatype, conditions, has.color =
 #' @export
 #'
 #' @examples
-importConditionVisualsSample <- function(sample, conditions) {
+importConditionVisualsSample <- function(sample, parameters, conditions, has.color = T, has.shape = T, has.name = T) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
@@ -92,7 +94,15 @@ importConditionVisualsSample <- function(sample, conditions) {
   con <- file(paste0("sampledata/", sample), "r")
   on.exit({ close(con) })
   
-  data <- importConditionVisuals(con, "csv", conditions)
+  parameters$separator <- ","
+  
+  data <- importConditionVisuals(filehandle = con, 
+                                 importer = "csv", 
+                                 parameters = parameters, 
+                                 conditions = conditions, 
+                                 has.color = has.color, 
+                                 has.shape = has.shape, 
+                                 has.name = has.name)
   
   return(data)
   
@@ -124,7 +134,8 @@ generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.
   
 }
 
-#' Gets the
+#' Given a set of conditions, return the name from condition visuals if avialable
+#' otherwise return the conditions
 #'
 #' @param visuals.conditions Table of all condition visual parameters
 #' @param cond Vector of conditions
@@ -151,7 +162,7 @@ conditionName <- function(visuals.conditions, conditions) {
   
 }
 
-#' 
+#' Builds the color & shape palettes (for plots) from a boolean conditions table and condition visuals
 #'
 #' @param samples List of samples that is used to create visual parameters for
 #' @param conditions Maps a sample to a list of conditions

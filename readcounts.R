@@ -6,13 +6,13 @@ library(shiny)
 library(SummarizedExperiment)
 library(DESeq2)
 source("classImporterEntry.R")
+source("helpers.R")
 
 #' A list of all read count data types that will be supported
 #' The user selects one of those types, which will then invoke the corresponding importer
 
 supportedReadcountImporters <- list(
-  ImporterEntry(name = "csv", label = "CSV read count table (*.csv)"),
-  ImporterEntry(name = "tsv", label = "TSV read count table (*.csv)")
+  ImporterEntry(name = "csv", label = "CSV read count table (*.csv)", parameters = list(ImporterParameter.csv))
 )
 
 supportedReadcountGenerators <- list()
@@ -37,33 +37,18 @@ supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq2", 
 #' @export
 #'
 #' @examples
-importReadcount <- function(filehandle, datatype, parameters) {
+importReadcount <- function(filehandle, parameters) {
   
-  if(missing(filehandle) || !is.character(datatype)) {
+  if(missing(filehandle)) {
     stop("Invalid arguments!")
   }
   
-  sep <- ","
-  
-  if(datatype == "tsv") {
-    sep <- ""
-  }
-  else if(datatype == "csv") {
-    sep <- ","
-  }
-  else {
-    stop(paste("Unsupported format", datatype))
-  }
-  
+  sep <- parameters$separator
   data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
 
   if(nrow(data) == 0 || ncol(data) == 0) {
     stop("Read count table is empty!")
   }
-  
-  # if(!all(apply(data, 1, function(x) { is.numeric(x) }))) {
-  #   stop("Read count table is not entirely numeric!")
-  # }
   
   counts <- as.matrix(data)
   experiment <- SummarizedExperiment(assays = list(counts = counts))
@@ -87,7 +72,9 @@ importReadcountSample <- function(sample, parameters) {
   
   con <- file(paste0("sampledata/", sample), "r")
   on.exit({ close(con) })
-  data <- importReadcount(con, "csv")
+  
+  parameters$separator <- ","
+  data <- importReadcount(con, parameters)
   
   return(data)
   
