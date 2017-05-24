@@ -37,7 +37,7 @@ supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq2", 
 #' @export
 #'
 #' @examples
-importReadcount <- function(filehandle, parameters) {
+importReadcount <- function(filehandle, importer, parameters) {
   
   if(missing(filehandle)) {
     stop("Invalid arguments!")
