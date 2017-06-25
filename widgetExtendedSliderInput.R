@@ -143,6 +143,20 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   
 }
 
+#' Updates the slider input values
+#'
+#' @param value.min 
+#' @param value.max 
+#' @param value 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+updateExtendedSliderInput_ <- function(input, output, session, value.min = NULL, value.max = NULL, value = NULL) {
+  updateSliderInput(session, "count", min = value.min, max = value.max, value = value)
+}
+
 #' Returns the value and animation steps from an extended slider input.
 #'
 #' @param value.min Reactive returning the min. value
@@ -163,4 +177,24 @@ extendedSliderInputValue <- function(id, value.min, value.max, value.default = N
                     value.default = value.default,
                     value.default.min = value.default.min,
                     value.default.max = value.default.max))
+}
+
+
+#' Updates the slider input values
+#'
+#' @param id 
+#' @param value.min 
+#' @param value.max 
+#' @param value 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+updateExtendedSliderInput <- function(id, value.min = NULL, value.max = NULL, value = NULL) {
+  return(callModule(updateExtendedSliderInput_, 
+                    id,
+                    value.min = value.min,
+                    value.max = value.max,
+                    value = value))
 }

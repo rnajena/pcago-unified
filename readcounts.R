@@ -74,7 +74,7 @@ importReadcountSample <- function(sample, parameters) {
   on.exit({ close(con) })
   
   parameters$separator <- ","
-  data <- importReadcount(con, parameters)
+  data <- importReadcount(con, "csv", parameters)
   
   return(data)
   
@@ -231,7 +231,7 @@ removeConstantReads <- function(readcounts) {
   }
   
   counts <- assay(readcounts)
-  invalid <- (apply(counts, 1, min) == apply(counts, 1, max))
+  invalid <- rowVars(counts) == 0
   
   genes.removed <- rownames(readcounts)[invalid]
   readcounts <- readcounts[which(!invalid),]

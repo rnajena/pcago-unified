@@ -31,6 +31,7 @@ source("widgetExtendedSliderInput.R")
 source("widgetProcessingSteps.R")
 source("widgetSampleAnnotationImporter.R")
 source("widgetGeneAnnotationImporter.R")
+source("widgetSNRCriterion.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
@@ -95,12 +96,22 @@ shinyServer(function(input, output, session) {
   
   gene.variances.filtered <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
   
+  
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
+  # Here we also include the hook for the minimal gene set (threshold) calculation
   pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
                                              value.min = reactive({ 1 }),
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
                                              value.default = reactive({ nrow(readcounts.filtered()) }))
   readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) })
+  
+  pca.pca.genes.set.count.minimal <- snrCriterionValue("pca.pca.genes.count.findminimal", 
+                                                       readcounts = readcounts.filtered,
+                                                       pca.center = reactive(input$pca.pca.settings.center),
+                                                       pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
+  observeEvent(pca.pca.genes.set.count.minimal(), {
+    updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.top.variant)
@@ -139,7 +150,7 @@ shinyServer(function(input, output, session) {
     validate(need(readcounts.filtered(), "0 genes selected"))
     return(paste(nrow(readcounts.filtered()), "genes selected"))
   })
- 
+  
   # Read count processing widget output
   readcountProcessing.at.readcounts.processed(input = input, 
                                               readcounts.raw = readcounts.raw,
