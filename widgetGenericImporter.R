@@ -134,6 +134,13 @@ genericImporterData.makeParameterInputUI <- function(ns, id, param, ...) {
                      value = lineedit.default))
     
   }
+  else if(param@type == "checkbox") {
+    
+    return(checkboxInput(ns(id),
+                        label = param@label,
+                        value = param@checkbox.selected))
+    
+  }
   else {
     stop(paste("Unsupported type", param@type))
   }
@@ -334,7 +341,7 @@ genericImporterData_ <- function(input,
     for(i in seq_len(length(importer.object()@parameters))) {
       input.id <- paste0("parameter.slot", i, ".value")
       param.name <- importer.object()@parameters[[i]]@name
-      parameters[[param.name]] <- input[[input.id]]
+      parameters[param.name] <- list(input[[input.id]])
     }
     
     # Run the importers

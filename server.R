@@ -43,6 +43,8 @@ source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
 source("processingReports.R")
 
+options(shiny.maxRequestSize=30*1024^2) 
+
 shinyServer(function(input, output, session) {
   
   # Read counts

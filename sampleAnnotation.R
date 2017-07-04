@@ -17,6 +17,10 @@ supportedSampleAnnotationImporters.imported_data.conditions <- ImporterParameter
                                                                                  type = "checkboxes",
                                                                                  checkboxes.options = c("Conditions" = "conditions"),
                                                                                  checkboxes.selected = c("Conditions" = "conditions"))
+supportedSampleAnnotationImporters.imported_data.conditions.collapse <- ImporterParameter(name = "collapse_conditions",
+                                                                                 label = "Collapse conditions",
+                                                                                 type = "checkbox",
+                                                                                 checkbox.selected = F)
 supportedSampleAnnotationImporters.imported_data.sample_info <- ImporterParameter(name = "imported_data",
                                                                                  label = "Imported data",
                                                                                  type = "checkboxes",
@@ -26,10 +30,14 @@ supportedSampleAnnotationImporters.imported_data.sample_info <- ImporterParamete
 supportedSampleAnnotationImporters <- list(
   ImporterEntry(name = "conditions_factor_csv", 
                 label = "Sample conditions factors table (*.csv)", 
-                parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
+                parameters = list(ImporterParameter.csv, 
+                                  supportedSampleAnnotationImporters.imported_data.conditions, 
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
   ImporterEntry(name = "conditions_boolean_csv", 
                 label = "Sample conditions boolean table (*.csv)",
-                parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.conditions)),
+                parameters = list(ImporterParameter.csv, 
+                                  supportedSampleAnnotationImporters.imported_data.conditions,
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
   ImporterEntry(name = "sample_info_csv", 
                 label = "Sample info table (*.csv)",
                 parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.sample_info))
@@ -37,7 +45,8 @@ supportedSampleAnnotationImporters <- list(
 availableSampleAnnotationSamples <- list(
   ImporterEntry(name = "conditions.vitamins.large.csv", 
                 label = "Conditions for Vitamins (Large)",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions)),
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
   ImporterEntry(name = "sample.annotation.vitamins.csv", 
                 label = "Sample info for Vitamins",
                 parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info))
@@ -49,6 +58,51 @@ supportedSampleAnnotationGenerators <- list(
   ))
 )
 
+#' Collapses the conditions for each sample in the condition table
+#' into a string.
+#'
+#' @param condition.table Table that determines if a sample has a condition
+#' @param conditions Vector of condition names that should be considered
+#'
+#' @return Vector of condition names
+#' @export
+#'
+#' @examples
+collapseConditions <- function(condition.table, conditions) {
+  
+  if(length(setdiff(conditions, colnames(condition.table))) > 0) {
+    stop("Conditions do not match condition table!")
+  }
+  
+  return(sapply(rownames(condition.table), function(sample) {
+    return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[sample, c]) c else "" })), collapse = "^"))
+  }))
+}
+
+#' Collapses the conditions for each sample in the condition table
+#' into a new condition table that contains the unique conditions.
+#'
+#' @param condition.table Table that determines if a sample has a condition
+#' @param conditions Vector of condition names that should be considered
+#'
+#' @return Vector of condition names
+#' @export
+#'
+#' @examples
+collapseConditionsToTable <- function(condition.table, conditions) {
+  
+  # Obtain the unique condition name for each sample
+  sample.conditions <- collapseConditions(condition.table, conditions)
+  
+  condition.table <- data.frame(row.names = rownames(condition.table))
+  
+  for(cond in unique(sample.conditions)) {
+    condition.table[,cond] <- (sample.conditions == cond)
+  }
+  
+  return(condition.table)
+  
+}
 
 
 #' Imports sample condition assignments from filehandle
@@ -62,7 +116,7 @@ supportedSampleAnnotationGenerators <- list(
 #' @export
 #'
 #' @examples
-importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, imported_data) {
+importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, imported_data, collpase) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(samples)) {
     stop("Invalid arguments!")
@@ -88,6 +142,10 @@ importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, 
     
   data <- data[samples,,drop=F]
   
+  if(collapse) {
+    data <- collapseConditionsToTable(data, colnames(data))
+  }
+  
   return(SampleAnnotation(conditions = data))
 }
 
@@ -107,7 +165,7 @@ importSampleAnnotation.Conditions.Boolean <- function(filehandle, sep, samples, 
 #' @export
 #'
 #' @examples
-importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples, imported_data) {
+importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples, imported_data, collapse) {
   
   if(missing(filehandle) || !is.character(sep) || !is.character(samples)) {
     stop("Invalid arguments!")
@@ -147,6 +205,10 @@ importSampleAnnotation.Conditions.Factor <- function(filehandle, sep, samples, i
       
     }
     
+  }
+  
+  if(collapse) {
+    output <- collapseConditionsToTable(output, colnames(output))
   }
   
   return(SampleAnnotation(conditions = output))
@@ -202,15 +264,25 @@ importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples, imported
 #'
 #' @examples
 importSampleAnnotation <- function(filehandle, datatype, samples, parameters) {
-  
   if(datatype == "conditions_boolean_csv") {
-    return(importSampleAnnotation.Conditions.Boolean(filehandle, parameters$separator, samples, parameters$imported_data))
+    return(importSampleAnnotation.Conditions.Boolean(filehandle, 
+                                                     parameters$separator, 
+                                                     samples, 
+                                                     parameters$imported_data,
+                                                     parameters$collapse_conditions))
   }
   else if(datatype == "conditions_factor_csv") {
-    return(importSampleAnnotation.Conditions.Factor(filehandle, parameters$separator, samples, parameters$imported_data))
+    return(importSampleAnnotation.Conditions.Factor(filehandle, 
+                                                    parameters$separator, 
+                                                    samples, 
+                                                    parameters$imported_data,
+                                                    parameters$collapse_conditions))
   }
   else if(datatype == "sample_info_csv") {
-    return(importSampleAnnotation.SampleInfo(filehandle, parameters$separator, samples, parameters$imported_data))
+    return(importSampleAnnotation.SampleInfo(filehandle, 
+                                             parameters$separator, 
+                                             samples, 
+                                             parameters$imported_data))
   }
   else {
     stop(paste("Unknown importer", datatype))
@@ -325,24 +397,5 @@ importSampleAnnotationFromGenerator <- function(generator, samples, parameters) 
   
 }
 
-#' Collapses the conditions for each sample in the condition table
-#' into a string.
-#'
-#' @param condition.table Table that determines if a sample has a condition
-#' @param conditions Vector of condition names that should be considered
-#'
-#' @return Vector of condition names
-#' @export
-#'
-#' @examples
-collapseConditions <- function(condition.table, conditions) {
-  
-  if(length(setdiff(conditions, colnames(condition.table))) > 0) {
-    stop("Conditions do not match condition table!")
-  }
-  
-  return(sapply(rownames(condition.table), function(sample) {
-    return(paste(na.omit(sapply(conditions, function(c) { if(condition.table[sample, c]) c else "" })), collapse = "^"))
-  }))
-}
+
 

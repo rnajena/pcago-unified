@@ -161,7 +161,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     }
   
     variables$visuals.table[condition, "color"] <- color
-    variables$update.ui <- variables$update.ui + 1
+    #variables$update.ui <- variables$update.ui + 1
     
   })
   
@@ -177,7 +177,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     shape <- as.numeric(input$shape)
     
     variables$visuals.table[condition, "shape"] <- shape
-    variables$update.ui <- variables$update.ui + 1
+    #variables$update.ui <- variables$update.ui + 1
     
   })
   

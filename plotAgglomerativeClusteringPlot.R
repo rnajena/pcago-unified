@@ -92,23 +92,23 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
     
     X <- if(is.matrix(readcounts())) readcounts() else assay(readcounts())
     
-    # dend <- t(X) %>%
-    #   dist(method = method.distance) %>%
-    #   hclust(method = method.cluster) %>%
-    #   as.dendrogram
-    # 
-    # dend.samples <- labels(dend)
-    # dend.factors <- sample.visuals()$factors[dend.samples,]
-    # 
-    # dend <- dend %>% dendextend::set("leaves_pch", palette.shapes[as.numeric(dend.factors$shape)]) %>%
-    #   dendextend::set("leaves_col", palette.colors[as.numeric(dend.factors$color)])
-    # 
-    # par(mar = c(5,4,4,10))
-    # dend %>% plot(main = title, sub = subtitle, horiz = T, cex = 0.6)
-    
+    dend <- t(X) %>%
+      dist(method = method.distance) %>%
+      hclust(method = method.cluster) %>%
+      as.dendrogram
+
+    dend.samples <- labels(dend)
+    dend.factors <- sample.visuals()$factors[dend.samples,]
+
+    dend <- dend %>% dendextend::set("leaves_pch", palette.shapes[as.numeric(dend.factors$shape)]) %>%
+      dendextend::set("leaves_col", palette.colors[as.numeric(dend.factors$color)])
+
     par(mar = c(5,4,4,10))
-    dend <- hclust(dist(t(X), method = method.distance), method = method.cluster)
-    plot(dend, main = title, sub = subtitle)
+    dend %>% plot(main = title, sub = subtitle, horiz = T, cex = 0.6)
+    
+    # par(mar = c(5,4,4,10))
+    # dend <- hclust(dist(t(X), method = method.distance), method = method.cluster)
+    # plot(dend, main = title, sub = subtitle)
   })
   
   return(plot.settings)

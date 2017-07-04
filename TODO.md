@@ -14,6 +14,7 @@
 ## Bugs
 
 * Visual editor color update sometimes not triggering
+* Crash if conditions change (DESeq)
 
 ## Additional notes
 
