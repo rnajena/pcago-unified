@@ -112,7 +112,7 @@ uiPCASidebarPCA <- function() {
                                   value = T),
                     checkboxInput("pca.pca.settings.scale", 
                                   helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), 
-                                  value = T)
+                                  value = F)
                    ),
     bsCollapsePanel("Output transformations",
                     radioButtons("pca.pca.settings.relative", 

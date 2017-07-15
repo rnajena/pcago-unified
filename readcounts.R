@@ -142,7 +142,7 @@ applyReadcountNormalization.TPM <- function(readcounts,
                                             sample.annotation, 
                                             gene.annotation, 
                                             use.feature.exonlength = T, 
-                                            use.fragment.effectivelength = T) {
+                                            use.feature.effectivelength = T) {
   
   if(!is.SummarizedExperiment(readcounts) ||
      !is.logical(use.fragment.effectivelength) ||
@@ -178,7 +178,7 @@ applyReadcountNormalization.TPM <- function(readcounts,
     
     feature.effectivelength <- NA
     
-    if(use.fragment.effectivelength) {
+    if(use.feature.effectivelength) {
       
       mean.fragmentlength <- sample.annotation@sample.info[sample, "meanfragmentlength"]
       

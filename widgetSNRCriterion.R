@@ -14,10 +14,8 @@ snrCriterionUI <- function(id) {
   ns <- NS(id)
   
   return(tagList(
-    checkboxInput(ns("userdefined"), "User defined clustering parameters", value = F),
-    conditionalPanel(conditionalPanel.equals(ns("userdefined"), "true"),
-                     selectizeInput(ns("fdistance"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
-                     selectizeInput(ns("flink"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection)),
+    selectizeInput(ns("fdistance"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
+    selectizeInput(ns("flink"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection),
     tags$p("Result depends on PCA parameters."),
     actionButton(ns("calculate"), "Calculate threshold")
   ))
@@ -47,22 +45,25 @@ snrCriterionValue_ <- function(input,
     }
     
     values$threshold <- NULL
-      
-    # Allow the user to find the minimal gene set for a defined distance and link function
-    if(input$userdefined) {
-      data <- assay(readcounts())
-      data <- data[order(rowVars(data), decreasing = T),]
-      values$threshold <- find.minimal.clustering.genes.improved.index(data = data, 
-                                                                       method.dist = input$fdistance, 
-                                                                       method.link = input$flink,
-                                                                       pca.center = pca.center(),
-                                                                       pca.scale = pca.scale())
-    }
-    else {
-      stop("Not implemented")
-    }
     
-  })
+    data <- assay(readcounts())
+    data <- data[order(rowVars(data), decreasing = T),]
+    
+    reference.clustering <- clustering(data, 
+                                       method.dist = input$fdistance, 
+                                       method.link = input$flink,
+                                       pca.enable = T,
+                                       pca.center = pca.center(),
+                                       pca.scale = pca.scale())
+    
+    values$threshold <- find.minimal.clustering.genes.index(data = data, 
+                                                            reference.clustering = reference.clustering,
+                                                            method.dist = input$fdistance, 
+                                                            method.link = input$flink,
+                                                            pca.enable = T,
+                                                            pca.center = pca.center(),
+                                                            pca.scale = pca.scale())
+      })
   
   return(reactive({ values$threshold }))
   
