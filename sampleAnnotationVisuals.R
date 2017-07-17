@@ -59,11 +59,11 @@ importConditionVisuals <- function(filehandle, importer, parameters, conditions,
   if(!setequal(expected.columns, colnames(data))) {
     stop("Imported visual definition doesn't have all columns!")
   }
-  if(has.name && !is.character(data$name)) {
-    stop("Imported visual definition has invalid names!")
+  if(has.name) {
+    data$name <- as.character(data$name)
   }
-  if(has.color && !is.character(data$color)) {
-    stop("Imported visual definition has invalid colors!")
+  if(has.color) {
+    data$name <- as.character(data$color)
   }
   if(has.color && !all(isColor(data$color[data$color != ""]))) {
     stop("Imported visual definition has invalid colors!")
