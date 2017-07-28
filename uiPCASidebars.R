@@ -15,6 +15,8 @@ source("widgetSampleAnnotationImporter.R")
 source("widgetNumericRangeInput.R")
 source("widgetExtendedSliderInput.R")
 source("widgetInPlaceHelp.R")
+source("widgetReadCountPreprocessing.R")
+source("widgetReadCountNormalization.R")
 source("plotSamplePlot.R")
 source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
@@ -44,25 +46,8 @@ uiPCASidebarData <- function() {
                     geneAnnotationImporterUI("data.gene.annotation.importer")),
     bsCollapsePanel("Read count processing",
                     value = "data.readcounts.processing",
-                    checkboxGroupInput("pca.data.readcounts.processing",
-                                       helpIconText("Apply processing", includeMarkdown("helptooltips/pca-data-readcounts-processing.md")),
-                                       choices = c("Transpose table" = "transpose",
-                                                   "Remove genes with constant readcounts" = "remove.constant"),
-                                       selected = c("remove.constant")),
-                    radioButtons("pca.data.normalization",
-                                 helpIconText("Apply read count normalization", 
-                                              "If you already have normalized read counts, set this to 'None'.",
-                                              "Read count normalization"),
-                                 choices = supportedReadcountNormalizationTypes),
-                    conditionalPanel("input['pca.data.normalization'] == 'tpm'",
-                                     checkboxInput("pca.data.normalization.tpm.effectivelength", "Use effective fragment length", value = T),
-                                     checkboxInput("pca.data.normalization.tpm.exonlength", "Use feature exon length", value = T)),
-                    conditionalPanel("input['pca.data.normalization'] == 'deseq2'",
-                                     selectizeInput("pca.data.normalization.deseq2.conditions", 
-                                                  helpIconText("Considered conditions", "You can choose which available conditions are considered during normalization."), 
-                                                  choices = c(),
-                                                  multiple = T,
-                                                  options = list(plugins = list("remove_button", "drag_drop")))))
+                    readCountPreprocessingUI("data.readcounts.preprocessing"),
+                    readCountNormalizationUI("data.readcounts.normalization"))
     
                     
     )

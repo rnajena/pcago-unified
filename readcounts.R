@@ -51,6 +51,11 @@ importReadcount <- function(filehandle, importer, parameters) {
   }
   
   counts <- as.matrix(data)
+  
+  if(!all(is.numeric(counts))) {
+    stop("Read counts must be numeric!")
+  }
+  
   experiment <- SummarizedExperiment(assays = list(counts = counts))
   
   return(experiment)
@@ -123,7 +128,7 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, se
   assay(readcounts) <- normalized.counts
   
   # Return the readcounts and the conditions used for normalization
-  return(list(readcounts = readcounts, conditions = deseq.coldata, design = "~condition"))
+  return(list(readcounts = readcounts, conditions = deseq.coldata, design = "~condition", operation.normalization = "deseq2"))
 }
 
 #' Applies read count normalization (TPM) to readcounts
@@ -211,7 +216,8 @@ applyReadcountNormalization.TPM <- function(readcounts,
   return(list(readcounts = readcounts, 
               sample.sum = sample.sum, 
               use.fragment.effectivelength = use.fragment.effectivelength, 
-              use.feature.exonlength = use.feature.exonlength))
+              use.feature.exonlength = use.feature.exonlength, 
+              operation.normalization = "tpm"))
   
 }
 

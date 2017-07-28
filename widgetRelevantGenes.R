@@ -1,5 +1,6 @@
 #'
-#' Contains a plot output with download buttons
+#' Defines widget that allows finding the clustering relevant genes using
+#' a heuristic.
 #'
 
 library(DT)

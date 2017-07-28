@@ -32,6 +32,8 @@ source("widgetProcessingSteps.R")
 source("widgetSampleAnnotationImporter.R")
 source("widgetGeneAnnotationImporter.R")
 source("widgetRelevantGenes.R")
+source("widgetReadCountPreprocessing.R")
+source("widgetReadCountNormalization.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
@@ -56,9 +58,10 @@ shinyServer(function(input, output, session) {
                                     exprsample = importReadcountSample)
   
   # Readcount processing
-  readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
+  #readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
+  #readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
+  readcounts.preprocessing.output <- readCountPreprocessingData("data.readcounts.preprocessing", readcounts.raw)
   readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
-  
  
   sample.annotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", readcounts = readcounts.preprocessed)
   conditions <- reactive({
@@ -66,26 +69,22 @@ shinyServer(function(input, output, session) {
     return(sample.annotation()@conditions)
   })
   
-  observeEvent(conditions(), {
-    
-    validate(need(conditions(), "No sample conditions available!"))
-    
-    updateSelectizeInput(session, 
-                         "pca.data.normalization.deseq2.conditions",
-                         choices = colnames(conditions()),
-                         selected = colnames(conditions()))
-  })
-  
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
   gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", readcounts = readcounts.preprocessed)
   
   # Finish processing of read counts with normalization
-  readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
-                                                                  gene.annotation = gene.annotation, 
-                                                                  sample.annotation = sample.annotation,
-                                                                  input = input)
+  #readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
+                                                                  # gene.annotation = gene.annotation, 
+                                                                  # sample.annotation = sample.annotation,
+                                                                  # input = input)
+  #readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
+  readcounts.normalization.output <- readCountNormalizationData("data.readcounts.normalization", 
+                                                                readcounts = readcounts.preprocessed,
+                                                                gene.annotation = gene.annotation,
+                                                                sample.annotation = sample.annotation)
   readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
+  
   
   # Gene variances
   gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
@@ -154,28 +153,24 @@ shinyServer(function(input, output, session) {
   })
   
   # Read count processing widget output
-  readcountProcessing.at.readcounts.processed(input = input, 
-                                              readcounts.raw = readcounts.raw,
+  readcountProcessing.at.readcounts.processed(readcounts.raw = readcounts.raw,
                                               readcounts.processed = readcounts.processed, 
                                               readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                               readcounts.normalization.output = readcounts.normalization.output)
-  readcountProcessing.at.readcounts.filtered(input = input, 
-                                             readcounts.raw = readcounts.raw,
+  readcountProcessing.at.readcounts.filtered(readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
                                              readcounts.filtered = readcounts.filtered,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
                                              genes.filtered = genes.filtered)
-  readcountProcessing.at.readcounts.top.variant(input = input, 
-                                                readcounts.raw = readcounts.raw,
+  readcountProcessing.at.readcounts.top.variant(readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
                                              readcounts.filtered = readcounts.filtered,
                                              readcounts.top.variant = readcounts.top.variant,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
                                              genes.filtered = genes.filtered)
-  readcountProcessing.at.pca(input = input, 
-                             readcounts.raw = readcounts.raw,
+  readcountProcessing.at.pca(readcounts.raw = readcounts.raw,
                             readcounts.processed = readcounts.processed, 
                             readcounts.filtered = readcounts.filtered,
                             readcounts.top.variant = readcounts.top.variant,
