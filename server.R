@@ -31,7 +31,7 @@ source("widgetExtendedSliderInput.R")
 source("widgetProcessingSteps.R")
 source("widgetSampleAnnotationImporter.R")
 source("widgetGeneAnnotationImporter.R")
-source("widgetSNRCriterion.R")
+source("widgetRelevantGenes.R")
 source("serverFunctions.R")
 source("helpers.R")
 source("classPlotSettings.R")
@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
                                              value.default = reactive({ nrow(readcounts.filtered()) }))
   readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) })
   
-  pca.pca.genes.set.count.minimal <- snrCriterionValue("pca.pca.genes.count.findminimal", 
+  pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
                                                        readcounts = readcounts.filtered,
                                                        pca.center = reactive(input$pca.pca.settings.center),
                                                        pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same

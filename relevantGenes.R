@@ -10,9 +10,57 @@ library(fastcluster)
 #' @export
 #'
 #' @examples
-clustering.equal <- function(cluster1, cluster2) {
+clustering.order.equal_ <- function(cluster1, cluster2) {
   return(identical(cluster1$order, cluster2$order) && identical(cluster1$merge, cluster2$merge))
 }
+
+clustering.order.equal <- compiler::cmpfun(clustering.order.equal_)
+clustering.equal <- clustering.order.equal
+
+
+#' Extracts all sets defined in a dendrogram
+#'
+#' @param cluster hclust dendrogram
+#'
+#' @return
+#' @export
+#'
+#' @examples
+clustering.extract.sets_ <- function(cluster) {
+  
+  sets <- as.list(cluster$labels)
+  
+  for(height in cluster$height) {
+    
+    grp <- cutree(cluster, h = height)
+    grp <- split(names(grp), grp)
+    sets <- append(sets, grp)
+    
+  }
+  
+  names(sets) <- NULL
+  
+  return(unique(sets))
+}
+
+clustering.extract.sets <- compiler::cmpfun(clustering.extract.sets_)
+
+#' Returns true if two hierarchical clusterings have the same structure. Tree height is ignored.
+#'
+#' @param cluster1
+#' @param cluster2
+#'
+#' @return
+#' @export
+#'
+#' @examples
+clustering.set.equal_ <- function(cluster1, cluster2) {
+  
+  return(setequal(clustering.extract.sets(cluster1), clustering.extract.sets(cluster2)))
+  
+}
+
+clustering.set.equal <- compiler::cmpfun(clustering.set.equal_)
 
 #' Applies clustering
 #'
@@ -27,7 +75,7 @@ clustering.equal <- function(cluster1, cluster2) {
 #' @export
 #'
 #' @examples
-clustering <- function(data, method.dist, method.link, pca.enable, pca.center, pca.scale) {
+clustering_ <- function(data, method.dist, method.link, pca.enable, pca.center, pca.scale) {
   
   if(pca.enable) {
     data <- prcomp(t(data), center = pca.center, scale. = pca.scale)$x
@@ -45,6 +93,8 @@ clustering <- function(data, method.dist, method.link, pca.enable, pca.center, p
   return(clustering)
 }
 
+clustering <- compiler::cmpfun(clustering_)
+
 #' Finds minimal n top variant genes, where n + i; i>= 0 top variant genes have the same clustering as all genes
 #'
 #' @param data 
@@ -55,7 +105,7 @@ clustering <- function(data, method.dist, method.link, pca.enable, pca.center, p
 #' @export
 #'
 #' @examples
-find.minimal.clustering.genes.index <- function(data, reference.clustering, method.dist, method.link, pca.enable, pca.center, pca.scale) {
+find.minimal.clustering.genes.index_ <- function(data, reference.clustering, method.dist, method.link, pca.enable, pca.center, pca.scale, f.clustering.equal = clustering.order.equal) {
   
   data <- data[order(rowVars(data), decreasing = T),]
   top <- NA
@@ -69,7 +119,7 @@ find.minimal.clustering.genes.index <- function(data, reference.clustering, meth
     test.data <- data[1:i,] # Select the top i most variant genes
     test.clustering <- clustering(test.data, method.dist, method.link, pca.enable, pca.center, pca.scale)
     
-    if(clustering.equal(reference.clustering, test.clustering)) {
+    if(f.clustering.equal(reference.clustering, test.clustering)) {
       if(is.na(top)) {
         top <- i
       }
@@ -88,6 +138,8 @@ find.minimal.clustering.genes.index <- function(data, reference.clustering, meth
   return(top)
 }
 
+find.minimal.clustering.genes.index <- compiler::cmpfun(find.minimal.clustering.genes.index_)
+
 #' Estimates if all supersets of candidate relevant genes produce the same clustering.
 #' This function outputs the number of fails and the genes involved.
 #'
@@ -105,7 +157,7 @@ find.minimal.clustering.genes.index <- function(data, reference.clustering, meth
 #' @export
 #'
 #' @examples
-estimate.superset.clusterequal.debug <- function(data,
+estimate.superset.clusterequal.debug_ <- function(data,
                                                  data.candidate.relevant,
                                                  reference.clustering,
                                                  method.dist, 
@@ -115,36 +167,49 @@ estimate.superset.clusterequal.debug <- function(data,
                                                  pca.scale,
                                                  times.superset) {
   
-  # To make the algorithm robust against the set of candidate relevant genes
-  data.noncandidates <- data[setdiff(rownames(data), rownames(data.candidate.relevant)),]
+  print(paste("Superset test ", method.dist, method.link, pca.enable, pca.center, pca.scale))
   
   fails.count <- 0
   fails <- data.frame(row.names = rownames(data), fails = rep(0, nrow(data)))
   
-  for(i in seq_len(times.superset)) {
+  if(!setequal(rownames(data), rownames(data.candidate.relevant))) {
     
-    if(i %% 1000 == 0) {
-      print(i)
+    # To make the algorithm robust against the set of candidate relevant genes
+    data.noncandidates <- data[setdiff(rownames(data), rownames(data.candidate.relevant)),,drop=F]
+    
+    for(i in seq_len(times.superset)) {
+      
+      if(i %% 1000 == 0) {
+        print(i)
+      }
+      
+      sample.size <- sample.int(nrow(data.noncandidates), 1)
+      
+      data.superset.rownames <- union(rownames(data.noncandidates)[sample.int(nrow(data.noncandidates), sample.size)], rownames(data.candidate.relevant))
+      data.superset <- data[data.superset.rownames,]
+      
+      superset.clustering <- clustering(data.superset, method.dist, method.link, pca.enable, pca.center, pca.scale)
+      
+      if(!clustering.equal(superset.clustering, reference.clustering)) {
+        # get the new genes
+        genes.superset.exclusive <- setdiff(data.superset.rownames, rownames(data.candidate.relevant))
+        fails[genes.superset.exclusive,] <- fails[genes.superset.exclusive,] + 1
+        fails.count <- fails.count + 1
+      }
     }
     
-    sample.size <- sample.int(nrow(data.noncandidates), 1)
-    
-    data.superset.rownames <- union(rownames(data.noncandidates)[sample.int(nrow(data.noncandidates), sample.size)], rownames(data.candidate.relevant))
-    data.superset <- data[data.superset.rownames,]
-    
-    superset.clustering <- clustering(data.superset, method.dist, method.link, pca.enable, pca.center, pca.scale)
-    
-    if(!clustering.equal(superset.clustering, reference.clustering)) {
-      # get the new genes
-      genes.superset.exclusive <- setdiff(data.superset.rownames, rownames(data.candidate.relevant))
-      fails[genes.superset.exclusive,] <- fails[genes.superset.exclusive,] + 1
-      fails.count <- fails.count + 1
-    }
   }
+  else {
+    print("Set of relevant genes is equal to set of all genes")
+    fails.count <- -1
+  }
+  
   
   return(list(fails.count = fails.count, fails.table = fails))
   
 }
+
+estimate.superset.clusterequal.debug <- compiler::cmpfun(estimate.superset.clusterequal.debug_)
 
 #' Estimates if all supersets of candidate relevant genes produce the same clustering.
 #'
@@ -162,7 +227,7 @@ estimate.superset.clusterequal.debug <- function(data,
 #' @export
 #'
 #' @examples
-estimate.superset.clusterequal <- function(data,
+estimate.superset.clusterequal_ <- function(data,
                                            data.candidate.relevant,
                                            reference.clustering,
                                            method.dist, 
@@ -172,6 +237,10 @@ estimate.superset.clusterequal <- function(data,
                                            pca.scale,
                                            times.superset) {
   
+  if(setequal(rownames(data), rownames(data.candidate.relevant))) {
+    return(T)
+  }
+  
   # To make the algorithm robust against the set of candidate relevant genes
   data.noncandidates <- data[setdiff(rownames(data), rownames(data.candidate.relevant)),]
   
@@ -179,7 +248,7 @@ estimate.superset.clusterequal <- function(data,
     sample.size <- sample.int(nrow(data.noncandidates), 1)
     
     data.superset.rownames <- union(rownames(data.noncandidates)[sample.int(nrow(data.noncandidates), sample.size)], rownames(data.candidate.relevant))
-    data.superset <- data[data.superset.rownames,]
+    data.superset <- data[data.superset.rownames,,drop=F]
     
     superset.clustering <- clustering(data.superset, method.dist, method.link, pca.enable, pca.center, pca.scale)
     
@@ -191,6 +260,8 @@ estimate.superset.clusterequal <- function(data,
   return(T)
   
 }
+
+estimate.superset.clusterequal <- compiler::cmpfun(estimate.superset.clusterequal_)
 
 
 #' Estimates which genes are not important in the set of clustering relevant genes
@@ -305,7 +376,7 @@ estimate.add.relevant.genes <- function(data,
     # determine the sample size. should be 1 smaller than the current minimum
     # subtract the candidate relevant genes from the current minimal superset - 1
     # This is equivalent to length(setdiff(data.min, data.candidate.relevant)) as data.min is a subset of data.candidate.relevant
-    sample.size <- sample.int(nrow(data.min) - nrow(data.candidate.relevant) - 1, 1) 
+    sample.size <- sample.int(max(1, nrow(data.min) - nrow(data.candidate.relevant) - 1), 1) 
     data.superset.rownames <- union(rownames(data.noncandidates)[sample.int(nrow(data.noncandidates), sample.size)], rownames(data.candidate.relevant))
     test.data <- data[data.superset.rownames,]
     

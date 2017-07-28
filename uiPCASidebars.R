@@ -21,7 +21,7 @@ source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
-source("widgetSNRCriterion.R")
+source("widgetRelevantGenes.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -89,7 +89,7 @@ uiPCASidebarFilterGenes <- function() {
                       bsCollapsePanel(helpIconText("Find minimal threshold", 
                                                    includeText("helptooltips/pca-pca-gene-set-variance-minimum.md")),
                                       value = "Find minimal threshold",
-                                      snrCriterionUI("pca.pca.genes.count.findminimal"))
+                                      relevantGenesUI("pca.pca.genes.count.findminimal"))
                     )
                     
     )))

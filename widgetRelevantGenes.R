@@ -6,10 +6,10 @@ library(DT)
 library(shiny)
 source("uiHelper.R")
 source("plotAgglomerativeClusteringPlot.R")
-source("pca_criterion_snr.R")
+source("relevantGenes.R")
 source("helpers.R")
 
-snrCriterionUI <- function(id) {
+relevantGenesUI <- function(id) {
   
   ns <- NS(id)
   
@@ -23,7 +23,7 @@ snrCriterionUI <- function(id) {
 
 
 
-snrCriterionValue_ <- function(input, 
+relevantGenesValue_ <- function(input, 
                               output, 
                               session,
                               readcounts,
@@ -69,9 +69,9 @@ snrCriterionValue_ <- function(input,
   
 }
 
-snrCriterionValue <- function(id, readcounts, pca.center, pca.scale) {
+relevantGenesValue <- function(id, readcounts, pca.center, pca.scale) {
   
-  return(callModule(snrCriterionValue_,
+  return(callModule(relevantGenesValue_,
                     id,
                     readcounts = readcounts,
                     pca.center = pca.center,
