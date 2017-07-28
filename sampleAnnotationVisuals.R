@@ -12,8 +12,10 @@ supportedConditionVisualsImporters <- list(
 )
 supportedConditionVisualsGenerators <- list()
 availableConditionVisualSamples <- list(
-  ImporterEntry(name = "visuals.vitamins.small.csv", label = "Vitamins (Small)"),
-  ImporterEntry(name = "visuals.vitamins.large.csv", label = "Vitamins (Large)"))
+  ImporterEntry(name = "Monocytes/pcago_visuals.csv", label = "Visuals for Monocytes"),
+  ImporterEntry(name = "Mouse/pcago_visuals.csv", label = "Visuals for Mouse"),
+  ImporterEntry(name = "Myotis RNA/pcago_visuals.csv", label = "Visuals for Myotis RNA"),
+  ImporterEntry(name = "Myotis smallRNA/pcago_visuals.csv", label = "Visuals for Myotis smallRNA"))
 
 importConditionVisuals.CSV <- function(filehandle, parameters, conditions) {
   
@@ -31,7 +33,11 @@ importConditionVisuals.CSV <- function(filehandle, parameters, conditions) {
 #' @export
 #'
 #' @examples
-importConditionVisuals <- function(filehandle, importer, parameters, conditions, has.color = T, has.shape = T, has.name = T) {
+importConditionVisuals <- function(filehandle, importer, parameters, conditions, expected.columns = c("name", "color", "shape")) {
+  
+  if(!all(expected.columns %in% c("name", "color", "shape"))) {
+    stop("Requested existance of unexpected columns!")
+  }
   
   data <- NULL
   
@@ -42,17 +48,15 @@ importConditionVisuals <- function(filehandle, importer, parameters, conditions,
     stop(paste("Unknown importer", importer))
   }
   
-  expected.columns <- c()
-  
-  if(has.name) { expected.columns <- c(expected.columns, "name") }
-  if(has.color) { expected.columns <- c(expected.columns, "color") }
-  if(has.shape) { expected.columns <- c(expected.columns, "shape") }
-  
   if(length(expected.columns) == 0) {
     stop("No data stored!")
   }
   
   # Handle errors
+  has.name <- "name" %in% expected.columns
+  has.color <- "color" %in% expected.columns
+  has.shape <- "shape" %in% expected.columns
+  
   if(!setequal(conditions, rownames(data))) {
     stop("Imported visual definition has different set of conditions!")
   }
@@ -63,7 +67,7 @@ importConditionVisuals <- function(filehandle, importer, parameters, conditions,
     data$name <- as.character(data$name)
   }
   if(has.color) {
-    data$name <- as.character(data$color)
+    data$color <- as.character(data$color)
   }
   if(has.color && !all(isColor(data$color[data$color != ""]))) {
     stop("Imported visual definition has invalid colors!")
@@ -83,7 +87,7 @@ importConditionVisuals <- function(filehandle, importer, parameters, conditions,
 #' @export
 #'
 #' @examples
-importConditionVisualsSample <- function(sample, parameters, conditions, has.color = T, has.shape = T, has.name = T) {
+importConditionVisualsSample <- function(sample, parameters, conditions, expected.columns = c("name", "color", "shape")) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
@@ -98,9 +102,7 @@ importConditionVisualsSample <- function(sample, parameters, conditions, has.col
                                  importer = "csv", 
                                  parameters = parameters, 
                                  conditions = conditions, 
-                                 has.color = has.color, 
-                                 has.shape = has.shape, 
-                                 has.name = has.name)
+                                 expected.columns = expected.columns)
   
   return(data)
   
@@ -115,7 +117,7 @@ importConditionVisualsSample <- function(sample, parameters, conditions, has.col
 #' @export
 #'
 #' @examples
-generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.shape = T, has.name = T) {
+generateDefaultConditionVisualsTable <- function(conditions, expected.columns = c("name", "color", "shape")) {
   
   validate(need(conditions, "Need list of conditions to build visual table!"))
   
@@ -124,9 +126,9 @@ generateDefaultConditionVisualsTable <- function(conditions, has.color = T, has.
     stringsAsFactors = F
   ))
   
-  if(has.name) { data$name = rep("", length(conditions)) }
-  if(has.color) { data$color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)) }
-  if(has.shape) { data$shape = rep(-1, length(conditions)) }
+  if("name" %in% expected.columns) { data$name = rep("", length(conditions)) }
+  if("color" %in% expected.columns) { data$color = colorRampPalette(brewer.pal(9, "Set1"))(length(conditions)) }
+  if("shape" %in% expected.columns) { data$shape = rep(-1, length(conditions)) }
   
   return(data)
   

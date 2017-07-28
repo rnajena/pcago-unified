@@ -1,0 +1,6 @@
+"","name","color","shape"
+"Time_24h","24h","",15
+"Time_6h","6h","",16
+"Treatment_IFN","IFN","#FF0000",-1
+"Treatment_mock","Mock","#285BA8",-1
+"Treatment_RVFV","RVFV","#CA0CEB",-1

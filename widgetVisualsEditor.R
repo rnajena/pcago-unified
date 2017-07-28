@@ -91,7 +91,10 @@ visualsEditorUI <- function(id) {
 #' @examples
 visualsEditorValue_ <- function(input, output, session, conditions, has.color = T, has.shape = T) {
   
-  variables <- reactiveValues(visuals.table = NULL, update.ui = 0)
+  # Define which data this widget will request from an annotation
+  expected.columns <- "name"
+  if(has.color) { expected.columns <- c(expected.columns, "color") }
+  if(has.shape) { expected.columns <- c(expected.columns, "shape") }
   
   # Disable inputs that don't matter
   observe({
@@ -99,6 +102,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     if(!has.shape) { shinyjs::hideElement("shape") }
   })
   
+  variables <- reactiveValues(visuals.table = NULL, update.ui = 0)
 
   # Change the list of choices and visual table when the conditions update
   observeEvent(conditions(), {
@@ -108,8 +112,7 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     # Rebuild table if conditions changed
     if(is.null(variables$visuals.table) || !identical(rownames(variables$visuals.table), (conditions()))) {
       variables$visuals.table <- generateDefaultConditionVisualsTable(conditions(), 
-                                                                      has.color = has.color, 
-                                                                      has.shape = has.shape)
+                                                                      expected.columns = expected.columns)
     }
     
   })
@@ -264,15 +267,13 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
                                                                                importer = importer, 
                                                                                parameters = parameters, 
                                                                                conditions = conditions(), 
-                                                                               has.color = has.color,
-                                                                               has.shape = has.shape))
+                                                                               expected.columns = expected.columns))
                                                },
                                                exprsample = function(sample, parameters) {
                                                  return(importConditionVisualsSample(sample = sample, 
                                                                                      parameters = parameters, 
-                                                                                     conditions = conditions(),
-                                                                                     has.color = has.color,
-                                                                                     has.shape = has.shape))
+                                                                                     conditions = conditions(), 
+                                                                                     expected.columns = expected.columns))
                                                })
   
   #' When the user imports a visual table, apply it

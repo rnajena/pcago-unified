@@ -43,13 +43,22 @@ supportedSampleAnnotationImporters <- list(
                 parameters = list(ImporterParameter.csv, supportedSampleAnnotationImporters.imported_data.sample_info))
 )
 availableSampleAnnotationSamples <- list(
-  ImporterEntry(name = "conditions.vitamins.large.csv", 
-                label = "Conditions for Vitamins (Large)",
+  ImporterEntry(name = "Monocytes/sample_annotation_conditions.csv", 
+                label = "Conditions for Monocytes",
                 parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
                                   supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
-  ImporterEntry(name = "sample.annotation.vitamins.csv", 
-                label = "Sample info for Vitamins",
-                parameters = list(supportedSampleAnnotationImporters.imported_data.sample_info))
+  ImporterEntry(name = "Mouse/sample_annotation_conditions.csv", 
+                label = "Conditions for Mouse",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
+  ImporterEntry(name = "Myotis RNA/sample_annotation_conditions_RNA.csv", 
+                label = "Conditions for Monocytes",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
+  ImporterEntry(name = "Myotis smallRNA/sample_annotation_conditions_smallRNA.csv", 
+                label = "Conditions for Monocytes",
+                parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
+                                  supportedSampleAnnotationImporters.imported_data.conditions.collapse))
 )
 supportedSampleAnnotationGenerators <- list(
   ImporterEntry(name = "conditions_split", label = "Conditions from sample names", parameters = list(
@@ -308,11 +317,10 @@ importSampleAnnotationSample <- function(sample, samples, parameters) {
   con <- file(paste0("sampledata/", sample), "r")
   on.exit({ close(con) })
   
-  if(sample == "sample.annotation.vitamins.csv") {
-    parameters$separator <- ","
-    data <- importSampleAnnotation(con, "sample_info_csv", samples, parameters)
-  }
-  else if(sample == "conditions.vitamins.large.csv") {
+  if(sample == "Monocytes/sample_annotation_conditions.csv" || 
+     sample == "Mouse/sample_annotation_conditions.csv" || 
+     sample == "Myotis RNA/sample_annotation_conditions_RNA.csv" ||
+     sample == "Myotis smallRNA/sample_annotation_conditions_smallRNA.csv") {
     parameters$separator <- ","
     data <- importSampleAnnotation(con, "conditions_factor_csv", samples, parameters)
   }

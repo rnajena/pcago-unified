@@ -1,0 +1,8 @@
+"","name","color","shape"
+"Infection_asp","A. fumigatus","#2B00FF",-1
+"Infection_control","No infection","#FF9900",-1
+"Infection_can","C. albicans","#00A13B",-1
+"Infection_eco","E. coli","#FF00DD",-1
+"Vitamin_atra","atRA","",18
+"Vitamin_control","No vitamin","",16
+"Vitamin_vitd","vitD","#999999",17

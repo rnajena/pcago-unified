@@ -18,9 +18,15 @@ supportedReadcountImporters <- list(
 supportedReadcountGenerators <- list()
 
 availableReadcountSamples <- list(
-  ImporterEntry(name = "vitamins.debug.csv", label = "Vitamins (debug)"),
-  ImporterEntry(name = "vitamins.small.csv", label = "Vitamins (small)"),
-  ImporterEntry(name = "vitamins.csv", label = "Vitamins")
+  ImporterEntry(name = "Monocytes/readcounts_rna.csv", label = "Monocytes (Raw)"),
+  ImporterEntry(name = "Monocytes/readcounts_normalized.csv", label = "Monocytes (Normalized)"),
+  ImporterEntry(name = "Monocytes/readcounts_normalized_diffexpressed.csv", label = "Monocytes (DEG, Normalized)"),
+  ImporterEntry(name = "Mouse/readcounts_rna.csv", label = "Mouse (Raw)"),
+  ImporterEntry(name = "Mouse/readcounts_normalized.csv", label = "Mouse (Normalized)"),
+  ImporterEntry(name = "Myotis RNA/readcounts_rna.csv", label = "Myotis RNA (Raw)"),
+  ImporterEntry(name = "Myotis RNA/readcounts_normalized_rna.csv", label = "Myotis RNA (Normalized)"),
+  ImporterEntry(name = "Myotis smallRNA/readcounts_smallrna.csv", label = "Myotis smallRNA (Raw)"),
+  ImporterEntry(name = "Myotis smallRNA/readcounts_normalized_smallrna.csv", label = "Myotis smallRNA (Normalized)")
 )
 
 #' Supported read count normalization types
