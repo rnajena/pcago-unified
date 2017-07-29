@@ -17,7 +17,9 @@ relevantGenesUI <- function(id) {
   return(tagList(
     selectizeInput(ns("fdistance"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
     selectizeInput(ns("flink"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection),
-    tags$p("Result depends on PCA parameters."),
+    checkboxInput(ns("pca.enable"), "Apply PCA", value = F),
+    conditionalPanel(conditionalPanel.equals(ns("pca.enable"), "true"),
+                     tags$p("Result depends on PCA parameters.")),
     actionButton(ns("calculate"), "Calculate threshold")
   ))
 }
@@ -53,7 +55,7 @@ relevantGenesValue_ <- function(input,
     reference.clustering <- clustering(data, 
                                        method.dist = input$fdistance, 
                                        method.link = input$flink,
-                                       pca.enable = T,
+                                       pca.enable = input$pca.enable,
                                        pca.center = pca.center(),
                                        pca.scale = pca.scale())
     
@@ -61,7 +63,7 @@ relevantGenesValue_ <- function(input,
                                                             reference.clustering = reference.clustering,
                                                             method.dist = input$fdistance, 
                                                             method.link = input$flink,
-                                                            pca.enable = T,
+                                                            pca.enable = input$pca.enable,
                                                             pca.center = pca.center(),
                                                             pca.scale = pca.scale())
       })
