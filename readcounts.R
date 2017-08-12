@@ -30,7 +30,7 @@ availableReadcountSamples <- list(
 )
 
 #' Supported read count normalization types
-supportedReadcountNormalizationTypes <- c("None" = "none", "DeSeq2" = "deseq2", "TPM" = "tpm")
+supportedReadcountNormalizationTypes <- c("None" = "none", "DESeq2" = "deseq2", "TPM" = "tpm")
 
 
 #' Imports readcount from filehandle with importer definded by datatype

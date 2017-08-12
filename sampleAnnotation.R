@@ -52,11 +52,11 @@ availableSampleAnnotationSamples <- list(
                 parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
                                   supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
   ImporterEntry(name = "Myotis RNA/sample_annotation_conditions_RNA.csv", 
-                label = "Conditions for Monocytes",
+                label = "Conditions for Myotis RNA",
                 parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
                                   supportedSampleAnnotationImporters.imported_data.conditions.collapse)),
   ImporterEntry(name = "Myotis smallRNA/sample_annotation_conditions_smallRNA.csv", 
-                label = "Conditions for Monocytes",
+                label = "Conditions for Myotis smallRNA",
                 parameters = list(supportedSampleAnnotationImporters.imported_data.conditions,
                                   supportedSampleAnnotationImporters.imported_data.conditions.collapse))
 )
