@@ -87,7 +87,7 @@ shinyServer(function(input, output, session) {
   
   
   # Gene variances
-  gene.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
+  readcounts.processed.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
   
   # Obtain the list of genes the user wants to use
   genes.filtered <- serverFilteredGenes(readcounts.processed, gene.annotation)
@@ -95,7 +95,7 @@ shinyServer(function(input, output, session) {
   # The filtered read counts just intersects the list of genes returned by each filter
   readcounts.filtered <- serverFilterReadcounts(genes.filtered, readcounts.processed)
   
-  gene.variances.filtered <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
+  readcounts.filtered.variances <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
   
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
@@ -104,7 +104,7 @@ shinyServer(function(input, output, session) {
                                              value.min = reactive({ 1 }),
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
                                              value.default = reactive({ nrow(readcounts.filtered()) }))
-  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) })
+  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), gene.variances(), pca.gene.count()$value) }) #######TODO
   
   pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
                                                        readcounts = readcounts.filtered,
@@ -113,6 +113,8 @@ shinyServer(function(input, output, session) {
   observeEvent(pca.pca.genes.set.count.minimal(), {
     updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
   })
+  
+  readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(input, readcounts.top.variant)
@@ -142,8 +144,8 @@ shinyServer(function(input, output, session) {
   plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
   
   
-  downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances))
-  downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(gene.variances.filtered))
+  downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.processed.variances))
+  downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.filtered.variances))
   downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.annotation))
   
   # Gene filtering
@@ -184,10 +186,10 @@ shinyServer(function(input, output, session) {
   downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
   downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
   
-  plotGeneVariancePlot("genes.variances.plot", gene.variances = gene.variances)
-  plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = gene.variances.filtered)
+  plotGeneVariancePlot("genes.variances.plot", gene.variances = readcounts.processed.variances)
+  plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = readcounts.filtered.variances)
   
-  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, gene.variances.filtered)
+  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, readcounts.filtered.variances)
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   
@@ -200,7 +202,7 @@ shinyServer(function(input, output, session) {
                readcounts.processed = readcounts.processed,
                readcounts.filtered = readcounts.filtered,
                readcounts.top.variant = readcounts.top.variant,
-               gene.variances = gene.variances,
+               gene.variances = readcounts.filtered.variances, # Important! Needed for movie function!
                animation.params = pca.gene.count,
                conditions = conditions,
                pca = pca)

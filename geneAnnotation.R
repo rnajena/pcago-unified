@@ -258,7 +258,7 @@ buildGeneVarianceTable <- function(readcounts) {
 #' Selects only the top n most variant genes from the read count table.
 #'
 #' @param readcounts The readcount table to be filtered
-#' @param gene.variances Gene variances table
+#' @param gene.variances Gene variances table (this table is ordered by gene variance decreasing)
 #' @param top The top n of genes 1 <= n <= nrow(readcounts)
 #'
 #' @return Filtered readcount table
@@ -270,18 +270,8 @@ selectTopVariantGeneReadcounts <- function(readcounts, gene.variances, top) {
   if(!is.SummarizedExperiment(readcounts) || !is.data.frame(gene.variances) || top <= 0) {
     return(NULL)
   }
-  
-  # Fetch the variances for all available genes
-  # But only select those which are in the read count table
-  variances <- gene.variances[rownames(readcounts),]
-  
-  topgeneids <- rownames(variances)[1:min(top, nrow(variances))]
-  readcounts.geneids <- rownames(readcounts)
-  
-  indices <- na.omit(match(topgeneids, readcounts.geneids))
-  
-  result <- readcounts[indices,]
-  
-  return(result)
+ 
+  return( readcounts[rownames(gene.variances)[1:top] ,] ) 
+ 
 }
 

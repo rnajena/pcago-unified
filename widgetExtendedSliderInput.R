@@ -26,10 +26,10 @@ extendedSliderInput <- function(id, header = "") {
   
   return(tagList(sliderInput(ns("count"), header, min = 0, max = 0, value = 0, step = 1, round = T),
                  fluidRow(style = css("text-align" = "center"), tags$div(class = "col-centered", style = css(display = "inline-block"),
-                                                                  actionButton(ns("large.step.increase"), label = "", icon = icon("fast-backward")),
-                                                                  actionButton(ns("small.step.increase"), label = "", icon = icon("step-backward")),
+                                                                  actionButton(ns("large.step.decrease"), label = "", icon = icon("fast-backward")),
+                                                                  actionButton(ns("small.step.decrease"), label = "", icon = icon("step-backward")),
                                                                   bsButton(ns("play"), label = tags$span(tags$span(class = "play", icon("play")), tags$span(class = "pause", icon("pause"))), type = "toggle", style = "play-pause"),
-                                                                  actionButton(ns("small.step.decrese"), label = "", icon = icon("step-forward")),
+                                                                  actionButton(ns("small.step.increase"), label = "", icon = icon("step-forward")),
                                                                   actionButton(ns("large.step.increase"), label = "", icon = icon("fast-forward"))
                  )),
                  hDivider(),
@@ -89,12 +89,12 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
     updateSliderInput(session, "count", value = current + anim.by())
   })
   
-  observeEvent(input$large.small.decrease, {
+  observeEvent(input$small.step.decrease, {
     current <- input$count
     updateSliderInput(session, "count", value = current - 1)
   })
   
-  observeEvent(input$large.small.increase, {
+  observeEvent(input$small.step.increase, {
     current <- input$count
     updateSliderInput(session, "count", value = current + 1)
   })
