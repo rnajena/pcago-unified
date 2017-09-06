@@ -19,10 +19,10 @@ plotAgglomerativeClusteringPlotUI.dist.methodsSelection <- c(
 )
 
 plotAgglomerativeClusteringPlotUI.hclust.methodsSelection <- c(
-  "UPGMA/Average" = "average",
-  "WPGMA/McQuitty" = "mcquitty",
-  "WPGMC/Median" = "median",
-  "UPGMC/Centroid" = "centroid",
+  "Average" = "average",
+  "McQuitty" = "mcquitty",
+  "Median" = "median",
+  "Centroid" = "centroid",
   "Ward D" = "ward.D",
   "Ward D2" = "ward.D2",
   "Single linkage" = "single",
