@@ -1,29 +1,39 @@
 # Overview
 
-PCAGO is a tool to analyze RNA-Seq results with principal component analysis.
-You can use it to ...
+Working with PCAGO can be categorized into three sections:
 
-* check if samples with the same treatment/condition cluster together
-* find out how including less and less variant genes affect this clustering
-* find sets of genes that explain most of the data
+1. Importing read counts and annotation data
+2. Processing like normalization and filtering
+3. Generating the output
 
-PCAGO provides additional features that lets you do your tasks easier, like ...
+First, read count data, sample and gene annotations need to be imported. The absolute
+minimum consists of the read count data and the sample annotation that defines the conditions
+of each sample. For other tasks like filtering or normalization, additional sample annotations
+or gene annotations are required.
 
-* filtering genes by *biotype*, *GO terms* and *scaffold*
-* animating the clustering live when less and less variant genes are included
-* importing annotations directly from online databases like Ensembl BioMart
+As second step, PCAGO allows additional processing steps that remove genes with a variance of zero,
+read count normalization and filtering of read count data by only including genes with
+specific properties. At last, principal component analysis (PCA) is applied to the
+data.
 
+Lastly, output plots and files need to be created for further usage.
 
-## Quick usage
+This help page will cover all required information about each step
+and will use certain terms to refer to specific user interface elements.
 
-1. Go to the "Analyze" page
-2. Upload your read counts in `Sidebar > Data > Readcounts` or choose a sample
-3. Optionally (but advised) upload a gene annotation in `Sidebar > Data > Annotation`
-4. Click on `PCA samples plot` to view the PCA results
+## User interface overview
 
-<div class="video-container">
-<video controls>
-  <source src="helppages/overview.webm" type="video/webm"/>
-  Your browser does not support the video tag.
-</video>
-</div>
+The user interface of the main application is separated into three parts:
+
+1. The content area
+2. The content navigation
+3. The sidebar
+
+The **content** area displays the currently selected output. This output consists of
+plots, tables and additional information about the currently displayed data. The
+**content navigation** allows access to all available outputs.
+The **sidebar** contains all controls, which includes plot settings and all controls
+that allow importing or processing of data. With exception to **Plot**,
+the categories in the sidebar are *independent* from the currently selected content.
+
+![UI of PCAGO](helppages/overview.png)

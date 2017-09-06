@@ -44,3 +44,8 @@ Depending on the filter settings, different genes are selected.
 | X, protein_coding | AND       | False  | A              |
 | X, protein_coding | AND       | True   | B,C,D          |
 | X, protein_coding | OR        | True   | D              |
+
+
+# Filtering read counts by gene variance cut-off
+
+![Filtering genes by gene variance](helppages/geneFilterByVariance.png)

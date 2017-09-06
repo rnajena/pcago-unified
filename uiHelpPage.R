@@ -23,21 +23,20 @@ uiHelpPageEntry <- function(title, filename) {
 #' @examples
 uiHelpPage <- function() {
   return(navlistPanel(
+    uiHelpPageEntry("About", "helppages/about.md"),
     uiHelpPageEntry("Overview", "helppages/overview.md"),
-    "Data",
-    uiHelpPageEntry("Read counts", "helppages/data-readcounts.md"),
-    uiHelpPageEntry("Sample annotation", "helppages/data-samples-annotation.md"),
-    uiHelpPageEntry("Gene annotation", "helppages/data-gene-annotation.md"),
-    uiHelpPageEntry("Read count processing", "helppages/data-readcount-processing.md"),
-    "Filter genes",
-    uiHelpPageEntry("By annotation", "helppages/filter-genes-annotation.md"),
-    uiHelpPageEntry("By gene variance", "helppages/filter-genes-gene-variance.md"),
-    "PCA",
-    uiHelpPageEntry("Parameters", "helppages/pca-parameters.md"),
-    "Appendix",
-    uiHelpPageEntry("Upload widget", "helppages/appendix-uploader-widget.md"),
-    uiHelpPageEntry("Visuals editor widget", "helppages/appendix-visual-editor.md"),
-    uiHelpPageEntry("Processing view widget", "helppages/appendix-processing-view.md"),
-    uiHelpPageEntry("File formats", "helppages/appendix-fileformats.md")
+    "Importing ",
+    uiHelpPageEntry("Read counts", "helppages/import-readcounts.md"),
+    uiHelpPageEntry("Sample annotation", "helppages/import-samples-annotation.md"),
+    uiHelpPageEntry("Gene annotation", "helppages/import-gene-annotation.md"),
+    uiHelpPageEntry("Upload widget", "helppages/import-uploader-widget.md"),
+    uiHelpPageEntry("File formats", "helppages/import-fileformats.md"),
+    "Processing",
+    uiHelpPageEntry("Read count processing", "helppages/processing-readcount-processing.md"),
+    uiHelpPageEntry("Filtering", "helppages/processing-filter-genes.md"),
+    uiHelpPageEntry("PCA", "helppages/processing-pca.md"),
+    "Output",
+    uiHelpPageEntry("Visuals editor widget", "helppages/output-visual-editor.md"),
+    uiHelpPageEntry("Processing view widget", "helppages/output-processing-view.md")
   ))
 }
