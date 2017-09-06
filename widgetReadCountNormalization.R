@@ -26,6 +26,7 @@ readCountNormalizationUI <- function(id) {
                                     choices = c(),
                                     multiple = T,
                                     options = list(plugins = list("remove_button", "drag_drop"))),
+                     checkboxInput(ns("normalization.deseq2.rlog"), "rlog transformation", value = F),
                      actionButton(ns("normalization.deseq2.submit"), "Calculate"))
   ))
 }
@@ -61,7 +62,8 @@ readCountNormalizationData_ <- function(input,
     gene.annotation() 
     sample.annotation() 
     input$normalization
-    input$normalization.deseq2.conditions }, {
+    input$normalization.deseq2.conditions 
+    input$normalization.deseq2.rlog}, {
       stored.values$readcounts.normalized.cache <- NULL
     })
   
@@ -118,7 +120,15 @@ readCountNormalizationData_ <- function(input,
     # This method uses soft-validate and the error is lost if not in a required path of the reaction graph
     # Use try-catch to get this error
     tryCatch({
+      
+      transform <- "none"
+      
+      if(input$normalization.deseq2.rlog) {
+        transform <- "rlog"
+      }
+      
       stored.values$readcounts.normalized.cache <- applyReadcountNormalization.DESeq2(readcounts = readcounts(),
+                                                                                      transform = transform,
                                                                                       sample.annotation = sample.annotation(),
                                                                                       selected.conditions = input$normalization.deseq2.conditions) 
       },

@@ -147,7 +147,8 @@ readcountProcessing.step.normalization <- function(readcounts.normalization.outp
                  tags$table(
                    do.call(tags$tr, lapply(c("Sample", rownames(output$conditions)),function(x) { tags$td(x) })),
                    do.call(tags$tr, lapply(c("Gen. condition", as.vector(output$conditions$condition)),function(x) { tags$td(x) }))
-                 ))
+                 )),
+        tags$p(paste("Apply transformation:", output$deseq2.transformation))
       )
       
       return(list(title = "Apply DESeq2 normalization",

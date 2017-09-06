@@ -94,6 +94,9 @@ importReadcountSample <- function(sample, parameters) {
 #' Applies read count normalization (DeSeq2) to readcounts
 #'
 #' @param readcounts 
+#' @param normalize Enable normalization (default true)
+#' @param transform Can be 'none' or 'rlog' (default none)
+#' @param betaPrior Set betaPrior in DESeq2 params (default false)
 #' @param condition.table Conditions table that associates each sample to the conditions it has
 #' @param selectedn.conditions Vector of conditions that should be used for normalization
 #'
@@ -101,10 +104,13 @@ importReadcountSample <- function(sample, parameters) {
 #' @export
 #'
 #' @examples
-applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, selected.conditions) {
+applyReadcountNormalization.DESeq2 <- function(readcounts, transform = "none", betaPrior = F, sample.annotation, selected.conditions) {
   
   if(!is.SummarizedExperiment(readcounts) || !is(sample.annotation, "SampleAnnotation") || !is.character(selected.conditions)) {
     stop("Invalid arguments!")
+  }
+  if(!(transform %in% c("none", "rlog"))) {
+    stop("Unsupported transformation!")
   }
   
   validate(need(nrow(readcounts) > 0 && ncol(readcounts) > 0, "No read counts to process!"),
@@ -128,13 +134,24 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, sample.annotation, se
                                           colData = deseq.coldata,
                                           design = ~ condition)
   
-  deseq.obj <- DESeq(deseq.dataset)
-  normalized.counts <- counts(deseq.obj, normalized = T)
+  deseq.obj <- DESeq(deseq.dataset, betaPrior = betaPrior)
   
-  assay(readcounts) <- normalized.counts
+  if(transform == "none") {
+    assay(readcounts) <- counts(deseq.obj, normalized = T)
+  }
+  else if(transform == "rlog") {
+    assay(readcounts) <- assay(rlog(deseq.obj))
+  }
+  else {
+    stop("Invalid transformation!")
+  }
   
   # Return the readcounts and the conditions used for normalization
-  return(list(readcounts = readcounts, conditions = deseq.coldata, design = "~condition", operation.normalization = "deseq2"))
+  return(list(readcounts = readcounts, 
+              conditions = deseq.coldata, 
+              design = "~condition", 
+              operation.normalization = "deseq2", 
+              deseq2.transformation = transform))
 }
 
 #' Applies read count normalization (TPM) to readcounts

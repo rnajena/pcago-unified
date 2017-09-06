@@ -104,7 +104,7 @@ shinyServer(function(input, output, session) {
                                              value.min = reactive({ 1 }),
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
                                              value.default = reactive({ nrow(readcounts.filtered()) }))
-  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) }) #######TODO
+  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) })
   
   pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
                                                        readcounts = readcounts.filtered,
