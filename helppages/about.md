@@ -16,10 +16,9 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 
 ## Quick usage
 
-1. Go to the "Analyze" page
-2. Upload your read counts in `Sidebar > Data > Readcounts` or choose a sample
-3. Optionally (but advised) upload a gene annotation in `Sidebar > Data > Annotation`
-4. Click on `PCA samples plot` to view the PCA results
+1. Go to the `Analyze` page
+2. Upload your read counts in `Sidebar > Data > Import read counts` or choose sample data
+3. Upload the sample annotation `Sidebar > Data > Import samples annotation` or choose sample data
 
 <div class="video-container">
 <video controls>

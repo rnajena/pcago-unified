@@ -1,68 +1,19 @@
 # Samples annotation
 
-A read count sample has following annotations:
+Read count samples are annotated with two different types of annotations,
+the **sample conditions** and the *optional* **sample info annotation**.
+The sample conditions assign a set of conditions to each sample
+and is used for visual representation and normalization. The sample info annotation
+currently only contains the **mean fragment length** that is needed by TPM normalization.
 
-* Conditions
-* Mean fragment length
+![Importing schema](helppages/importingOverviewSamplesAnnotation.png)
 
-The **conditions** annotation defines the conditions/treatments of each sample,
-which are needed for DESeq2 normalization and visual representation of the data.
-The **mean fragment length** is needed for TPM normalization (see `Data > Read count processing` help page).
+## Sample conditions
 
-## Conditions annotation
-
-The condition annotation determines for each sample if it is in a condition or has a specific treatment.
-It is a generalization of factorized treatment tables like the following:
-
-| Sample | Vitamin | Infection |
-|--------|---------|-----------|
-| S1     | C       | E. coli   |
-| S2     | C       | Control   |
-| S3     | Control | E. coli   |
-
-Instead of having factors like "Vitamin" or "Infection", the general approach of the condition table
-stores only boolean values (true or false)
-
-| Sample | Vitamin_C | Vitamin_Control | Infection_EColi | Infection_Control |
-|--------|-----------|-----------------|-----------------|-------------------|
-| S1     | TRUE      | FALSE           | TRUE            | FALSE             |
-| S2     | TRUE      | FALSE           | FALSE           | TRUE              |
-| S3     | FALSE     | TRUE            | TRUE            | FALSE             |
-
-## Mean fragment length
-
-The mean fragment length of a sample can be obtained from the read analysis step.
-
-## Managing conditions
-
-Other components like the visual editor use the condition table to determine cell properties.
-The order of the conditions within the table may change the output depending on the component.
-You can disable and move conditions by using the **Rearrange conditions** control at
-the below the samples annotation importer.
-
-![Condition rearrangement tool](helppages/samplesAnnotationConditionEditor.png)
-
-## Importing data
-
-You can upload multiple sample annotations per upload widget (see `Appendix > Upload widget` for more information).
-The data will be integrated into a final sample annotation. You can upload multiple data for the same type.
-The sample info annotation will be merged, while the conditions are completely overwritten. Newer data overwrites
-old data.
-
-## Importing conditions
-
-Following importers are available:
-
-* **Sample conditions boolean table (\*.csv)** Import from a boolean table in CSV format
-* **Sample conditions factors table (\*.csv)** Import from a *factors* table in CSV format
-
-See `Appendix > File formats` for more information about file formats.
-
-Following generators are available:
-
-* **Conditions from sample names.** Generates the conditions table by splitting the sample names by a **separator** (additional parameter)
-
-### General format of a boolean table
+PCAGO represents the sample conditions as a **boolean table** that contains logical values.
+The rows represent the samples, while the columns represent the available conditions.
+Similar to the read count table, the first row and the first column are reserved for labeling.
+All other cells determine if a *sample* of a given row has a *condition* as given by the column.
 
 |       | Condition1    | Condition2 | Condition3 | ... |
 |-------|---------------|------------|------------|-----|
@@ -71,33 +22,84 @@ Following generators are available:
 | Sample3 | ...           | ...        | ...        | ... |
 | ...   | ...           | ...        | ...        | ... |
 
-Sample1, Sample2, ... are the column names in your read count table.
+**Example**
 
-### General format of a factors table
+A valid sample condition table looks like following:
 
-| Sample  | Treatment1        | Treatment2 | ... |
+| Sample | Vitamin_C | Vitamin_Control | Infection_EColi | Infection_Control |
+|--------|-----------|-----------------|-----------------|-------------------|
+| S1     | TRUE      | FALSE           | TRUE            | FALSE             |
+| S2     | TRUE      | FALSE           | FALSE           | TRUE              |
+| S3     | FALSE     | TRUE            | TRUE            | FALSE             |
+
+Sample **S1** is infected by E. coli and treated with Vitamin C. Sample **S2** is not infected, but
+treated with Vitamin C. Sample **S3** is only infected with E. coli.
+
+### Alternative representation
+
+PCAGO is able to convert a different format to represent sample conditions to
+its internal representation. This **factor table** is more easily readable by humans
+and represents sample conditions as choice from specified categories of treatments. Here the columns represent
+the categories.
+
+| Sample  | Category of treatments 1        | Category of treatments 2 | ... |
 |---------|-------------------|------------|-----|
-| Sample1 | Treatment factors | ...        | ... |
+| Sample1 | Specific treatment of given category | ...        | ... |
 | Sample2 | ...               | ...        | ... |
 | ...     | ...               | ...        | ... |
 
-Sample1, Sample2, ... are the column names in your read count table.
+**Example**
 
-## Mean fragment length
+Following factor table represents the same conditions as with the other example:
 
-For future development, the mean fragment length is part of the **sample info**
-annotation group that later may contain additional information about each sample similar to
-gene annotations. Currently, only the *mean fragment length* is supported.
-
-Following importers are available:
-
-* **Sample info table (\*.csv)** Import sample info from a CSV table
+| Sample | Vitamin | Infection |
+|--------|---------|-----------|
+| S1     | C       | E. coli   |
+| S2     | C       | Control   |
+| S3     | Control | E. coli   |
 
 
-### General format of a sample info table
+### Importing sample conditions
+
+PCAGO supports importing sample conditions from a **boolean table** or
+a **factor table**. The tables must be provided in **CSV** format.
+See `Importing > File formats` for more information about file formats.
+
+The sample conditions also can be built based on the names of the
+samples in the read count table. The *generator* splits the name of each sample
+by a userdefined character and adds each of the resulting substrings to the set of conditions.
+If for example the name of a sample is `Infection_EColi_N1` and the generator is set to split
+using a `_` character, this sample has the conditions `Infection`, `EColi` and `N1`.
+If the character does not occur in the sample name or the split character is empty,
+the whole sample name is assumed to be a condition.
+
+Other components like the visual editor use the condition table to determine cell properties.
+The order of the conditions within the table may change the output depending on the component.
+Additionally, the generator can generate unwanted conditions that would affect normalization
+(an example might be `N1`).
+To solve this, the **Rearrange conditions** control below the samples annotation importer
+allows *rearrangement* and *disabling* of specific conditions.
+
+![Condition rearrangement tool](helppages/samplesAnnotationConditionEditor.png)
+
+## Sample info
+
+The sample info currently only contains the mean fragment length used by TPM normalization
+and similar to the condition annotation is stored as a table.
+Again, the rows represent the sample. The columns represent the currently supported
+annotation values. To allow extension of PCAGO, both the first row and the first column
+are reserved for labeling of the data.
 
 | ID      | meanfragmentlength |
 |---------|--------------------|
 | Sample1 | ...                |
 | Sample2 | ...                |
 | ...     | ...                |
+
+The table must be provided in **CSV** format.
+See `Importing > File formats` for more information about file formats.
+
+You can upload multiple sample annotations per upload widget (see `Importing > Upload widget` for more information).
+The data will be integrated into a final sample annotation. You can upload multiple data for the same type.
+The sample info annotation will be merged, while the conditions are completely overwritten. Newer data overwrites
+old data.
