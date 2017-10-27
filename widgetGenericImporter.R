@@ -75,7 +75,7 @@ genericImporterData.resolveParameterInputParameterOption <- function(option, lab
   
   if(is.reactive(option)) {
     
-    notification.id <- progressNotification(paste("Loading available parametes for", label))
+    notification.id <- progressNotification(paste("Loading available parameters for", label))
     option <-  tryCatch(option(), error = function(e) { c() })
     removeNotification(notification.id)
   }

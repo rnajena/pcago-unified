@@ -5,12 +5,12 @@
 #' 
 
 library(shiny)
-library(colourpicker)
 library(RColorBrewer)
 source("uiHelper.R")
 source("sampleAnnotation.R")
 source("sampleAnnotationVisuals.R")
 source("widgetGenericImporter.R")
+source("widgetOptionalColorInput.R")
 
 visualsEditor.shapes <- c(
   "No shape" = -1,
@@ -73,7 +73,7 @@ visualsEditorUI <- function(id) {
                                                           "Available conditions",
                                                           choices = c("None"))),
                                            textInput(ns("name"), "Custom name"),
-                                           colourInput(ns("color"), "Color", value = "transparent", palette = "square", allowTransparent = T, transparentText = "No color"),
+                                           optionalColorInput(ns("color"), "Color"),
                                            selectizeInput(ns("shape"), "Shape", choices = visualsEditor.shapes, selected = -1))
                           
                           ))))
@@ -133,22 +133,20 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
       color <- variables$visuals.table[condition, "color"]
       shape <- variables$visuals.table[condition, "shape"]
       name <- variables$visuals.table[condition, "name"]
-      
-      if(is.null(color) || color == "") {
-        color <- "transparent"
-      }
+   
       if(!is.numeric(shape) || shape < 0) {
         shape <- -1
       }
       
-      updateColourInput(session, "color", value = color)
+      updateOptionalColorInput("color", value = color)
       updateSelectizeInput(session, "shape", selected = shape)
       updateTextInput(session, "name", value = name)
     
   })
   
   # Change color/shape based on input
-  observeEvent(input$color, {
+  color.input.value <- optionalColorInputValue("color")
+  observeEvent(color.input.value(), {
     
     if(!has.color) {
       return()
@@ -157,9 +155,9 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
     validate(need(variables$visuals.table, "No visual table to write to!"))
     
     condition <- input$conditions
-    color <- input$color
+    color <- color.input.value()
     
-    if(color == "transparent") {
+    if(is.null(color)) {
       color <- ""
     }
   
