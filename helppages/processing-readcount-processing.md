@@ -2,11 +2,9 @@
 
 You can apply additional processing to your read count table:
 
-## Remove genes with constant read counts
+## Remove genes with zero read counts
 
-If enabled, all genes with constant read counts are omitted from the table.
-This is needed if you want to apply variance scaling to the data before PCA as
-genes with constant read counts have a variance of zero.
+If enabled, all genes with zero read counts are omitted from the table.
 
 ## Transpose matrix
 
@@ -62,3 +60,9 @@ mean fragment length is provided by the sample annotation. See the respective he
 <div class="well help-box">
 <label>Info</label>  We chose to not include normalization via RPKM/FPKM. See <a href="http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/">here</a> and <a href="http://blog.nextgenetics.net/?e=51">here</a> for great articles that give a summary about read count normalization and the issues with RPKM/FPKM.
 </div>
+
+## Remove genes with constant read counts
+
+If enabled, all genes with constant read counts are omitted from the table.
+This is needed if you want to apply variance scaling to the data before PCA as
+genes with constant read counts have a variance of zero.

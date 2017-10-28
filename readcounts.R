@@ -244,6 +244,31 @@ applyReadcountNormalization.TPM <- function(readcounts,
   
 }
 
+#' Removes zero read count genes from the table.
+#' #'
+#' @param readcounts 
+#'
+#' @return list of readcounts without constant entries (readcounts) and list of removed genes (genes.removed)
+#' @export
+#'
+#' @examples
+removeZeroReads <- function(readcounts) {
+  
+  if(is.null(readcounts)) {
+    return(NULL)
+  }
+  
+  counts <- assay(readcounts)
+  invalid <- rowMins(counts) == 0 & identical(rowMaxs(counts), rowMins(counts))
+  
+  genes.removed <- rownames(readcounts)[invalid]
+  readcounts <- readcounts[which(!invalid),]
+  
+  return(list(readcounts = readcounts, genes.removed = genes.removed))
+  
+}
+
+
 #' Removes constant read count genes from the table.
 #' As they result in variance = 0, scaling in the PCA step won't work
 #'

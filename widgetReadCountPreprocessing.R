@@ -14,20 +14,20 @@ readCountPreprocessingUI <- function(id) {
   
   return(tagList(
     checkboxInput(ns("preprocessing.transpose"), "Transpose table", value = F),
-    checkboxInput(ns("preprocessing.remove.constant"), "Remove genes with constant readcounts", value = T)
+    checkboxInput(ns("preprocessing.zero"), "Remove genes with zero readcounts", value = T)
   ))
 }
 
 readCountPreprocessingData_ <- function(input, 
-                              output, 
-                              session,
-                              readcounts) {
+                                        output, 
+                                        session,
+                                        readcounts) {
   
   return(reactive({
     
     validate(need(readcounts(), "[Read count processing] No read counts to process!"))
     
-    output <- list(removed.genes = c(), readcounts = readcounts(), operation.transpose = F, operation.remove.constant = F)
+    output <- list(removed.genes = c(), readcounts = readcounts(), operation.transpose = F, operation.remove.zero = F)
     
     # Transpose read counts
     if(input$preprocessing.transpose) {
@@ -42,11 +42,11 @@ readCountPreprocessingData_ <- function(input,
     }
     
     # Remove constant read genes
-    if(input$preprocessing.remove.constant) {
+    if(input$preprocessing.zero) {
       processed <- removeConstantReads(output$readcounts)
       output$readcounts <- processed$readcounts
       output$removed.genes <- processed$genes.removed
-      output$operation.remove.constant <- T
+      output$operation.remove.zero <- T
     }
     
     return(output)

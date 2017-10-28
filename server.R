@@ -83,7 +83,12 @@ shinyServer(function(input, output, session) {
                                                                 readcounts = readcounts.preprocessed,
                                                                 gene.annotation = gene.annotation,
                                                                 sample.annotation = sample.annotation)
-  readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
+  readcounts.normalized <- reactive({ readcounts.normalization.output()$readcounts })
+  
+  # Additional postprocessing after normalization
+  readcounts.postprocessing.output <- readCountPostprocessingData("data.readcounts.postprocessing", readcounts.normalized)
+  
+  readcounts.processed <- reactive({ readcounts.postprocessing.output()$readcounts })
   
   
   # Gene variances
@@ -158,12 +163,14 @@ shinyServer(function(input, output, session) {
   readcountProcessing.at.readcounts.processed(readcounts.raw = readcounts.raw,
                                               readcounts.processed = readcounts.processed, 
                                               readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                              readcounts.normalization.output = readcounts.normalization.output)
+                                              readcounts.normalization.output = readcounts.normalization.output,
+                                              readcounts.postprocessing.output = readcounts.postprocessing.output)
   readcountProcessing.at.readcounts.filtered(readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
                                              readcounts.filtered = readcounts.filtered,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
+                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
                                              genes.filtered = genes.filtered)
   readcountProcessing.at.readcounts.top.variant(readcounts.raw = readcounts.raw,
                                              readcounts.processed = readcounts.processed, 
@@ -171,6 +178,7 @@ shinyServer(function(input, output, session) {
                                              readcounts.top.variant = readcounts.top.variant,
                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
                                              readcounts.normalization.output = readcounts.normalization.output,
+                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
                                              genes.filtered = genes.filtered)
   readcountProcessing.at.pca(readcounts.raw = readcounts.raw,
                             readcounts.processed = readcounts.processed, 
@@ -178,6 +186,7 @@ shinyServer(function(input, output, session) {
                             readcounts.top.variant = readcounts.top.variant,
                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
                             readcounts.normalization.output = readcounts.normalization.output,
+                            readcounts.postprocessing.output = readcounts.postprocessing.output,
                             genes.filtered = genes.filtered,
                              pca = pca)
   

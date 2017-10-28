@@ -77,10 +77,10 @@ readcountProcessing.step.transpose <- function(readcounts.processed, readcounts.
 #' @export
 #'
 #' @examples
-readcountProcessing.step.remove.constant <- function(readcounts.processed, readcounts.preprocessing.output) {
+readcountProcessing.step.remove.zero <- function(readcounts.processed, readcounts.preprocessing.output) {
   return(reactive({
     
-    if(readcounts.preprocessing.output()$operation.remove.constant) {
+    if(readcounts.preprocessing.output()$operation.remove.zero) {
       
       content <- "No genes have been removed."
       removed.genes <- readcounts.preprocessing.output()$removed.genes
@@ -93,7 +93,7 @@ readcountProcessing.step.remove.constant <- function(readcounts.processed, readc
                                                                                    height = "200px")))  
       }
       
-      return(list(title = "Remove constant read count genes",
+      return(list(title = "Remove zero count genes",
                   content = content))
     }
     else {
@@ -161,6 +161,43 @@ readcountProcessing.step.normalization <- function(readcounts.normalization.outp
     
   }))
 }
+
+#' Returns information about read count pre-processing step: Remove constant reads
+#'
+#' @param input 
+#' @param readcounts.processed 
+#' @param readcounts.preprocessing.output 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+readcountProcessing.step.remove.constant <- function(readcounts.postprocessing.output) {
+  return(reactive({
+    
+    if(readcounts.postprocessing.output()$operation.remove.constant) {
+      
+      content <- "No genes have been removed."
+      removed.genes <- readcounts.postprocessing.output()$removed.genes
+      
+      if(length(removed.genes) != 0) {
+        
+        genes <- paste0(removed.genes, collapse = "\n")
+        content <- tagList(tags$p(paste(length(removed.genes) ,"genes have been removed.")),
+                           tags$textarea(genes, readonly = "readonly", style = css(width = "100%",
+                                                                                   height = "200px")))  
+      }
+      
+      return(list(title = "Remove constant count genes",
+                  content = content))
+    }
+    else {
+      return(NULL)
+    }
+    
+  }))
+}
+
 
 #' Returns information about filtering with annotation criteria
 #'
@@ -287,22 +324,26 @@ readcountProcessing.step.pca <- function(readcounts.top.variant, pca) {
 readcountProcessing.at.readcounts.processed <- function(readcounts.raw,
                                                         readcounts.processed, 
                                                         readcounts.preprocessing.output, 
-                                                        readcounts.normalization.output) {
+                                                        readcounts.normalization.output,
+                                                        readcounts.postprocessing.output) {
   
   step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.processed, readcounts.preprocessing.output)
+  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
   step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
+  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
   
   processingStepsWidgetData("readcounts.processing.steps",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
-                            step.normalization)
+                            step.remove.zero,
+                            step.normalization,
+                            step.remove.constant)
   processingStepsWidgetData("genes.variance.processing",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             readcountProcessing.step.calculate.variance())
   
 }
@@ -318,24 +359,28 @@ readcountProcessing.at.readcounts.filtered <- function(readcounts.raw,
                                                        readcounts.filtered,
                                                        readcounts.preprocessing.output, 
                                                        readcounts.normalization.output,
+                                                       readcounts.postprocessing.output,
                                                        genes.filtered) {
   
   step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.processed, readcounts.preprocessing.output)
+  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
   step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
+  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
   step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
   
   processingStepsWidgetData("readcounts.filtered.steps",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter)
   processingStepsWidgetData("genes.variance.filtered.processing",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter,
                             readcountProcessing.step.calculate.variance())
   
@@ -353,19 +398,22 @@ readcountProcessing.at.readcounts.top.variant <- function(readcounts.raw,
                                                          readcounts.top.variant,
                                                          readcounts.preprocessing.output, 
                                                          readcounts.normalization.output,
+                                                         readcounts.postprocessing.output,
                                                          genes.filtered) {
   
   step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.processed, readcounts.preprocessing.output)
+  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
   step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
+  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
   step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
   step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
   
   processingStepsWidgetData("readcounts.top.variant.steps",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter,
                             step.top.variant)
   
@@ -383,12 +431,14 @@ readcountProcessing.at.pca <- function(readcounts.raw,
                                         readcounts.top.variant,
                                         readcounts.preprocessing.output, 
                                         readcounts.normalization.output,
+                                        readcounts.postprocessing.output,
                                         genes.filtered,
                                        pca) {
   
   step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.processed, readcounts.preprocessing.output)
+  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
   step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
+  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
   step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
   step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
   step.pca <- readcountProcessing.step.pca(readcounts.top.variant, pca)
@@ -396,24 +446,27 @@ readcountProcessing.at.pca <- function(readcounts.raw,
   processingStepsWidgetData("pca.pc.processing",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter,
                             step.top.variant,
                             step.pca)
   processingStepsWidgetData("pca.variance.processing",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter,
                             step.top.variant,
                             step.pca)
   processingStepsWidgetData("pca.transformed.processing",
                             readcountProcessing.step.input.readcounts(readcounts.raw),
                             step.transpose,
-                            step.remove.constant,
+                            step.remove.zero,
                             step.normalization,
+                            step.remove.constant,
                             step.filter,
                             step.top.variant,
                             step.pca)
