@@ -4,6 +4,7 @@
 
 library(DT)
 library(shiny)
+library(openxlsx)
 source("uiHelper.R")
 
 #' Creates a UI with a data table output and download buttons
@@ -29,7 +30,8 @@ downloadableDataTableOutput <- function(id,
   
   export.items <- tagList(
     downloadButton(ns("export.csv"), "as *.csv"),
-    downloadButton(ns("export.tsv"), "as *.tsv"))
+    downloadButton(ns("export.tsv"), "as *.tsv"),
+    downloadButton(ns("export.xlsx"), "as *.xlsx"))
   
   if(!is.null(custom.export.items)) {
     export.items <- tagAppendChildren(export.items, list = custom.export.items)
@@ -101,6 +103,15 @@ downloadableDataTable_ <- function(input, output, session, data, export.filename
                                                      sep = "\t",
                                                      row.names = export.rownames,
                                                      col.names = export.colnames)
+                                         
+                                       })
+  output$export.xlsx <- downloadHandler(paste0(export.filename, ".xlsx"), 
+                                       function(file) {
+                                         
+                                         write.xlsx(table.data(),
+                                                     file,
+                                                     row.names = export.rownames,
+                                                     col.names = is.na(export.colnames))
                                          
                                        })
   
