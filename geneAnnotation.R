@@ -267,11 +267,19 @@ buildGeneVarianceTable <- function(readcounts) {
 #' @examples
 selectTopVariantGeneReadcounts <- function(readcounts, gene.variances, top) {
   
-  if(!is.SummarizedExperiment(readcounts) || !is.data.frame(gene.variances) || top <= 0) {
+  if(!is.SummarizedExperiment(readcounts) || !is.data.frame(gene.variances) || nrow(readcounts) == 0 || top <= 0) {
+    return(NULL)
+  }
+  
+  available.rows <- rownames(readcounts)
+  requested.rows <- rownames(gene.variances)[1:min(top, nrow(gene.variances))]
+  requested.rows <- intersect(available.rows, requested.rows)
+  
+  if(length(requested.rows) == 0) {
     return(NULL)
   }
  
-  return( readcounts[rownames(gene.variances)[1:top] ,] ) 
+  return( readcounts[requested.rows,] ) 
  
 }
 
