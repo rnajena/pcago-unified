@@ -129,7 +129,7 @@
 	font-weight: bold;
 }
 
-.help-page .video-container {
+/*.help-page .video-container {
 	margin-top: 30px;
 	margin-bottom: 30px;
 	text-align: center;
@@ -141,6 +141,43 @@
 	height: auto;
 	margin: 0 auto;
 	border: 1px solid #ddd;
+}*/
+
+.video-embed {
+  text-align: center;
+}
+
+.video-embed > div {
+  width: 70%;
+  display: inline-block;
+}
+
+.video-embed > div > div{
+  position: relative;
+  padding-bottom: 56.25%; /*16:9*/
+  padding-top: 30px;
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.video-embed > div > div > iframe{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video-embed.full-width > div {
+  width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+    /* For mobile phones: */
+    .video-embed > div {
+        width: 100%;
+    }
 }
 
 .help-page .help-box label {
