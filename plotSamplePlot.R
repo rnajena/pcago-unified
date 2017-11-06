@@ -30,6 +30,13 @@ plotSamplePlotSettingsUI <- function(id) {
                                    multiple = T,
                                    options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
     bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel("Misc", 
+                    checkboxInput(ns("calculateaxeslimits"),
+                                  "Stabilize axis limits",
+                                  value = T),
+                    checkboxInput(ns("stabilizeplot"),
+                                  "Stabilize data points",
+                                  value = T)),
     bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
   ))
   
@@ -40,6 +47,9 @@ plotSamplePlot.save <- function(pca,
                             visuals.sample, 
                             axes, 
                             plot.settings,
+                            xaxislimit,
+                            yaxislimit,
+                            zaxislimit,
                             format,
                             filename ){
   
@@ -132,6 +142,7 @@ plotSamplePlot.save <- function(pca,
     p <- ggplot(pca.transformed, aes_string(x = dimensions.requested[1],
                                             y = dimensions.requested[2])) + 
       geom_point(aes(colour = color, shape = shape))
+    p <- p + coord_cartesian(xlim = xaxislimit, ylim = yaxislimit)
     #p <- p + theme_classic()
     
     #' Add legends to the plot and map the correct colors to the factor levels
@@ -171,6 +182,9 @@ plotSamplePlot.save <- function(pca,
         xlab = pc.lab(dimensions.requested[1]),
         ylab = pc.lab(dimensions.requested[2]),
         zlab = pc.lab(dimensions.requested[3]),
+        xlim = xaxislimit,
+        ylim = yaxislimit,
+        zlim = zaxislimit,
         type = "h",
         main = title,
         sub = subtitle
@@ -291,7 +305,14 @@ plotSamplePlot_ <- function(input,
                           animation.params,
                           gene.variances,
                           conditions, 
-                          pca) {
+                          pca.center,
+                          pca.scale,
+                          pca.relative) {
+  
+  pca <- serverPCA(pca.center,
+              pca.scale,
+              pca.relative,
+              readcounts.top.variant)
   
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
   visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
@@ -327,6 +348,9 @@ plotSamplePlot_ <- function(input,
                             visuals.sample = visuals.sample(),
                             axes = input$axes,
                             plot.settings = plot.settings,
+                            xaxislimit = NULL,
+                            yaxislimit = NULL,
+                            zaxislimit = NULL,
                             format = format,
                             filename = filename))
   })
@@ -356,9 +380,9 @@ plotSamplePlot_ <- function(input,
         visuals.sample = visuals.sample(),
         readcounts.filtered = readcounts.filtered(),
         gene.variances = gene.variances(),
-        pca.center = pca()$params$center,
-        pca.scale = pca()$params$scale,
-        pca.relative = pca()$params$relative,
+        pca.center = pca.center(),
+        pca.scale = pca.scale(),
+        pca.relative = pca.relative(),
         updateProgress = updateProgress
       )
       
@@ -373,8 +397,10 @@ plotSamplePlot <- function(id,
                          readcounts.top.variant, 
                          gene.variances,
                          animation.params,
-                         conditions, 
-                         pca) {
+                         conditions,
+                         pca.center,
+                         pca.scale,
+                         pca.relative) {
   
   return(callModule(plotSamplePlot_, 
                     id, 
@@ -383,7 +409,9 @@ plotSamplePlot <- function(id,
                     readcounts.top.variant = readcounts.top.variant, 
                     gene.variances = gene.variances,
                     animation.params = animation.params,
-                    conditions = conditions, 
-                    pca = pca))
+                    conditions = conditions,
+                    pca.center = pca.center,
+                    pca.scale = pca.scale,
+                    pca.relative = pca.relative))
   
 }

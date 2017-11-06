@@ -122,7 +122,10 @@ shinyServer(function(input, output, session) {
   readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
   
   # pca is applied to the selected genes and setup some values to be used by outputs
-  pca <- serverPCA(input, readcounts.top.variant)
+  pca <- serverPCA(reactive({input$pca.pca.settings.center}),
+                   reactive({input$pca.pca.settings.scale}),
+                   reactive({input$pca.pca.settings.relative}), 
+                   readcounts.top.variant)
   
   #
   # Update input elements
@@ -214,5 +217,7 @@ shinyServer(function(input, output, session) {
                gene.variances = readcounts.filtered.variances, # Important! Needed for movie function!
                animation.params = pca.gene.count,
                conditions = conditions,
-               pca = pca)
+               pca.center = reactive({input$pca.pca.settings.center}),
+               pca.scale = reactive({input$pca.pca.settings.scale}),
+               pca.relative = reactive({input$pca.pca.settings.relative}))
 })

@@ -80,3 +80,23 @@ applyPCA <- function(readcounts, center, scale, relative) {
               )))
 }
 
+
+serverPCA <- function(center, scale, relative, readcounts) {
+  
+  return(reactive( {
+    
+    center <- center()
+    scale <- scale()
+    relative <- relative()
+    
+    validate(need(readcounts(), "[PCA] No data to apply PCA to!"))
+    validate(need(!scale || all(rowVars(assay(readcounts())) > 0), "[PCA] Constant read count genes must be removed for scaling!"))
+    
+    return(applyPCA(readcounts(), 
+                    center = center, 
+                    scale = scale, 
+                    relative = relative))
+    
+  }))
+  
+}
