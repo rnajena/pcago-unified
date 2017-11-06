@@ -43,15 +43,14 @@ plotSamplePlotSettingsUI <- function(id) {
 }
 
 plotSamplePlot.save <- function(pca, 
-                            visuals.conditions, 
-                            visuals.sample, 
-                            axes, 
-                            plot.settings,
-                            xaxislimit,
-                            yaxislimit,
-                            zaxislimit,
-                            format,
-                            filename ){
+                                pca.full,
+                                visuals.conditions, 
+                                visuals.sample, 
+                                axes, 
+                                plot.settings,
+                                calculateaxeslimits,
+                                format,
+                                filename ){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
                                      PlotSettings(width = 640, 
@@ -60,7 +59,7 @@ plotSamplePlot.save <- function(pca,
                                                   scale = 1,
                                                   title = "PCA samples plot",
                                                   subtitle = "",
-                                                  legend.color = "Color",
+                                                  legend.color = "Color", 
                                                   legend.shape = "Shape"))
   
   width <- plot.settings@width
@@ -98,6 +97,25 @@ plotSamplePlot.save <- function(pca,
   
   validate(need(dimensions.plot > 0, "No axes to draw!"),
            need(dimensions.plot <= 3, "Too many axes to draw!"))
+  
+  # xlim, ylim and zlim calculation
+  xaxislimit <- NULL
+  yaxislimit <- NULL
+  zaxislimit <- NULL
+  
+  if(calculateaxeslimits) {
+    xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
+                    max(pca.full$transformed[, dimensions.requested[1]]))
+    
+    if(dimensions.plot > 1) {
+      yaxislimit <- c(min(pca.full$transformed[, dimensions.requested[2]]),
+                      max(pca.full$transformed[, dimensions.requested[2]]))
+    }
+    if(dimensions.plot > 2) {
+      zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
+                      max(pca.full$transformed[, dimensions.requested[3]]))
+    }
+  }
   
   # Add visual properties to the variables
   pca.transformed$color <- visuals.sample$factors$color
@@ -246,6 +264,7 @@ plotSamplePlot.saveMovie <- function(filename,
                                  pca.center,
                                  pca.scale,
                                  pca.relative,
+                                 calculateaxeslimits,
                                  updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.sample) ||
@@ -255,6 +274,8 @@ plotSamplePlot.saveMovie <- function(filename,
   
   basefile <- tempfile()
   genecounts <- unique(c(seq(animation.params$from, animation.params$to, animation.params$by), animation.params$to))
+  
+  pca.full <- applyPCA(readcounts.filtered, center = pca.center, scale = pca.scale, relative = pca.relative)
   
   for(i in 1:length(genecounts)) {
     
@@ -267,12 +288,14 @@ plotSamplePlot.saveMovie <- function(filename,
     
     pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale, relative = pca.relative)
     plotSamplePlot.save(pca = pca,
-                    visuals.conditions = visuals.conditions,
-                    visuals.sample = visuals.sample,
-                    axes = axes,
-                    plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
-                    format = "png",
-                    filename = plot.filename)
+                        pca.full = pca.full,
+                        visuals.conditions = visuals.conditions,
+                        visuals.sample = visuals.sample,
+                        axes = axes,
+                        plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
+                        calculateaxeslimits = calculateaxeslimits,
+                        format = "png",
+                        filename = plot.filename)
     
   }
   
@@ -313,6 +336,10 @@ plotSamplePlot_ <- function(input,
               pca.scale,
               pca.relative,
               readcounts.top.variant)
+  pca.full <- serverPCA(pca.center,
+                        pca.scale,
+                        pca.relative,
+                        readcounts.filtered)
   
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
   visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
@@ -344,15 +371,14 @@ plotSamplePlot_ <- function(input,
     plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
     
     return(plotSamplePlot.save(pca = pca(),
-                            visuals.conditions = visuals.conditions(),
-                            visuals.sample = visuals.sample(),
-                            axes = input$axes,
-                            plot.settings = plot.settings,
-                            xaxislimit = NULL,
-                            yaxislimit = NULL,
-                            zaxislimit = NULL,
-                            format = format,
-                            filename = filename))
+                               pca.full = pca.full(),
+                              visuals.conditions = visuals.conditions(),
+                              visuals.sample = visuals.sample(),
+                              axes = input$axes,
+                              plot.settings = plot.settings,
+                              calculateaxeslimits = input$calculateaxeslimits,
+                              format = format,
+                              filename = filename))
   })
   
   # Download mp4 movie
@@ -376,6 +402,7 @@ plotSamplePlot_ <- function(input,
         animation.params = animation.params(),
         axes = input$axes,
         plot.settings = plot.settings(),
+        calculateaxeslimits = input$calculateaxeslimits,
         visuals.conditions = visuals.conditions(),
         visuals.sample = visuals.sample(),
         readcounts.filtered = readcounts.filtered(),
