@@ -22,7 +22,7 @@ readCountNormalizationUI <- function(id) {
                      checkboxInput(ns("normalization.tpm.exonlength"), "Use feature exon length", value = T)),
     conditionalPanel(conditionalPanel.equals(ns("normalization"), "'deseq2'"),
                      selectizeInput(ns("normalization.deseq2.conditions"), 
-                                    helpIconText("Considered conditions", "You can choose which available conditions are considered during normalization."), 
+                                    helpIconText("Considered conditions", includeText('helptooltips/pca-data-readcounts-normalization-deseq2-conditions.md')), 
                                     choices = c(),
                                     multiple = T,
                                     options = list(plugins = list("remove_button", "drag_drop"))),

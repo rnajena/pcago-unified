@@ -1,0 +1,1 @@
+You can choose which available conditions are considered during normalization.

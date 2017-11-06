@@ -7,6 +7,7 @@ library(ggplot2)
 library(scatterplot3d)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
+source("widgetInPlaceHelp.R")
 
 plotSamplePlotUI <- function(id) {
   
@@ -32,10 +33,10 @@ plotSamplePlotSettingsUI <- function(id) {
     bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
     bsCollapsePanel("Misc", 
                     checkboxInput(ns("calculateaxeslimits"),
-                                  "Stabilize axis limits",
+                                  helpIconText("Stabilize axis limits", includeText("helptooltips/pca-pca-plot-stabilize-axes.md")),
                                   value = T),
                     checkboxInput(ns("stabilizeplot"),
-                                  "Stabilize data points",
+                                  helpIconText("Stabilize axes against flips", includeText("helptooltips/pca-pca-plot-stabilize-points.md")),
                                   value = T)),
     bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
   ))
@@ -49,6 +50,7 @@ plotSamplePlot.save <- function(pca,
                                 axes, 
                                 plot.settings,
                                 calculateaxeslimits,
+                                stabilizeplot,
                                 format,
                                 filename ){
   
@@ -98,7 +100,7 @@ plotSamplePlot.save <- function(pca,
   validate(need(dimensions.plot > 0, "No axes to draw!"),
            need(dimensions.plot <= 3, "Too many axes to draw!"))
   
-  # xlim, ylim and zlim calculation
+  # xlim, ylim and zlim calculation based on full PCA
   xaxislimit <- NULL
   yaxislimit <- NULL
   zaxislimit <- NULL
@@ -114,6 +116,20 @@ plotSamplePlot.save <- function(pca,
     if(dimensions.plot > 2) {
       zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
                       max(pca.full$transformed[, dimensions.requested[3]]))
+    }
+  }
+  
+  # As two opposite eigenvectors have the same information it can happen that either a rotation vector
+  # or its negative is calculated. This "flips" the affected axis. 
+  # We correct this behavior by using the full PCA as reference
+  # The correlation between the intersection of the rotation vector of the gene subset and the full PCA is
+  # either 1 or -1 (ideal data). If it is negative, we can just negate the affected dimension.
+  if(stabilizeplot) {
+    for(dim in seq_len(dimensions.plot)) {
+      similarity <- cor(pca$pc[, dimensions.requested[dim]], pca.full$pc[rownames(pca$pc), dimensions.requested[dim]])
+      if(!is.na(similarity) && similarity < 0) {
+        pca.transformed[,dimensions.requested[dim]] <- -pca.transformed[,dimensions.requested[dim]]
+      }
     }
   }
   
@@ -265,6 +281,7 @@ plotSamplePlot.saveMovie <- function(filename,
                                  pca.scale,
                                  pca.relative,
                                  calculateaxeslimits,
+                                 stabilizeplot,
                                  updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.sample) ||
@@ -294,6 +311,7 @@ plotSamplePlot.saveMovie <- function(filename,
                         axes = axes,
                         plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
                         calculateaxeslimits = calculateaxeslimits,
+                        stabilizeplot = stabilizeplot,
                         format = "png",
                         filename = plot.filename)
     
@@ -377,6 +395,7 @@ plotSamplePlot_ <- function(input,
                               axes = input$axes,
                               plot.settings = plot.settings,
                               calculateaxeslimits = input$calculateaxeslimits,
+                              stabilizeplot = input$stabilizeplot,
                               format = format,
                               filename = filename))
   })
@@ -403,6 +422,7 @@ plotSamplePlot_ <- function(input,
         axes = input$axes,
         plot.settings = plot.settings(),
         calculateaxeslimits = input$calculateaxeslimits,
+        stabilizeplot = input$stabilizeplot,
         visuals.conditions = visuals.conditions(),
         visuals.sample = visuals.sample(),
         readcounts.filtered = readcounts.filtered(),
