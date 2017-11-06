@@ -46,7 +46,8 @@ PCAGO supports [packrat](https://rstudio.github.io/packrat/)
 
 1. Download the [package sources](https://drive.google.com/file/d/1aJ1m0hfl1wofaaON1_TfZY0k-YkXonaB/view?usp=sharing)
 2. Unpack them into the `packrat` directory within the PCAGO project folder
-3. If you start R within the directory, packrat will automatically setup the dependencies
+3. Start R within the project directory
+4. Run `source('packrat/init.R')`
 
 If you do not want to use packrat, you can install the dependencies manually.
 Please note that newer library versions might break functionality.
