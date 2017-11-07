@@ -76,7 +76,7 @@ numericRangeInputValue_ <- function(input, output, session, value.min, value.max
   
   range <- reactive( {
     
-    if(from() < to()) {
+    if(!is.na(from()) && !is.na(to()) && from() < to()) {
       return(list("from" = from(), "to" = to()))
     }
     else {
@@ -86,7 +86,7 @@ numericRangeInputValue_ <- function(input, output, session, value.min, value.max
   })
   
   output$message <- renderText({
-    if(from() < to()) {
+    if(!is.na(from()) && !is.na(to()) && from() < to()) {
       return("")
     }
     else {

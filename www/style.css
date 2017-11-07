@@ -545,3 +545,16 @@ Style for the size rows in general plot settings
 	width: 100%;
 	min-width: 60px;
 }
+
+/*
+Style for labeled elements labeled by a higher order label
+*/
+.sub-labeled .shiny-input-container label {
+	color: gray;
+}
+
+.sub-labeled button {
+	width: 100%;
+	min-width: 60px;
+}
+

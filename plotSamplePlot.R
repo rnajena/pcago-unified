@@ -8,6 +8,9 @@ library(scatterplot3d)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
 source("widgetInPlaceHelp.R")
+source("widgetNumericRangeInput.R")
+
+plotSamplePlotSettingsUI.axisLimitModes <- c("Auto" = "auto", "Auto (All genes)" = "allgenes", "Manual" = "manual")
 
 plotSamplePlotUI <- function(id) {
   
@@ -31,10 +34,26 @@ plotSamplePlotSettingsUI <- function(id) {
                                    multiple = T,
                                    options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
     bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel("Axis limits",
+                    tags$label("x Axis limit"),
+                    tags$div(class = "row sub-labeled",
+                             column(width = 3, selectizeInput(ns("axis.limitx.mode"), "Mode", choices = plotSamplePlotSettingsUI.axisLimitModes)),
+                             column(width = 9, numericRangeInput(ns("axis.limitx"), "min", "max"))
+                             
+                    ),
+                    tags$label("y Axis limit"),
+                    tags$div(class = "row sub-labeled",
+                             column(width = 3, selectizeInput(ns("axis.limity.mode"), "Mode", choices = plotSamplePlotSettingsUI.axisLimitModes)),
+                             column(width = 9, numericRangeInput(ns("axis.limity"), "min", "max"))
+                             
+                    ),
+                    tags$label("z Axis limit"),
+                    tags$div(class = "row sub-labeled",
+                             column(width = 3, selectizeInput(ns("axis.limitz.mode"), "Mode", choices = plotSamplePlotSettingsUI.axisLimitModes)),
+                             column(width = 9, numericRangeInput(ns("axis.limitz"), "min", "max"))
+                             
+                    )),
     bsCollapsePanel("Misc", 
-                    checkboxInput(ns("calculateaxeslimits"),
-                                  helpIconText("Stabilize axis limits", includeText("helptooltips/pca-pca-plot-stabilize-axes.md")),
-                                  value = T),
                     checkboxInput(ns("stabilizeplot"),
                                   helpIconText("Stabilize axes against flips", includeText("helptooltips/pca-pca-plot-stabilize-points.md")),
                                   value = T)),
@@ -49,7 +68,7 @@ plotSamplePlot.save <- function(pca,
                                 visuals.sample, 
                                 axes, 
                                 plot.settings,
-                                calculateaxeslimits,
+                                axislimits,
                                 stabilizeplot,
                                 format,
                                 filename ){
@@ -105,19 +124,48 @@ plotSamplePlot.save <- function(pca,
   yaxislimit <- NULL
   zaxislimit <- NULL
   
-  if(calculateaxeslimits) {
+  # if(calculateaxeslimits) {
+  #   xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
+  #                   max(pca.full$transformed[, dimensions.requested[1]]))
+  #   
+  #   if(dimensions.plot > 1) {
+  #     yaxislimit <- c(min(pca.full$transformed[, dimensions.requested[2]]),
+  #                     max(pca.full$transformed[, dimensions.requested[2]]))
+  #   }
+  #   if(dimensions.plot > 2) {
+  #     zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
+  #                     max(pca.full$transformed[, dimensions.requested[3]]))
+  #   }
+  # }
+  
+  if(axislimits$x$mode == "allgenes") {
     xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
-                    max(pca.full$transformed[, dimensions.requested[1]]))
-    
-    if(dimensions.plot > 1) {
+                  max(pca.full$transformed[, dimensions.requested[1]]))
+  }
+  else if(axislimits$x$mode == "manual") {
+    xaxislimit <- c(axislimits$x$range$from, axislimits$x$range$to)
+  }
+  
+  if(dimensions.plot > 1) {
+    if(axislimits$y$mode == "allgenes") {
       yaxislimit <- c(min(pca.full$transformed[, dimensions.requested[2]]),
                       max(pca.full$transformed[, dimensions.requested[2]]))
     }
-    if(dimensions.plot > 2) {
+    else if(axislimits$y$mode == "manual") {
+      yaxislimit <- c(axislimits$y$range$from, axislimits$y$range$to)
+    }
+  }
+  
+  if(dimensions.plot > 2) {
+    if(axislimits$z$mode == "allgenes") {
       zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
                       max(pca.full$transformed[, dimensions.requested[3]]))
     }
+    else if(axislimits$z$mode == "manual") {
+      zaxislimit <- c(axislimits$z$range$from, axislimits$z$range$to)
+    }
   }
+  
   
   # As two opposite eigenvectors have the same information it can happen that either a rotation vector
   # or its negative is calculated. This "flips" the affected axis. 
@@ -280,7 +328,7 @@ plotSamplePlot.saveMovie <- function(filename,
                                  pca.center,
                                  pca.scale,
                                  pca.relative,
-                                 calculateaxeslimits,
+                                 axislimits,
                                  stabilizeplot,
                                  updateProgress = NULL) {
   
@@ -310,7 +358,7 @@ plotSamplePlot.saveMovie <- function(filename,
                         visuals.sample = visuals.sample,
                         axes = axes,
                         plot.settings = plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(genecounts[i], "genes"))),
-                        calculateaxeslimits = calculateaxeslimits,
+                        axislimits = axislimits,
                         stabilizeplot = stabilizeplot,
                         format = "png",
                         filename = plot.filename)
@@ -363,6 +411,20 @@ plotSamplePlot_ <- function(input,
   visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
   plot.settings <- generalPlotSettings("plot.settings")
   
+  # Axis limits selection 
+  min.axis.limit <- reactive({ return(min(pca.full()$transformed)) })
+  max.axis.limit <- reactive({ return(max(pca.full()$transformed)) })
+  
+  axislimits.x <- numericRangeInputValue("axis.limitx", min.axis.limit, max.axis.limit)
+  axislimits.y <- numericRangeInputValue("axis.limity", min.axis.limit, max.axis.limit)
+  axislimits.z <- numericRangeInputValue("axis.limitz", min.axis.limit, max.axis.limit)
+ 
+  axislimits <- reactive({
+    return(list("x" = list("mode" = input$axis.limitx.mode, "range" = axislimits.x()),
+           "y" = list("mode" = input$axis.limity.mode, "range" = axislimits.y()),
+           "z" = list("mode" = input$axis.limitz.mode, "range" = axislimits.z())))
+  })
+  
   # Update the axis selectize
   observeEvent(readcounts.top.variant(), {
     
@@ -394,7 +456,7 @@ plotSamplePlot_ <- function(input,
                               visuals.sample = visuals.sample(),
                               axes = input$axes,
                               plot.settings = plot.settings,
-                              calculateaxeslimits = input$calculateaxeslimits,
+                              axislimits = axislimits(),
                               stabilizeplot = input$stabilizeplot,
                               format = format,
                               filename = filename))
@@ -421,7 +483,7 @@ plotSamplePlot_ <- function(input,
         animation.params = animation.params(),
         axes = input$axes,
         plot.settings = plot.settings(),
-        calculateaxeslimits = input$calculateaxeslimits,
+        axislimits = axislimits(),
         stabilizeplot = input$stabilizeplot,
         visuals.conditions = visuals.conditions(),
         visuals.sample = visuals.sample(),
