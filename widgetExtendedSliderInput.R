@@ -30,7 +30,8 @@ extendedSliderInput <- function(id, header = "") {
                                                                   actionButton(ns("small.step.decrease"), label = "", icon = icon("step-backward")),
                                                                   bsButton(ns("play"), label = tags$span(tags$span(class = "play", icon("play")), tags$span(class = "pause", icon("pause"))), type = "toggle", style = "play-pause"),
                                                                   actionButton(ns("small.step.increase"), label = "", icon = icon("step-forward")),
-                                                                  actionButton(ns("large.step.increase"), label = "", icon = icon("fast-forward"))
+                                                                  actionButton(ns("large.step.increase"), label = "", icon = icon("fast-forward")),
+                                                                  numericInput(ns("exact.value"), label = "", value = 0)
                  )),
                  hDivider(),
                  bsCollapse(
@@ -97,6 +98,26 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   observeEvent(input$small.step.increase, {
     current <- input$count
     updateSliderInput(session, "count", value = current + 1)
+  })
+  
+  # Exact value 
+  observeEvent(input$exact.value, {
+    if(!input$play) { # Prevent react loops.
+      current <- input$count
+      requested <- min(value.max(), max(value.min(), input$exact.value))
+      
+      if(requested != current) {
+        updateSliderInput(session, "count", value = requested)
+      }
+    }
+  })
+  observeEvent(input$count, {
+    current <- input$count
+    current.exact <- input$exact.value
+    
+    if(current != current.exact) {
+      updateNumericInput(session, "exact.value", value = current)
+    }
   })
   
   #' Handles the animation of the slider

@@ -29,12 +29,12 @@ generalPlotSettingsInput <- function(id, legend.color = T, legend.shape = T) {
     tags$label("Width"),
     tags$div(class = "row general-plot-settings-size",
              column(width = 3, bsButton(ns("auto.width"), "Auto", value = T, type = "toggle")),
-             column(width = 9, numericInput(ns("width"), label = "", value = 640, min = -1, max = 10000))
+             column(width = 9, numericInput(ns("width"), label = "", value = 0, min = -1, max = 10000))
     ),
     tags$label("Height"),
     tags$div(class = "row general-plot-settings-size",
              column(width = 3, bsButton(ns("auto.height"), "Auto", value = T, type = "toggle")),
-             column(width = 9, numericInput(ns("height"), label = "", value = 480, min = -1, max = 10000))
+             column(width = 9, numericInput(ns("height"), label = "", value = 0, min = -1, max = 10000))
              
     ),
     sliderInput(ns("scale"), "Scale", min = 0.025, max = 2, value = 1, step = 0.025),
