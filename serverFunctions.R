@@ -23,6 +23,11 @@ serverNavigation <- function(input, session) {
     updateNavbarPage(session, "main.nav", "analyze")
   })
   
+  #' Start page button. User can click it to go to the "Help" section
+  observeEvent(input$about.goto.help, {
+    updateNavbarPage(session, "main.nav", "help")
+  })
+  
   # Navigation quick links
   # Offer quick links in the navigation as compromise between hierarchical layout and discoverability
   observeEvent(input$pca.nav, {

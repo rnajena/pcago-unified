@@ -17,8 +17,10 @@ uiAboutPage <- function() {
     tags$div(class="landing-header",
              tags$img(class = "landing-header-logo", src = "logo.svg"),
              tags$div(class = "container-fluid landing-header-action",
-                      fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"),
-                                      bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))))
+                      fluidRow(column(width = 8, offset = 2, includeMarkdown("aboutpage/landing.md"))),
+                      fluidRow(column(width = 8, offset = 2, bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large"))),
+                      tags$div(class="row top5", column(width = 8, offset = 2, actionLink("about.goto.help", "or learn how to use it!")))
+                                      )
     ),
     tags$div(class="features", 
              fluidRow(
