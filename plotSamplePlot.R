@@ -27,14 +27,18 @@ plotSamplePlotSettingsUI <- function(id) {
   ns <- NS(id)
   
   return(bsCollapse(
-    bsCollapsePanel("Axes",
+    bsCollapsePanel(recommendedDataText("Axes"),
+                    value = "axes",
                     selectizeInput(ns("axes"),
                                    "Visible axes (x, y, z)",
                                    choices = c(),
                                    multiple = T,
                                    options = list(maxItems = 3, plugins = c("remove_button", "drag_drop")))),
-    bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
-    bsCollapsePanel("Axis limits",
+    bsCollapsePanel(optionalDataText("Visualization"), 
+                    value = "visualization",
+                    visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel(optionalDataText("Axis limits"),
+                    value = "axis.limits",
                     tags$label("x Axis limit"),
                     tags$div(class = "row sub-labeled",
                              column(width = 3, selectizeInput(ns("axis.limitx.mode"), "Mode", choices = plotSamplePlotSettingsUI.axisLimitModes)),
@@ -53,11 +57,14 @@ plotSamplePlotSettingsUI <- function(id) {
                              column(width = 9, numericRangeInput(ns("axis.limitz"), "min", "max"))
                              
                     )),
-    bsCollapsePanel("Misc", 
+    bsCollapsePanel(optionalDataText("Misc"), 
+                    value = "misc",
                     checkboxInput(ns("stabilizeplot"),
                                   helpIconText("Stabilize axes against flips", includeText("helptooltips/pca-pca-plot-stabilize-points.md")),
                                   value = T)),
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings")))
+    bsCollapsePanel(optionalDataText("General settings"), 
+                    value = "generalsettings",
+                    generalPlotSettingsInput(ns("plot.settings")))
   ))
   
 }

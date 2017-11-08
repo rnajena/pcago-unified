@@ -32,6 +32,21 @@ serverNavigation <- function(input, session) {
   })
 }
 
+#' Automatically navigates to a content navigation based on which data is refereshed
+#'
+#' @param observed 
+#' @param target.nav 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverReactiveNavigation <- function(session, observed, target.nav) {
+  observeEvent(observed(), {
+    updateNavbarPage(session, "pca.nav", selected = target.nav)
+  })
+}
+
 #' Lets the user choose a set of genes based on the features
 #'
 #' @param readcounts.processed 

@@ -36,16 +36,16 @@ source("widgetReadCountPostprocessing.R")
 uiPCASidebarData <- function() {
   
   return(bsCollapse(
-    bsCollapsePanel("Import read counts", 
+    bsCollapsePanel(requiredDataText("Import read counts"), 
                     value = "data.readcounts.import",
                     genericImporterInput("pca.data.readcounts.importer")),
-    bsCollapsePanel("Import samples annotation",
+    bsCollapsePanel(requiredDataText("Import samples annotation"),
                     value = "data.sample.annotation",
                     sampleAnnotationImporterUI("data.sample.annotation.importer")),
-    bsCollapsePanel("Import gene annotation",
+    bsCollapsePanel(optionalDataText("Import gene annotation"),
                     value = "data.gene.annotation",
                     geneAnnotationImporterUI("data.gene.annotation.importer")),
-    bsCollapsePanel("Read count processing",
+    bsCollapsePanel(recommendedDataText("Read count processing"),
                     value = "data.readcounts.processing",
                     readCountPreprocessingUI("data.readcounts.preprocessing"),
                     readCountNormalizationUI("data.readcounts.normalization"),
@@ -65,11 +65,13 @@ uiPCASidebarData <- function() {
 #' @examples
 uiPCASidebarFilterGenes <- function() {
   return(bsCollapse(
-    bsCollapsePanel("by annotation",
+    bsCollapsePanel(optionalDataText("by annotation"),
+                    value = "pca.filter.bygenes",
                     filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
                     hDivider(),
                     textOutput("pca.pca.genes.set.count")),
-    bsCollapsePanel("by gene variance",
+    bsCollapsePanel(optionalDataText("by gene variance"),
+                    value = "pca.filter.byvariance",
                     plotGeneVarianceRangePlotUI("pca.pca.genes.count.variance.plot", height = "120px"),
                     extendedSliderInput("pca.genes.count", "Gene variance cut-off"),
                     bsCollapse(
@@ -93,7 +95,8 @@ uiPCASidebarFilterGenes <- function() {
 uiPCASidebarPCA <- function() {
   
   return(bsCollapse(
-    bsCollapsePanel("Data processing",
+    bsCollapsePanel(recommendedDataText("Data processing"),
+                    value = "pca.pca.dataprocessing",
                     checkboxInput("pca.pca.settings.center", 
                                   helpIconText("Center data", includeMarkdown("helptooltips/pca-pca-settings-center.md")), 
                                   value = T),
@@ -101,7 +104,8 @@ uiPCASidebarPCA <- function() {
                                   helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), 
                                   value = F)
                    ),
-    bsCollapsePanel("Output transformations",
+    bsCollapsePanel(optionalDataText("Output transformations"),
+                    value = "pca.pca.outputtransformations",
                     radioButtons("pca.pca.settings.relative", 
                                  helpIconText("Relative sample positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
                                  choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global")))

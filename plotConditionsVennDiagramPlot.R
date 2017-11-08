@@ -20,12 +20,18 @@ plotConditionsVennDiagramPlotSettingsUI <- function(id) {
   ns <- NS(id)
   
   return(bsCollapse(
-    bsCollapsePanel("Venn diagram",selectizeInput(ns("conditions"), "Displayed sets", 
+    bsCollapsePanel(recommendedDataText("Venn diagram"),
+                    value = "venndiagram",
+                    selectizeInput(ns("conditions"), "Displayed sets", 
                                                   choices = c(),
                                                   multiple = T,
                                                   options = list(maxItems = 5))),
-    bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings"),
+    bsCollapsePanel(optionalDataText("Visualization"), 
+                    value = "visualization",
+                    visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel(optionalDataText("General settings"), 
+                    value = "generalsettings",
+                    generalPlotSettingsInput(ns("plot.settings"),
                                                                  legend.shape = F,
                                                                  legend.color = F))
   ))

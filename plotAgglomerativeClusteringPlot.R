@@ -49,11 +49,16 @@ plotAgglomerativeClusteringPlotSettingsUI <- function(id) {
   ns <- NS(id)
   
   return(bsCollapse(
-    bsCollapsePanel("Hierarchical clustering",
+    bsCollapsePanel(recommendedDataText("Hierarchical clustering"),
+                    value = "hierarchical.clustering",
                     selectizeInput(ns("method.dist"), "Distance method", choices = plotAgglomerativeClusteringPlotUI.dist.methodsSelection),
                     selectizeInput(ns("method.hclust"), "Clustering method", choices = plotAgglomerativeClusteringPlotUI.hclust.methodsSelection)),
-    bsCollapsePanel("Visualization", visualsEditorUI(ns("visuals"))),
-    bsCollapsePanel("General settings", generalPlotSettingsInput(ns("plot.settings"),
+    bsCollapsePanel(optionalDataText("Visualization"), 
+                    value = "visualization",
+                    visualsEditorUI(ns("visuals"))),
+    bsCollapsePanel(optionalDataText("General settings"), 
+                    value = "generalsettings",
+                    generalPlotSettingsInput(ns("plot.settings"),
                                                                  legend.color = F,
                                                                  legend.shape = F))
   ))

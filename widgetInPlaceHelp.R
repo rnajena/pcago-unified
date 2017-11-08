@@ -60,4 +60,52 @@ helpIconText <- function(text, helptext, title = "Info") {
   
 }
 
+#' Flags a functions with importance
+#'
+#' @param text 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+flaggedDataText <- function(text, icon, helptext = "The input is useful, but not required.", title = "Info") {
+  return(tags$span(icon(icon),
+                   tags$span(text)))
+}
+
+#' Indicates an optional function
+#'
+#' @param text 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+optionalDataText <- function(text, helptext = "The input is useful, but not required.", title = "Info") {
+  return(flaggedDataText(text, "circle", helptext, title))
+}
+
+#' Indicates a recommended function
+#'
+#' @param text 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+recommendedDataText <- function(text, helptext = "We recommend to give an input here.", title = "Info") {
+  return(flaggedDataText(text, "check-circle", helptext, title))
+}
+
+#' Indicates a required function
+#'
+#' @param text 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+requiredDataText <- function(text, helptext = "The input is necessary for other functions.", title = "Info") {
+  return(flaggedDataText(text, "exclamation-circle", helptext, title))
+}
 
