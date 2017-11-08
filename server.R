@@ -56,7 +56,6 @@ shinyServer(function(input, output, session) {
                                     generators = reactive(supportedReadcountGenerators),
                                     exprimport = importReadcount, 
                                     exprsample = importReadcountSample)
-  serverReactiveNavigation(session, readcounts.raw, "readcounts.raw") # Auto navigate
   
   # Readcount processing
   #readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
@@ -134,6 +133,9 @@ shinyServer(function(input, output, session) {
   
   # For navigation (links)
   serverNavigation(input, session)
+  
+  # Auto navigation
+  serverAutoNavigation(input, session)
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)

@@ -36,6 +36,8 @@ source("widgetReadCountPostprocessing.R")
 uiPCASidebarData <- function() {
   
   return(bsCollapse(
+    id = "sidebar.data",
+    multiple = F,
     bsCollapsePanel(requiredDataText("Import read counts"), 
                     value = "data.readcounts.import",
                     genericImporterInput("pca.data.readcounts.importer")),
@@ -65,6 +67,7 @@ uiPCASidebarData <- function() {
 #' @examples
 uiPCASidebarFilterGenes <- function() {
   return(bsCollapse(
+    id = "sidebar.filter",
     bsCollapsePanel(optionalDataText("by annotation"),
                     value = "pca.filter.bygenes",
                     filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),

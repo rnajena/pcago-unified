@@ -122,3 +122,27 @@ dropdownButton <- function(id, label, content, icon = NULL, button.style = "btn-
                   tags$ul(class = "dropdown-menu",
                           wrapped)))
 }
+
+#' Workaround for bug in shinyBS
+#' Returns all collapse elements 2x (except if not) and then (as last entry) the current open one
+#'
+#' @param input 
+#' @param id 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+getOpenCollapseId <- function(input, id) {
+  l <- input[[id]]
+  t <- table(l)
+  c <- l[length(l)]
+  
+  if(t[c] > 2 || t[c] == 1) {
+    return(c)
+  }
+  else {
+    return(NULL)
+  }
+  
+}

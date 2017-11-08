@@ -32,6 +32,38 @@ serverNavigation <- function(input, session) {
   })
 }
 
+#' Automatically navigates to content pages depending on sidebar
+#'
+#' @param input 
+#' @param session 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverAutoNavigation <- function(input, session) {
+  observeEvent(input$sidebar.data, {
+    cid <- getOpenCollapseId(input, "sidebar.data")
+    
+    if(is.null(cid)) {
+      
+    }
+    else if(cid == "data.readcounts.import") {
+      updateNavbarPage(session, "pca.nav", selected = "readcounts.raw")
+    }
+    else if(cid == "data.sample.annotation") {
+      updateNavbarPage(session, "pca.nav", selected = "samples.conditions")
+    }
+    else if(cid == "data.gene.annotation") {
+      updateNavbarPage(session, "pca.nav", selected = "genes.annotation")
+    }
+    else if(cid == "data.readcounts.processing") {
+      updateNavbarPage(session, "pca.nav", selected = "readcounts.processed")
+    }
+    
+  })
+}
+
 #' Automatically navigates to a content navigation based on which data is refereshed
 #'
 #' @param observed 
