@@ -38,7 +38,8 @@ extendedSliderInput <- function(id, header = "") {
                    bsCollapsePanel("Animation parameters",
                                    numericRangeInput(ns("anim.range"), "From", "To"),
                                    numericInput(ns("anim.by"), "Animation step", 1, 1000, value = 10),
-                                   numericInput(ns("anim.delay"), "Animation speed (ms)", 100, 1000, value = 100))
+                                   numericInput(ns("anim.delay"), helpIconText("Animation speed (ms)", 
+                                                                               includeText("helptooltips/extended-slider-anim-speed.md")), 100, 1000, value = 100))
                  )))
   
 }
@@ -102,14 +103,14 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   
   # Exact value 
   observeEvent(input$exact.value, {
-    if(!input$play) { # Prevent react loops.
+    #if(!input$play) { # Prevent react loops.
       current <- input$count
       requested <- min(value.max(), max(value.min(), input$exact.value))
       
       if(requested != current) {
         updateSliderInput(session, "count", value = requested)
       }
-    }
+    #}
   })
   observeEvent(input$count, {
     current <- input$count
@@ -146,7 +147,8 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
           current <- from
         }
         
-        updateSliderInput(session, "count", value = current)
+        #updateSliderInput(session, "count", value = current)
+        updateNumericInput(session, "exact.value", value = current)
         
       })
       

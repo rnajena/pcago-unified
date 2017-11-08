@@ -1,0 +1,1 @@
+Only has full effect on exporting a video file, as the rendering speed is limited by the server and the connection speed.
