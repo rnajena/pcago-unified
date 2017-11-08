@@ -78,7 +78,7 @@ readCountNormalizationData_ <- function(input,
       
       return(applyReadcountNormalization.TPM(readcounts = readcounts(), 
                                               use.feature.exonlength = input$normalization.tpm.exonlength,
-                                              use.fragment.effectivelength = input$normalization.tpm.effectivelength,
+                                              use.feature.effectivelength = input$normalization.tpm.effectivelength,
                                               gene.annotation = gene.annotation(),
                                               sample.annotation = sample.annotation()))
       

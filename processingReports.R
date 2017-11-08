@@ -122,7 +122,7 @@ readcountProcessing.step.normalization <- function(readcounts.normalization.outp
       content <- tagList(
         tags$p("Applied read count normalization with TPM method."),
         tags$p(paste("Use non-overlapping sum of exon lengths:", output$use.feature.exonlength)),
-        tags$p(paste("Calculate effective length:", output$use.fragment.effectivelength)),
+        tags$p(paste("Calculate effective length:", output$use.feature.effectivelength)),
         h2("Sum of normalized sample counts"),
         tags$div(class = "scrollable-x",
                  tags$table(

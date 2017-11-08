@@ -157,7 +157,7 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, transform = "none", b
 #' Applies read count normalization (TPM) to readcounts
 #'
 #' @param readcounts Read count data
-#' @param use.fragment.effectivelength Calculate the effective length instead of using the feature length (preferred)
+#' @param use.feature.effectivelength Calculate the effective length instead of using the feature length (preferred)
 #' @param use.feature.exonlength Use the exon length of a feature instead of the feature length (preferred)
 #' @param sample.annotation Annotation of samples
 #' @param gene.annotation Annotation of genes
@@ -173,16 +173,16 @@ applyReadcountNormalization.TPM <- function(readcounts,
                                             use.feature.effectivelength = T) {
   
   if(!is.SummarizedExperiment(readcounts) ||
-     !is.logical(use.fragment.effectivelength) ||
+     !is.logical(use.feature.effectivelength) ||
      !is.logical(use.feature.exonlength) || 
      !is(gene.annotation, "GeneAnnotation")) {
     stop("Invalid arguments!")
   }
   
-  validate(need(nrow(readcounts) > 0 && ncol(readcounts) > 0, "No read counts to process!"),
-           need(geneAnnotationHasSequenceInfo(gene.annotation), "No sequence info available!"),
-           need(!use.fragment.effectivelength || sampleAnnotationHasSampleInfo(sample.annotation), "No sample info available!"),
-           need(is.integer(assay(readcounts)), "Read counts need to be integers!"))
+  validate(need(nrow(readcounts) > 0 && ncol(readcounts) > 0, "[TPM] No read counts to process!"),
+           need(geneAnnotationHasSequenceInfo(gene.annotation), "[TPM] No sequence info available!"),
+           need(!use.feature.effectivelength || sampleAnnotationHasSampleInfo(sample.annotation), "[TPM] No sample info available!"),
+           need(is.integer(assay(readcounts)), "[TPM] Read counts need to be integers!"))
   
    counts <- assay(readcounts)
   
@@ -190,8 +190,8 @@ applyReadcountNormalization.TPM <- function(readcounts,
   genes <- rownames(readcounts)
   feature.lengths <- if(use.feature.exonlength) gene.annotation@sequence.info[genes, "exon_length"] else gene.annotation@sequence.info[genes, "length"]
   
-  validate(need(all(!is.na(feature.lengths)), paste("Missing feature length annotations: ", paste(genes[is.na(feature.lengths)], collapse = ", "))),
-           need(!use.fragment.effectivelength || all(!is.na(sample.annotation@sample.info$meanfragmentlength)), "All samples need a mean fragment length annotation!"))
+  validate(need(all(!is.na(feature.lengths)), paste("[TPM] Missing feature length annotations: ", paste(genes[is.na(feature.lengths)], collapse = ", "))),
+           need(!use.feature.effectivelength || all(!is.na(sample.annotation@sample.info$meanfragmentlength)), "[TPM] All samples need a mean fragment length annotation!"))
   
   # Go through each sample
   for(i in seq_len(ncol(counts))) {
@@ -238,7 +238,7 @@ applyReadcountNormalization.TPM <- function(readcounts,
   # Output the assay and parameters
   return(list(readcounts = readcounts, 
               sample.sum = sample.sum, 
-              use.fragment.effectivelength = use.fragment.effectivelength, 
+              use.feature.effectivelength = use.feature.effectivelength, 
               use.feature.exonlength = use.feature.exonlength, 
               operation.normalization = "tpm"))
   
