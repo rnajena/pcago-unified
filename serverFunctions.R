@@ -42,8 +42,8 @@ serverNavigation <- function(input, session) {
 #'
 #' @examples
 serverAutoNavigation <- function(input, session) {
-  observeEvent(input$sidebar.data, {
-    cid <- getOpenCollapseId(input, "sidebar.data")
+  observeEvent(input$sidebardata, {
+    cid <- getOpenCollapseId(input, "sidebardata")
     
     if(is.null(cid)) {
       

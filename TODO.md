@@ -1,11 +1,5 @@
 # PCAGO
 
-## Features
-
-* Help pages
-* About page
-* SMPFPP server implementation
-
 ## Code
 
 * Improve performance
@@ -14,7 +8,6 @@
 ## Bugs
 
 * Visual editor color update sometimes not triggering
-* Crash if conditions change (DESeq)
 
 ## Additional notes
 
@@ -24,4 +17,3 @@
 ## R Quirks
 
 * RStudio downloads don't overwrite files correctly
-* R 3.3.3 compile rtracklayer etc. from source https://support.bioconductor.org/p/93347/#93373

@@ -36,7 +36,7 @@ source("widgetReadCountPostprocessing.R")
 uiPCASidebarData <- function() {
   
   return(bsCollapse(
-    id = "sidebar.data",
+    id = "sidebardata",
     multiple = F,
     bsCollapsePanel(requiredDataText("Import read counts"), 
                     value = "data.readcounts.import",
@@ -67,7 +67,6 @@ uiPCASidebarData <- function() {
 #' @examples
 uiPCASidebarFilterGenes <- function() {
   return(bsCollapse(
-    id = "sidebar.filter",
     bsCollapsePanel(optionalDataText("by annotation"),
                     value = "pca.filter.bygenes",
                     filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
@@ -84,7 +83,8 @@ uiPCASidebarFilterGenes <- function() {
                                       relevantGenesUI("pca.pca.genes.count.findminimal"))
                     )
                     
-    )))
+    ),
+    id = "sidebarfilter"))
 }
 
 #' Creates definition for the "PCA" sidebar
