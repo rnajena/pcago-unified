@@ -35,5 +35,13 @@ plots, tables and additional information about the currently displayed data. The
 The **sidebar** contains all controls, which includes plot settings and all controls
 that allow importing or processing of data. With exception to **Plot**,
 the categories in the sidebar are *independent* from the currently selected content.
+Each category is marked with an icon that indicates if user input is expected, recommended or required:
+
+* <i class="fa fa-exclamation-circle" aria-hidden="true"></i> indicates required input
+* <i class="fa fa-check-circle" aria-hidden="true"></i> indicates that we recommend at least checking of the parameters
+* <i class="fa fa-circle" aria-hidden="true"></i> indicates that input is useful, but entirely optional
+
+
+
 
 ![UI of PCAGO](helppages/overview.png)
