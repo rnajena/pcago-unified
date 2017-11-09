@@ -68,16 +68,41 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   anim.by <- reactive({ min(1000, max(1, input$anim.by)) })
   anim.delay <- reactive({ min(1000, max(100, input$anim.delay)) })
   
-  # Update slider based on range
-  observeEvent(anim.range(), {
-    
-    default <- anim.range()[["from"]]
-    
-    if(!is.null(value.default)) {
-      default <- value.default()
+  # Update slider based on range # Not needed anymore
+  # observeEvent(anim.range(), {
+  #   
+  #   default <- anim.range()[["from"]]
+  #   
+  #   if(!is.null(value.default)) {
+  #     default <- value.default()
+  #   }
+  #   
+  #   updateSliderInput(session, "count", min = anim.range()[["from"]], max = anim.range()[["to"]], value = default)
+  # })
+  
+  # Update slider min/max
+  observeEvent({ value.min()
+    value.max()}, {
+      
+      default <- value.min()
+
+      if(!is.null(value.default)) {
+        default <- value.default()
+      }
+      
+      updateSliderInput(session, "count", min = value.min(), max = value.max(), value = default)
+    })
+  
+  # Guarding (against reaction loops)
+  observeEvent(input$play, {
+    if(input$play) {
+      shinyjs::disable("count")
+      shinyjs::disable("exact.value")
     }
-    
-    updateSliderInput(session, "count", min = anim.range()[["from"]], max = anim.range()[["to"]], value = default)
+    else {
+      shinyjs::enable("count")
+      shinyjs::enable("exact.value")
+    }
   })
   
   # Step increase/decrease buttons
@@ -138,6 +163,9 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
         current <- input$count
         
         if(current == to) {
+          current <- from
+        }
+        else if(current < from) {
           current <- from
         }
         else if(current < to) {
