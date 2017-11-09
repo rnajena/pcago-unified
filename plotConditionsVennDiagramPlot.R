@@ -121,7 +121,6 @@ plotConditionsVennDiagramPlot_ <- function(input,
     
     updateSelectizeInput(session, 
                          "conditions", 
-                         label = paste(available.conditions, collapse = ","),
                          choices = available.conditions, 
                          selected = selected.conditions)
     
