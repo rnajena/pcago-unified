@@ -186,6 +186,15 @@ shinyServer(function(input, output, session) {
                    reactive({input$pca.pca.settings.relative}), 
                    readcounts.top.variant)
   
+  dataset.pca <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available"))
+    validate(need(pca(), "No PCA results available"))
+    
+    dataset <- dataset.top.variant()
+    dataset$pca.top.variant <- pca()
+    return(dataset)
+  })
+  
   #
   # Update input elements
   #

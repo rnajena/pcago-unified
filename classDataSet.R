@@ -26,6 +26,5 @@ PCAGODataSet <- R6Class(
     variances.filtered = NULL,
     variances.top.variant = NULL,
     pca.top.variant = NULL
-    
   )
 )
