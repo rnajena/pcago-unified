@@ -45,26 +45,43 @@ source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
 source("processingReports.R")
+source("classDataSet.R")
 
 options(shiny.maxRequestSize=30*1024^2) 
 
 shinyServer(function(input, output, session) {
   
+  dataset.raw <- genericImporterData("pca.data.readcounts.importer", 
+                                 importers = reactive(supportedReadcountImporters),
+                                 samples = reactive(availableReadcountSamples),
+                                 generators = reactive(supportedReadcountGenerators),
+                                 exprimport = importReadcount, 
+                                 exprsample = importReadcountSample)
+  
   # Read counts
-  readcounts.raw <- genericImporterData("pca.data.readcounts.importer", 
-                                    importers = reactive(supportedReadcountImporters),
-                                    samples = reactive(availableReadcountSamples),
-                                    generators = reactive(supportedReadcountGenerators),
-                                    exprimport = importReadcount, 
-                                    exprsample = importReadcountSample)
+  readcounts.raw <- reactive(
+    { 
+      validate(need(dataset.raw(), "No datset loaded."))
+      return(dataset.raw()$readcounts.raw)
+    })
   
   # Readcount processing
-  #readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
-  #readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
-  readcounts.preprocessing.output <- readCountPreprocessingData("data.readcounts.preprocessing", readcounts.raw)
-  readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
- 
-  sample.annotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", readcounts = readcounts.preprocessed)
+  
+  dataset.preprocessed <- readCountPreprocessingData("data.readcounts.preprocessing", dataset.raw)
+  
+  readcounts.preprocessing.output <- reactive({ dataset.preprocessed()$readcounts.preprocessing.parameters })
+  readcounts.preprocessed <- reactive({ dataset.preprocessed()$readcounts.preprocessed })
+  
+  dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", dataset = dataset.preprocessed)
+  
+  sample.annotation <- reactive({ 
+    validate(need(dataset.sampleannotation(), "No datset loaded."))
+    validate(need(dataset.sampleannotation()$sample.annotation, "No sample annotation available."))
+    
+    return(dataset.sampleannotation()$sample.annotation)
+    
+    })
+    
   conditions <- reactive({
     validate(need(sample.annotation(), "No samples annotation available!"))
     return(sample.annotation()@conditions)
