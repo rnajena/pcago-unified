@@ -16,7 +16,15 @@ PCAGODataSet <- R6Class(
     readcounts.normalization.parameters = NULL,
     readcounts.processed = NULL,
     readcounts.postprocessing.parameters = NULL,
+    readcounts.filtered = NULL,
+    readcounts.top.variant = NULL,
     gene.annotation = NULL,
-    sample.annotation = NULL
+    sample.annotation = NULL,
+    genes.filtered = NULL,
+    variances.processed = NULL,
+    variances.filtered = NULL,
+    variances.top.variant = NULL,
+    pca.top.variant = NULL
+    
   )
 )

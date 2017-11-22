@@ -84,18 +84,28 @@ serverReactiveNavigation <- function(session, observed, target.nav) {
   })
 }
 
-#' Lets the user choose a set of genes based on the features
+#' Filters the read count table by only returning the rows that are in the list of genes.
 #'
+#' @param genes.filtered 
 #' @param readcounts.processed 
-#' @param gene.annotation 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
+serverFilterReadcounts <- function(dataset) {
   
-  return(filterSelectionValues("pca.pca.genes.set",  reactive({
+  readcounts.processed <- reactive({ 
+    validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
+    return(dataset()$readcounts.processed)
+  })
+  gene.annotation <- reactive({ 
+    validate(need(dataset(), "[Gene filtering] No gene annotation available!"))
+    return(dataset()$gene.annotation)
+  })
+  
+  # Get the list of genes we want
+  genes.filtered <- (filterSelectionValues("pca.pca.genes.set",  reactive({
     
     validate(need(readcounts.processed(), "[Gene filtering] No readcounts to process!"),
              need(gene.annotation(), "[Gene filtering] No gene annotation available!"))
@@ -143,20 +153,11 @@ serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
     return(gene.criteria)
     
   })))
-}
-
-#' Filters the read count table by only returning the rows that are in the list of genes.
-#'
-#' @param genes.filtered 
-#' @param readcounts.processed 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
+  
+  # Return a dataset that both contains the filtered read counts and the list of filtered genes
   return(reactive({
     
+    validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
     validate(
       need(genes.filtered(), "[Gene filtering] No genes selected!"),
       need(length(genes.filtered()$values) > 0, "[Gene filtering] No genes selected!"))
@@ -166,7 +167,11 @@ serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
     
     keep.readcounts <- readcounts.processed()[keep.genes,]
     
-    return(keep.readcounts)
+    dataset <- dataset()
+    dataset$genes.filtered <- genes.filtered()
+    dataset$readcounts.filtered <- keep.readcounts
+    
+    return(dataset)
   }))
 }
 

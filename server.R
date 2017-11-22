@@ -120,17 +120,37 @@ shinyServer(function(input, output, session) {
     return(dataset.postprocessed()$readcounts.postprocessing.parameters )
   })
   
-  # Gene variances
-  readcounts.processed.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
-  
   # Obtain the list of genes the user wants to use
-  genes.filtered <- serverFilteredGenes(readcounts.processed, gene.annotation)
-  
   # The filtered read counts just intersects the list of genes returned by each filter
-  readcounts.filtered <- serverFilterReadcounts(genes.filtered, readcounts.processed)
+  dataset.filtered <- serverFilterReadcounts(dataset.postprocessed)
+  genes.filtered <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    return(dataset.filtered()$genes.filtered)
+  })
+  readcounts.filtered <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    return(dataset.filtered()$readcounts.filtered)
+  })
   
-  readcounts.filtered.variances <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
+  # Annotate gene variances
+  dataset.variances <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    
+    dataset <- dataset.filtered()
+    dataset$variances.processed <- buildGeneVarianceTable(dataset.filtered()$readcounts.processed)
+    dataset$variances.filtered <- buildGeneVarianceTable(dataset.filtered()$readcounts.filtered)
+    
+    return(dataset)
+  })
   
+  readcounts.processed.variances <- reactive( { 
+    validate(need(dataset.variances(), "No filtered read counts available!")) 
+    return(dataset.variances()$variances.processed)
+  })
+  readcounts.filtered.variances <- reactive( { 
+    validate(need(dataset.variances(), "No filtered read counts available!")) 
+    return(dataset.variances()$variances.filtered)
+  })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   # Here we also include the hook for the minimal gene set (threshold) calculation
