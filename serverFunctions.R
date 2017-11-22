@@ -100,6 +100,7 @@ serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
     validate(need(readcounts.processed(), "[Gene filtering] No readcounts to process!"),
              need(gene.annotation(), "[Gene filtering] No gene annotation available!"))
     
+    
     gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
     all.genes <- rownames(readcounts.processed())
     

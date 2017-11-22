@@ -14,7 +14,7 @@ PCAGODataSet <- R6Class(
     readcounts.preprocessing.parameters = NULL,
     readcounts.normalized = NULL,
     readcounts.normalization.parameters = NULL,
-    readcounts.postprocessed = NULL,
+    readcounts.processed = NULL,
     readcounts.postprocessing.parameters = NULL,
     gene.annotation = NULL,
     sample.annotation = NULL

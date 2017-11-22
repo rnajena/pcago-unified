@@ -20,31 +20,36 @@ readCountPostprocessingUI <- function(id) {
 readCountPostprocessingData_ <- function(input, 
                               output, 
                               session,
-                              readcounts) {
+                              dataset) {
   
   return(reactive({
     
-    validate(need(readcounts(), "[Read count processing] No read counts to process!"))
+    validate(need(dataset(), "[Read count processing] No read counts to process!"))
+    validate(need(dataset()$readcounts.normalized, "[Read count processing] No read counts to process!"))
     
-    output <- list(removed.genes = c(), readcounts = readcounts(), operation.transpose = F, operation.remove.constant = F)
+    dataset <- dataset()
+    
+    output <- list(removed.genes = c(), operation.transpose = F, operation.remove.constant = F)
     
     # Remove constant read genes
     if(input$postprocessing.remove.constant) {
-      processed <- removeConstantReads(output$readcounts)
-      output$readcounts <- processed$readcounts
+      processed <- removeConstantReads(dataset$readcounts.normalized)
       output$removed.genes <- processed$genes.removed
       output$operation.remove.constant <- T
+      dataset$readcounts.processed <- processed$readcounts
     }
     
-    return(output)
+    dataset$readcounts.postprocessing.parameters <- output
+    
+    return(dataset)
     
   }))
   
 }
 
-readCountPostprocessingData <- function(id, readcounts) {
+readCountPostprocessingData <- function(id, dataset) {
   
   return(callModule(readCountPostprocessingData_,
                     id,
-                    readcounts = readcounts))
+                    dataset = dataset))
 }

@@ -89,25 +89,36 @@ shinyServer(function(input, output, session) {
   
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
-  gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", readcounts = readcounts.preprocessed)
+  dataset.gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", dataset = dataset.sampleannotation)
+  gene.annotation <- reactive({
+    validate(need(dataset.gene.annotation(), "No gene annotation available!"))
+    return(dataset.gene.annotation()$gene.annotation)
+  })
   
   # Finish processing of read counts with normalization
-  #readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
-                                                                  # gene.annotation = gene.annotation, 
-                                                                  # sample.annotation = sample.annotation,
-                                                                  # input = input)
-  #readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
-  readcounts.normalization.output <- readCountNormalizationData("data.readcounts.normalization", 
-                                                                readcounts = readcounts.preprocessed,
-                                                                gene.annotation = gene.annotation,
-                                                                sample.annotation = sample.annotation)
-  readcounts.normalized <- reactive({ readcounts.normalization.output()$readcounts })
+  dataset.normalized <- readCountNormalizationData("data.readcounts.normalization", 
+                                                   dataset = dataset.gene.annotation)
+  readcounts.normalization.output <- reactive({ 
+    validate(need(dataset.normalized(), "No normalized read counts available!"))
+    return(dataset.normalized()$readcounts.normalization.parameters)
+    })
+  readcounts.normalized <- reactive({ 
+    validate(need(dataset.normalized(), "No normalized read counts available!"))
+    return(dataset.normalized()$readcounts.normalized )
+    })
   
   # Additional postprocessing after normalization
-  readcounts.postprocessing.output <- readCountPostprocessingData("data.readcounts.postprocessing", readcounts.normalized)
+  dataset.postprocessed <- readCountPostprocessingData("data.readcounts.postprocessing", dataset = dataset.normalized)
   
-  readcounts.processed <- reactive({ readcounts.postprocessing.output()$readcounts })
+  readcounts.processed <- reactive({
+    validate(need(dataset.postprocessed(), "No processed read counts available!"))
+    return(dataset.postprocessed()$readcounts.processed )
+  })
   
+  readcounts.postprocessing.output <- reactive({
+    validate(need(dataset.postprocessed(), "No processed read counts available!"))
+    return(dataset.postprocessed()$readcounts.postprocessing.parameters )
+  })
   
   # Gene variances
   readcounts.processed.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
