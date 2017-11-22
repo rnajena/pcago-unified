@@ -118,32 +118,32 @@ serverFilterReadcountsByAnnotation <- function(dataset) {
     annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
     
     {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))
-      gene.criteria[["Biotype"]] <- annotation@gene.biotype@data
+      unused.genes <- setdiff(all.genes, (annotation@gene.biotype$get_genes()))
+      gene.criteria[["Biotype"]] <- annotation@gene.biotype$data
       
       if(length(unused.genes) > 0) {
         gene.criteria[["Biotype"]][["No data"]] <- unused.genes
       }
     }
     {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.go.terms))
-      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms@data
+      unused.genes <- setdiff(all.genes, (annotation@gene.go.terms$get_genes()))
+      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms$data
       
       if(length(unused.genes) > 0) {
         gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
       }
     }
     {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.scaffold))
-      gene.criteria[["Scaffold"]] <- annotation@gene.scaffold@data
+      unused.genes <- setdiff(all.genes, (annotation@gene.scaffold$get_genes()))
+      gene.criteria[["Scaffold"]] <- annotation@gene.scaffold$data
       
       if(length(unused.genes) > 0) {
         gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
       }
     }
     {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.custom))
-      gene.criteria[["Custom"]] <- annotation@gene.custom@data
+      unused.genes <- setdiff(all.genes, (annotation@gene.custom$get_genes()))
+      gene.criteria[["Custom"]] <- annotation@gene.custom$data
       
       if(length(unused.genes) > 0) {
         gene.criteria[["Custom"]][["No data"]] <- unused.genes

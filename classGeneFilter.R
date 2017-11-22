@@ -4,6 +4,9 @@
 #' 
 
 library(shiny)
+library(R6)
+
+# TODO: buildGeneFilter, mergeGeneFilter, geneFilterKeys, geneFilterGenes, geneFilterSelectGenes, geneFilterRestrictToGenes
 
 
 #' Holds multiple filter strings. Maps each filter string to a list of genes where it applies.
@@ -14,33 +17,35 @@ library(shiny)
 #' @export
 #'
 #' @examples
-GeneFilter <- setClass(
-  "GeneFilter",
-  slots = signature(
-    data = "list"
-  ),
-  prototype = list(
-    data = list()
-  ),
-  validity = function(object) {
-    
-    if(length(object@data) == 0) {
-      return(T)
-    }
-    
-    if(!is.null(names(object@data)) && (!is.character(names(object@data))) || any(is.na(names(object@data)))) {
-      return("Keys must be strings and not NA!")
-    }
-    
-    if(any(unlist(lapply(object@data, function(x) { !is.character(x)  || is.na(x) })))) {
-      return("Data must have following structure: Filter maps to vector of gene names that are not NA!")
-    }
-    
+GeneFilter <- R6Class("GeneFilter",
+                      public = list(data = list(),
+                                    initialize = function(data = list()) {
+                                      self$data <- data
+                                    }))
+
+GeneFilter$set("public", "is_valid", function() {
+  if (length(self$data) == 0) {
     return(T)
   }
-)
+  
+  if (!is.null(names(self$data)) &&
+      (!is.character(names(self$data))) ||
+      any(is.na(names(self$data)))) {
+    return("Keys must be strings and not NA!")
+  }
+  
+  if (any(unlist(lapply(self$data, function(x) {
+    !is.character(x)  || is.na(x)
+  })))) {
+    return(
+      "Data must have following structure: Filter maps to vector of gene names that are not NA!"
+    )
+  }
+  
+  return(T)
+})
 
-#' Builds a gene filter from a named vector where the names are the criteria
+#' Loads data from a named vector where the names are the criteria
 #'
 #' @param vector named character vector
 #'
@@ -49,36 +54,28 @@ GeneFilter <- setClass(
 #' @rdname buildGeneFilter
 #'
 #' @examples
-setGeneric(name = "buildGeneFilter",
-           def = function(vector) {
-             standardGeneric("buildGeneFilter")
-           })
-
-#' @rdname buildGeneFilter
-setMethod(f = "buildGeneFilter",
-          signature = signature(vector = "character"),
-          definition = function(vector) {
-            
-            output <- list()
-            
-            for(crit in names(vector)) {
-              
-              if(is.na(crit)) {
-                next()
-              }
-              
-              values <- na.omit(vector[names(vector) == crit])
-              
-              if(length(values) > 0) {
-                output[[setNames(crit, NULL)]] <- as.vector(setNames(values, NULL))
-              }
-              
-              
-            }
-            
-            return(GeneFilter(data = output))
-            
-          })
+GeneFilter$set("public", "load_from", function(vector) {
+  
+  output <- list()
+  
+  for(crit in names(vector)) {
+    
+    if(is.na(crit)) {
+      next()
+    }
+    
+    values <- na.omit(vector[names(vector) == crit])
+    
+    if(length(values) > 0) {
+      output[[setNames(crit, NULL)]] <- as.vector(setNames(values, NULL))
+    }
+    
+    
+  }
+  
+  self$data <- output
+  
+})
 
 #' Merges two GeneFilter objects
 #'
@@ -90,28 +87,20 @@ setMethod(f = "buildGeneFilter",
 #' @rdname mergeGeneFilter
 #'
 #' @examples
-setGeneric(name = "mergeGeneFilter",
-           def = function(object1, object2) {
-             standardGeneric("mergeGeneFilter")
-           })
-
-#' @rdname mergeGeneFilter
-setMethod(f = "mergeGeneFilter",
-          signature = signature(object1 = "GeneFilter", object2 = "GeneFilter"),
-          definition = function(object1, object2) {
-            
-            for(key in names(object2@data)) {
-              if(key %in% names(object1@data)) {
-                object1@data[[key]] <- unique(c(object1@data[[key]], object2@data[[key]]))
-              }
-              else {
-                object1@data[[key]] <- object2@data[[key]]
-              }
-            }
-            
-            validObject(object1)
-            return(object1)
-          })
+GeneFilter$set("public", "merge_with", function(object2) {
+  
+  for(key in names(object2$data)) {
+    if(key %in% names(self$data)) {
+      self$data[[key]] <- unique(c(self$data[[key]], object2$data[[key]]))
+    }
+    else {
+      self$data[[key]] <- object2$data[[key]]
+    }
+  }
+  
+  return(self)
+  
+})
 
 #' Inverts the data in the GeneFilter object.
 #' Returns a list that maps gene name to a list of features
@@ -123,28 +112,37 @@ setMethod(f = "mergeGeneFilter",
 #' @rdname invertGeneFilter
 #'
 #' @examples
-setGeneric(name = "invertGeneFilter",
-           def = function(object) {
-             standardGeneric("invertGeneFilter")
-           })
+GeneFilter$set("public", "invert_data", function() {
+  
+  output <- list()
+  
+  # TODO: Find better algorithm (nested apply so far is worse!)
+  for(key in names(self$data)) {
+    for(gene in self$data[[key]]) {
+      output[[gene]] <- c(output[[gene]], key)
+    }
+  }
+  
+  return(output)
+  
+})
 
+#' Inverts the data in the GeneFilter object.
+#' Returns a list that maps gene name to a list of features
+#'
+#' @param object GeneFilter object
+#'
+#' @return
+#' @export
 #' @rdname invertGeneFilter
-setMethod(f = "invertGeneFilter",
-          signature = signature(object = "GeneFilter"),
-          definition = function(object) {
-            
-            output <- list()
-            
-            # TODO: Find better algorithm (nested apply so far is worse!)
-            for(key in names(object@data)) {
-              for(gene in object@data[[key]]) {
-                output[[gene]] <- c(output[[gene]], key)
-              }
-            }
-            
-            return(output)
-            
-          })
+#'
+#' @examples
+GeneFilter$set("public", "invert", function() {
+  
+  data <- self$invert_data()
+  return(GeneFilter$new(data = data))
+  
+})
 
 #' Returns the filter keys in the GeneFilter object
 #'
@@ -155,17 +153,9 @@ setMethod(f = "invertGeneFilter",
 #' @rdname geneFilterKeys
 #'
 #' @examples
-setGeneric(name = "geneFilterKeys",
-           def = function(object) {
-             standardGeneric("geneFilterKeys")
-           })
-
-#' @rdname geneFilterKeys
-setMethod(f = "geneFilterKeys",
-          signature = signature(object = "GeneFilter"),
-          definition = function(object) {
-            return(names(object@data))
-          })
+GeneFilter$set("public", "get_filter_keys", function() {
+  return(names(self$data))
+})
 
 #' Returns the genes in the GeneFilter object
 #'
@@ -176,17 +166,9 @@ setMethod(f = "geneFilterKeys",
 #' @rdname geneFilterGenes
 #'
 #' @examples
-setGeneric(name = "geneFilterGenes",
-           def = function(object) {
-             standardGeneric("geneFilterGenes")
-           })
-
-#' @rdname geneFilterGenes
-setMethod(f = "geneFilterGenes",
-          signature = signature(object = "GeneFilter"),
-          definition = function(object) {
-            return(unique(unlist((object@data))))
-          })
+GeneFilter$set("public", "get_genes", function() {
+  return(unique(unlist((self$data))))
+})
 
 #' Returns the vector of genes that belongs to the filter entries
 #'
@@ -198,17 +180,9 @@ setMethod(f = "geneFilterGenes",
 #' @rdname geneFilterSelectGenes
 #'
 #' @examples
-setGeneric(name = "geneFilterSelectGenes",
-           def = function(object, filter.keys) {
-             standardGeneric("geneFilterSelectGenes")
-           })
-
-#' @rdname geneFilterSelectGenes
-setMethod(f = "geneFilterSelectGenes",
-          signature = signature(object = "GeneFilter", filter.keys = "character"),
-          definition = function(object, filter.keys) {
-            return(unlist(object@data[filter.keys]))
-          })
+GeneFilter$set("public", "get_genes_for", function(filter.keys) {
+  return(unlist(self$data[filter.keys]))
+})
 
 #' Returns a new GeneFilter object that only contains the genes defined in the restrict.genes vector
 #'
@@ -220,18 +194,10 @@ setMethod(f = "geneFilterSelectGenes",
 #' @rdname geneFilterRestrictToGenes
 #'
 #' @examples
-setGeneric(name = "geneFilterRestrictToGenes",
-           def = function(object, restrict.gene) {
-             standardGeneric("geneFilterRestrictToGenes")
-           })
-
-#' @rdname geneFilterRestrictToGenes
-setMethod(f = "geneFilterRestrictToGenes",
-          signature = signature(object = "GeneFilter", restrict.gene = "character"),
-          definition = function(object, restrict.gene) {
-            
-            object@data <- lapply(object@data, function(x) { intersect(x, restrict.gene)  })
-            object@data <- object@data[lapply(object@data, length) > 0]
-            
-            return(object)
-          })
+GeneFilter$set("public", "restrict_to", function(restrict.gene) {
+  object <- self$clone()
+  object$data <- lapply(object$data, function(x) { intersect(x, restrict.gene)  })
+  object$data <- object$data[lapply(object$data, length) > 0]
+  
+  return(object)
+})
