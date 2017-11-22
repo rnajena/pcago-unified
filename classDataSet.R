@@ -2,32 +2,20 @@
 #' Class that holds the whole data set
 #' 
 
+library(R6)
 library(SummarizedExperiment)
 source("classGeneAnnotation.R")
 
-PCAGODataSet <- setClass(
+PCAGODataSet <- R6Class(
   "PCAGODataSet",
-  slots = signature(
-    readcounts.raw = "SummarizedExperiment",
-    readcounts.preprocessed = "SummarizedExperiment",
-    readcounts.preprocessing.parameters = "list",
-    readcounts.normalized = "SummarizedExperiment",
-    readcounts.normalization.parameters = "list",
-    readcounts.postprocessed = "SummarizedExperiment",
-    readcounts.postprocessing.parameters = "list",
-    gene.annotation = "GeneAnnotation"
-  ),
-  prototype = list(
+  public = list(
     readcounts.raw = NULL,
     readcounts.preprocessed = NULL,
-    readcounts.preprocessing.parameters = list(),
+    readcounts.preprocessing.parameters = NULL,
     readcounts.normalized = NULL,
-    readcounts.normalization.parameters = list(),
+    readcounts.normalization.parameters = NULL,
     readcounts.postprocessed = NULL,
-    readcounts.postprocessing.parameters = list(),
+    readcounts.postprocessing.parameters = NULL,
     gene.annotation = NULL
-  ),
-  validity = function(object) {
-    return(T)
-  }
+  )
 )
