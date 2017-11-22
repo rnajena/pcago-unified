@@ -16,11 +16,15 @@ library(htmltools)
 #' @export
 #'
 #' @examples
-readcountProcessing.step.input.readcounts <- function(readcounts.raw) {
+readcountProcessing.step.input.readcounts <- function(dataset) {
   return(reactive({
+    
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.raw, "No data available"))
+    
     return(list(
       title = "Raw read counts",
-      content = paste0("Table with ", nrow(readcounts.raw()), " rows and ", ncol(readcounts.raw()), " columns")
+      content = paste0("Table with ", nrow(dataset()$readcounts.raw), " rows and ", ncol(dataset()$readcounts.raw), " columns")
     ))
   }))
 }
@@ -50,12 +54,14 @@ readcountProcessing.step.calculate.variance <- function() {
 #' @export
 #'
 #' @examples
-readcountProcessing.step.transpose <- function(readcounts.processed, readcounts.preprocessing.output) {
+readcountProcessing.step.transpose <- function(dataset) {
   return(reactive({
-    validate(need(readcounts.processed(), "No processed read counts available."),
-             need(readcounts.preprocessing.output(), "No read count processing info available!"))
     
-    if(readcounts.preprocessing.output()$operation.transpose) {
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.processed, "No data available"))
+    validate(need(dataset()$readcounts.preprocessing.parameters, "No data available"))
+    
+    if(dataset()$readcounts.preprocessing.parameters$operation.transpose) {
       
       return(list(title = "Transpose read counts",
                   content = "Read counts table have been transposed."))
@@ -77,13 +83,17 @@ readcountProcessing.step.transpose <- function(readcounts.processed, readcounts.
 #' @export
 #'
 #' @examples
-readcountProcessing.step.remove.zero <- function(readcounts.processed, readcounts.preprocessing.output) {
+readcountProcessing.step.remove.zero <- function(dataset) {
   return(reactive({
     
-    if(readcounts.preprocessing.output()$operation.remove.zero) {
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.processed, "No data available"))
+    validate(need(dataset()$readcounts.preprocessing.parameters, "No data available"))
+    
+    if(dataset()$readcounts.preprocessing.parameters$operation.remove.zero) {
       
       content <- "No genes have been removed."
-      removed.genes <- readcounts.preprocessing.output()$removed.genes
+      removed.genes <- dataset()$readcounts.preprocessing.parameters$removed.genes
       
       if(length(removed.genes) != 0) {
         
@@ -112,12 +122,15 @@ readcountProcessing.step.remove.zero <- function(readcounts.processed, readcount
 #' @export
 #'
 #' @examples
-readcountProcessing.step.normalization <- function(readcounts.normalization.output) {
+readcountProcessing.step.normalization <- function(dataset) {
   return(reactive({
     
-    if(readcounts.normalization.output()$operation.normalization == "tpm") {
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.normalization.parameters, "No data available"))
+    
+    if(dataset()$readcounts.normalization.parameters$operation.normalization == "tpm") {
       
-      output <- readcounts.normalization.output()
+      output <- dataset()$readcounts.normalization.parameters
       
       content <- tagList(
         tags$p("Applied read count normalization with TPM method."),
@@ -135,9 +148,9 @@ readcountProcessing.step.normalization <- function(readcounts.normalization.outp
                   content = content))
       
     }
-    else if(readcounts.normalization.output()$operation.normalization == "deseq2") {
+    else if(dataset()$readcounts.normalization.parameters$operation.normalization == "deseq2") {
      
-      output <- readcounts.normalization.output()
+      output <- dataset()$readcounts.normalization.parameters
       
       content <- tagList(
         tags$p("Applied read count normalization with DESeq2 method."),
@@ -172,13 +185,16 @@ readcountProcessing.step.normalization <- function(readcounts.normalization.outp
 #' @export
 #'
 #' @examples
-readcountProcessing.step.remove.constant <- function(readcounts.postprocessing.output) {
+readcountProcessing.step.remove.constant <- function(dataset) {
   return(reactive({
     
-    if(readcounts.postprocessing.output()$operation.remove.constant) {
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.postprocessing.parameters, "No data available"))
+    
+    if(dataset()$readcounts.postprocessing.parameters$operation.remove.constant) {
       
       content <- "No genes have been removed."
-      removed.genes <- readcounts.postprocessing.output()$removed.genes
+      removed.genes <- dataset()$readcounts.postprocessing.parameters$removed.genes
       
       if(length(removed.genes) != 0) {
         
@@ -209,19 +225,25 @@ readcountProcessing.step.remove.constant <- function(readcounts.postprocessing.o
 #' @export
 #'
 #' @examples
-readcountProcessing.step.filter <- function(readcounts.processed, readcounts.filtered, genes.filtered) {
+readcountProcessing.step.filter <- function(dataset) {
   return(reactive({
+    
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.processed, "No data available"))
+    validate(need(dataset()$readcounts.filtered, "No data available"))
+    validate(need(dataset()$readcounts.filtered.parameters.genes, "No data available"))
     
     # Summary of selected genes
     genesinfo <- tagList(
-      tags$p(paste0(nrow(readcounts.filtered()), "/", nrow(readcounts.processed()), " genes selected.")),
-      tags$textarea(paste(rownames(readcounts.filtered()), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
+      tags$p(paste0(nrow(dataset()$readcounts.filtered), "/", nrow(dataset()$readcounts.processed), " genes selected.")),
+      tags$textarea(paste(rownames(dataset()$readcounts.filtered), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
                                                               height = "200px"))
     )
     
     # Give summary of the filters the user selected
+    genes.filtered <- dataset()$readcounts.filtered.parameters.genes
     keysinfo <- tagList()
-    selectedkeys <- split(genes.filtered()$keys, sapply(genes.filtered()$keys, function(x){ unlist(strsplit(x, ".", fixed = T))[1] }))
+    selectedkeys <- split(genes.filtered$keys, sapply(genes.filtered$keys, function(x){ unlist(strsplit(x, ".", fixed = T))[1] }))
     
     for(criterion in names(selectedkeys)) {
       
@@ -235,8 +257,8 @@ readcountProcessing.step.filter <- function(readcounts.processed, readcounts.fil
     }
     
     # Summary of filter settings
-    filterinfo <- tagList(tags$p(paste("Operation:", genes.filtered()$operation)),
-                          tags$p(paste("Invert results:", genes.filtered()$invert)))
+    filterinfo <- tagList(tags$p(paste("Operation:", genes.filtered$operation)),
+                          tags$p(paste("Invert results:", genes.filtered$invert)))
     
     # Build final UI
     content <- tagList(
@@ -261,19 +283,23 @@ readcountProcessing.step.filter <- function(readcounts.processed, readcounts.fil
 #' @export
 #'
 #' @examples
-readcountProcessing.step.top.variant <- function(readcounts.filtered, readcounts.top.variant) {
+readcountProcessing.step.top.variant <- function(dataset) {
   return(reactive({
+    
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.filtered, "No data available"))
+    validate(need(dataset()$readcounts.top.variant, "No data available"))
     
     # Summary of selected genes
     genesinfo <- tagList(
-      tags$p(paste0(nrow(readcounts.top.variant()), "/", nrow(readcounts.filtered()), " top variant genes selected.")),
-      tags$textarea(paste(rownames(readcounts.top.variant()), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
+      tags$p(paste0(nrow(dataset()$readcounts.top.variant), "/", nrow(dataset()$readcounts.filtered), " top variant genes selected.")),
+      tags$textarea(paste(rownames(dataset()$readcounts.top.variant), collapse = "\n"), readonly = "readonly", style = css(width = "100%",
                                                                                                                 height = "200px"))
     )
     
     # Give summary of variance
-    var.filtered <- sum(rowVars(assay(readcounts.filtered())))
-    var.top.variant <- sum(rowVars(assay(readcounts.top.variant())))
+    var.filtered <- sum(rowVars(assay(dataset()$readcounts.filtered)))
+    var.top.variant <- sum(rowVars(assay(dataset()$readcounts.top.variant)))
     
     varianceinfo <- tagList(tags$p( paste0( format((var.top.variant / var.filtered) * 100, digits = 2, scientific=F), "% of available variance." ) ))
     
@@ -294,17 +320,23 @@ readcountProcessing.step.top.variant <- function(readcounts.filtered, readcounts
 #' @export
 #'
 #' @examples
-readcountProcessing.step.pca <- function(readcounts.top.variant, pca) {
+readcountProcessing.step.pca <- function(dataset) {
   return(reactive({
+    
+    validate(need(dataset(), "No data available"))
+    validate(need(dataset()$readcounts.top.variant, "No data available"))
+    validate(need(dataset()$pca.top.variant, "No data available"))
+    
+    pca <- dataset()$pca.top.variant
     
     content <- tagList(
       h2("Input"),
-      tags$p(paste0(ncol(readcounts.top.variant()), " points with ", nrow(readcounts.top.variant()), " dimensions")),
+      tags$p(paste0(ncol(dataset()$readcounts.top.variant), " points with ", nrow(dataset()$readcounts.top.variant), " dimensions")),
       h2("PCA parameters"),
-      tags$p(paste0("Center data: ", pca()$params$center)),
-      tags$p(paste0("Scale data: ", pca()$params$scale)),
+      tags$p(paste0("Center data: ", pca$params$center)),
+      tags$p(paste0("Scale data: ", pca$params$scale)),
       h2("Output parameters"),
-      tags$p(paste0("Relative transformed positions: ", pca()$params$relative))
+      tags$p(paste0("Relative transformed positions: ", pca$params$relative))
     )
     
     return(list(
@@ -321,25 +353,21 @@ readcountProcessing.step.pca <- function(readcounts.top.variant, pca) {
 #' @export
 #'
 #' @examples
-readcountProcessing.at.readcounts.processed <- function(readcounts.raw,
-                                                        readcounts.processed, 
-                                                        readcounts.preprocessing.output, 
-                                                        readcounts.normalization.output,
-                                                        readcounts.postprocessing.output) {
+readcountProcessing.at.readcounts.processed <- function(dataset) {
   
-  step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
-  step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
+  step.transpose <- readcountProcessing.step.transpose(dataset)
+  step.remove.zero <- readcountProcessing.step.remove.zero(dataset)
+  step.normalization <- readcountProcessing.step.normalization(dataset)
+  step.remove.constant <- readcountProcessing.step.remove.constant(dataset)
   
   processingStepsWidgetData("readcounts.processing.steps",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
                             step.remove.constant)
   processingStepsWidgetData("genes.variance.processing",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
@@ -354,29 +382,23 @@ readcountProcessing.at.readcounts.processed <- function(readcounts.raw,
 #' @export
 #'
 #' @examples
-readcountProcessing.at.readcounts.filtered <- function(readcounts.raw,
-                                                       readcounts.processed, 
-                                                       readcounts.filtered,
-                                                       readcounts.preprocessing.output, 
-                                                       readcounts.normalization.output,
-                                                       readcounts.postprocessing.output,
-                                                       genes.filtered) {
+readcountProcessing.at.readcounts.filtered <- function(dataset) {
   
-  step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
-  step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
-  step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
+  step.transpose <- readcountProcessing.step.transpose(dataset)
+  step.remove.zero <- readcountProcessing.step.remove.zero(dataset)
+  step.normalization <- readcountProcessing.step.normalization(dataset)
+  step.remove.constant <- readcountProcessing.step.remove.constant(dataset)
+  step.filter <- readcountProcessing.step.filter(dataset)
   
   processingStepsWidgetData("readcounts.filtered.steps",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
                             step.remove.constant,
                             step.filter)
   processingStepsWidgetData("genes.variance.filtered.processing",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
@@ -392,24 +414,17 @@ readcountProcessing.at.readcounts.filtered <- function(readcounts.raw,
 #' @export
 #'
 #' @examples
-readcountProcessing.at.readcounts.top.variant <- function(readcounts.raw,
-                                                         readcounts.processed, 
-                                                         readcounts.filtered,
-                                                         readcounts.top.variant,
-                                                         readcounts.preprocessing.output, 
-                                                         readcounts.normalization.output,
-                                                         readcounts.postprocessing.output,
-                                                         genes.filtered) {
+readcountProcessing.at.readcounts.top.variant <- function(dataset) {
   
-  step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
-  step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
-  step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
-  step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
+  step.transpose <- readcountProcessing.step.transpose(dataset)
+  step.remove.zero <- readcountProcessing.step.remove.zero(dataset)
+  step.normalization <- readcountProcessing.step.normalization(dataset)
+  step.remove.constant <- readcountProcessing.step.remove.constant(dataset)
+  step.filter <- readcountProcessing.step.filter(dataset)
+  step.top.variant <- readcountProcessing.step.top.variant(dataset)
   
   processingStepsWidgetData("readcounts.top.variant.steps",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
@@ -425,26 +440,18 @@ readcountProcessing.at.readcounts.top.variant <- function(readcounts.raw,
 #' @export
 #'
 #' @examples
-readcountProcessing.at.pca <- function(readcounts.raw,
-                                        readcounts.processed, 
-                                        readcounts.filtered,
-                                        readcounts.top.variant,
-                                        readcounts.preprocessing.output, 
-                                        readcounts.normalization.output,
-                                        readcounts.postprocessing.output,
-                                        genes.filtered,
-                                       pca) {
+readcountProcessing.at.pca <- function(dataset) {
   
-  step.transpose <- readcountProcessing.step.transpose(readcounts.processed, readcounts.preprocessing.output)
-  step.remove.zero <- readcountProcessing.step.remove.zero(readcounts.processed, readcounts.preprocessing.output)
-  step.normalization <- readcountProcessing.step.normalization(readcounts.normalization.output)
-  step.remove.constant <- readcountProcessing.step.remove.constant(readcounts.postprocessing.output)
-  step.filter <- readcountProcessing.step.filter(readcounts.processed, readcounts.filtered, genes.filtered)
-  step.top.variant <- readcountProcessing.step.top.variant(readcounts.filtered, readcounts.top.variant)
-  step.pca <- readcountProcessing.step.pca(readcounts.top.variant, pca)
+  step.transpose <- readcountProcessing.step.transpose(dataset)
+  step.remove.zero <- readcountProcessing.step.remove.zero(dataset)
+  step.normalization <- readcountProcessing.step.normalization(dataset)
+  step.remove.constant <- readcountProcessing.step.remove.constant(dataset)
+  step.filter <- readcountProcessing.step.filter(dataset)
+  step.top.variant <- readcountProcessing.step.top.variant(dataset)
+  step.pca <- readcountProcessing.step.pca(dataset)
   
   processingStepsWidgetData("pca.pc.processing",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
@@ -453,7 +460,7 @@ readcountProcessing.at.pca <- function(readcounts.raw,
                             step.top.variant,
                             step.pca)
   processingStepsWidgetData("pca.variance.processing",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,
@@ -462,7 +469,7 @@ readcountProcessing.at.pca <- function(readcounts.raw,
                             step.top.variant,
                             step.pca)
   processingStepsWidgetData("pca.transformed.processing",
-                            readcountProcessing.step.input.readcounts(readcounts.raw),
+                            readcountProcessing.step.input.readcounts(dataset),
                             step.transpose,
                             step.remove.zero,
                             step.normalization,

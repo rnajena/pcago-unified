@@ -154,22 +154,6 @@ shinyServer(function(input, output, session) {
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   # Here we also include the hook for the minimal gene set (threshold) calculation
-  # pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
-  #                                            value.min = reactive({ 1 }),
-  #                                            value.max = reactive({ nrow(readcounts.filtered()) }),
-  #                                            value.default = reactive({ nrow(readcounts.filtered()) }))
-  # readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) })
-  # 
-  # pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
-  #                                                      readcounts = readcounts.filtered,
-  #                                                      pca.center = reactive(input$pca.pca.settings.center),
-  #                                                      pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
-  # observeEvent(pca.pca.genes.set.count.minimal(), {
-  #   updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
-  # })
-  # 
-  # readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
-  
   dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances)
   pca.gene.count <- reactive({
     validate(need(dataset.top.variant(), "No top variant read counts available!")) 
@@ -234,35 +218,10 @@ shinyServer(function(input, output, session) {
   })
   
   # Read count processing widget output
-  readcountProcessing.at.readcounts.processed(readcounts.raw = readcounts.raw,
-                                              readcounts.processed = readcounts.processed, 
-                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                              readcounts.normalization.output = readcounts.normalization.output,
-                                              readcounts.postprocessing.output = readcounts.postprocessing.output)
-  readcountProcessing.at.readcounts.filtered(readcounts.raw = readcounts.raw,
-                                             readcounts.processed = readcounts.processed, 
-                                             readcounts.filtered = readcounts.filtered,
-                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                             readcounts.normalization.output = readcounts.normalization.output,
-                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
-                                             genes.filtered = genes.filtered)
-  readcountProcessing.at.readcounts.top.variant(readcounts.raw = readcounts.raw,
-                                             readcounts.processed = readcounts.processed, 
-                                             readcounts.filtered = readcounts.filtered,
-                                             readcounts.top.variant = readcounts.top.variant,
-                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                             readcounts.normalization.output = readcounts.normalization.output,
-                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
-                                             genes.filtered = genes.filtered)
-  readcountProcessing.at.pca(readcounts.raw = readcounts.raw,
-                            readcounts.processed = readcounts.processed, 
-                            readcounts.filtered = readcounts.filtered,
-                            readcounts.top.variant = readcounts.top.variant,
-                            readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                            readcounts.normalization.output = readcounts.normalization.output,
-                            readcounts.postprocessing.output = readcounts.postprocessing.output,
-                            genes.filtered = genes.filtered,
-                             pca = pca)
+  readcountProcessing.at.readcounts.processed(dataset.pca)
+  readcountProcessing.at.readcounts.filtered(dataset.pca)
+  readcountProcessing.at.readcounts.top.variant(dataset.pca)
+  readcountProcessing.at.pca(dataset.pca)
   
   # Fill tables & plots
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
