@@ -263,7 +263,7 @@ removeZeroReads <- function(readcounts) {
   }
   
   counts <- assay(readcounts)
-  invalid <- rowMins(counts) == 0 & identical(rowMaxs(counts), rowMins(counts))
+  invalid <- rowMins(counts) == 0 & rowMaxs(counts) == rowMins(counts)
   
   genes.removed <- rownames(readcounts)[invalid]
   readcounts <- readcounts[which(!invalid),]
