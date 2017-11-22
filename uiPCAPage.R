@@ -32,7 +32,12 @@ uiPCAPage <- function() {
       tabPanel("PCA", uiPCASidebarPCA()),
       tabPanel("Plot", uiPCASidebarPlot()),
       type = "pills"
-    )),
+    ),
+    hDivider(),
+    dropdownButton(ns("quickio"), "Quick actions", 
+                   icon = icon("bolt"),
+                   content = list(actionButton("quickio.load", "Quick load sample data", icon = icon("folder-open")),
+                   actionButton("quickio.save", "Quick save all data", icon = icon("floppy-o"))))),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
                          selected = "pca.samples.plot",
