@@ -24,16 +24,16 @@ plotGeneVarianceRangePlotUI <- function(id, ...) {
 plotGeneVarianceRangePlot_ <- function(input, 
                                  output, 
                                  session, 
-                                 pca.gene.count,
-                                 gene.variances.filtered) {
+                                 dataset) {
   
   output$plot <- renderPlot({
     
-    validate(need(gene.variances.filtered(), "No gene variances to display!"))
+    validate(need(dataset(), "No gene variances to display!"))
+    validate(need(dataset()$variances.filtered, "No gene variances to display!"))
     
     logarithmic <- input$logarithmic
-    genes.count <- pca.gene.count()$value
-    data <- gene.variances.filtered()
+    genes.count <- dataset()$readcounts.top.variant.parameters.count
+    data <- dataset()$variances.filtered
     data$logvar <- log(data$var)
     data.selection <- data[1:genes.count,]
     
@@ -59,11 +59,10 @@ plotGeneVarianceRangePlot_ <- function(input,
   
 }
 
-plotGeneVarianceRangePlot <- function(id, pca.gene.count, gene.variances.filtered) {
+plotGeneVarianceRangePlot <- function(id, dataset) {
   
   return(callModule(plotGeneVarianceRangePlot_, 
                     id, 
-                    pca.gene.count = pca.gene.count,
-                    gene.variances.filtered = gene.variances.filtered))
+                    dataset = dataset))
   
 }

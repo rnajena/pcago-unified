@@ -93,7 +93,7 @@ serverReactiveNavigation <- function(session, observed, target.nav) {
 #' @export
 #'
 #' @examples
-serverFilterReadcounts <- function(dataset) {
+serverFilterReadcountsByAnnotation <- function(dataset) {
   
   readcounts.processed <- reactive({ 
     validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
@@ -168,10 +168,55 @@ serverFilterReadcounts <- function(dataset) {
     keep.readcounts <- readcounts.processed()[keep.genes,]
     
     dataset <- dataset()
-    dataset$genes.filtered <- genes.filtered()
+    dataset$readcounts.filtered.parameters.genes <- genes.filtered()
     dataset$readcounts.filtered <- keep.readcounts
     
     return(dataset)
+  }))
+}
+
+#' Filters read counts by selecting only the top variant genes
+#'
+#' @param dataset 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverFilterReadCountsByVariance <- function(dataset) {
+  
+  readcounts.filtered <- reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    return(dataset()$readcounts.filtered)
+  })
+  
+  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
+                                             value.min = reactive({ 1 }),
+                                             value.max = reactive({ nrow(readcounts.filtered()) }),
+                                             value.default = reactive({ nrow(readcounts.filtered()) }))
+  readcounts.top.variant <- reactive({  })
+  
+  pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
+                                                        readcounts = readcounts.filtered,
+                                                        pca.center = reactive(input$pca.pca.settings.center),
+                                                        pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
+  observeEvent(pca.pca.genes.set.count.minimal(), {
+    updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  })
+  
+  return(reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    validate(need(dataset()$variances.filtered, "No filtered read counts available!"))
+    
+    dataset <- dataset()
+    dataset$readcounts.top.variant <- selectTopVariantGeneReadcounts(dataset$readcounts.filtered, dataset$variances.filtered, pca.gene.count()$value)
+    dataset$variances.top.variant <- buildGeneVarianceTable(dataset$readcounts.top.variant)
+    dataset$readcounts.top.variant.parameters.count <- pca.gene.count()$value
+    
+    return(dataset)
+    
   }))
 }
 

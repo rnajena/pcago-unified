@@ -122,10 +122,10 @@ shinyServer(function(input, output, session) {
   
   # Obtain the list of genes the user wants to use
   # The filtered read counts just intersects the list of genes returned by each filter
-  dataset.filtered <- serverFilterReadcounts(dataset.postprocessed)
+  dataset.filtered <- serverFilterReadcountsByAnnotation(dataset.postprocessed)
   genes.filtered <- reactive({
     validate(need(dataset.filtered(), "No filtered read counts available!"))
-    return(dataset.filtered()$genes.filtered)
+    return(dataset.filtered()$readcounts.filtered.parameters.genes)
   })
   readcounts.filtered <- reactive({
     validate(need(dataset.filtered(), "No filtered read counts available!"))
@@ -154,21 +154,31 @@ shinyServer(function(input, output, session) {
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   # Here we also include the hook for the minimal gene set (threshold) calculation
-  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
-                                             value.min = reactive({ 1 }),
-                                             value.max = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default = reactive({ nrow(readcounts.filtered()) }))
-  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) })
+  # pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
+  #                                            value.min = reactive({ 1 }),
+  #                                            value.max = reactive({ nrow(readcounts.filtered()) }),
+  #                                            value.default = reactive({ nrow(readcounts.filtered()) }))
+  # readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) })
+  # 
+  # pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
+  #                                                      readcounts = readcounts.filtered,
+  #                                                      pca.center = reactive(input$pca.pca.settings.center),
+  #                                                      pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
+  # observeEvent(pca.pca.genes.set.count.minimal(), {
+  #   updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  # })
+  # 
+  # readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
   
-  pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
-                                                       readcounts = readcounts.filtered,
-                                                       pca.center = reactive(input$pca.pca.settings.center),
-                                                       pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
-  observeEvent(pca.pca.genes.set.count.minimal(), {
-    updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances)
+  pca.gene.count <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant.parameters.count)
   })
-  
-  readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
+  readcounts.top.variant <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant)
+  })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(reactive({input$pca.pca.settings.center}),
@@ -253,7 +263,7 @@ shinyServer(function(input, output, session) {
   plotGeneVariancePlot("genes.variances.plot", gene.variances = readcounts.processed.variances)
   plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = readcounts.filtered.variances)
   
-  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, readcounts.filtered.variances)
+  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", dataset.top.variant)
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   
