@@ -35,10 +35,10 @@ GeneAnnotation <- setClass(
   "GeneAnnotation",
   slots = signature(
     sequence.info = "data.frame",
-    gene.biotype = "GeneFilter",
-    gene.go.terms = "GeneFilter",
-    gene.scaffold = "GeneFilter",
-    gene.custom = "GeneFilter"
+    gene.biotype = "ANY",
+    gene.go.terms = "ANY",
+    gene.scaffold = "ANY",
+    gene.custom = "ANY"
   ),
   prototype = list(
     sequence.info = data.frame(),

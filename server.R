@@ -51,12 +51,21 @@ options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
   
-  dataset.raw <- genericImporterData("pca.data.readcounts.importer", 
+  variables <- reactiveValues(dataset = NULL)
+  
+  
+  dataset.imported.raw <- genericImporterData("pca.data.readcounts.importer", 
                                  importers = reactive(supportedReadcountImporters),
                                  samples = reactive(availableReadcountSamples),
                                  generators = reactive(supportedReadcountGenerators),
                                  exprimport = importReadcount, 
                                  exprsample = importReadcountSample)
+  
+  observeEvent(dataset.imported.raw(), {
+    variables$dataset <- dataset.imported.raw()
+  })
+  
+  dataset.raw <- reactive( { return(variables$dataset) })
   
   # Read counts
   readcounts.raw <- reactive(
