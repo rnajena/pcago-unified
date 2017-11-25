@@ -6,6 +6,7 @@ library(shiny)
 library(SummarizedExperiment)
 library(DESeq2)
 source("classImporterEntry.R")
+source("classDataSet.R")
 source("helpers.R")
 
 #' A list of all read count data types that will be supported
@@ -64,7 +65,10 @@ importReadcount <- function(filehandle, importer, parameters) {
   
   experiment <- SummarizedExperiment(assays = list(counts = counts))
   
-  return(experiment)
+  dataset <- PCAGODataSet$new()
+  dataset$readcounts.raw <- experiment
+  
+  return(dataset)
 }
 
 #' Imports sample with given sample id
@@ -259,7 +263,7 @@ removeZeroReads <- function(readcounts) {
   }
   
   counts <- assay(readcounts)
-  invalid <- rowMins(counts) == 0 & identical(rowMaxs(counts), rowMins(counts))
+  invalid <- rowMins(counts) == 0 & rowMaxs(counts) == rowMins(counts)
   
   genes.removed <- rownames(readcounts)[invalid]
   readcounts <- readcounts[which(!invalid),]

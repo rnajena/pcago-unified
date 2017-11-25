@@ -131,20 +131,6 @@ plotSamplePlot.save <- function(pca,
   yaxislimit <- NULL
   zaxislimit <- NULL
   
-  # if(calculateaxeslimits) {
-  #   xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
-  #                   max(pca.full$transformed[, dimensions.requested[1]]))
-  #   
-  #   if(dimensions.plot > 1) {
-  #     yaxislimit <- c(min(pca.full$transformed[, dimensions.requested[2]]),
-  #                     max(pca.full$transformed[, dimensions.requested[2]]))
-  #   }
-  #   if(dimensions.plot > 2) {
-  #     zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
-  #                     max(pca.full$transformed[, dimensions.requested[3]]))
-  #   }
-  # }
-  
   if(axislimits$x$mode == "allgenes") {
     xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
                   max(pca.full$transformed[, dimensions.requested[1]]))
@@ -392,18 +378,56 @@ plotSamplePlot.saveMovie <- function(filename,
   showNotification("Your video file has been successfully rendered.", type = "message")
 }
 
+#' Logic of the PCA sample plot
+#'
+#' @param input 
+#' @param output 
+#' @param session 
+#' @param dataset 
+#' @param animation.params 
+#' @param pca.center 
+#' @param pca.scale 
+#' @param pca.relative 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plotSamplePlot_ <- function(input, 
                           output, 
                           session, 
-                          readcounts.processed, 
-                          readcounts.filtered, 
-                          readcounts.top.variant, 
+                          dataset,
                           animation.params,
-                          gene.variances,
-                          conditions, 
                           pca.center,
                           pca.scale,
                           pca.relative) {
+  
+  readcounts.processed <- reactive({
+    validate(need(dataset(), "No processed read counts available!"))
+    validate(need(dataset()$readcounts.processed, "No processed read counts available!"))
+    return(dataset()$readcounts.processed)
+  })
+  readcounts.filtered <- reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    return(dataset()$readcounts.filtered)
+  })
+  readcounts.top.variant <- reactive({
+    validate(need(dataset(), "No top variant read counts available!"))
+    validate(need(dataset()$readcounts.top.variant, "No top variant read counts available!"))
+    return(dataset()$readcounts.top.variant)
+  })
+  gene.variances <- reactive({
+    validate(need(dataset(), "No gene variances available!"))
+    validate(need(dataset()$variances.filtered, "No gene variances available!"))
+    return(dataset()$variances.filtered)
+  })
+  conditions <- reactive({
+    validate(need(dataset(), "No sample conditions available!"))
+    validate(need(dataset()$sample.annotation, "No sample conditions available!"))
+    validate(need(dataset()$sample.annotation@conditions, "No sample conditions available!"))
+    return(dataset()$sample.annotation@conditions)
+  })
   
   pca <- serverPCA(pca.center,
               pca.scale,
@@ -508,24 +532,16 @@ plotSamplePlot_ <- function(input,
 }
 
 plotSamplePlot <- function(id, 
-                         readcounts.processed, 
-                         readcounts.filtered, 
-                         readcounts.top.variant, 
-                         gene.variances,
+                         dataset,
                          animation.params,
-                         conditions,
                          pca.center,
                          pca.scale,
                          pca.relative) {
   
   return(callModule(plotSamplePlot_, 
                     id, 
-                    readcounts.processed = readcounts.processed,
-                    readcounts.filtered = readcounts.filtered, 
-                    readcounts.top.variant = readcounts.top.variant, 
-                    gene.variances = gene.variances,
+                    dataset = dataset,
                     animation.params = animation.params,
-                    conditions = conditions,
                     pca.center = pca.center,
                     pca.scale = pca.scale,
                     pca.relative = pca.relative))

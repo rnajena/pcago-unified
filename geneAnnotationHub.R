@@ -70,7 +70,9 @@ annotationHub.importerEntry <- ImporterEntry(name = "annotation_hub",
                                                            checkboxes.selected = GeneAnnotationEntryNames.annotation_hub)
                                        ))
 
-generateGeneInformation.AnnotationHub <- function(database, species, dataset, imported_data, readcounts) {
+generateGeneInformation.AnnotationHub <- function(database, species, dataset, imported_data, pcago.dataset) {
+  
+  readcounts <- pcago.dataset$readcounts.preprocessed
   
   if(!is.character(database) || database == "" || length(database) != 1) {
     stop("Invalid database!")

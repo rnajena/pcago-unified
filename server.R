@@ -45,26 +45,50 @@ source("plotPCAVariancePlot.R")
 source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
 source("processingReports.R")
+source("classDataSet.R")
 
 options(shiny.maxRequestSize=30*1024^2) 
 
 shinyServer(function(input, output, session) {
   
+  variables <- reactiveValues(dataset = NULL)
+  
+  
+  dataset.imported.raw <- genericImporterData("pca.data.readcounts.importer", 
+                                 importers = reactive(supportedReadcountImporters),
+                                 samples = reactive(availableReadcountSamples),
+                                 generators = reactive(supportedReadcountGenerators),
+                                 exprimport = importReadcount, 
+                                 exprsample = importReadcountSample)
+  
+  observeEvent(dataset.imported.raw(), {
+    variables$dataset <- dataset.imported.raw()
+  })
+  
+  dataset.raw <- reactive( { return(variables$dataset) })
+  
   # Read counts
-  readcounts.raw <- genericImporterData("pca.data.readcounts.importer", 
-                                    importers = reactive(supportedReadcountImporters),
-                                    samples = reactive(availableReadcountSamples),
-                                    generators = reactive(supportedReadcountGenerators),
-                                    exprimport = importReadcount, 
-                                    exprsample = importReadcountSample)
+  readcounts.raw <- reactive(
+    { 
+      validate(need(dataset.raw(), "No datset loaded."))
+      return(dataset.raw()$readcounts.raw)
+    })
   
   # Readcount processing
-  #readcounts.preprocessing.output <- serverReadCountPreProcessing(readcounts.raw, input)
-  #readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
-  readcounts.preprocessing.output <- readCountPreprocessingData("data.readcounts.preprocessing", readcounts.raw)
-  readcounts.preprocessed <- reactive({ readcounts.preprocessing.output()$readcounts })
- 
-  sample.annotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", readcounts = readcounts.preprocessed)
+  
+  dataset.preprocessed <- readCountPreprocessingData("data.readcounts.preprocessing", dataset.raw)
+  readcounts.preprocessed <- reactive({ dataset.preprocessed()$readcounts.preprocessed })
+  
+  dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", dataset = dataset.preprocessed)
+  
+  sample.annotation <- reactive({ 
+    validate(need(dataset.sampleannotation(), "No datset loaded."))
+    validate(need(dataset.sampleannotation()$sample.annotation, "No sample annotation available."))
+    
+    return(dataset.sampleannotation()$sample.annotation)
+    
+    })
+    
   conditions <- reactive({
     validate(need(sample.annotation(), "No samples annotation available!"))
     return(sample.annotation()@conditions)
@@ -72,61 +96,86 @@ shinyServer(function(input, output, session) {
   
   # Fetch gene info annotation with an integrating generic importer.
   # This allows the user to provide multiple data source with only one UI and feedback what was found
-  gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", readcounts = readcounts.preprocessed)
+  dataset.gene.annotation <- geneAnnotationImporterValue("data.gene.annotation.importer", dataset = dataset.sampleannotation)
+  gene.annotation <- reactive({
+    validate(need(dataset.gene.annotation(), "No gene annotation available!"))
+    return(dataset.gene.annotation()$gene.annotation)
+  })
   
   # Finish processing of read counts with normalization
-  #readcounts.normalization.output <- serverReadcountNormalization(readcounts = readcounts.preprocessed, 
-                                                                  # gene.annotation = gene.annotation, 
-                                                                  # sample.annotation = sample.annotation,
-                                                                  # input = input)
-  #readcounts.processed <- reactive({ readcounts.normalization.output()$readcounts })
-  readcounts.normalization.output <- readCountNormalizationData("data.readcounts.normalization", 
-                                                                readcounts = readcounts.preprocessed,
-                                                                gene.annotation = gene.annotation,
-                                                                sample.annotation = sample.annotation)
-  readcounts.normalized <- reactive({ readcounts.normalization.output()$readcounts })
+  dataset.normalized <- readCountNormalizationData("data.readcounts.normalization", 
+                                                   dataset = dataset.gene.annotation)
+  readcounts.normalized <- reactive({ 
+    validate(need(dataset.normalized(), "No normalized read counts available!"))
+    return(dataset.normalized()$readcounts.normalized )
+    })
   
   # Additional postprocessing after normalization
-  readcounts.postprocessing.output <- readCountPostprocessingData("data.readcounts.postprocessing", readcounts.normalized)
+  dataset.postprocessed <- readCountPostprocessingData("data.readcounts.postprocessing", dataset = dataset.normalized)
   
-  readcounts.processed <- reactive({ readcounts.postprocessing.output()$readcounts })
-  
-  
-  # Gene variances
-  readcounts.processed.variances <- reactive( { buildGeneVarianceTable(readcounts.processed()) } )
+  readcounts.processed <- reactive({
+    validate(need(dataset.postprocessed(), "No processed read counts available!"))
+    return(dataset.postprocessed()$readcounts.processed )
+  })
   
   # Obtain the list of genes the user wants to use
-  genes.filtered <- serverFilteredGenes(readcounts.processed, gene.annotation)
-  
   # The filtered read counts just intersects the list of genes returned by each filter
-  readcounts.filtered <- serverFilterReadcounts(genes.filtered, readcounts.processed)
+  dataset.filtered <- serverFilterReadcountsByAnnotation(dataset.postprocessed)
+  genes.filtered <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    return(dataset.filtered()$readcounts.filtered.parameters.genes)
+  })
+  readcounts.filtered <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    return(dataset.filtered()$readcounts.filtered)
+  })
   
-  readcounts.filtered.variances <- reactive( { buildGeneVarianceTable(readcounts.filtered()) } )
+  # Annotate gene variances
+  dataset.variances <- reactive({
+    validate(need(dataset.filtered(), "No filtered read counts available!"))
+    
+    dataset <- dataset.filtered()
+    dataset$variances.processed <- buildGeneVarianceTable(dataset.filtered()$readcounts.processed)
+    dataset$variances.filtered <- buildGeneVarianceTable(dataset.filtered()$readcounts.filtered)
+    
+    return(dataset)
+  })
   
+  readcounts.processed.variances <- reactive( { 
+    validate(need(dataset.variances(), "No filtered read counts available!")) 
+    return(dataset.variances()$variances.processed)
+  })
+  readcounts.filtered.variances <- reactive( { 
+    validate(need(dataset.variances(), "No filtered read counts available!")) 
+    return(dataset.variances()$variances.filtered)
+  })
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   # Here we also include the hook for the minimal gene set (threshold) calculation
-  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
-                                             value.min = reactive({ 1 }),
-                                             value.max = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default = reactive({ nrow(readcounts.filtered()) }))
-  readcounts.top.variant <- reactive({ selectTopVariantGeneReadcounts(readcounts.filtered(), readcounts.filtered.variances(), pca.gene.count()$value) })
-  
-  pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
-                                                       readcounts = readcounts.filtered,
-                                                       pca.center = reactive(input$pca.pca.settings.center),
-                                                       pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
-  observeEvent(pca.pca.genes.set.count.minimal(), {
-    updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances)
+  pca.gene.count <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant.parameters.count)
   })
-  
-  readcounts.top.variant.variances <- reactive( { buildGeneVarianceTable(readcounts.top.variant()) } )
+  readcounts.top.variant <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant)
+  })
   
   # pca is applied to the selected genes and setup some values to be used by outputs
   pca <- serverPCA(reactive({input$pca.pca.settings.center}),
                    reactive({input$pca.pca.settings.scale}),
                    reactive({input$pca.pca.settings.relative}), 
                    readcounts.top.variant)
+  
+  dataset.pca <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available"))
+    validate(need(pca(), "No PCA results available"))
+    
+    dataset <- dataset.top.variant()
+    dataset$pca.top.variant <- pca()
+    return(dataset)
+  })
   
   #
   # Update input elements
@@ -137,6 +186,9 @@ shinyServer(function(input, output, session) {
   
   # Auto navigation
   serverAutoNavigation(input, session)
+  
+  # QuickIO
+  serverQuickIO(input, output, session, variables, dataset.pca)
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
@@ -167,35 +219,10 @@ shinyServer(function(input, output, session) {
   })
   
   # Read count processing widget output
-  readcountProcessing.at.readcounts.processed(readcounts.raw = readcounts.raw,
-                                              readcounts.processed = readcounts.processed, 
-                                              readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                              readcounts.normalization.output = readcounts.normalization.output,
-                                              readcounts.postprocessing.output = readcounts.postprocessing.output)
-  readcountProcessing.at.readcounts.filtered(readcounts.raw = readcounts.raw,
-                                             readcounts.processed = readcounts.processed, 
-                                             readcounts.filtered = readcounts.filtered,
-                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                             readcounts.normalization.output = readcounts.normalization.output,
-                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
-                                             genes.filtered = genes.filtered)
-  readcountProcessing.at.readcounts.top.variant(readcounts.raw = readcounts.raw,
-                                             readcounts.processed = readcounts.processed, 
-                                             readcounts.filtered = readcounts.filtered,
-                                             readcounts.top.variant = readcounts.top.variant,
-                                             readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                                             readcounts.normalization.output = readcounts.normalization.output,
-                                             readcounts.postprocessing.output = readcounts.postprocessing.output,
-                                             genes.filtered = genes.filtered)
-  readcountProcessing.at.pca(readcounts.raw = readcounts.raw,
-                            readcounts.processed = readcounts.processed, 
-                            readcounts.filtered = readcounts.filtered,
-                            readcounts.top.variant = readcounts.top.variant,
-                            readcounts.preprocessing.output = readcounts.preprocessing.output, 
-                            readcounts.normalization.output = readcounts.normalization.output,
-                            readcounts.postprocessing.output = readcounts.postprocessing.output,
-                            genes.filtered = genes.filtered,
-                             pca = pca)
+  readcountProcessing.at.readcounts.processed(dataset.pca)
+  readcountProcessing.at.readcounts.filtered(dataset.pca)
+  readcountProcessing.at.readcounts.top.variant(dataset.pca)
+  readcountProcessing.at.pca(dataset.pca)
   
   # Fill tables & plots
   downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed })) 
@@ -205,7 +232,7 @@ shinyServer(function(input, output, session) {
   plotGeneVariancePlot("genes.variances.plot", gene.variances = readcounts.processed.variances)
   plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = readcounts.filtered.variances)
   
-  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", pca.gene.count, readcounts.filtered.variances)
+  plotGeneVarianceRangePlot("pca.pca.genes.count.variance.plot", dataset.top.variant)
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   
@@ -215,12 +242,8 @@ shinyServer(function(input, output, session) {
                                   default.title = reactive({ "PCA transformed values clustering" }))
   
   plotSamplePlot("pca.samples.plot",
-               readcounts.processed = readcounts.processed,
-               readcounts.filtered = readcounts.filtered,
-               readcounts.top.variant = readcounts.top.variant,
-               gene.variances = readcounts.filtered.variances, # Important! Needed for movie function!
+               dataset = dataset.pca,
                animation.params = pca.gene.count,
-               conditions = conditions,
                pca.center = reactive({input$pca.pca.settings.center}),
                pca.scale = reactive({input$pca.pca.settings.scale}),
                pca.relative = reactive({input$pca.pca.settings.relative}))

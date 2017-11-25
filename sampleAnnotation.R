@@ -272,7 +272,10 @@ importSampleAnnotation.SampleInfo <- function(filehandle, sep, samples, imported
 #' @export
 #'
 #' @examples
-importSampleAnnotation <- function(filehandle, datatype, samples, parameters) {
+importSampleAnnotation <- function(filehandle, datatype, dataset, parameters) {
+  
+  samples <- colnames(dataset$readcounts.preprocessed)
+  
   if(datatype == "conditions_boolean_csv") {
     return(importSampleAnnotation.Conditions.Boolean(filehandle, 
                                                      parameters$separator, 
@@ -308,7 +311,7 @@ importSampleAnnotation <- function(filehandle, datatype, samples, parameters) {
 #' @export
 #'
 #' @examples
-importSampleAnnotationSample <- function(sample, samples, parameters) {
+importSampleAnnotationSample <- function(sample, dataset, parameters) {
   
   if(!is.character(sample)) {
     stop("Invalid arguments!")
@@ -322,7 +325,7 @@ importSampleAnnotationSample <- function(sample, samples, parameters) {
      sample == "Myotis RNA/sample_annotation_conditions_RNA.csv" ||
      sample == "Myotis smallRNA/sample_annotation_conditions_smallRNA.csv") {
     parameters$separator <- ","
-    data <- importSampleAnnotation(con, "conditions_factor_csv", samples, parameters)
+    data <- importSampleAnnotation(con, "conditions_factor_csv", dataset, parameters)
   }
   else {
     stop(paste("Unknown sample", sample))
@@ -342,7 +345,9 @@ importSampleAnnotationSample <- function(sample, samples, parameters) {
 #' @export
 #'
 #' @examples
-importSampleAnnotationFromGenerator.Conditions.SplitSampleNames <- function(samples, sep, imported_data) {
+importSampleAnnotationFromGenerator.Conditions.SplitSampleNames <- function(dataset, sep, imported_data) {
+  
+  samples <- colnames(dataset$readcounts.preprocessed)
   
   if(length(imported_data) == 0) {
     stop("No data to be imported selected!")
@@ -390,14 +395,14 @@ importSampleAnnotationFromGenerator.Conditions.SplitSampleNames <- function(samp
 #' @export
 #'
 #' @examples
-importSampleAnnotationFromGenerator <- function(generator, samples, parameters) {
+importSampleAnnotationFromGenerator <- function(generator, dataset, parameters) {
   
   if(!is.character(generator)) {
     stop("Invalid arguments!")
   }
   
   if(generator == "conditions_split") {
-    return(importSampleAnnotationFromGenerator.Conditions.SplitSampleNames(samples, parameters$separator, parameters$imported_data))
+    return(importSampleAnnotationFromGenerator.Conditions.SplitSampleNames(dataset, parameters$separator, parameters$imported_data))
   }
   else {
     stop(paste("Unknown generator", datatype))

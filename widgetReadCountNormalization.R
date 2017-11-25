@@ -34,11 +34,22 @@ readCountNormalizationUI <- function(id) {
 readCountNormalizationData_ <- function(input, 
                               output, 
                               session,
-                              readcounts,
-                              gene.annotation,
-                              sample.annotation) {
+                              dataset) {
   
   stored.values <- reactiveValues(readcounts.normalized.cache = NULL)
+  
+  readcounts <- reactive({ 
+    validate(need(dataset, "No processed read counts available!"))
+    return(dataset()$readcounts.preprocessed)
+  })
+  sample.annotation <- reactive({ 
+    validate(need(dataset, "No sample annotation available!"))
+    return(dataset()$sample.annotation)
+    })
+  gene.annotation <- reactive({ 
+    validate(need(dataset, "No sample annotation available!"))
+    return(dataset()$gene.annotation)
+  })
   
   # Extract the sample conditions from the sample annotation
   conditions <- reactive({
@@ -138,16 +149,20 @@ readCountNormalizationData_ <- function(input,
     
   })
   
-  return(reactive({ readcounts.normalized() }))
+  return(reactive({ 
+    dataset <- dataset()
+    dataset$readcounts.normalized <- readcounts.normalized()$readcounts
+    dataset$readcounts.normalization.parameters <- readcounts.normalized()
+    
+    return(dataset)
+    }))
   
 }
 
-readCountNormalizationData <- function(id, readcounts, gene.annotation, sample.annotation) {
+readCountNormalizationData <- function(id, dataset) {
   
   return(callModule(readCountNormalizationData_,
                     id,
-                    readcounts = readcounts,
-                    gene.annotation = gene.annotation,
-                    sample.annotation = sample.annotation))
+                    dataset = dataset))
   
 }

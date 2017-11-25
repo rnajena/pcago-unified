@@ -50,35 +50,42 @@ sampleAnnotationImporterUI <- function(id) {
 #' @export
 #'
 #' @examples
-sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
+sampleAnnotationImporterValue_ <- function(input, output, session, dataset) {
   
   sample.annotation.imported <- genericImporterData("importer",
                                                    importers = reactive(supportedSampleAnnotationImporters),
                                                    samples = reactive(availableSampleAnnotationSamples),
                                                    generators = reactive(supportedSampleAnnotationGenerators),
                                                    exprimport = function(con, importer, parameters) {
-                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
-                                                     samples <- colnames(readcounts())
+                                                     validate(need(dataset(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     validate(need(dataset()$readcounts.preprocessed, "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     samples <- colnames(dataset()$readcounts.preprocessed)
                                                      
-                                                     return(importSampleAnnotation(con, importer, samples, parameters))
+                                                     return(importSampleAnnotation(con, importer, dataset(), parameters))
                                                    },
                                                    exprsample = function(sample, parameters) {
                                                      
-                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
-                                                     samples <- colnames(readcounts())
-                                                     return(importSampleAnnotationSample(sample, samples, parameters))
+                                                     validate(need(dataset(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     validate(need(dataset()$readcounts.preprocessed, "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     return(importSampleAnnotationSample(sample, dataset(), parameters))
                                                      
                                                    },
                                                    exprgenerator = function(generator, parameters) {
                                                      
-                                                     validate(need(readcounts(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
-                                                     samples <- colnames(readcounts())
+                                                     validate(need(dataset(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     validate(need(dataset()$readcounts.preprocessed, "[Sample Annotation] Cannot import sample annotation without read counts!"))
+                                                     samples <- colnames(dataset()$readcounts.preprocessed)
                                                      
-                                                     return(importSampleAnnotationFromGenerator(generator, samples, parameters))
+                                                     return(importSampleAnnotationFromGenerator(generator, dataset(), parameters))
                                                    },
                                                    exprintegrate = function(data, callback) {
                                                      
                                                      output <- SampleAnnotation()
+                                                     
+                                                     # Injection point for quickio
+                                                     if(!is.null(dataset()$sample.annotation)) {
+                                                       output <- dataset()$sample.annotation
+                                                     }
                                                      
                                                      choices <- SampleAnnotationNames
                                                      selected <- c()
@@ -99,7 +106,7 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                                      }
                                                      
                                                      # Populate callback list
-                                                     samples <- colnames(readcounts())
+                                                     samples <- colnames(dataset()$readcounts.preprocessed)
 
                                                      for(annotation.type in choices) {
                                                        covered.samples <- intersect(sampleAnnotationAnnotatedSamples(output, annotation.type), samples)
@@ -129,9 +136,9 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   # Build conditions
   conditions <- reactive({
     
-    validate(need(readcounts(), "[Sample Annotation] Cannot get condition table without read counts!"),
-             need(sample.annotation.imported(), "[Sample Annotation] No sample annotation available!"))
-    # ! Needs to be separate. Thanks, R Shiny for ALWAYS TESTING ALL F**** CHECKS!!!
+    validate(need(dataset(), "[Sample Annotation] Cannot get condition table without read counts!"))
+    validate(need(dataset()$readcounts.preprocessed, "[Sample Annotation] Cannot get condition table without read counts!"))
+    validate(need(sample.annotation.imported(), "[Sample Annotation] No sample annotation available!"))
     validate(need(sampleAnnotationHasConditions(sample.annotation.imported()), "[Sample Annotation] No sample conditions available!"))
     
     return(sample.annotation.imported()@conditions)
@@ -163,7 +170,11 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
   })
   
   return(reactive({
-    return(mergeSampleAnnotation(sample.annotation.imported(), SampleAnnotation(conditions = conditions.modified())))
+    
+    dataset <- dataset()
+    dataset$sample.annotation <- mergeSampleAnnotation(sample.annotation.imported(), SampleAnnotation(conditions = conditions.modified()))
+    
+    return(dataset)
   }))
   
 }
@@ -171,14 +182,14 @@ sampleAnnotationImporterValue_ <- function(input, output, session, readcounts) {
 #' Extracts the sample conditions based on the user input.
 #'
 #' @param id 
-#' @param readcounts 
+#' @param dataset 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-sampleAnnotationImporterValue <- function(id, readcounts) {
+sampleAnnotationImporterValue <- function(id, dataset) {
   
-  return(callModule(sampleAnnotationImporterValue_, id, readcounts = readcounts))
+  return(callModule(sampleAnnotationImporterValue_, id, dataset = dataset))
   
 }

@@ -64,8 +64,13 @@ availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vi
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcounts, parameters) {
+importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, dataset, parameters) {
   
+  readcounts <- dataset$readcounts.preprocessed
+  
+  if(is.null(readcounts)) {
+    stop("No read counts loaded!")
+  }
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
@@ -109,8 +114,13 @@ importGeneInformationFromAnnotation.EnsemblGFF <- function(filehandle, readcount
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcounts, parameters) {
+importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, dataset, parameters) {
   
+  readcounts <- dataset$readcounts.preprocessed
+  
+  if(is.null(readcounts)) {
+    stop("No read counts loaded!")
+  }
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
@@ -145,17 +155,22 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, readcou
 #' @export
 #'
 #' @examples
-importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts, parameters) {
+importGeneInformationFromAnnotation <- function(filehandle, datatype, dataset, parameters) {
   
+  readcounts <- dataset$readcounts.preprocessed
+  
+  if(is.null(readcounts)) {
+    stop("No read counts loaded!")
+  }
   if(missing(filehandle) || !is.character(datatype) || !is.SummarizedExperiment(readcounts)) {
     stop("Invalid arguments!")
   }
   
   if(datatype == "gff_ensembl") {
-    return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, readcounts, parameters))
+    return(importGeneInformationFromAnnotation.EnsemblGFF(filehandle, dataset, parameters))
   }
   if(datatype == "pcago_csv") {
-    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, readcounts, parameters))
+    return(importGeneInformationFromAnnotation.PCAGOTabular(filehandle, dataset, parameters))
   }
   else {
     stop(paste("Unknown datatype", datatype))
@@ -172,17 +187,22 @@ importGeneInformationFromAnnotation <- function(filehandle, datatype, readcounts
 #' @export
 #'
 #' @examples
-generateGeneInformation <- function(generator, readcounts, parameters) {
+generateGeneInformation <- function(generator, dataset, parameters) {
   
+  readcounts <- dataset$readcounts.preprocessed
+  
+  if(is.null(readcounts)) {
+    stop("No read counts loaded!")
+  }
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
   
   if(generator == "ensembl_biomart") {
-    return(generateGeneInformation.EnsemblBioMart(parameters$database, parameters$species, parameters$imported_data, readcounts))
+    return(generateGeneInformation.EnsemblBioMart(parameters$database, parameters$species, parameters$imported_data, dataset))
   }
   else if(generator == "annotation_hub") {
-    return(generateGeneInformation.AnnotationHub(parameters$database, parameters$species, parameters$dataset, parameters$imported_data, readcounts))
+    return(generateGeneInformation.AnnotationHub(parameters$database, parameters$species, parameters$dataset, parameters$imported_data, dataset))
   }
   else {
     stop(paste("Unkown generator", generator))
@@ -199,8 +219,13 @@ generateGeneInformation <- function(generator, readcounts, parameters) {
 #' @export
 #'
 #' @examples
-importSampleGeneInformation <- function(sample, readcounts, parameters) {
+importSampleGeneInformation <- function(sample, dataset, parameters) {
   
+  readcounts <- dataset$readcounts.preprocessed
+  
+  if(is.null(readcounts)) {
+    stop("No read counts loaded!")
+  }
   if(!is.SummarizedExperiment(readcounts)) {
     stop("No readcounts to annotate!")
   }
@@ -214,12 +239,12 @@ importSampleGeneInformation <- function(sample, readcounts, parameters) {
   })
   
   if(sample == "vitamins.gff3") {
-    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", readcounts, parameters)
+    data <- importGeneInformationFromAnnotation(con, "gff_ensembl", dataset, parameters)
     return(data)
   }
   else if(sample == "genes.annotation.vitamins.csv") {
     parameters$separator <- ","
-    data <- importGeneInformationFromAnnotation(con, "pcago_csv", readcounts, parameters)
+    data <- importGeneInformationFromAnnotation(con, "pcago_csv", dataset, parameters)
     return(data)
   }
   else {

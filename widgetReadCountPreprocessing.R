@@ -21,43 +21,50 @@ readCountPreprocessingUI <- function(id) {
 readCountPreprocessingData_ <- function(input, 
                                         output, 
                                         session,
-                                        readcounts) {
+                                        dataset) {
   
   return(reactive({
     
-    validate(need(readcounts(), "[Read count processing] No read counts to process!"))
+    validate(need(dataset(), "[Read count processing] No read counts to process!"))
+    validate(need(dataset()$readcounts.raw, "[Read count processing] No read counts to process!"))
     
-    output <- list(removed.genes = c(), readcounts = readcounts(), operation.transpose = F, operation.remove.zero = F)
+    dataset <- dataset()
+    
+    readcounts.preprocessing.parameters <- list(removed.genes = c(), operation.transpose = F, operation.remove.zero = F)
+    dataset$readcounts.preprocessed <- dataset$readcounts.raw
     
     # Transpose read counts
     if(input$preprocessing.transpose) {
-      output$operation.transpose <- T
-      output$readcounts <- transposeReadCounts(output$readcounts)
+      readcounts.preprocessing.parameters$operation.transpose <- T
+      dataset$readcounts.preprocessed <- transposeReadCounts(output$readcounts)
     }
     
     # Prevent too many samples
-    if(ncol(output$readcounts) > 100) {
+    if(ncol(dataset$readcounts.preprocessed) > 100) {
       showNotification("There are over 100 samples! I won't calculate with that! Maybe you need to transpose your data?", type = "error")
-      return(NULL)
+      dataset()$readcounts.preprocessed <- NULL
+      return(dataset)
     }
     
-    # Remove constant read genes
+    # Remove zero
     if(input$preprocessing.zero) {
-      processed <- removeConstantReads(output$readcounts)
-      output$readcounts <- processed$readcounts
-      output$removed.genes <- processed$genes.removed
-      output$operation.remove.zero <- T
+      processed <- removeZeroReads(dataset()$readcounts.raw)
+      dataset$readcounts.preprocessed <- processed$readcounts
+      readcounts.preprocessing.parameters$removed.genes <- processed$genes.removed
+      readcounts.preprocessing.parameters$operation.remove.zero <- T
     }
     
-    return(output)
+    dataset$readcounts.preprocessing.parameters <- readcounts.preprocessing.parameters
+    
+    return(dataset)
     
   }))
   
 }
 
-readCountPreprocessingData <- function(id, readcounts) {
+readCountPreprocessingData <- function(id, dataset) {
   
   return(callModule(readCountPreprocessingData_,
                     id,
-                    readcounts = readcounts))
+                    dataset = dataset))
 }

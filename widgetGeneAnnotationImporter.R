@@ -44,20 +44,25 @@ geneAnnotationImporterUI <- function(id) {
 #' @export
 #'
 #' @examples
-geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
+geneAnnotationImporterValue_ <- function(input, output, session, dataset) {
   
-  return(genericImporterData("importer", 
+  readcounts <- reactive({
+    validate(need(dataset(), "No preprocessed read counts available!"))
+    return(dataset()$readcounts.preprocessed)
+  })
+  
+  annotation <- (genericImporterData("importer", 
                              importers = reactive(supportedGeneAnnotationImporters),
                              samples = reactive(availableGeneAnnotationSamples),
                              generators = reactive(supportedGeneAnnotationGenerators),
                              exprimport = function(con, importer, parameters) {
-                               return(importGeneInformationFromAnnotation(con, importer, readcounts(), parameters))
+                               return(importGeneInformationFromAnnotation(con, importer, dataset(), parameters))
                              },
                              exprsample = function(sample, parameters) {
-                               return(importSampleGeneInformation(sample, readcounts(), parameters))
+                               return(importSampleGeneInformation(sample, dataset(), parameters))
                              },
                              exprgenerator = function(generator, parameters) {
-                               return(generateGeneInformation(generator, readcounts(), parameters))
+                               return(generateGeneInformation(generator, dataset(), parameters))
                              },
                              exprintegrate = function(data, callback) {
                                output <- GeneAnnotation()
@@ -92,6 +97,12 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
                                return(output)
                              }))
   
+  return(reactive({
+    dataset <- dataset()
+    dataset$gene.annotation <- annotation()
+    return(dataset)
+  }))
+  
 }
 
 #' Extracts the gene annotation based on the user input.
@@ -103,8 +114,8 @@ geneAnnotationImporterValue_ <- function(input, output, session, readcounts) {
 #' @export
 #'
 #' @examples
-geneAnnotationImporterValue <- function(id, readcounts) {
+geneAnnotationImporterValue <- function(id, dataset) {
   
-  return(callModule(geneAnnotationImporterValue_, id, readcounts = readcounts))
+  return(callModule(geneAnnotationImporterValue_, id, dataset = dataset))
   
 }

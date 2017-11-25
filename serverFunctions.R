@@ -69,6 +69,197 @@ serverAutoNavigation <- function(input, session) {
   })
 }
 
+#' Fills PCAGO with some sample data
+#'
+#' @param variables 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverQuickLoad <- function(variables) {
+  # Note: Shiny is clearly not designed for this
+  # This quick loading consists of a quick hack to circumvent complicated flow control of the data
+  
+  notification.id <- progressNotification("Please wait ... importing data")
+  
+  shinyjs::disable("quickio.load")
+  on.exit({ 
+    shinyjs::enable("quickio.load")
+    removeNotification(id = notification.id) 
+  })
+  
+  # Raw data
+  dataset <- importReadcountSample("Monocytes/readcounts_rna.csv", list())
+  
+  # Processing
+  dataset$readcounts.preprocessed <- dataset$readcounts.raw # Only required for the loading of sample annotation. Will be properly handled by its repective widget
+  
+  # Sample annotation
+  dataset$sample.annotation <- importSampleAnnotationSample("Monocytes/sample_annotation_conditions.csv", 
+                                                            dataset = dataset,
+                                                            parameters = list(imported_data = c("conditions"),
+                                                                              collapse_conditions = F))
+  
+  variables$dataset <- dataset
+}
+
+#' Saves dataset into a zip
+#'
+#' @param filename 
+#' @param dataset 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverQuickSave <- function(filename, input, dataset) {
+  
+  if(is.null(dataset)) {
+    showNotification("Currently no data loaded!", type = "error")
+    return()
+  }
+  
+  notification.id <- progressNotification("Please wait ... exporting data")
+  
+  shinyjs::disable("quickio.save")
+  on.exit({ 
+    shinyjs::enable("quickio.save")
+    removeNotification(id = notification.id) 
+  })
+  
+  basefile <- tempfile("pcago-export")
+  dir.create(basefile, recursive = T)
+  
+  print(basefile)
+  
+  failed <- c()
+  
+  # Export read counts
+  if(!is.null(dataset$readcounts.raw)) {
+    write.table(assay(dataset$readcounts.raw),
+                paste0(basefile, "/readcounts_raw.csv"),
+                sep = ",",
+                row.names = T,
+                col.names = NA)
+  }
+  else {
+    failed <- c(failed, "Raw read counts")
+  }
+  
+  if(!is.null(dataset$readcounts.processed)) {
+    write.table(assay(dataset$readcounts.processed),
+                paste0(basefile, "/readcounts_processed.csv"),
+                sep = ",",
+                row.names = T,
+                col.names = NA)
+  }
+  else {
+    failed <- c(failed, "Processed read counts")
+  }
+  
+  if(!is.null(dataset$readcounts.filtered)) {
+    write.table(assay(dataset$readcounts.filtered),
+                paste0(basefile, "/readcounts_filtered.csv"),
+                sep = ",",
+                row.names = T,
+                col.names = NA)
+  }
+  else {
+    failed <- c(failed, "Filtered read counts")
+  }
+  
+  if(!is.null(dataset$readcounts.top.variant)) {
+    write.table(assay(dataset$readcounts.top.variant),
+                paste0(basefile, "/readcounts_top_variant.csv"),
+                sep = ",",
+                row.names = T,
+                col.names = NA)
+  }
+  else {
+    failed <- c(failed, "Top variant read counts")
+  }
+  
+  # PCA transformation result
+  if(!is.null(dataset$pca.top.variant)) {
+    write.table(dataset$pca.top.variant$transformed,
+                paste0(basefile, "/readcounts_pca_transformed.csv"),
+                sep = ",",
+                row.names = T,
+                col.names = NA)
+  }
+  else {
+    failed <- c(failed, "PCA transformed read counts")
+  }
+  
+  # PCA plot
+  
+  pca.gene.count <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant.parameters.count)
+  })
+  
+  # TODO: Not working
+  plot <- plotSamplePlot_export("pca.samples.plot",
+                 dataset = reactive( { dataset } ),
+                 animation.params = pca.gene.count,
+                 pca.center = reactive({input$pca.pca.settings.center}),
+                 pca.scale = reactive({input$pca.pca.settings.scale}),
+                 pca.relative = reactive({input$pca.pca.settings.relative}))
+  plot()
+  
+  # Processing report
+  readcountProcessing.at.pca.save(paste0(basefile, "/processing_report.html"), reactive( { dataset } ) )
+  
+  if(length(failed) > 0) {
+    showNotification(paste("Cannot export data that is not available:", paste(failed, collapse = ", ")), type = "warning")
+  }
+  
+  zip(zipfile = filename, 
+      files = basefile,
+      flags = "-r9Xj")
+  
+}
+
+#' QuickIO implementation
+#'
+#' @param session 
+#' @param input 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverQuickIO <- function(input, output, session, variables, dataset.final) {
+  
+  observeEvent(input$quickio.load, {
+    if(is.null(variables$dataset)) {
+      serverQuickLoad(variables)
+    }
+    else {
+      showModal(modalDialog(
+        "Do you really want to load sample data?",
+        footer = tagList(
+          modalButton("No"),
+          actionButton("quickio.load.yes", "Yes")
+        )
+      ))
+    }
+  })
+  
+  observeEvent(input$quickio.load.yes, {
+    removeModal()
+    serverQuickLoad(variables)
+  })
+  
+  # output$quickio.save <- downloadHandler(filename = "pcago_data.zip",
+  #                                        content = function(filename) {
+  #                                          serverQuickSave(filename, input, dataset.final())
+  #                                        },
+  #                                        contentType = "application/zip")
+  
+}
+
 #' Automatically navigates to a content navigation based on which data is refereshed
 #'
 #' @param observed 
@@ -84,66 +275,6 @@ serverReactiveNavigation <- function(session, observed, target.nav) {
   })
 }
 
-#' Lets the user choose a set of genes based on the features
-#'
-#' @param readcounts.processed 
-#' @param gene.annotation 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
-  
-  return(filterSelectionValues("pca.pca.genes.set",  reactive({
-    
-    validate(need(readcounts.processed(), "[Gene filtering] No readcounts to process!"),
-             need(gene.annotation(), "[Gene filtering] No gene annotation available!"))
-    
-    gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
-    all.genes <- rownames(readcounts.processed())
-    
-    annotation <- gene.annotation()
-    annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
-    
-    {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.biotype))
-      gene.criteria[["Biotype"]] <- annotation@gene.biotype@data
-      
-      if(length(unused.genes) > 0) {
-        gene.criteria[["Biotype"]][["No data"]] <- unused.genes
-      }
-    }
-    {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.go.terms))
-      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms@data
-      
-      if(length(unused.genes) > 0) {
-        gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
-      }
-    }
-    {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.scaffold))
-      gene.criteria[["Scaffold"]] <- annotation@gene.scaffold@data
-      
-      if(length(unused.genes) > 0) {
-        gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
-      }
-    }
-    {
-      unused.genes <- setdiff(all.genes, geneFilterGenes(annotation@gene.custom))
-      gene.criteria[["Custom"]] <- annotation@gene.custom@data
-      
-      if(length(unused.genes) > 0) {
-        gene.criteria[["Custom"]][["No data"]] <- unused.genes
-      }
-    }
-    
-    return(gene.criteria)
-    
-  })))
-}
-
 #' Filters the read count table by only returning the rows that are in the list of genes.
 #'
 #' @param genes.filtered 
@@ -153,9 +284,71 @@ serverFilteredGenes <- function(readcounts.processed, gene.annotation) {
 #' @export
 #'
 #' @examples
-serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
+serverFilterReadcountsByAnnotation <- function(dataset) {
+  
+  readcounts.processed <- reactive({ 
+    validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
+    return(dataset()$readcounts.processed)
+  })
+  gene.annotation <- reactive({ 
+    validate(need(dataset(), "[Gene filtering] No gene annotation available!"))
+    return(dataset()$gene.annotation)
+  })
+  
+  # Get the list of genes we want
+  genes.filtered <- (filterSelectionValues("pca.pca.genes.set",  reactive({
+    
+    validate(need(readcounts.processed(), "[Gene filtering] No readcounts to process!"),
+             need(gene.annotation(), "[Gene filtering] No gene annotation available!"))
+    
+    
+    gene.criteria <- list() # This list contains Category -> list of [ Criterion -> Vector of genes ]
+    all.genes <- rownames(readcounts.processed())
+    
+    annotation <- gene.annotation()
+    annotation <- geneAnnotationRestrictToGenes(annotation, all.genes) # The annotation is for the complete set of genes. But we want to filter processed readcounts
+    
+    {
+      unused.genes <- setdiff(all.genes, (annotation@gene.biotype$get_genes()))
+      gene.criteria[["Biotype"]] <- annotation@gene.biotype$data
+      
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Biotype"]][["No data"]] <- unused.genes
+      }
+    }
+    {
+      unused.genes <- setdiff(all.genes, (annotation@gene.go.terms$get_genes()))
+      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms$data
+      
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
+      }
+    }
+    {
+      unused.genes <- setdiff(all.genes, (annotation@gene.scaffold$get_genes()))
+      gene.criteria[["Scaffold"]] <- annotation@gene.scaffold$data
+      
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Scaffold"]][["No data"]] <- unused.genes
+      }
+    }
+    {
+      unused.genes <- setdiff(all.genes, (annotation@gene.custom$get_genes()))
+      gene.criteria[["Custom"]] <- annotation@gene.custom$data
+      
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Custom"]][["No data"]] <- unused.genes
+      }
+    }
+    
+    return(gene.criteria)
+    
+  })))
+  
+  # Return a dataset that both contains the filtered read counts and the list of filtered genes
   return(reactive({
     
+    validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
     validate(
       need(genes.filtered(), "[Gene filtering] No genes selected!"),
       need(length(genes.filtered()$values) > 0, "[Gene filtering] No genes selected!"))
@@ -165,7 +358,56 @@ serverFilterReadcounts <- function(genes.filtered, readcounts.processed) {
     
     keep.readcounts <- readcounts.processed()[keep.genes,]
     
-    return(keep.readcounts)
+    dataset <- dataset()
+    dataset$readcounts.filtered.parameters.genes <- genes.filtered()
+    dataset$readcounts.filtered <- keep.readcounts
+    
+    return(dataset)
+  }))
+}
+
+#' Filters read counts by selecting only the top variant genes
+#'
+#' @param dataset 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverFilterReadCountsByVariance <- function(dataset) {
+  
+  readcounts.filtered <- reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    return(dataset()$readcounts.filtered)
+  })
+  
+  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
+                                             value.min = reactive({ 1 }),
+                                             value.max = reactive({ nrow(readcounts.filtered()) }),
+                                             value.default = reactive({ nrow(readcounts.filtered()) }))
+  readcounts.top.variant <- reactive({  })
+  
+  pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
+                                                        readcounts = readcounts.filtered,
+                                                        pca.center = reactive(input$pca.pca.settings.center),
+                                                        pca.scale = reactive(input$pca.pca.settings.scale)) # Minimal set of genes that clusters the same
+  observeEvent(pca.pca.genes.set.count.minimal(), {
+    updateExtendedSliderInput("pca.genes.count", value = pca.pca.genes.set.count.minimal())
+  })
+  
+  return(reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    validate(need(dataset()$variances.filtered, "No filtered read counts available!"))
+    
+    dataset <- dataset()
+    dataset$readcounts.top.variant <- selectTopVariantGeneReadcounts(dataset$readcounts.filtered, dataset$variances.filtered, pca.gene.count()$value)
+    dataset$variances.top.variant <- buildGeneVarianceTable(dataset$readcounts.top.variant)
+    dataset$readcounts.top.variant.parameters.count <- pca.gene.count()$value
+    
+    return(dataset)
+    
   }))
 }
 

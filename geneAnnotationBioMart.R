@@ -103,7 +103,7 @@ getBioMartGOTerms <- function(mart, genes) {
     
   }
   
-  return(GeneAnnotation(gene.go.terms = GeneFilter(data = go.terms.filter)))
+  return(GeneAnnotation(gene.go.terms = GeneFilter$new(data = go.terms.filter)))
 }
 
 #' Returns a table with gene and biotype 
@@ -134,7 +134,7 @@ getBioMartBiotype <- function(mart, genes) {
     biotypes[[feature]] <- unique(bm$gene[bm$type == feature])
   }
   
-  return(GeneAnnotation(gene.biotype = GeneFilter(data = biotypes)))
+  return(GeneAnnotation(gene.biotype = GeneFilter$new(data = biotypes)))
 }
 
 #' Returns a table with gene and scaffold 
@@ -166,7 +166,7 @@ getBioMartScaffold <- function(mart, genes) {
     scaffold[[feature]] <- unique(bm$gene[bm$scaffold == feature])
   }
   
-  return(GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
+  return(GeneAnnotation(gene.scaffold = GeneFilter$new(data = scaffold)))
 }
 
 bioMart.databaseChoices <- function() {
@@ -213,7 +213,9 @@ bioMart.importerEntry <- ImporterEntry(name = "ensembl_biomart",
                                        ))
 
 
-generateGeneInformation.EnsemblBioMart <- function(database, species, imported_data, readcounts) {
+generateGeneInformation.EnsemblBioMart <- function(database, species, imported_data, dataset) {
+  
+  readcounts <- dataset$readcounts.preprocessed
   
   if(length(imported_data) == 0) {
     stop("No data to be imported selected!")

@@ -34,6 +34,39 @@ processingStepsWidgetUI <- function(id, title) {
   
 }
 
+#' Exports the processing steps within data as HTML
+#'
+#' @param filename 
+#' @param data 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+processingStepsWidget.exportHTML <- function(filename, data) {
+  steps <- tagList()
+  
+  for(processing.output in data) {
+    
+    output <- processing.output()
+    
+    if(!is.null(output)) {
+      
+      title <- paste0(length(steps) + 1, ". ", output$title)
+      steps <- tagAppendChild(steps, h1(title))
+      steps <- tagAppendChild(steps, output$content)
+    }
+    
+  }
+  
+  conn <- file(filename)
+  on.exit({
+    close(conn)
+  })
+  
+  writeLines(paste(steps), conn)
+}
+
 #' Displays the output of the reactives in ... in the UI
 #' #' 
 #' Processing step info functions must return NULL or a list with title and content entries.
@@ -77,29 +110,7 @@ processingStepsWidgetData_ <- function(input, output, session, ...) {
   })
   
   output$export.html <- downloadHandler("report.html", function(filename) {
-    
-    steps <- tagList()
-    
-    for(processing.output in list(...)) {
-      
-      output <- processing.output()
-      
-      if(!is.null(output)) {
-        
-        title <- paste0(length(steps) + 1, ". ", output$title)
-        steps <- tagAppendChild(steps, h1(title))
-        steps <- tagAppendChild(steps, output$content)
-      }
-      
-    }
-    
-    conn <- file(filename)
-    on.exit({
-      close(conn)
-    })
-    
-    writeLines(paste(steps), conn)
-    
+    processingStepsWidget.exportHTML(filename, list(...))
   })
   
 }
