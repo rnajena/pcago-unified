@@ -77,8 +77,6 @@ shinyServer(function(input, output, session) {
   # Readcount processing
   
   dataset.preprocessed <- readCountPreprocessingData("data.readcounts.preprocessing", dataset.raw)
-  
-  readcounts.preprocessing.output <- reactive({ dataset.preprocessed()$readcounts.preprocessing.parameters })
   readcounts.preprocessed <- reactive({ dataset.preprocessed()$readcounts.preprocessed })
   
   dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", dataset = dataset.preprocessed)
@@ -107,10 +105,6 @@ shinyServer(function(input, output, session) {
   # Finish processing of read counts with normalization
   dataset.normalized <- readCountNormalizationData("data.readcounts.normalization", 
                                                    dataset = dataset.gene.annotation)
-  readcounts.normalization.output <- reactive({ 
-    validate(need(dataset.normalized(), "No normalized read counts available!"))
-    return(dataset.normalized()$readcounts.normalization.parameters)
-    })
   readcounts.normalized <- reactive({ 
     validate(need(dataset.normalized(), "No normalized read counts available!"))
     return(dataset.normalized()$readcounts.normalized )
@@ -122,11 +116,6 @@ shinyServer(function(input, output, session) {
   readcounts.processed <- reactive({
     validate(need(dataset.postprocessed(), "No processed read counts available!"))
     return(dataset.postprocessed()$readcounts.processed )
-  })
-  
-  readcounts.postprocessing.output <- reactive({
-    validate(need(dataset.postprocessed(), "No processed read counts available!"))
-    return(dataset.postprocessed()$readcounts.postprocessing.parameters )
   })
   
   # Obtain the list of genes the user wants to use
@@ -253,12 +242,8 @@ shinyServer(function(input, output, session) {
                                   default.title = reactive({ "PCA transformed values clustering" }))
   
   plotSamplePlot("pca.samples.plot",
-               readcounts.processed = readcounts.processed,
-               readcounts.filtered = readcounts.filtered,
-               readcounts.top.variant = readcounts.top.variant,
-               gene.variances = readcounts.filtered.variances, # Important! Needed for movie function!
+               dataset = dataset.pca,
                animation.params = pca.gene.count,
-               conditions = conditions,
                pca.center = reactive({input$pca.pca.settings.center}),
                pca.scale = reactive({input$pca.pca.settings.scale}),
                pca.relative = reactive({input$pca.pca.settings.relative}))
