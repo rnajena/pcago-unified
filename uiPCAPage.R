@@ -34,10 +34,8 @@ uiPCAPage <- function() {
       type = "pills"
     ),
     hDivider(),
-    dropdownButton(ns("quickio"), "Quick actions", 
-                   icon = icon("bolt"),
-                   content = list(actionButton("quickio.load", "Quick load sample data", icon = icon("folder-open")),
-                   actionButton("quickio.save", "Quick save all data", icon = icon("floppy-o"))))),
+    tags$p(actionLink("quickio.load", "Load all sample data", icon = icon("folder-open"))),
+    tags$p(downloadLink("quickio.save", iconText(icon("download"), "Download all data")))),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
                          selected = "pca.samples.plot",
@@ -95,6 +93,7 @@ uiPCAPage <- function() {
                                              downloadableDataTableOutput("pca.transformed")),
                                     tabPanel("PCA samples plot", value = "pca.samples.plot", plotSamplePlotUI("pca.samples.plot"))
                                     ),
-                         tabPanel(faIconText("link", "Samples plot"), value = "pca.samples.plot.quicklink")))
+                         tabPanel(faIconText("link", "Samples plot"), value = "pca.samples.plot.quicklink")
+                         ))
   )))
 }

@@ -479,3 +479,31 @@ readcountProcessing.at.pca <- function(dataset) {
                             step.pca)
   
 }
+
+#' Saves all steps as HTML
+#'
+#' @param filename 
+#' @param dataset 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+readcountProcessing.at.pca.save <- function(filename, dataset) {
+  
+  step.transpose <- readcountProcessing.step.transpose(dataset)
+  step.remove.zero <- readcountProcessing.step.remove.zero(dataset)
+  step.normalization <- readcountProcessing.step.normalization(dataset)
+  step.remove.constant <- readcountProcessing.step.remove.constant(dataset)
+  step.filter <- readcountProcessing.step.filter(dataset)
+  step.top.variant <- readcountProcessing.step.top.variant(dataset)
+  step.pca <- readcountProcessing.step.pca(dataset)
+  
+  processingStepsWidget.exportHTML(filename, list(step.transpose,
+                                                  step.remove.zero,
+                                                  step.normalization,
+                                                  step.remove.constant,
+                                                  step.filter,
+                                                  step.top.variant,
+                                                  step.pca))
+}

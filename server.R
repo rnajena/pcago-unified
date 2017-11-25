@@ -199,7 +199,7 @@ shinyServer(function(input, output, session) {
   serverAutoNavigation(input, session)
   
   # QuickIO
-  serverQuickIO(input, session, variables)
+  serverQuickIO(input, output, session, variables, dataset.pca)
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
