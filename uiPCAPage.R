@@ -34,8 +34,9 @@ uiPCAPage <- function() {
       type = "pills"
     ),
     hDivider(),
-    tags$p(actionLink("quickio.load", "Load all sample data", icon = icon("folder-open"))),
-    tags$p(downloadLink("quickio.save", iconText(icon("download"), "Download all data")))),
+    tags$p(actionLink("quickio.load", "Load all sample data", icon = icon("folder-open"))) #,
+    # tags$p(downloadLink("quickio.save", iconText(icon("download"), "Download all data"))) # not working
+    ),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
                          id = "pca.nav",
                          selected = "pca.samples.plot",

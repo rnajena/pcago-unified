@@ -113,7 +113,7 @@ serverQuickLoad <- function(variables) {
 #' @export
 #'
 #' @examples
-serverQuickSave <- function(filename, dataset) {
+serverQuickSave <- function(filename, input, dataset) {
   
   if(is.null(dataset)) {
     showNotification("Currently no data loaded!", type = "error")
@@ -192,6 +192,22 @@ serverQuickSave <- function(filename, dataset) {
     failed <- c(failed, "PCA transformed read counts")
   }
   
+  # PCA plot
+  
+  pca.gene.count <- reactive({
+    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
+    return(dataset.top.variant()$readcounts.top.variant.parameters.count)
+  })
+  
+  # TODO: Not working
+  plot <- plotSamplePlot_export("pca.samples.plot",
+                 dataset = reactive( { dataset } ),
+                 animation.params = pca.gene.count,
+                 pca.center = reactive({input$pca.pca.settings.center}),
+                 pca.scale = reactive({input$pca.pca.settings.scale}),
+                 pca.relative = reactive({input$pca.pca.settings.relative}))
+  plot()
+  
   # Processing report
   readcountProcessing.at.pca.save(paste0(basefile, "/processing_report.html"), reactive( { dataset } ) )
   
@@ -236,11 +252,11 @@ serverQuickIO <- function(input, output, session, variables, dataset.final) {
     serverQuickLoad(variables)
   })
   
-  output$quickio.save <- downloadHandler(filename = "pcago_data.zip",
-                                         content = function(filename) {
-                                           serverQuickSave(filename, dataset.final())
-                                         },
-                                         contentType = "application/zip")
+  # output$quickio.save <- downloadHandler(filename = "pcago_data.zip",
+  #                                        content = function(filename) {
+  #                                          serverQuickSave(filename, input, dataset.final())
+  #                                        },
+  #                                        contentType = "application/zip")
   
 }
 

@@ -131,20 +131,6 @@ plotSamplePlot.save <- function(pca,
   yaxislimit <- NULL
   zaxislimit <- NULL
   
-  # if(calculateaxeslimits) {
-  #   xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
-  #                   max(pca.full$transformed[, dimensions.requested[1]]))
-  #   
-  #   if(dimensions.plot > 1) {
-  #     yaxislimit <- c(min(pca.full$transformed[, dimensions.requested[2]]),
-  #                     max(pca.full$transformed[, dimensions.requested[2]]))
-  #   }
-  #   if(dimensions.plot > 2) {
-  #     zaxislimit <- c(min(pca.full$transformed[, dimensions.requested[3]]),
-  #                     max(pca.full$transformed[, dimensions.requested[3]]))
-  #   }
-  # }
-  
   if(axislimits$x$mode == "allgenes") {
     xaxislimit <- c(min(pca.full$transformed[, dimensions.requested[1]]),
                   max(pca.full$transformed[, dimensions.requested[1]]))
@@ -392,6 +378,151 @@ plotSamplePlot.saveMovie <- function(filename,
   showNotification("Your video file has been successfully rendered.", type = "message")
 }
 
+#' Exports the plot as SVG
+#'
+#' @param input 
+#' @param output 
+#' @param session 
+#' @param filename 
+#' @param dataset 
+#' @param animation.params 
+#' @param pca.center 
+#' @param pca.scale 
+#' @param pca.relative 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotSamplePlot_export_ <- function(input, 
+                                    output, 
+                                    session, 
+                                    filename,
+                                    dataset,
+                                    animation.params,
+                                    pca.center,
+                                    pca.scale,
+                                    pca.relative) {
+  readcounts.processed <- reactive({
+    validate(need(dataset(), "No processed read counts available!"))
+    validate(need(dataset()$readcounts.processed, "No processed read counts available!"))
+    return(dataset()$readcounts.processed)
+  })
+  readcounts.filtered <- reactive({
+    validate(need(dataset(), "No filtered read counts available!"))
+    validate(need(dataset()$readcounts.filtered, "No filtered read counts available!"))
+    return(dataset()$readcounts.filtered)
+  })
+  readcounts.top.variant <- reactive({
+    validate(need(dataset(), "No top variant read counts available!"))
+    validate(need(dataset()$readcounts.top.variant, "No top variant read counts available!"))
+    return(dataset()$readcounts.top.variant)
+  })
+  gene.variances <- reactive({
+    validate(need(dataset(), "No gene variances available!"))
+    validate(need(dataset()$variances.filtered, "No gene variances available!"))
+    return(dataset()$variances.filtered)
+  })
+  conditions <- reactive({
+    validate(need(dataset(), "No sample conditions available!"))
+    validate(need(dataset()$sample.annotation, "No sample conditions available!"))
+    validate(need(dataset()$sample.annotation@conditions, "No sample conditions available!"))
+    return(dataset()$sample.annotation@conditions)
+  })
+  
+  pca <- serverPCA(pca.center,
+                   pca.scale,
+                   pca.relative,
+                   readcounts.top.variant)
+  pca.full <- serverPCA(pca.center,
+                        pca.scale,
+                        pca.relative,
+                        readcounts.filtered)
+  
+  visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
+  visuals.sample <- reactive({ calculateSampleVisuals(colnames(readcounts.processed()), conditions(), visuals.conditions()) })
+  plot.settings <- generalPlotSettings("plot.settings")
+  
+  # Axis limits selection 
+  min.axis.limit <- reactive({ return(min(pca.full()$transformed)) })
+  max.axis.limit <- reactive({ return(max(pca.full()$transformed)) })
+  
+  axislimits.x <- numericRangeInputValue("axis.limitx", min.axis.limit, max.axis.limit)
+  axislimits.y <- numericRangeInputValue("axis.limity", min.axis.limit, max.axis.limit)
+  axislimits.z <- numericRangeInputValue("axis.limitz", min.axis.limit, max.axis.limit)
+  
+  axislimits <- reactive({
+    return(list("x" = list("mode" = input$axis.limitx.mode, "range" = axislimits.x()),
+                "y" = list("mode" = input$axis.limity.mode, "range" = axislimits.y()),
+                "z" = list("mode" = input$axis.limitz.mode, "range" = axislimits.z())))
+  })
+  
+  return(reactive({
+    validate(need(pca(), "No PCA results to plot!"),
+             need(visuals.sample(), "No visual parameters!"))
+    
+    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
+    
+    return(plotSamplePlot.save(pca = pca(),
+                               pca.full = pca.full(),
+                               visuals.conditions = visuals.conditions(),
+                               visuals.sample = visuals.sample(),
+                               axes = input$axes,
+                               plot.settings = plot.settings,
+                               axislimits = axislimits(),
+                               stabilizeplot = input$stabilizeplot,
+                               format = format,
+                               filename = filename))
+  }))
+}
+
+#' Exports the plot as SVG
+#'
+#' @param filename 
+#' @param dataset 
+#' @param animation.params 
+#' @param pca.center 
+#' @param pca.scale 
+#' @param pca.relative 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotSamplePlot_export <- function(id, 
+                                  filename,
+                             dataset,
+                             animation.params,
+                             pca.center,
+                             pca.scale,
+                             pca.relative) {
+  
+  return(callModule(plotSamplePlot_export_, 
+                    id, 
+                    filename = filename,
+                    dataset = dataset,
+                    animation.params = animation.params,
+                    pca.center = pca.center,
+                    pca.scale = pca.scale,
+                    pca.relative = pca.relative))
+  
+}
+
+#' Logic of the PCA sample plot
+#'
+#' @param input 
+#' @param output 
+#' @param session 
+#' @param dataset 
+#' @param animation.params 
+#' @param pca.center 
+#' @param pca.scale 
+#' @param pca.relative 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plotSamplePlot_ <- function(input, 
                           output, 
                           session, 
