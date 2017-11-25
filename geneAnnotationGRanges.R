@@ -85,7 +85,7 @@ GRanges.extractBiotypeAnnotation <- function(gr, genes) {
     }
   }
   
-  return(GeneAnnotation(gene.biotype = GeneFilter(data = features)))
+  return(GeneAnnotation(gene.biotype = GeneFilter$new(data = features)))
   
 }
 
@@ -114,5 +114,5 @@ GRanges.extractScaffoldAnnotation <- function(gr, genes) {
     }
   }
   
-  return(GeneAnnotation(gene.scaffold = GeneFilter(data = scaffold)))
+  return(GeneAnnotation(gene.scaffold = GeneFilter$new(data = scaffold)))
 }
