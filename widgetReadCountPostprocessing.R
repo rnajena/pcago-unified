@@ -29,7 +29,7 @@ readCountPostprocessingData_ <- function(input,
     
     dataset <- dataset()
     
-    output <- list(removed.genes = c(), operation.transpose = F, operation.remove.constant = F)
+    output <- list(removed.genes = c(), operation.remove.constant = F)
     
     # Remove constant read genes
     if(input$postprocessing.remove.constant) {

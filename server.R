@@ -198,6 +198,9 @@ shinyServer(function(input, output, session) {
   # Auto navigation
   serverAutoNavigation(input, session)
   
+  # QuickIO
+  serverQuickIO(input, session, variables)
+  
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
   

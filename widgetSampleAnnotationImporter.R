@@ -82,6 +82,11 @@ sampleAnnotationImporterValue_ <- function(input, output, session, dataset) {
                                                      
                                                      output <- SampleAnnotation()
                                                      
+                                                     # Injection point for quickio
+                                                     if(!is.null(dataset()$sample.annotation)) {
+                                                       output <- dataset()$sample.annotation
+                                                     }
+                                                     
                                                      choices <- SampleAnnotationNames
                                                      selected <- c()
                                                      

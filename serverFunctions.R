@@ -69,6 +69,44 @@ serverAutoNavigation <- function(input, session) {
   })
 }
 
+#' QuickIO implementation
+#'
+#' @param session 
+#' @param input 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverQuickIO <- function(input, session, variables) {
+  observeEvent(input$quickio.load, {
+    # Note: Shiny is clearly not designed for this
+    # This quick loading consists of a quick hack to circumvent complicated flow control of the data
+    
+    notification.id <- progressNotification("Please wait ... importing data")
+    
+    shinyjs::disable("quickio.load")
+    on.exit({ 
+      shinyjs::enable("quickio.load")
+      removeNotification(id = notification.id) 
+    })
+    
+    # Raw data
+    dataset <- importReadcountSample("Monocytes/readcounts_rna.csv", list())
+    
+    # Processing
+    dataset$readcounts.preprocessed <- dataset$readcounts.raw # Only required for the loading of sample annotation. Will be properly handled by its repective widget
+    
+    # Sample annotation
+    dataset$sample.annotation <- importSampleAnnotationSample("Monocytes/sample_annotation_conditions.csv", 
+                                                              dataset = dataset,
+                                                              parameters = list(imported_data = c("conditions"),
+                                                                                collapse_conditions = F))
+    
+    variables$dataset <- dataset
+  })
+}
+
 #' Automatically navigates to a content navigation based on which data is refereshed
 #'
 #' @param observed 
