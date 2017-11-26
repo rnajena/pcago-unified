@@ -60,6 +60,8 @@ shinyServer(function(input, output, session) {
                               export.readcounts.filtered = NULL,
                               export.readcounts.top.variant = NULL,
                               export.readcounts.pca.transformed = NULL,
+                              export.sample.annotation.conditions = NULL,
+                              export.sample.annotation.sampleinfo = NULL,
                               export.count = 0)
   
   
@@ -206,8 +208,8 @@ shinyServer(function(input, output, session) {
   plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
   
   # Sample annotation
-  downloadableDataTable("samples.annotation", export.filename = "annotation", data = reactive({ sampleAnnotationToTable(sample.annotation()) }))
-  downloadableDataTable("samples.conditions", export.filename = "conditions", data = conditions)
+  xauto.export.sample.annotation.sampleinfo <- downloadableDataTable("samples.annotation", export.filename = "annotation", data = reactive({ sampleAnnotationToTable(sample.annotation()) }), xauto = reactive({ xautovars$export.sample.annotation.sampleinfo }))
+  xauto.export.sample.annotation.conditions <- downloadableDataTable("samples.conditions", export.filename = "conditions", data = conditions, xauto = reactive({ xautovars$export.sample.annotation.conditions }))
   plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
   
   
@@ -263,6 +265,8 @@ shinyServer(function(input, output, session) {
     xauto.export.readcounts.processed,
     xauto.export.readcounts.filtered,
     xauto.export.readcounts.top.variant,
-    xauto.export.readcounts.pca.transformed
+    xauto.export.readcounts.pca.transformed,
+    xauto.export.sample.annotation.conditions,
+    xauto.export.sample.annotation.sampleinfo
   ))
 })

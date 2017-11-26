@@ -165,6 +165,8 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   xautovars$export.readcounts.filtered <- list(filename = paste0(export.directory, "/readcounts_filtered.csv"), format = "csv")
   xautovars$export.readcounts.top.variant <- list(filename = paste0(export.directory, "/readcounts_top_variant.csv"), format = "csv")
   xautovars$export.readcounts.pca.transformed <- list(filename = paste0(export.directory, "/readcounts_pca_transformed.csv"), format = "csv")
+  xautovars$export.sample.annotation.conditions <- list(filename = paste0(export.directory, "/sample_conditions.csv"), format = "csv")
+  xautovars$export.sample.annotation.sampleinfo <- list(filename = paste0(export.directory, "/sample_annotation.csv"), format = "csv")
   
   for(target in export.targets) {
     observeEvent(target(), {
@@ -185,6 +187,8 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
       xautovars$export.readcounts.filtered <- NULL
       xautovars$export.readcounts.top.variant <- NULL
       xautovars$export.readcounts.pca.transformed <- NULL
+      xautovars$export.sample.annotation.conditions <- NULL
+      xautovars$export.sample.annotation.sampleinfo <- NULL
       
       # Reset notification
       shinyjs::enable("quickio.save")
