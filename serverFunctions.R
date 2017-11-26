@@ -115,6 +115,8 @@ serverQuickLoad <- function(xautovars, dataset.preprocessed) {
                                        parameters = list(imported_data = c("conditions"),
                                                          collapse_conditions = F)
       )
+      
+      reset.flow()
     }
   })
   
