@@ -62,6 +62,9 @@ shinyServer(function(input, output, session) {
                               export.readcounts.pca.transformed = NULL,
                               export.sample.annotation.conditions = NULL,
                               export.sample.annotation.sampleinfo = NULL,
+                              export.gene.annotation = NULL,
+                              export.gene.variances.processed = NULL,
+                              export.gene.variances.filtered = NULL,
                               export.count = 0)
   
   
@@ -212,10 +215,11 @@ shinyServer(function(input, output, session) {
   xauto.export.sample.annotation.conditions <- downloadableDataTable("samples.conditions", export.filename = "conditions", data = conditions, xauto = reactive({ xautovars$export.sample.annotation.conditions }))
   plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
   
+  # Gene annotation
   
-  downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.processed.variances))
-  downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.filtered.variances))
-  downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.annotation))
+  xauto.export.gene.variances.processed <- downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.processed.variances), xauto = reactive({ xautovars$export.gene.variances.processed }))
+  xauto.export.gene.variances.filtered <- downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.filtered.variances), xauto = reactive({ xautovars$export.gene.variances.filtered }))
+  xauto.export.gene.annotation <- downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.annotation), xauto = reactive({ xautovars$export.gene.annotation }))
   
   # Gene filtering
   output$pca.pca.genes.set.count <- renderText({
@@ -267,6 +271,9 @@ shinyServer(function(input, output, session) {
     xauto.export.readcounts.top.variant,
     xauto.export.readcounts.pca.transformed,
     xauto.export.sample.annotation.conditions,
-    xauto.export.sample.annotation.sampleinfo
+    xauto.export.sample.annotation.sampleinfo,
+    xauto.export.gene.variances.processed,
+    xauto.export.gene.variances.filtered,
+    xauto.export.gene.annotation
   ))
 })

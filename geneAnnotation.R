@@ -48,10 +48,10 @@ supportedGeneAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
 availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
-                                                 label = "Vitamins (PCAGO annotation table CSV)",
+                                                 label = "Monocytes (PCAGO annotation table CSV)",
                                                  parameters = list(geneAnnotationImporterParameter.imported_data.pcago_csv)),
                                    ImporterEntry(name = "vitamins.gff3",
-                                                 label = "Vitamins (Ensembl GFF)",
+                                                 label = "Monocytes (Ensembl GFF)",
                                                  parameters = list(geneAnnotationImporterParameter.imported_data.gff_ensembl)))
 
 #' Extracts gene information from an Ensembl GFF file
