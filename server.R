@@ -55,6 +55,7 @@ shinyServer(function(input, output, session) {
   xautovars <- reactiveValues(import.readcounts.raw = NULL,
                               import.sample.annotation = NULL,
                               import.stage = "null",
+                              import.ask = F,
                               export.readcounts.raw = NULL,
                               export.readcounts.processed = NULL,
                               export.readcounts.filtered = NULL,
@@ -86,6 +87,10 @@ shinyServer(function(input, output, session) {
                                  exprimport = importReadcount, 
                                  exprsample = importReadcountSample,
                                  xauto = reactive({xautovars$import.readcounts.raw }))
+  
+  observeEvent(dataset.raw(), {
+    xautovars$import.ask <- T
+  })
   
   # Read counts
   readcounts.raw <- reactive(

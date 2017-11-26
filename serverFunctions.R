@@ -263,18 +263,18 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
 serverQuickIO <- function(input, output, session, xautovars, dataset.preprocessed, dataset.pca, export.targets) {
   
   observeEvent(input$quickio.load, {
-    #if(is.null(variables$dataset)) {
+    if(!xautovars$import.ask) {
       serverQuickLoad(xautovars, dataset.preprocessed, dataset.pca)
-    # }
-    # else {
-    #   showModal(modalDialog(
-    #     "Do you really want to load sample data?",
-    #     footer = tagList(
-    #       modalButton("No"),
-    #       actionButton("quickio.load.yes", "Yes")
-    #     )
-    #   ))
-    # }
+    }
+    else {
+      showModal(modalDialog(
+        "Do you really want to load sample data?",
+        footer = tagList(
+          modalButton("No"),
+          actionButton("quickio.load.yes", "Yes")
+        )
+      ))
+    }
   })
   
   observeEvent(input$quickio.load.yes, {
