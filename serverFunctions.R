@@ -95,7 +95,7 @@ serverQuickLoad <- function(xautovars, dataset.preprocessed, dataset.pca) {
     xautovars$import.stage <- "NULL"
   }
 
-  # Raw data
+  # Raw read counts
   xautovars$import.readcounts.raw <- list(source = "sample",
                                    clear = T,
                                    sample = "Monocytes/readcounts_rna.csv",
@@ -161,6 +161,10 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   
   # Data tables
   xautovars$export.readcounts.raw <- list(filename = paste0(export.directory, "/readcounts_raw.csv"), format = "csv")
+  xautovars$export.readcounts.processed <- list(filename = paste0(export.directory, "/readcounts_processed.csv"), format = "csv")
+  xautovars$export.readcounts.filtered <- list(filename = paste0(export.directory, "/readcounts_filtered.csv"), format = "csv")
+  xautovars$export.readcounts.top.variant <- list(filename = paste0(export.directory, "/readcounts_top_variant.csv"), format = "csv")
+  xautovars$export.readcounts.pca.transformed <- list(filename = paste0(export.directory, "/readcounts_pca_transformed.csv"), format = "csv")
   
   for(target in export.targets) {
     observeEvent(target(), {
@@ -177,6 +181,10 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
       # Reset the flow
       xautovars$export.count <- 0
       xautovars$export.readcounts.raw <- NULL
+      xautovars$export.readcounts.processed <- NULL
+      xautovars$export.readcounts.filtered <- NULL
+      xautovars$export.readcounts.top.variant <- NULL
+      xautovars$export.readcounts.pca.transformed <- NULL
       
       # Reset notification
       shinyjs::enable("quickio.save")
