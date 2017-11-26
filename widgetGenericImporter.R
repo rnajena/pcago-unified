@@ -192,6 +192,7 @@ genericImporterData.makeParameterInput <- function(input, ns, importer.object, s
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample, parameters)
 #' @param exprgenerator install The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator, parameters)
 #' @param exprintegrate If not NULL, the widget will hold multiple data that then will be integrated with this function
+#' @param xauto IF not NULL, this must be a function that returns a list(source = "sample", sample = <>, parameters = <>, clear = <T,F>) (Currently only supports importing samples)
 #' 
 #' exprintegrate: This function generates the output of this control it has following parameters:
 #' * data: List of data values to integrate
@@ -210,7 +211,8 @@ genericImporterData_ <- function(input,
                                  exprimport, 
                                  exprsample, 
                                  exprgenerator,
-                                 exprintegrate = NULL) {
+                                 exprintegrate = NULL,
+                                 xauto = NULL) {
   
   if(!is.reactive(importers) || !is.reactive(samples) || !is.reactive(generators)) {
     stop("Invalid arguments!")
@@ -302,12 +304,15 @@ genericImporterData_ <- function(input,
   output$parameter.slot4 <- genericImporterData.makeParameterInput(input, session$ns, importer.object, 4)
   
   # Reset data to NULL if reset button is clicked
-  observeEvent(input$reset, {
-    
+  
+  reset.data <- function() {
     variables$data <- list()
     variables$data.labels <- list()
     showNotification("Data has been reset.", type = "message")
-    
+  }
+  
+  observeEvent(input$reset, {
+    reset.data()
   })
   
   # For QOL improvement
@@ -322,6 +327,55 @@ genericImporterData_ <- function(input,
     names(data.labels)[length(data.labels)] <- label
     variables$data.labels <- data.labels
     
+  }
+  
+  # xauto importer that allows triggering of importing samples from code
+  if(!is.null(xauto)) {
+    
+    observeEvent(xauto(), {
+      
+      notification.id <- progressNotification("Please wait ... importing data")
+      shinyjs::disable("submit")
+      on.exit({ 
+        shinyjs::enable("submit")
+        removeNotification(id = notification.id) 
+      })
+      
+      # Allow clearing of data
+      if(xauto()$clear) {
+        reset.data()
+      }
+      
+      if(xauto()$source == "sample") {
+        sample <- xauto()$sample
+        parameters <- xauto()$parameters
+        
+        data <- tryCatch({exprsample(sample, parameters)}, 
+                         error = function(e){
+                           showNotification(paste(e), type = "error", duration = NULL)
+                           return(NULL)
+                         }, 
+                         warning = function(w)
+                         {
+                           showNotification(paste(w), type = "warning", duration = NULL)
+                           return(NULL)
+                         })
+        
+        if(!is.null(data)) {
+          
+          addData(data, paste0("Sample: ", sample))
+          
+          showNotification(paste("Loaded sample", sample), type = "message")
+        } 
+        else {
+          showNotification("Error while importing sample!", type = "error")
+        }
+      }
+      else {
+        stop("Not supported")
+      }
+      
+    })
   }
   
   # Import if the user clicks on the submit button
@@ -578,6 +632,7 @@ genericImporterData_ <- function(input,
 #' @param exprsample The expression to be called if the submit button is clicked, but the user wants to select a sample. Parameters are (sample, parameters)
 #' @param exprgenerator The expression to be called if the submit button is clicked, but the user wants to select a generator Parameters are (generator, parameters)
 #' @param exprintegrate If not NULL, the widget will hold multiple data that then will be integrated with this function
+#' @param xauto IF not NULL, this must be a function that returns a list(source = "sample", sample = <>, parameters = <>, clear = <T,F>) (Currently only supports importing samples)
 #' 
 #' exprintegrate: This function generates the output of this control it has following parameters:
 #' * data: List of data values to integrate
@@ -594,7 +649,8 @@ genericImporterData <- function(id,
                                 exprimport, 
                                 exprsample, 
                                 exprgenerator,
-                                exprintegrate = NULL) {
+                                exprintegrate = NULL,
+                                xauto = NULL) {
   
   return(callModule(genericImporterData_, 
                     id, 
@@ -604,6 +660,7 @@ genericImporterData <- function(id,
                     exprimport = exprimport, 
                     exprsample = exprsample, 
                     exprgenerator = exprgenerator,
-                    exprintegrate = exprintegrate))
+                    exprintegrate = exprintegrate,
+                    xauto = xauto))
   
 }

@@ -50,12 +50,13 @@ sampleAnnotationImporterUI <- function(id) {
 #' @export
 #'
 #' @examples
-sampleAnnotationImporterValue_ <- function(input, output, session, dataset) {
+sampleAnnotationImporterValue_ <- function(input, output, session, dataset, xauto = NULL) {
   
   sample.annotation.imported <- genericImporterData("importer",
                                                    importers = reactive(supportedSampleAnnotationImporters),
                                                    samples = reactive(availableSampleAnnotationSamples),
                                                    generators = reactive(supportedSampleAnnotationGenerators),
+                                                   xauto = xauto,
                                                    exprimport = function(con, importer, parameters) {
                                                      validate(need(dataset(), "[Sample Annotation] Cannot import sample annotation without read counts!"))
                                                      validate(need(dataset()$readcounts.preprocessed, "[Sample Annotation] Cannot import sample annotation without read counts!"))
@@ -188,8 +189,8 @@ sampleAnnotationImporterValue_ <- function(input, output, session, dataset) {
 #' @export
 #'
 #' @examples
-sampleAnnotationImporterValue <- function(id, dataset) {
+sampleAnnotationImporterValue <- function(id, dataset, xauto = NULL) {
   
-  return(callModule(sampleAnnotationImporterValue_, id, dataset = dataset))
+  return(callModule(sampleAnnotationImporterValue_, id, dataset = dataset, xauto = xauto))
   
 }

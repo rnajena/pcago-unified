@@ -51,21 +51,18 @@ options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
   
-  variables <- reactiveValues(dataset = NULL)
+  xautovars <- reactiveValues(readcounts.raw = NULL,
+                              sample.annotation = NULL,
+                              stage = "null")
   
   
-  dataset.imported.raw <- genericImporterData("pca.data.readcounts.importer", 
+  dataset.raw <- genericImporterData("pca.data.readcounts.importer", 
                                  importers = reactive(supportedReadcountImporters),
                                  samples = reactive(availableReadcountSamples),
                                  generators = reactive(supportedReadcountGenerators),
                                  exprimport = importReadcount, 
-                                 exprsample = importReadcountSample)
-  
-  observeEvent(dataset.imported.raw(), {
-    variables$dataset <- dataset.imported.raw()
-  })
-  
-  dataset.raw <- reactive( { return(variables$dataset) })
+                                 exprsample = importReadcountSample,
+                                 xauto = reactive({xautovars$readcounts.raw }))
   
   # Read counts
   readcounts.raw <- reactive(
@@ -79,7 +76,9 @@ shinyServer(function(input, output, session) {
   dataset.preprocessed <- readCountPreprocessingData("data.readcounts.preprocessing", dataset.raw)
   readcounts.preprocessed <- reactive({ dataset.preprocessed()$readcounts.preprocessed })
   
-  dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", dataset = dataset.preprocessed)
+  dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", 
+                                                            dataset = dataset.preprocessed,
+                                                            xauto = reactive({xautovars$sample.annotation }))
   
   sample.annotation <- reactive({ 
     validate(need(dataset.sampleannotation(), "No datset loaded."))
@@ -188,7 +187,7 @@ shinyServer(function(input, output, session) {
   serverAutoNavigation(input, session)
   
   # QuickIO
-  serverQuickIO(input, output, session, variables, dataset.pca)
+  serverQuickIO(input, output, session, xautovars, dataset.preprocessed, dataset.pca)
   
   # Readcounts
   downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
