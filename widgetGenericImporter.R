@@ -331,7 +331,6 @@ genericImporterData_ <- function(input,
   
   # xauto importer that allows triggering of importing samples from code
   if(!is.null(xauto)) {
-    
     observeEvent(xauto(), {
       
       notification.id <- progressNotification("Please wait ... importing data")

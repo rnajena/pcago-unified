@@ -51,9 +51,12 @@ options(shiny.maxRequestSize=30*1024^2)
 
 shinyServer(function(input, output, session) {
   
-  xautovars <- reactiveValues(readcounts.raw = NULL,
-                              sample.annotation = NULL,
-                              stage = "null")
+  # xautovars used for automatic i/o
+  xautovars <- reactiveValues(import.readcounts.raw = NULL,
+                              import.sample.annotation = NULL,
+                              import.stage = "null",
+                              export.readcounts.raw = NULL,
+                              export.count = 0)
   
   
   dataset.raw <- genericImporterData("pca.data.readcounts.importer", 
@@ -62,7 +65,7 @@ shinyServer(function(input, output, session) {
                                  generators = reactive(supportedReadcountGenerators),
                                  exprimport = importReadcount, 
                                  exprsample = importReadcountSample,
-                                 xauto = reactive({xautovars$readcounts.raw }))
+                                 xauto = reactive({xautovars$import.readcounts.raw }))
   
   # Read counts
   readcounts.raw <- reactive(
@@ -78,7 +81,7 @@ shinyServer(function(input, output, session) {
   
   dataset.sampleannotation <- sampleAnnotationImporterValue("data.sample.annotation.importer", 
                                                             dataset = dataset.preprocessed,
-                                                            xauto = reactive({xautovars$sample.annotation }))
+                                                            xauto = reactive({xautovars$import.sample.annotation }))
   
   sample.annotation <- reactive({ 
     validate(need(dataset.sampleannotation(), "No datset loaded."))
@@ -186,11 +189,8 @@ shinyServer(function(input, output, session) {
   # Auto navigation
   serverAutoNavigation(input, session)
   
-  # QuickIO
-  serverQuickIO(input, output, session, xautovars, dataset.preprocessed, dataset.pca)
-  
   # Readcounts
-  downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw)
+  xauto.export.readcounts.raw <- downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw, xauto = reactive({ xautovars$export.readcounts.raw }))
   
   downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed)
   plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed, default.title = reactive({ "Processed read counts clustering" }))
@@ -246,4 +246,15 @@ shinyServer(function(input, output, session) {
                pca.center = reactive({input$pca.pca.settings.center}),
                pca.scale = reactive({input$pca.pca.settings.scale}),
                pca.relative = reactive({input$pca.pca.settings.relative}))
+  
+  # QuickIO
+  serverQuickIO(input =  input, 
+                output =  output, 
+                session =  session, 
+                xautovars =  xautovars, 
+                dataset.preprocessed = dataset.preprocessed, 
+                dataset.pca = dataset.pca,
+                export.targets = list(
+    xauto.export.readcounts.raw
+  ))
 })

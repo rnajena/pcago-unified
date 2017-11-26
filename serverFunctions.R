@@ -77,167 +77,132 @@ serverAutoNavigation <- function(input, session) {
 #' @export
 #'
 #' @examples
-serverQuickLoad <- function(xautovars, dataset.preprocessed) {
+serverQuickLoad <- function(xautovars, dataset.preprocessed, dataset.pca) {
   # Note: Shiny is clearly not designed for this
   # Uses the xauto variable in generic importer to tell that specific data should be loaded.
   # Observers & a variable that tracks the current stage allow data to be loaded one after another
 
   notification.id <- progressNotification("Please wait ... importing data")
-
   shinyjs::disable("quickio.load")
-  on.exit({
-    shinyjs::enable("quickio.load")
-    removeNotification(id = notification.id)
-  })
   
   reset.flow <- function() {
-    xautovars$readcounts.raw <- NULL
-    xautovars$sample.annotation <- NULL
-    xautovars$stage <- "NULL"
+    
+    shinyjs::enable("quickio.load")
+    removeNotification(id = notification.id)
+    
+    xautovars$import.readcounts.raw <- NULL
+    xautovars$import.sample.annotation <- NULL
+    xautovars$import.stage <- "NULL"
   }
 
   # Raw data
-  xautovars$readcounts.raw <- list(source = "sample",
+  xautovars$import.readcounts.raw <- list(source = "sample",
                                    clear = T,
                                    sample = "Monocytes/readcounts_rna.csv",
                                    parameters = list())
   
   # Flow control
-  xautovars$stage <- "readcounts.raw"
+  xautovars$import.stage <- "readcounts.raw"
+  
   observeEvent(dataset.preprocessed(), {
+    
     validate(need(dataset.preprocessed(), "Waiting for preprocessing"))
     validate(need(dataset.preprocessed()$readcounts.preprocessed, "Waiting for preprocessing"))
     
-    if(xautovars$stage == "readcounts.raw") {
-      xautovars$sample.annotation <- list(source = "sample",
+    if(xautovars$import.stage == "readcounts.raw") {
+      xautovars$import.sample.annotation <- list(source = "sample",
                                        clear = T,
                                        sample = "Monocytes/sample_annotation_conditions.csv",
                                        parameters = list(imported_data = c("conditions"),
                                                          collapse_conditions = F)
       )
-      
-      reset.flow()
+      xautovars$import.stage <- "sample.annotation"
     }
   })
   
+  observeEvent(dataset.pca(), {
+    
+    validate(need(dataset.pca(), "Waiting for processing"))
+    validate(need(dataset.pca()$readcounts.processed, "Waiting for processing"))
+    
+    if(xautovars$import.stage == "sample.annotation") {
+      reset.flow()
+    }
+    
+  })
 }
 
-#' #' Saves dataset into a zip
-#' #'
-#' #' @param filename 
-#' #' @param dataset 
-#' #'
-#' #' @return
-#' #' @export
-#' #'
-#' #' @examples
-#' serverQuickSave <- function(filename, input, dataset) {
-#'   
-#'   if(is.null(dataset)) {
-#'     showNotification("Currently no data loaded!", type = "error")
-#'     return()
-#'   }
-#'   
-#'   notification.id <- progressNotification("Please wait ... exporting data")
-#'   
-#'   shinyjs::disable("quickio.save")
-#'   on.exit({ 
-#'     shinyjs::enable("quickio.save")
-#'     removeNotification(id = notification.id) 
-#'   })
-#'   
-#'   basefile <- tempfile("pcago-export")
-#'   dir.create(basefile, recursive = T)
-#'   
-#'   print(basefile)
-#'   
-#'   failed <- c()
-#'   
-#'   # Export read counts
-#'   if(!is.null(dataset$readcounts.raw)) {
-#'     write.table(assay(dataset$readcounts.raw),
-#'                 paste0(basefile, "/readcounts_raw.csv"),
-#'                 sep = ",",
-#'                 row.names = T,
-#'                 col.names = NA)
-#'   }
-#'   else {
-#'     failed <- c(failed, "Raw read counts")
-#'   }
-#'   
-#'   if(!is.null(dataset$readcounts.processed)) {
-#'     write.table(assay(dataset$readcounts.processed),
-#'                 paste0(basefile, "/readcounts_processed.csv"),
-#'                 sep = ",",
-#'                 row.names = T,
-#'                 col.names = NA)
-#'   }
-#'   else {
-#'     failed <- c(failed, "Processed read counts")
-#'   }
-#'   
-#'   if(!is.null(dataset$readcounts.filtered)) {
-#'     write.table(assay(dataset$readcounts.filtered),
-#'                 paste0(basefile, "/readcounts_filtered.csv"),
-#'                 sep = ",",
-#'                 row.names = T,
-#'                 col.names = NA)
-#'   }
-#'   else {
-#'     failed <- c(failed, "Filtered read counts")
-#'   }
-#'   
-#'   if(!is.null(dataset$readcounts.top.variant)) {
-#'     write.table(assay(dataset$readcounts.top.variant),
-#'                 paste0(basefile, "/readcounts_top_variant.csv"),
-#'                 sep = ",",
-#'                 row.names = T,
-#'                 col.names = NA)
-#'   }
-#'   else {
-#'     failed <- c(failed, "Top variant read counts")
-#'   }
-#'   
-#'   # PCA transformation result
-#'   if(!is.null(dataset$pca.top.variant)) {
-#'     write.table(dataset$pca.top.variant$transformed,
-#'                 paste0(basefile, "/readcounts_pca_transformed.csv"),
-#'                 sep = ",",
-#'                 row.names = T,
-#'                 col.names = NA)
-#'   }
-#'   else {
-#'     failed <- c(failed, "PCA transformed read counts")
-#'   }
-#'   
-#'   # PCA plot
-#'   
-#'   pca.gene.count <- reactive({
-#'     validate(need(dataset.top.variant(), "No top variant read counts available!")) 
-#'     return(dataset.top.variant()$readcounts.top.variant.parameters.count)
-#'   })
-#'   
-#'   # TODO: Not working
-#'   plot <- plotSamplePlot_export("pca.samples.plot",
-#'                  dataset = reactive( { dataset } ),
-#'                  animation.params = pca.gene.count,
-#'                  pca.center = reactive({input$pca.pca.settings.center}),
-#'                  pca.scale = reactive({input$pca.pca.settings.scale}),
-#'                  pca.relative = reactive({input$pca.pca.settings.relative}))
-#'   plot()
-#'   
-#'   # Processing report
-#'   readcountProcessing.at.pca.save(paste0(basefile, "/processing_report.html"), reactive( { dataset } ) )
-#'   
-#'   if(length(failed) > 0) {
-#'     showNotification(paste("Cannot export data that is not available:", paste(failed, collapse = ", ")), type = "warning")
-#'   }
-#'   
-#'   zip(zipfile = filename, 
-#'       files = basefile,
-#'       flags = "-r9Xj")
-#'   
-#' }
+#' Saves dataset into a zip
+#'
+#' @param filename
+#' @param dataset
+#'
+#' @return
+#' @export
+#'
+#' @examples
+serverQuickSave <- function(input, output, dataset.pca, xautovars, export.targets) {
+
+  if(is.null(dataset.pca())) {
+    showNotification("Currently no data loaded!", type = "error")
+    return()
+  }
+
+  notification.id <- progressNotification("Please wait ... exporting data")
+
+  shinyjs::disable("quickio.save")
+
+  export.directory <- tempfile("pcago-export")
+  export.zip <- paste0(tempfile("pcago-export"), ".zip")
+  dir.create(export.directory, recursive = T)
+
+  # Processing report (we can export this without flow control)
+  readcountProcessing.at.pca.save(paste0(export.directory, "/processing_report.html"), dataset.pca )
+  
+  # Data tables
+  xautovars$export.readcounts.raw <- list(filename = paste0(export.directory, "/readcounts_raw.csv"), format = "csv")
+  
+  for(target in export.targets) {
+    observeEvent(target(), {
+      xautovars$export.count <- xautovars$export.count + 1
+    })
+  }
+
+  observeEvent(xautovars$export.count, {
+    if(xautovars$export.count >= length(export.targets)) {
+      zip(zipfile = export.zip,
+          files = export.directory,
+          flags = "-r9Xj")
+      
+      # Reset the flow
+      xautovars$export.count <- 0
+      xautovars$export.readcounts.raw <- NULL
+      
+      # Reset notification
+      shinyjs::enable("quickio.save")
+      removeNotification(id = notification.id)
+      
+      # Show download modal
+      showModal(modalDialog(
+          "The data is ready for download!",
+          footer = tagList(
+            modalButton("Cancel"),
+            downloadButton("quickio.save.download", "Download now")
+          )
+        ))
+      
+    }
+  })
+  
+  
+  output$quickio.save.download <- downloadHandler("pcago-export.zip",
+                                                  content = function(filename) {
+                                                    file.copy(export.zip, filename, overwrite = T)
+                                                  },
+                                                  contentType = "application/zip")
+  
+
+}
 
 #' QuickIO implementation
 #'
@@ -248,11 +213,11 @@ serverQuickLoad <- function(xautovars, dataset.preprocessed) {
 #' @export
 #'
 #' @examples
-serverQuickIO <- function(input, output, session, xautovars, dataset.preprocessed, dataset.final) {
+serverQuickIO <- function(input, output, session, xautovars, dataset.preprocessed, dataset.pca, export.targets) {
   
   observeEvent(input$quickio.load, {
     #if(is.null(variables$dataset)) {
-      serverQuickLoad(xautovars, dataset.preprocessed)
+      serverQuickLoad(xautovars, dataset.preprocessed, dataset.pca)
     # }
     # else {
     #   showModal(modalDialog(
@@ -267,15 +232,12 @@ serverQuickIO <- function(input, output, session, xautovars, dataset.preprocesse
   
   observeEvent(input$quickio.load.yes, {
     removeModal()
-    serverQuickLoad(variables)
+    serverQuickLoad(xautovars, dataset.preprocessed, dataset.pca)
   })
   
-  # output$quickio.save <- downloadHandler(filename = "pcago_data.zip",
-  #                                        content = function(filename) {
-  #                                          serverQuickSave(filename, input, dataset.final())
-  #                                        },
-  #                                        contentType = "application/zip")
-  
+  observeEvent(input$quickio.save, {
+    serverQuickSave(input, output, dataset.pca, xautovars, export.targets)
+  })
 }
 
 #' Automatically navigates to a content navigation based on which data is refereshed

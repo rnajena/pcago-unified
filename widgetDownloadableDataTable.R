@@ -62,12 +62,13 @@ downloadableDataTableOutput <- function(id,
 #' @param export.filename Filename of the downloaded file
 #' @param export.rownames Export row names, too. Default = TRUE
 #' @param export.colnames Parameter of write.table.
+#' @param xauto If not NULL, this is a function that returns a list list(filename = <>, format = <>). Used for automated export
 #'
 #' @return
 #' @export
 #'
 #' @examples
-downloadableDataTable_ <- function(input, output, session, data, export.filename, export.rownames = T, export.colnames = NA) {
+downloadableDataTable_ <- function(input, output, session, data, export.filename, export.rownames = T, export.colnames = NA, xauto = NULL) {
   
   table.data <- reactive({
     
@@ -115,6 +116,32 @@ downloadableDataTable_ <- function(input, output, session, data, export.filename
                                          
                                        })
   
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    
+    observeEvent(xauto(), {
+      
+      file <- xauto()$filename
+      
+      if(xauto()$format == "csv") {
+        write.table(table.data(),
+                    file,
+                    sep = ",",
+                    row.names = export.rownames,
+                    col.names = export.colnames)
+        xautovars$xautocounter <- xautovars$xautocounter + 1
+      }
+      else {
+        stop("Not supported")
+      }
+      
+    })
+  }
+  
+  return(reactive({ xautovars$xautocounter }))
+  
 }
 
 #' Fills the data table with given data output.
@@ -123,18 +150,20 @@ downloadableDataTable_ <- function(input, output, session, data, export.filename
 #' @param export.filename Filename of the downloaded file
 #' @param export.rownames Export row names, too. Default = TRUE
 #' @param export.colnames Parameter of write.table.
+#' @param xauto If not NULL, this is a function that returns a list list(filename = <>, format = <>). Used for automated export
 #'
-#' @return
+#' @return Variable that indicates that xauto is finished
 #' @export
 #'
 #' @examples
-downloadableDataTable <- function(id, data, export.filename = "table", export.rownames = T, export.colnames = NA) {
+downloadableDataTable <- function(id, data, export.filename = "table", export.rownames = T, export.colnames = NA, xauto = NULL) {
   
   return(callModule(downloadableDataTable_,
                     id, 
                     data = data, 
                     export.filename = export.filename,
                     export.rownames = export.rownames,
-                    export.colnames = export.colnames))
+                    export.colnames = export.colnames,
+                    xauto = xauto))
   
 }
