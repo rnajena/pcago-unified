@@ -71,6 +71,7 @@ shinyServer(function(input, output, session) {
                               export.plot.clustering.readcounts.filtered = NULL,        
                               export.plot.clustering.readcounts.top.variant = NULL,     
                               export.plot.clustering.readcounts.pca.transformed = NULL,         
+                              export.plot.venn.conditions = NULL,
                               export.count = 0)
   
   
@@ -219,7 +220,7 @@ shinyServer(function(input, output, session) {
   # Sample annotation
   xauto.export.sample.annotation.sampleinfo <- downloadableDataTable("samples.annotation", export.filename = "annotation", data = reactive({ sampleAnnotationToTable(sample.annotation()) }), xauto = reactive({ xautovars$export.sample.annotation.sampleinfo }))
   xauto.export.sample.annotation.conditions <- downloadableDataTable("samples.conditions", export.filename = "conditions", data = conditions, xauto = reactive({ xautovars$export.sample.annotation.conditions }))
-  plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
+  xauto.export.plot.venn.conditions <- plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions, xauto = reactive({ xautovars$export.plot.venn.conditions }))
   
   # Gene annotation
   xauto.export.gene.variances.processed <- downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.processed.variances), xauto = reactive({ xautovars$export.gene.variances.processed }))
@@ -286,6 +287,7 @@ shinyServer(function(input, output, session) {
     xauto.export.plot.clustering.readcounts.processed,
     xauto.export.plot.clustering.readcounts.filtered,
     xauto.export.plot.clustering.readcounts.top.variant,
-    xauto.export.plot.clustering.readcounts.pca.transformed
+    xauto.export.plot.clustering.readcounts.pca.transformed,
+    xauto.export.plot.venn.conditions
   ))
 })

@@ -106,7 +106,8 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
 plotConditionsVennDiagramPlot_ <- function(input, 
                                   output, 
                                   session, 
-                                  conditions) {
+                                  conditions,
+                                  xauto = NULL) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   visuals <- visualsEditorValue("visuals", reactive({colnames(conditions())}), has.shape = F)
@@ -141,12 +142,48 @@ plotConditionsVennDiagramPlot_ <- function(input,
                      ))
                    })
   
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    observeEvent(xauto(), {
+      
+      format <- xauto()$format
+      filename <- xauto()$filename
+      
+      plotConditionsVennDiagramPlot.save(
+        selected.conditions = input$conditions,
+        conditions = conditions,
+        pca.conditions.plot.visuals = visuals,
+        plot.settings = plot.settings(),
+        format = format,
+        filename = filename
+      )
+      
+      xautovars$xautocounter <- xautovars$xautocounter + 1
+      
+    })
+  }
+  
+  return(reactive({ xautovars$xautocounter }))
+  
 }
 
-plotConditionsVennDiagramPlot <- function(id, conditions) {
+#' Venn diagram plot
+#'
+#' @param id 
+#' @param conditions 
+#' @param xauto If not null returns a function that returns list(filename = <>, format = <svg,png,tiff>)
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotConditionsVennDiagramPlot <- function(id, conditions, xauto = NULL) {
   
   return(callModule(plotConditionsVennDiagramPlot_, 
                     id, 
-                    conditions = conditions))
+                    conditions = conditions,
+                    xauto = xauto))
   
 }

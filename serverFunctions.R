@@ -176,6 +176,7 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   xautovars$export.plot.clustering.readcounts.filtered <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_filtered.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_filtered.newick"))
   xautovars$export.plot.clustering.readcounts.top.variant <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_top_variant.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_top_variant.newick"))
   xautovars$export.plot.clustering.readcounts.pca.transformed <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_pca_transformed.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_pca_transformed.newick"))
+  xautovars$export.plot.venn.conditions <- list(filename = paste0(export.directory, "/sample_conditions.svg"), format = "svg")
   
   for(target in export.targets) {
     observeEvent(target(), {
@@ -211,6 +212,7 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
       xautovars$export.plot.clustering.readcounts.filtered <- NULL
       xautovars$export.plot.clustering.readcounts.top.variant <- NULL
       xautovars$export.plot.clustering.readcounts.pca.transformed <- NULL
+      xautovars$export.plot.venn.conditions <- NULL
       
       # Reset notification
       shinyjs::enable("quickio.save")
