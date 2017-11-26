@@ -159,6 +159,9 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   # Processing report (we can export this without flow control)
   readcountProcessing.at.pca.save(paste0(export.directory, "/processing_report.html"), dataset.pca )
   
+  # README
+  file.copy("pcago_export_readme.md", paste0(export.directory, "/README.md"))
+  
   # Data tables
   xautovars$export.readcounts.raw <- list(filename = paste0(export.directory, "/readcounts_raw.csv"), format = "csv")
   xautovars$export.readcounts.processed <- list(filename = paste0(export.directory, "/readcounts_processed.csv"), format = "csv")
