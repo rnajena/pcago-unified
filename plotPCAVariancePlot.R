@@ -60,7 +60,8 @@ plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
 plotPCAVariancePlot_ <- function(input, 
                           output, 
                           session, 
-                          pca) {
+                          pca,
+                          xauto = NULL) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   downloadablePlot("plot", 
@@ -70,12 +71,31 @@ plotPCAVariancePlot_ <- function(input,
                      return(plotPCAVariancePlot.save(pca(), plot.settings, format, filename))
                    })
   
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    observeEvent(xauto(), {
+      
+      filename <- xauto()$filename
+      format <- xauto()$format
+      
+      plotPCAVariancePlot.save(pca(), plot.settings(), format, filename)
+      
+      xautovars$xautocounter <- xautovars$xautocounter + 1
+      
+    })
+  }
+    
+  return(reactive({ xautovars$xautocounter }))
+  
 }
 
-plotPCAVariancePlot <- function(id, pca) {
+plotPCAVariancePlot <- function(id, pca, xauto = NULL) {
   
   return(callModule(plotPCAVariancePlot_, 
                     id, 
-                    pca = pca))
+                    pca = pca,
+                    xauto = xauto))
   
 }

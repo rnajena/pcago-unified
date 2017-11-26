@@ -74,7 +74,8 @@ plotGeneVariancePlot.save <- function(gene.variances, plot.settings, format, fil
 plotGeneVariancePlot_ <- function(input, 
                                   output, 
                                   session, 
-                                  gene.variances) {
+                                  gene.variances,
+                                  xauto = NULL) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   downloadablePlot("plot", 
@@ -85,12 +86,32 @@ plotGeneVariancePlot_ <- function(input,
                                                       logarithmic = input$logarithmic))
                    })
   
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    observeEvent(xauto(), {
+      
+      filename <- xauto()$filename
+      format <- xauto()$format
+      
+      plotGeneVariancePlot.save(gene.variances(), plot.settings(), format, filename, 
+                                logarithmic = input$logarithmic)
+      
+      xautovars$xautocounter <- xautovars$xautocounter + 1
+      
+    })
+  }
+  
+  return(reactive({ xautovars$xautocounter }))
+  
 }
 
-plotGeneVariancePlot <- function(id, gene.variances) {
+plotGeneVariancePlot <- function(id, gene.variances, xauto = NULL) {
   
   return(callModule(plotGeneVariancePlot_, 
                     id, 
-                    gene.variances = gene.variances))
+                    gene.variances = gene.variances,
+                    xauto = xauto))
   
 }

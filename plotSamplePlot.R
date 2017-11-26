@@ -400,7 +400,8 @@ plotSamplePlot_ <- function(input,
                           animation.params,
                           pca.center,
                           pca.scale,
-                          pca.relative) {
+                          pca.relative,
+                          xauto = NULL) {
   
   readcounts.processed <- reactive({
     validate(need(dataset(), "No processed read counts available!"))
@@ -529,6 +530,38 @@ plotSamplePlot_ <- function(input,
     }, message = "Creating movie")
     
   })
+  
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    observeEvent(xauto(), {
+      
+      filename <- xauto()$filename
+      format <- xauto()$format
+      
+      validate(need(pca(), "No PCA results to plot!"),
+               need(visuals.sample(), "No visual parameters!"))
+      
+      plot.settings <- plotSettingsSetNA(plot.settings(), PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
+      
+      return(plotSamplePlot.save(pca = pca(),
+                                 pca.full = pca.full(),
+                                 visuals.conditions = visuals.conditions(),
+                                 visuals.sample = visuals.sample(),
+                                 axes = input$axes,
+                                 plot.settings = plot.settings,
+                                 axislimits = axislimits(),
+                                 stabilizeplot = input$stabilizeplot,
+                                 format = format,
+                                 filename = filename))
+      
+      xautovars$xautocounter <- xautovars$xautocounter + 1
+      
+    })
+  }
+  
+  return(reactive({ xautovars$xautocounter }))
 }
 
 plotSamplePlot <- function(id, 
@@ -536,7 +569,8 @@ plotSamplePlot <- function(id,
                          animation.params,
                          pca.center,
                          pca.scale,
-                         pca.relative) {
+                         pca.relative,
+                         xauto = NULL) {
   
   return(callModule(plotSamplePlot_, 
                     id, 
@@ -544,6 +578,7 @@ plotSamplePlot <- function(id,
                     animation.params = animation.params,
                     pca.center = pca.center,
                     pca.scale = pca.scale,
-                    pca.relative = pca.relative))
+                    pca.relative = pca.relative,
+                    xauto = xauto))
   
 }
