@@ -170,15 +170,25 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   xautovars$export.gene.annotation <- list(filename = paste0(export.directory, "/gene_annotation.csv"), format = "csv")
   xautovars$export.gene.variances.processed <- list(filename = paste0(export.directory, "/gene_variances_processed.csv"), format = "csv")
   xautovars$export.gene.variances.filtered <- list(filename = paste0(export.directory, "/gene_variances_filtered.csv"), format = "csv")
+  xautovars$export.pca.pc <- list(filename = paste0(export.directory, "/pca_principal_components.csv"), format = "csv")
+  xautovars$export.pca.variances <- list(filename = paste0(export.directory, "/pca_variances.csv"), format = "csv")
+  xautovars$export.plot.clustering.readcounts.processed <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_processed.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_processed.newick"))
+  xautovars$export.plot.clustering.readcounts.filtered <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_filtered.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_filtered.newick"))
+  xautovars$export.plot.clustering.readcounts.top.variant <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_top_variant.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_top_variant.newick"))
+  xautovars$export.plot.clustering.readcounts.pca.transformed <- list(filename.svg = paste0(export.directory, "/clustering_readcounts_pca_transformed.svg"), filename.newick = paste0(export.directory, "/clustering_readcounts_pca_transformed.newick"))
   
   for(target in export.targets) {
     observeEvent(target(), {
       xautovars$export.count <- xautovars$export.count + 1
+      updateProgressNotification(notification.id, paste0("Please wait ... exporting data (", xautovars$export.count, "/", length(export.targets), ")"))
     })
   }
 
   observeEvent(xautovars$export.count, {
     if(xautovars$export.count >= length(export.targets)) {
+      
+      updateProgressNotification(notification.id, "Please wait ... compressing")
+      
       zip(zipfile = export.zip,
           files = export.directory,
           flags = "-r9Xj")
@@ -195,6 +205,12 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
       xautovars$export.gene.annotation <- NULL
       xautovars$export.gene.variances.processed <- NULL
       xautovars$export.gene.variances.filtered <- NULL
+      xautovars$export.pca.pc <- NULL
+      xautovars$export.pca.variances <- NULL
+      xautovars$export.plot.clustering.readcounts.processed <- NULL
+      xautovars$export.plot.clustering.readcounts.filtered <- NULL
+      xautovars$export.plot.clustering.readcounts.top.variant <- NULL
+      xautovars$export.plot.clustering.readcounts.pca.transformed <- NULL
       
       # Reset notification
       shinyjs::enable("quickio.save")

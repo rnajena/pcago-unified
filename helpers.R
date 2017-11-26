@@ -166,6 +166,26 @@ progressNotification <- function(message, id = NULL) {
 }
 
 
+#' Updates an existing progress notification
+#'
+#' @param id 
+#' @param message 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+updateProgressNotification <- function(id, message) {
+  showNotification(
+    ui = tags$span(icon("circle-o-notch", class = "fa-spin"), message),
+    id = id,
+    closeButton = F,
+    type = "default",
+    duration = NULL
+  )
+}
+
+
 
 #' Runs an expression with progress notification
 #'

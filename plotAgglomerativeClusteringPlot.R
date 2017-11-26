@@ -142,7 +142,8 @@ plotAgglomerativeClusteringPlot_ <- function(input,
                                   session, 
                                   conditions,
                                   readcounts,
-                                  default.title) {
+                                  default.title,
+                                  xauto) {
   
   plot.settings <- generalPlotSettings("plot.settings")
   visuals.conditions <- visualsEditorValue("visuals", reactive({colnames(conditions())}))
@@ -195,14 +196,69 @@ plotAgglomerativeClusteringPlot_ <- function(input,
     plotAgglomerativeClusteringPlot.saveNewick(readcounts, file, input$method.dist, input$method.hclust)
   })
   
+  # xauto exporter that allows triggering of exporting data from code
+  xautovars <- reactiveValues(xautocounter = 1)
+  
+  if(!is.null(xauto)) {
+    observeEvent(xauto(), {
+      if(!is.null(xauto()$filename.newick)) {
+        plotAgglomerativeClusteringPlot.saveNewick(readcounts, xauto()$filename.newick, input$method.dist, input$method.hclust)
+      }
+      if(!is.null(xauto()$filename.svg)) {
+        
+        filename <- xauto()$filename.svg
+        distance.methods <- plotAgglomerativeClusteringPlotUI.dist.methodsSelection
+        clustering.methods <- plotAgglomerativeClusteringPlotUI.hclust.methodsSelection
+        
+        distance.method.name <- names(distance.methods)[distance.methods == input$method.dist]
+        clustering.method.name <- names(clustering.methods)[clustering.methods == input$method.hclust]
+        
+        plot.settings <- plotSettingsSetNA(plot.settings(),
+                                           PlotSettings(subtitle = paste0(distance.method.name, " distance, ", clustering.method.name),
+                                                        title = default.title()))
+        
+        return(plotAgglomerativeClusteringPlot.save(readcounts, 
+                                                    plot.settings, 
+                                                    "svg", 
+                                                    filename,
+                                                    sample.visuals = visuals.sample,
+                                                    method.distance = input$method.dist,
+                                                    method.cluster = input$method.hclust))
+        
+      }
+      
+      xautovars$xautocounter <- xautovars$xautocounter + 1
+      
+    })
+  }
+  
+  return(reactive({ xautovars$xautocounter }))
+  
 }
 
-plotAgglomerativeClusteringPlot <- function(id, conditions, readcounts, default.title = reactive({"Hierarchical clustering"})) {
+#' Agglomerative clustering plot
+#'
+#' @param id 
+#' @param conditions 
+#' @param readcounts 
+#' @param default.title 
+#' @param xauto If not null returns a function that returns list(filename.svg = <>, filename.newick = <>)
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plotAgglomerativeClusteringPlot <- function(id, 
+                                            conditions, 
+                                            readcounts, 
+                                            default.title = reactive({"Hierarchical clustering"}),
+                                            xauto = NULL) {
   
   return(callModule(plotAgglomerativeClusteringPlot_, 
                     id, 
                     conditions = conditions,
                     readcounts = readcounts,
-                    default.title = default.title))
+                    default.title = default.title,
+                    xauto = xauto))
   
 }

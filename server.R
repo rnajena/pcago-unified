@@ -65,6 +65,12 @@ shinyServer(function(input, output, session) {
                               export.gene.annotation = NULL,
                               export.gene.variances.processed = NULL,
                               export.gene.variances.filtered = NULL,
+                              export.pca.pc = NULL,
+                              export.pca.variances = NULL,       
+                              export.plot.clustering.readcounts.processed = NULL, 
+                              export.plot.clustering.readcounts.filtered = NULL,        
+                              export.plot.clustering.readcounts.top.variant = NULL,     
+                              export.plot.clustering.readcounts.pca.transformed = NULL,         
                               export.count = 0)
   
   
@@ -202,13 +208,13 @@ shinyServer(function(input, output, session) {
   xauto.export.readcounts.raw <- downloadableDataTable("readcounts", export.filename = "readcounts", data = readcounts.raw, xauto = reactive({ xautovars$export.readcounts.raw }))
   
   xauto.export.readcounts.processed <- downloadableDataTable("readcounts.processed", export.filename = "readcounts.processed", data = readcounts.processed, xauto = reactive({ xautovars$export.readcounts.processed }))
-  plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed, default.title = reactive({ "Processed read counts clustering" }))
+  xauto.export.plot.clustering.readcounts.processed <- plotAgglomerativeClusteringPlot("readcounts.processed.hclust.plot", conditions, readcounts.processed, default.title = reactive({ "Processed read counts clustering" }), xauto = reactive({ xautovars$export.plot.clustering.readcounts.processed }))
   
   xauto.export.readcounts.filtered <- downloadableDataTable("readcounts.filtered", export.filename = "readcounts.filtered", data = readcounts.filtered, xauto = reactive({ xautovars$export.readcounts.filtered }))
-  plotAgglomerativeClusteringPlot("readcounts.filtered.hclust.plot", conditions, readcounts.filtered, default.title = reactive({ "Filtered read counts clustering" }))
+  xauto.export.plot.clustering.readcounts.filtered <- plotAgglomerativeClusteringPlot("readcounts.filtered.hclust.plot", conditions, readcounts.filtered, default.title = reactive({ "Filtered read counts clustering" }), xauto = reactive({ xautovars$export.plot.clustering.readcounts.filtered }))
   
   xauto.export.readcounts.top.variant <- downloadableDataTable("readcounts.top.variant", export.filename = "readcounts.top.variant", data = readcounts.top.variant, xauto = reactive({ xautovars$export.readcounts.top.variant }))
-  plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }))
+  xauto.export.plot.clustering.readcounts.top.variant <- plotAgglomerativeClusteringPlot("readcounts.top.variant.hclust.plot", conditions, readcounts.top.variant, default.title = reactive({ "Top variant read counts clustering" }), xauto = reactive({ xautovars$export.plot.clustering.readcounts.top.variant }))
   
   # Sample annotation
   xauto.export.sample.annotation.sampleinfo <- downloadableDataTable("samples.annotation", export.filename = "annotation", data = reactive({ sampleAnnotationToTable(sample.annotation()) }), xauto = reactive({ xautovars$export.sample.annotation.sampleinfo }))
@@ -216,7 +222,6 @@ shinyServer(function(input, output, session) {
   plotConditionsVennDiagramPlot("samples.conditions.plot", conditions = conditions)
   
   # Gene annotation
-  
   xauto.export.gene.variances.processed <- downloadableDataTable("genes.variance", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.processed.variances), xauto = reactive({ xautovars$export.gene.variances.processed }))
   xauto.export.gene.variances.filtered <- downloadableDataTable("genes.variance.filtered", export.filename = "variance", data = serverGeneVarianceTableData(readcounts.filtered.variances), xauto = reactive({ xautovars$export.gene.variances.filtered }))
   xauto.export.gene.annotation <- downloadableDataTable("genes.annotation", export.filename = "annotation", data = serverGeneAnnotationTableData(readcounts, gene.annotation), xauto = reactive({ xautovars$export.gene.annotation }))
@@ -235,8 +240,8 @@ shinyServer(function(input, output, session) {
   
   # Fill tables & plots
   xauto.export.readcounts.pca.transformed <- downloadableDataTable("pca.transformed", export.filename = "pca.transformed", data = reactive({ pca()$transformed }), xauto = reactive({ xautovars$export.readcounts.pca.transformed })) 
-  downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }))
-  downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }))
+  xauto.export.pca.pc <- downloadableDataTable("pca.pc", export.filename = "pca.pc", data = reactive({ pca()$pc }), xauto = reactive({ xautovars$export.pca.pc }))
+  xauto.export.pca.variances <- downloadableDataTable("pca.variance", export.filename = "pca.var", data = reactive({ pca()$var }), xauto = reactive({ xautovars$export.pca.variances }))
   
   plotGeneVariancePlot("genes.variances.plot", gene.variances = readcounts.processed.variances)
   plotGeneVariancePlot("genes.variances.filtered.plot", gene.variances = readcounts.filtered.variances)
@@ -245,10 +250,11 @@ shinyServer(function(input, output, session) {
   
   plotPCAVariancePlot("pca.variance.plot", pca)
   
-  plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", 
+  xauto.export.plot.clustering.readcounts.pca.transformed <- plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", 
                                   conditions, 
                                   reactive({ t(pca()$transformed) }),
-                                  default.title = reactive({ "PCA transformed values clustering" }))
+                                  default.title = reactive({ "PCA transformed values clustering" }),
+                                  xauto = reactive({ xautovars$export.plot.clustering.readcounts.pca.transformed }))
   
   plotSamplePlot("pca.samples.plot",
                dataset = dataset.pca,
@@ -274,6 +280,12 @@ shinyServer(function(input, output, session) {
     xauto.export.sample.annotation.sampleinfo,
     xauto.export.gene.variances.processed,
     xauto.export.gene.variances.filtered,
-    xauto.export.gene.annotation
+    xauto.export.gene.annotation,
+    xauto.export.pca.pc,
+    xauto.export.pca.variances,
+    xauto.export.plot.clustering.readcounts.processed,
+    xauto.export.plot.clustering.readcounts.filtered,
+    xauto.export.plot.clustering.readcounts.top.variant,
+    xauto.export.plot.clustering.readcounts.pca.transformed
   ))
 })
