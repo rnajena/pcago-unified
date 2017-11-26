@@ -79,7 +79,8 @@ serverAutoNavigation <- function(input, session) {
 #' @examples
 serverQuickLoad <- function(xautovars, dataset.preprocessed) {
   # Note: Shiny is clearly not designed for this
-  # This quick loading consists of a quick hack to circumvent complicated flow control of the data
+  # Uses the xauto variable in generic importer to tell that specific data should be loaded.
+  # Observers & a variable that tracks the current stage allow data to be loaded one after another
 
   notification.id <- progressNotification("Please wait ... importing data")
 
@@ -88,6 +89,12 @@ serverQuickLoad <- function(xautovars, dataset.preprocessed) {
     shinyjs::enable("quickio.load")
     removeNotification(id = notification.id)
   })
+  
+  reset.flow <- function() {
+    xautovars$readcounts.raw <- NULL
+    xautovars$sample.annotation <- NULL
+    xautovars$stage <- "NULL"
+  }
 
   # Raw data
   xautovars$readcounts.raw <- list(source = "sample",
@@ -109,10 +116,6 @@ serverQuickLoad <- function(xautovars, dataset.preprocessed) {
                                                          collapse_conditions = F)
       )
     }
-    
-    # Reset stage
-    xautovars$stage <- "NULL"
-    
   })
   
 }
