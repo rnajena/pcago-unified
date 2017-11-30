@@ -48,4 +48,19 @@ Depending on the filter settings, different genes are selected.
 
 # Filtering read counts by gene variance cut-off
 
+A gene variance cut-off can be applied to genes filtered by the gene annotation.
+Use the slider or the numeric input within the gene variance filtering settings to
+change the cut-off.
+
 ![Filtering genes by gene variance](helppages/geneFilterByVariance.png)
+
+Below the slider you can find buttons that increase/decrease the gene variance cut-off
+by 1 or the currently selected animation step.
+Use the play/pause button to enable or disable animation of the gene variance cut-off
+within the selected range (parameters *From* and *To*). The speed of the animation and
+the increase of the gene variance cut-off can be changed by the *Animation step* and
+*Animation speed (ms)* parameters.
+
+Please note that the actual animation speed depends on the speed of your connection and
+the hardware that runs PCAGO. In certain plots, an *Export .mp4* feature allows
+export of the animation as video file.
