@@ -401,7 +401,7 @@ serverFilterReadcountsByAnnotation <- function(dataset) {
 #' @export
 #'
 #' @examples
-serverFilterReadCountsByVariance <- function(dataset) {
+serverFilterReadCountsByVariance <- function(dataset, animation.top.variant) {
   
   readcounts.filtered <- reactive({
     validate(need(dataset(), "No filtered read counts available!"))
@@ -409,10 +409,6 @@ serverFilterReadCountsByVariance <- function(dataset) {
     return(dataset()$readcounts.filtered)
   })
   
-  pca.gene.count <- extendedSliderInputValue("pca.genes.count", 
-                                             value.min = reactive({ 1 }),
-                                             value.max = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default = reactive({ nrow(readcounts.filtered()) }))
   readcounts.top.variant <- reactive({  })
   
   pca.pca.genes.set.count.minimal <- relevantGenesValue("pca.pca.genes.count.findminimal", 
@@ -429,9 +425,9 @@ serverFilterReadCountsByVariance <- function(dataset) {
     validate(need(dataset()$variances.filtered, "No filtered read counts available!"))
     
     dataset <- dataset()
-    dataset$readcounts.top.variant <- selectTopVariantGeneReadcounts(dataset$readcounts.filtered, dataset$variances.filtered, pca.gene.count()$value)
+    dataset$readcounts.top.variant <- selectTopVariantGeneReadcounts(dataset$readcounts.filtered, dataset$variances.filtered, animation.top.variant()$value)
     dataset$variances.top.variant <- buildGeneVarianceTable(dataset$readcounts.top.variant)
-    dataset$readcounts.top.variant.parameters.count <- pca.gene.count()$value
+    dataset$readcounts.top.variant.parameters.count <- animation.top.variant()$value
     
     return(dataset)
     

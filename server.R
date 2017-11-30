@@ -179,11 +179,13 @@ shinyServer(function(input, output, session) {
   
   # The next step is to filter our genes based on the annotation and then select the top n most variant genes
   # Here we also include the hook for the minimal gene set (threshold) calculation
-  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances)
-  pca.gene.count <- reactive({
-    validate(need(dataset.top.variant(), "No top variant read counts available!")) 
-    return(dataset.top.variant()$readcounts.top.variant.parameters.count)
-  })
+  
+  animation.top.variant <- extendedSliderInputValue("pca.genes.count", 
+                                             value.min = reactive({ 1 }),
+                                             value.max = reactive({ nrow(readcounts.filtered()) }),
+                                             value.default = reactive({ nrow(readcounts.filtered()) }))
+  
+  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances, animation.top.variant = animation.top.variant)
   readcounts.top.variant <- reactive({
     validate(need(dataset.top.variant(), "No top variant read counts available!")) 
     return(dataset.top.variant()$readcounts.top.variant)
@@ -268,7 +270,7 @@ shinyServer(function(input, output, session) {
   
   xauto.export.plot.pca.sampleplot <- plotSamplePlot("pca.samples.plot",
                dataset = dataset.pca,
-               animation.params = pca.gene.count,
+               animation.params = animation.top.variant,
                pca.center = reactive({input$pca.pca.settings.center}),
                pca.scale = reactive({input$pca.pca.settings.scale}),
                pca.relative = reactive({input$pca.pca.settings.relative}),
