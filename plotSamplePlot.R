@@ -9,6 +9,7 @@ source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
 source("widgetInPlaceHelp.R")
 source("widgetNumericRangeInput.R")
+source("environment.R")
 
 plotSamplePlotSettingsUI.axisLimitModes <- c("Auto" = "auto", "Auto (All genes)" = "allgenes", "Manual" = "manual")
 
@@ -367,13 +368,14 @@ plotSamplePlot.saveMovie <- function(filename,
   fps <- 1 / spf
   
   
-  system(paste("bash -lc '",
-               "ffmpeg",
-               "-framerate", fps, 
-               "-i", paste0(basefile, "_%d.png"), 
-               "-c:v", "libx264",
-               filename,
-               "'"))
+  # system(paste("bash -lc '",
+  #              "ffmpeg",
+  #              "-framerate", fps, 
+  #              "-i", paste0(basefile, "_%d.png"), 
+  #              "-c:v", "libx264",
+  #              filename,
+  #              "'"))
+  system2(ffmpeg.path, c("-framerate", fps, "-i", paste0(basefile, "_%d.png"), "-c:v", "libx264", filename))
   
   showNotification("Your video file has been successfully rendered.", type = "message")
 }
