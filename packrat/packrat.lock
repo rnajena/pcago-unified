@@ -729,6 +729,11 @@ Source: CRAN
 Version: 2.1.14
 Hash: c81230c3a7d9ba20607ad6b4331173d1
 
+Package: zip
+Source: CRAN
+Version: 1.0.0
+Hash: eeef8cf88fb0a89636fe26c134eaef32
+
 Package: zlibbioc
 Source: Bioconductor
 Version: 1.24.0
