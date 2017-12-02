@@ -19,7 +19,7 @@ uiAboutPage <- function() {
              tags$div(class = "landing-header-action",
                       tags$div(style="display: inline-block; width: 80%;", includeMarkdown("aboutpage/landing.md")),
                       tags$div(style="display: block;",bsButton("about.goto.analyze", "Start  analysis!", style = "primary", size = "large")),
-                      tags$div(style="display: block;", class="row top5", column(width = 8, offset = 2, actionLink("about.goto.help", "or learn how to use it!")))
+                      tags$div(style="display: block; margin-top: 5px;", actionLink("about.goto.help", "or learn how to use it!"))
                                       )
     ),
     tags$div(class="features", 
