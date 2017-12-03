@@ -42,7 +42,8 @@ shiny::runApp()
 ## Requirements
 
 * `r sessionInfo()$R.version$version.string` or higher
-* 
+* `curl` and development packages
+* Fortran language packages
 
 PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the 
 package management system packrat.

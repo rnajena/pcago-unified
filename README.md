@@ -38,7 +38,8 @@ Requirements
 ------------
 
 -   R version 3.4.2 (2017-09-28) or higher
--   
+-   `curl` and development packages
+-   Fortran language packages
 
 PCAGO also requires several R packages (see table below). You can either
 install those packages manually or by using the package management
