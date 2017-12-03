@@ -7,47 +7,61 @@ output: github_document
 knitr::opts_chunk$set(echo = F)
 ```
 
-Online tool to perform PCA on RNASeq results.
+PCAGO is an interactive web service that allows analysis of RNA-Seq read count data with principal component analysis (PCA)
+and agglomerative clustering. The tool also includes features like read count normalization, filtering read counts by 
+gene annotation and various visualization options.
 
 ## Running
 
-To start the PCAGO server open a R console in the PCAGO folder and run
+You have following options to run PCAGO:
+
+* Use our online server (In development)
+* Use a standalone desktop application
+* Run the PCAGO server on one of your servers or your local computer
+
+### Using the standalone application
+
+Download the PCAGO-Electron [here](https://github.com/rumangerst/pcago-electron). This application wraps a
+PCAGO-server within an [Electron](https://electronjs.org/) application.
+
+### Running manually
+
+Open a R console in the PCAGO folder and run
 
 ```
 shiny::runApp()
 ```
 
-## Requirements
-
-PCAGO was developed on `r sessionInfo()$R.version$version.string` and also requires following packages to run:
-
-```{r, results = 'asis'}
-
-library(knitr)
-library(rmarkdown)
-
-r.packages <- sessionInfo()$otherPkgs
-
-table <- data.frame(
-  Package = sapply(r.packages, function(x) { x$Package }),
-  Author = sapply(r.packages, function(x) { if("Author" %in% names(x)) gsub("\n", " ", x$Author) else "" }),
-  URL = sapply(r.packages, function(x) { if("URL" %in% names(x)) gsub("\n", " ", x$URL, fixed = T) else "" }),
-  "Version" = sapply(r.packages, function(x) { x$Version }),
-  stringsAsFactors = F,
-  check.names = F,
-  row.names = NULL
-)
-
-kable(table, caption = "Required packages")
+**Note: ** If you use packrat (see below), you have to run
 
 ```
+source('packrat/init.R')
+shiny::runApp()
+```
 
-PCAGO supports [packrat](https://rstudio.github.io/packrat/) 
+## Requirements
+
+* `r sessionInfo()$R.version$version.string` or higher
+* 
+
+PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the 
+package management system packrat.
+
+### Using packrat
+
+[Packrat](https://rstudio.github.io/packrat/) is a package management system that allows creating snapshots
+of the libraries used for development of the application. This prevents breakage introduced by newer library versions.
+To use packrat, follow these steps:
 
 1. Download the [package sources](https://drive.google.com/file/d/1aJ1m0hfl1wofaaON1_TfZY0k-YkXonaB/view?usp=sharing)
 2. Unpack them into the `packrat` directory within the PCAGO project folder
 3. Start R within the project directory
 4. Run `source('packrat/init.R')`
+
+**Important note: ** `source('packrat/init.R')` must be always called before starting PCAGO to enable packrat. If you want to automate this
+process or want to deploy a server using [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/), create a file `.Rprofile` that contains `source('packrat/init.R')` in the PCAGO directory.
+
+### Installing requirements manually
 
 If you do not want to use packrat, you can install the dependencies manually.
 Please note that newer library versions might break functionality.
@@ -72,6 +86,30 @@ cat("# CRAN packages",
   sep = "\n")
 
 ```
+
+## R packages
+
+```{r, results = 'asis'}
+
+library(knitr)
+library(rmarkdown)
+
+r.packages <- sessionInfo()$otherPkgs
+
+table <- data.frame(
+  Package = sapply(r.packages, function(x) { x$Package }),
+  Author = sapply(r.packages, function(x) { if("Author" %in% names(x)) gsub("\n", " ", x$Author) else "" }),
+  URL = sapply(r.packages, function(x) { if("URL" %in% names(x)) gsub("\n", " ", x$URL, fixed = T) else "" }),
+  "Version" = sapply(r.packages, function(x) { x$Version }),
+  stringsAsFactors = F,
+  check.names = F,
+  row.names = NULL
+)
+
+kable(table, caption = "Required packages")
+
+```
+
 
 ## Updating this README file
 
