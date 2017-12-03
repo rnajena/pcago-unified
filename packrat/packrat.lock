@@ -629,6 +629,7 @@ Hash: fef2abdadbb8db061b9d37e7ca5cb0b4
 Package: rmarkdown
 Source: CRAN
 Version: 1.8
+Hash: 2a7842e3cee62a79dd737d17e9e9d86b
 Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
     rprojroot, stringr, yaml
 
@@ -641,6 +642,7 @@ Requires: DEoptimR
 Package: rprojroot
 Source: CRAN
 Version: 1.2
+Hash: fdcac51a7f47decd60556ceefc3c26b1
 Requires: backports
 
 Package: rstudioapi

@@ -41,9 +41,19 @@ shiny::runApp()
 
 ## Requirements
 
+Following packages are required to run PCAGO if the dependencies are already installed:
+
 * `r sessionInfo()$R.version$version.string` or higher
-* `curl` and development packages
-* Fortran language packages
+* ffmpeg (Debian/Ubuntu: `ffmpeg`)
+* libmariadb (Debian/Ubuntu: `libmariadb2`)
+
+Following packages are required to install PCAGO if the required libraries have to be installed
+
+* libcurl dev package (Debian/Ubuntu: `libcurl4-openssl-dev`)
+* xml2-config dev package (Debian/Ubuntu: `libxml2-dev`)
+* openssl dev package (Debian/Ubuntu: `libssl-dev`)
+* mariadb dev package (Debian/Ubuntu: `libmariadb-client-lgpl-dev`)
+* cairo2 dev package (Debian/Ubuntu: `libcairo2-dev`)
 
 PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the 
 package management system packrat.
@@ -61,6 +71,10 @@ To use packrat, follow these steps:
 
 **Important note: ** `source('packrat/init.R')` must be always called before starting PCAGO to enable packrat. If you want to automate this
 process or want to deploy a server using [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/), create a file `.Rprofile` that contains `source('packrat/init.R')` in the PCAGO directory.
+
+**Important note: ** If the installation of the dependencies failed for any reason `source('packrat/init.R')` will **not** continue the installation of the library. Additionally run `packrat::restore()` to continue the dependency installation.
+
+**Tip: ** You can copy the packrat directory to other computers running the same operating system to skip the building times. This will likely not work if you copy data between different distributions or different versions of the same distribution.
 
 ### Installing requirements manually
 
