@@ -63,7 +63,7 @@ development of the application. This prevents breakage introduced by
 newer library versions. To use packrat, follow these steps:
 
 1.  Download the [package
-    sources](https://drive.google.com/file/d/1aJ1m0hfl1wofaaON1_TfZY0k-YkXonaB/view?usp=sharing)
+    sources](https://github.com/rumangerst/pcago/releases)
 2.  Unpack them into the `packrat` directory within the PCAGO project
     folder
 3.  Start R within the project directory
