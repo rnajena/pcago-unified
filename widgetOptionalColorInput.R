@@ -23,10 +23,10 @@ optionalColorInput <- function(id, label = NULL) {
   
   ns <- NS(id)
   
-  return(tagList(
+  return(tags$div(class = "optional-color-input",
     fixedRow(
-      column(width = 6, colourInput(ns('color'), label = label, allowTransparent = F)),
-      column(width = 6, checkboxGroupInput(ns('hascolor'), label = " ", choices = c("No color" = "no_color")))
+      column(width = 8, colourInput(ns('color'), label = label, allowTransparent = T)),
+      column(width = 4, bsButton(ns('nocolor'), label = "No color"))
     )
   ))
 }
@@ -45,16 +45,19 @@ optionalColorInputValue_ <- function(input, output, session) {
   
   result.data <- reactiveValues(color = "")
   
-  observeEvent({ input$hascolor
-    input$color },
+  observeEvent(input$color,
     {
-      if("no_color" %in% input$hascolor) {
+      if(col2rgb(input$color, alpha = T)["alpha", ] == 0) {
           result.data$color = ""
       }
       else {
         result.data$color = input$color
       }
     })
+  
+  observeEvent(input$nocolor, {
+    updateColourInput(session, "color", value = "#FFFFFF00")
+  })
   
   return(reactive({result.data$color}))
   
@@ -85,10 +88,9 @@ optionalColorInputValue <- function(id) {
 updateOptionalColorInput_ <- function(input, output, session, value) {
   
   if(is.null(value) || value == "") {
-    updateCheckboxGroupInput(session, "hascolor", selected = c("no_color"))
+    updateColourInput(session, "color", value = "#FFFFFF00")
   }
   else {
-    updateCheckboxGroupInput(session, "hascolor", selected = c())
     updateColourInput(session, "color", value = value)
   }
   

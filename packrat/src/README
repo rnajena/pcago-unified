@@ -1,5 +1,7 @@
 # PCAGO Dependency library sources
 
+This folder must contain all source files for each dependency if packrat is used.
+
 The code of all libraries contained within this folder belongs to the respective authors.
 The license can be reviewed in the PCAGO README.md file.
 If provided by the authors, LICENSE files are available for each package.
