@@ -6,6 +6,7 @@ library(DT)
 library(shiny)
 source("uiHelper.R")
 source("helpers.R")
+source("defaultParameters.R")
 
 readCountNormalizationUI <- function(id) {
   
@@ -16,7 +17,8 @@ readCountNormalizationUI <- function(id) {
                  helpIconText("Apply read count normalization", 
                               "If you already have normalized read counts, set this to 'None'.",
                               "Read count normalization"),
-                 choices = supportedReadcountNormalizationTypes),
+                 choices = supportedReadcountNormalizationTypes,
+                 selected = default.data.normalization),
     conditionalPanel(conditionalPanel.equals(ns("normalization"), "'tpm'"),
                      checkboxInput(ns("normalization.tpm.effectivelength"), "Use effective fragment length", value = T),
                      checkboxInput(ns("normalization.tpm.exonlength"), "Use feature exon length", value = T)),

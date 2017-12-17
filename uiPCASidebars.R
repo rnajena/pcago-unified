@@ -25,6 +25,7 @@ source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
 source("widgetRelevantGenes.R")
 source("widgetReadCountPostprocessing.R")
+source("defaultParameters.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -102,16 +103,17 @@ uiPCASidebarPCA <- function() {
                     value = "pca.pca.dataprocessing",
                     checkboxInput("pca.pca.settings.center", 
                                   helpIconText("Center data", includeMarkdown("helptooltips/pca-pca-settings-center.md")), 
-                                  value = T),
+                                  value = default.pca.settings.centering),
                     checkboxInput("pca.pca.settings.scale", 
                                   helpIconText("Scale data", includeMarkdown("helptooltips/pca-pca-settings-scale.md")), 
-                                  value = F)
+                                  value = default.pca.settings.scaling)
                    ),
     bsCollapsePanel(optionalDataText("Output transformations"),
                     value = "pca.pca.outputtransformations",
                     radioButtons("pca.pca.settings.relative", 
                                  helpIconText("Relative sample positions", includeMarkdown("helptooltips/pca-pca-settings-relative.md")), 
-                                 choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global")))
+                                 choices = c("None" = "none", "Per dimension" = "dimension", "Global" = "global"),
+                                 selected = default.pca.settings.relative))
   ))
   
 }

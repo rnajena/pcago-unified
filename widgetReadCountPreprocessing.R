@@ -7,14 +7,15 @@ library(shiny)
 source("uiHelper.R")
 source("helpers.R")
 source("readcounts.R")
+source("defaultParameters.R")
 
 readCountPreprocessingUI <- function(id) {
   
   ns <- NS(id)
   
   return(tagList(
-    checkboxInput(ns("preprocessing.transpose"), "Transpose table", value = F),
-    checkboxInput(ns("preprocessing.zero"), "Remove genes with zero readcounts", value = T)
+    checkboxInput(ns("preprocessing.transpose"), "Transpose table", value = default.data.preprocessing.transpose),
+    checkboxInput(ns("preprocessing.zero"), "Remove genes with zero readcounts", value = default.data.preprocessing.removezero)
   ))
 }
 

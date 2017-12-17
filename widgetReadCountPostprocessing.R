@@ -7,13 +7,14 @@ library(shiny)
 source("uiHelper.R")
 source("helpers.R")
 source("readcounts.R")
+source("defaultParameters.R")
 
 readCountPostprocessingUI <- function(id) {
   
   ns <- NS(id)
   
   return(tagList(
-    checkboxInput(ns("postprocessing.remove.constant"), "Remove genes with constant readcounts", value = T)
+    checkboxInput(ns("postprocessing.remove.constant"), "Remove genes with constant readcounts", value = default.data.postprocessing.removeconstant)
   ))
 }
 
