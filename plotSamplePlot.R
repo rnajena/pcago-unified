@@ -37,7 +37,8 @@ plotSamplePlotSettingsUI <- function(id) {
                      selectizeInput(ns("plot3dprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
                      conditionalPanel(conditionalPanel.equals(ns("plot3dprovider"), "'perspective'"),
                                       numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 40),
-                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 40))
+                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 40),
+                                      numericInput(ns("plot3d.nticks"), "Number of ticks", value = 5))
                     ),
     bsCollapsePanel(recommendedDataText("Axes"),
                     value = "axes",
@@ -93,6 +94,7 @@ plotSamplePlot.save <- function(pca,
                                 plot3dprovider,
                                 plot3d.theta,
                                 plot3d.phi,
+                                plot3d.nticks,
                                 filename ){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
@@ -119,7 +121,9 @@ plotSamplePlot.save <- function(pca,
     need(pca, "No PCA results available!"),
     need(axes, "No axes to draw!"),
     need(visuals.conditions, "No condition visual parameters available!"),
-    need(visuals.sample, "No sample visual parameters available!"))
+    need(visuals.sample, "No sample visual parameters available!"),
+    need(is.integer(plot3d.nticks), "Invalid number of ticks!"))
+  validate(need(plot3d.nticks >= 0, "Invalid number of ticks!"))
   
   if(!is.character(format) || !is.character(filename)) {
     stop("Invalid arguments!")
@@ -321,8 +325,8 @@ plotSamplePlot.save <- function(pca,
                theta = plot3d.theta,
                phi = plot3d.phi,
                colkey = F,
-               nticks = 10,
-               ticktype = "detailed",
+               nticks = if(plot3d.nticks < 1) 1 else plot3d.nticks,
+               ticktype = if(plot3d.nticks < 1) "simple" else "detailed",
                type = "p",
                main = title,
                sub = subtitle)
@@ -389,6 +393,7 @@ plotSamplePlot.saveMovie <- function(filename,
                                  plot3dprovider,
                                  plot3d.theta,
                                  plot3d.phi,
+                                 plot3d.nticks,
                                  updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.sample) ||
@@ -423,6 +428,7 @@ plotSamplePlot.saveMovie <- function(filename,
                         plot3dprovider = plot3dprovider,
                         plot3d.theta = plot3d.theta,
                         plot3d.phi = plot3d.phi,
+                        plot3d.nticks = plot3d.nticks,
                         filename = plot.filename)
     
   }
@@ -564,6 +570,7 @@ plotSamplePlot_ <- function(input,
                               plot3dprovider = input$plot3dprovider,
                               plot3d.phi = input$plot3d.phi,
                               plot3d.theta = input$plot3d.theta,
+                              plot3d.nticks = input$plot3d.nticks,
                               filename = filename))
   })
   
@@ -599,6 +606,7 @@ plotSamplePlot_ <- function(input,
             plot3dprovider = input$plot3dprovider,
             plot3d.phi = input$plot3d.phi,
             plot3d.theta = input$plot3d.theta,
+            plot3d.nticks = input$plot3d.nticks,
             updateProgress = updateProgress
           )
 
@@ -644,6 +652,10 @@ plotSamplePlot_ <- function(input,
                                  axislimits = axislimits(),
                                  stabilizeplot = input$stabilizeplot,
                                  format = format,
+                                 plot3dprovider = input$plot3dprovider,
+                                 plot3d.phi = input$plot3d.phi,
+                                 plot3d.theta = input$plot3d.theta,
+                                 plot3d.nticks = input$plot3d.nticks,
                                  filename = filename))
       
       xautovars$xautocounter <- xautovars$xautocounter + 1
