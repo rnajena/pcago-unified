@@ -321,6 +321,8 @@ plotSamplePlot.save <- function(pca,
                theta = plot3d.theta,
                phi = plot3d.phi,
                colkey = F,
+               nticks = 10,
+               ticktype = "detailed",
                type = "p",
                main = title,
                sub = subtitle)
