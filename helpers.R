@@ -5,6 +5,7 @@
 library(shiny)
 library(reshape2)
 library(SummarizedExperiment)
+library(Cairo)
 source("classImporterParameter.R")
 
 #' Returns TRUE if all data in x are integers
@@ -241,19 +242,19 @@ saveRPlot <- function(width, height, dpi, scale, filename, format, expr) {
   } 
   
   if(format == "svg") {
-    svg(filename = filename,
+    CairoSVG(file = filename,
         width = width / dpi,
         height = height / dpi,
         pointsize = 12 * scale)
   }
   else if(format == "pdf") {
-    pdf(file = filename,
+    CairoPDF(file = filename,
         width = width / dpi,
         height = height / dpi,
         pointsize = 12 * scale)
   }
   else if(format == "png") {
-    png(filename = filename,
+    CairoPNG(filename = filename,
         width = width,
         height = height,
         pointsize = 12 * scale,
@@ -261,7 +262,7 @@ saveRPlot <- function(width, height, dpi, scale, filename, format, expr) {
         res = dpi)
   }
   else if(format == "tiff") {
-    tiff(filename = filename,
+    CairoTIFF(filename = filename,
          width = width,
          height = height,
          pointsize = 12 * scale,
