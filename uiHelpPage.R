@@ -37,6 +37,7 @@ uiHelpPage <- function() {
     uiHelpPageEntry("PCA", "helppages/processing-pca.md"),
     "Output",
     uiHelpPageEntry("Visuals editor widget", "helppages/output-visual-editor.md"),
+    uiHelpPageEntry("Gradient editor widget", "helppages/output-gradient-editor.md"),
     uiHelpPageEntry("Processing view widget", "helppages/output-processing-view.md")
   ))
 }
