@@ -1,0 +1,8 @@
+# PCAGO packrat sources
+
+Copy the contents of this package to PCAGO/packrat
+
+Contains sources for required libraries. The rights to the required libraries
+are owned by their respective authors. See src/README for more information
+about the licenses of those libraries.
+ 

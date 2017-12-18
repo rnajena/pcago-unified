@@ -234,6 +234,9 @@ visualsEditorValue_ <- function(input, output, session, conditions, has.color = 
         }
         
       }
+      else {
+        js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"border\", \"%s\")", condition, control.name, "2px solid #555"))
+      }
     }
     
     if(length(js) > 0) {

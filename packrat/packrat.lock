@@ -284,6 +284,12 @@ Version: 1.1.0
 Hash: e29764e47f2faf0cd5b74cbcddc3fa9c
 Requires: tibble
 
+Package: caTools
+Source: CRAN
+Version: 1.17.1
+Hash: 97cb6f6293cd18d17df77a6383cc6763
+Requires: bitops
+
 Package: checkmate
 Source: CRAN
 Version: 1.8.5
@@ -381,6 +387,12 @@ Source: CRAN
 Version: 1.0.0
 Hash: 4f24cbf581681c263186b9425f05ba3e
 
+Package: gdata
+Source: CRAN
+Version: 2.18.0
+Hash: 62797fafa287d1845a014c615d46e50c
+Requires: gtools
+
 Package: gdtools
 Source: CRAN
 Version: 0.1.6
@@ -410,6 +422,18 @@ Source: CRAN
 Version: 1.2.0
 Hash: 381e42baedecc633c0e547a0c7ca9de7
 
+Package: gplots
+Source: CRAN
+Version: 3.0.1
+Hash: b7abe122479c203aa236499b7fc4b816
+Requires: caTools, gdata, gtools
+
+Package: gradientPickerD3
+Source: CRAN
+Version: 0.1.0.0
+Hash: 8ed45980330e32631f14225ec5ad83fd
+Requires: htmlwidgets, jsonlite, shiny
+
 Package: gridExtra
 Source: CRAN
 Version: 2.3
@@ -420,6 +444,11 @@ Package: gtable
 Source: CRAN
 Version: 0.2.0
 Hash: cd78381a9d3fea966ac39bd0daaf5554
+
+Package: gtools
+Source: CRAN
+Version: 3.5.0
+Hash: 471b2e2452dfb30fdc1dd6f1b567925a
 
 Package: highr
 Source: CRAN
