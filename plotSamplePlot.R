@@ -19,7 +19,7 @@ plotSamplePlotUI <- function(id) {
   
   return(downloadablePlotOutput(ns("plot"),
                                 custom.header.items = tagList(
-                                  downloadButton(ns("export.mp4"), "Export *.mp4")
+                                  actionButton(ns("export.mp4"), "Export *.mp4", icon = icon("download"))
                                 )))
 }
 
@@ -496,40 +496,54 @@ plotSamplePlot_ <- function(input,
                               filename = filename))
   })
   
-  # Download mp4 movie
-  output$export.mp4 <- downloadHandler("sample-plot-movie.mp4", function(file) {
+  # It seems that for long processes, downloadHandler can time out for some reason
+  # Use a modal approach
+  observeEvent(input$export.mp4, {
     
-    validate(
-      need(readcounts.filtered(), "No filtered read counts!")
-    )
+    validate(need(readcounts.filtered(), "No filtered read counts!"))
     
-    # Disable the export button, so the user doesn't spam it
+    shinyjs::disable("export.mp4")
     on.exit({
       shinyjs::enable("export.mp4")
     })
-    shinyjs::disable("export.mp4")
     
+    movie.file <- tempfile(pattern = "samples-plot-mp4", fileext = ".mp4")
     
     withProgressCustom(function(updateProgress) {
-      
-      plotSamplePlot.saveMovie(
-        filename = file,
-        animation.params = animation.params(),
-        axes = input$axes,
-        plot.settings = plot.settings(),
-        axislimits = axislimits(),
-        stabilizeplot = input$stabilizeplot,
-        visuals.conditions = visuals.conditions(),
-        visuals.sample = visuals.sample(),
-        readcounts.filtered = readcounts.filtered(),
-        gene.variances = gene.variances(),
-        pca.center = pca.center(),
-        pca.scale = pca.scale(),
-        pca.relative = pca.relative(),
-        updateProgress = updateProgress
+
+          plotSamplePlot.saveMovie(
+            filename = movie.file,
+            animation.params = animation.params(),
+            axes = input$axes,
+            plot.settings = plot.settings(),
+            axislimits = axislimits(),
+            stabilizeplot = input$stabilizeplot,
+            visuals.conditions = visuals.conditions(),
+            visuals.sample = visuals.sample(),
+            readcounts.filtered = readcounts.filtered(),
+            gene.variances = gene.variances(),
+            pca.center = pca.center(),
+            pca.scale = pca.scale(),
+            pca.relative = pca.relative(),
+            updateProgress = updateProgress
+          )
+
+        }, message = "Creating movie")
+    
+    # Use a modal to download the plot
+    showModal(modalDialog(
+      "The movie is ready for download!",
+      footer = tagList(
+        modalButton("Close"),
+        downloadButton(session$ns("export.mp4.download"), "Download now")
       )
-      
-    }, message = "Creating movie")
+    ))
+    
+    output$export.mp4.download <- downloadHandler("pcago-pca-movie.mp4",
+                                                    content = function(filename) {
+                                                      file.copy(movie.file, filename, overwrite = T)
+                                                    },
+                                                    contentType = "video/mp4")
     
   })
   
