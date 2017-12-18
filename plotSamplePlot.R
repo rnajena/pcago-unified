@@ -5,7 +5,6 @@
 library(shiny)
 library(ggplot2)
 library(scatterplot3d)
-library(ggbiplot)
 library(plot3D)
 
 source("widgetVisualsEditor.R")
@@ -15,8 +14,6 @@ source("widgetNumericRangeInput.R")
 source("environment.R")
 
 plotSamplePlotSettingsUI.axisLimitModes <- c("Auto" = "auto", "Auto (All genes)" = "allgenes", "Manual" = "manual")
-
-plotSamplePlotSettingsUI.plotTypes <- c("Standard plot" = "default", "Biplot" = "biplot")
 
 plotSamplePlotSettingsUI.3dplotProvider <- c("Isometric" = "isometric", "Perspective" = "perspective")
 
@@ -37,12 +34,10 @@ plotSamplePlotSettingsUI <- function(id) {
   return(bsCollapse(
     bsCollapsePanel(recommendedDataText("Plot type"),
                     value = "plottype",
-                    selectizeInput(ns("plottype"), "Plot type", choices = plotSamplePlotSettingsUI.plotTypes),
-                    conditionalPanel(conditionalPanel.equals(ns("plottype"), "'default'"),
-                                     selectizeInput(ns("plot3dprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
-                                     conditionalPanel(conditionalPanel.equals(ns("plot3dprovider"), "'perspective'"),
-                                                      numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 40),
-                                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 40)))
+                     selectizeInput(ns("plot3dprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
+                     conditionalPanel(conditionalPanel.equals(ns("plot3dprovider"), "'perspective'"),
+                                      numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 40),
+                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 40))
                     ),
     bsCollapsePanel(recommendedDataText("Axes"),
                     value = "axes",

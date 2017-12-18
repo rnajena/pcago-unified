@@ -82,7 +82,7 @@ uiPCAPage <- function() {
                                     tabPanel("Principal components", value = "pca.pc.pc",
                                              processingStepsWidgetUI("pca.pc.processing", "Processing overview"),
                                              downloadableDataTableOutput("pca.pc")),
-                                    tabPanel("Importance", value = "pca.pc.importance",
+                                    tabPanel("Scree plot", value = "pca.pc.importance",
                                              processingStepsWidgetUI("pca.variance.processing", "Processing overview"),
                                              plotPCAVariancePlotUI("pca.variance.plot"),
                                              downloadableDataTableOutput("pca.variance")),
