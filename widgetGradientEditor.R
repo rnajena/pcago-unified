@@ -7,6 +7,7 @@ library(shiny)
 library(RColorBrewer)
 source("uiHelper.R")
 source("widgetGenericImporter.R")
+source("gradients.R")
 
 
 #' Creates a widget that allows editing of visual parameters of a gradient
@@ -42,8 +43,9 @@ gradientEditorUI <- function(id) {
                                            numericInput(ns("value"), "Value", value = 0),
                                            colourInput(ns("color"), "Color", allowTransparent = F),
                                            hDivider(),
+                                           fluidPage(
                                            fluidRow(actionButton(ns("add"), "Add stop", icon = icon("plus")),
-                                                    actionButton(ns("remove"), "Delete this stop", icon = icon("trash"))))
+                                                    actionButton(ns("remove"), "Delete this stop", icon = icon("trash")))))
                           
                           ))))
   
@@ -90,7 +92,22 @@ gradientEditorValue_ <- function(input, output, session, default.gradient) {
       inv.color.value <- if(inv.color.value < 255/2) 0 else 255
       inv.color <- rgb(inv.color.value, inv.color.value, inv.color.value, maxColorValue = 255)
       
-      js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"background-color\", \"%s\")", index, control.name, color))
+      # Build linear gradient for fancy
+      if(nrow(variables$visuals.table) > 1) {
+        if(index == 1) {
+          
+        }
+        else if(index == nrow(variables$visuals.table)) {
+          
+        }
+        else {
+          prev.color <- variables$visuals.table[index - 1, "color"]
+          next.color <- variables$visuals.table[index + 1, "color"]
+          color <- sprintf("linear-gradient(90deg, %s, %s, %s)", prev.color, color, next.color)
+        }
+      }
+      
+      js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"background\", \"%s\")", index, control.name, color))
       js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"color\", \"%s\")", index, control.name, inv.color))
       js <- c(js, sprintf("$(\"input[value='%s'][name='%s']\").next().css(\"border\", \"%s\")", index, control.name, "2px solid #555"))
       
@@ -110,7 +127,7 @@ gradientEditorValue_ <- function(input, output, session, default.gradient) {
     else {
       
       values <- 1:nrow(variables$visuals.table)
-      names <- rep("◆", nrow(variables$visuals.table))
+      names <- sapply(1:nrow(variables$visuals.table), function(x) paste("Stop", x) )
       
       updateRadioButtons(session, "gradientstops", 
                          choiceNames = names,
@@ -180,6 +197,44 @@ gradientEditorValue_ <- function(input, output, session, default.gradient) {
     variables$visuals.table
   }, {
     update.ui()
+  })
+  
+  # Add/Remove stops
+  observeEvent(input$add, {
+    
+    if(input$gradientstops == "None") {
+      return()
+    }
+    
+    # We recalculate the values for the whole table -> smooth
+    data <- variables$visuals.table
+    newvalues <- seq(from = min(data[, "value"]), to = max(data[, "value"]), by = (max(data[, "value"] - min(data[, "value"]))) / (nrow(data)))
+    newcolors <- colorRampPalette(data[,"color"])(n = nrow(data) + 1)
+    
+    
+    newdata <- data.frame(value = newvalues,
+                          color = newcolors) 
+    
+    variables$visuals.table <- newdata
+    update.gradientstops()
+  })
+  
+  observeEvent(input$remove, {
+    if(input$gradientstops == "None") {
+      return()
+    }
+    data <- variables$visuals.table
+    
+    if(nrow(data) <= 2) {
+      return()
+    }
+    
+    index <- as.integer(input$gradientstops)
+    newdata <- data[-index,]
+    
+    variables$visuals.table <- newdata
+    update.gradientstops()
+    
   })
   
   #' Handler for download of current visuals table
