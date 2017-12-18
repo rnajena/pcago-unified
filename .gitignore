@@ -7,5 +7,4 @@ README.html
 README_files
 figure
 packrat/lib*/
-packrat/src/
 .Rprofile
