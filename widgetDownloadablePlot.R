@@ -97,7 +97,7 @@ downloadablePlot_ <- function(input,
   output$plot.container <- renderUI({
     
     width <- "100%"
-    height <- "400px"
+    height <- "700px"
     
     if(!is.na(plot.settings()@width)) {
       width <- paste0(plot.settings()@width, "px")

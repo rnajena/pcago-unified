@@ -39,10 +39,10 @@ plotSamplePlotSettingsUI <- function(id) {
                     value = "plottype",
                     selectizeInput(ns("plottype"), "Plot type", choices = plotSamplePlotSettingsUI.plotTypes),
                     conditionalPanel(conditionalPanel.equals(ns("plottype"), "'default'"),
-                                     selectizeInput(ns("3dplotprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
-                                     conditionalPanel(conditionalPanel.equals(ns("3dplotprovider"), "'perspective'"),
-                                                      numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 0),
-                                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 0)))
+                                     selectizeInput(ns("plot3dprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
+                                     conditionalPanel(conditionalPanel.equals(ns("plot3dprovider"), "'perspective'"),
+                                                      numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 40),
+                                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 40)))
                     ),
     bsCollapsePanel(recommendedDataText("Axes"),
                     value = "axes",
@@ -95,6 +95,9 @@ plotSamplePlot.save <- function(pca,
                                 axislimits,
                                 stabilizeplot,
                                 format,
+                                plot3dprovider,
+                                plot3d.theta,
+                                plot3d.phi,
                                 filename ){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
@@ -262,47 +265,93 @@ plotSamplePlot.save <- function(pca,
     
   }
   else if(dimensions.plot == 3) {
-    saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
-      par(oma = c(1,7,1,1))
-      
-      scatterplot3d(
-        x = pca.transformed[[dimensions.requested[1]]],
-        y = pca.transformed[[dimensions.requested[2]]],
-        z = pca.transformed[[dimensions.requested[3]]],
-        color = palette.colors[as.numeric(pca.transformed$color)],
-        pch = palette.shapes[as.numeric(pca.transformed$shape)],
-        xlab = pc.lab(dimensions.requested[1]),
-        ylab = pc.lab(dimensions.requested[2]),
-        zlab = pc.lab(dimensions.requested[3]),
-        xlim = xaxislimit,
-        ylim = yaxislimit,
-        zlim = zaxislimit,
-        type = "h",
-        main = title,
-        sub = subtitle
-      )
-      
-      # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?
-      par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-      plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-      
-      legend("topleft",
-             legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
-             col = palette.colors,
-             pch = 16,
-             bty = "n",
-             xpd = T,
-             title = label.color,
-             title.adj = 0) # wtf?
-      legend("bottomleft",
-             legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
-             col = "black",
-             pch = palette.shapes,
-             bty = "n",
-             xpd = T,
-             title = label.shape,
-             title.adj = 0)
-    })
+    
+    if(plot3dprovider == "isometric") {
+      saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
+        par(oma = c(1,7,1,1))
+        
+        scatterplot3d(
+          x = pca.transformed[[dimensions.requested[1]]],
+          y = pca.transformed[[dimensions.requested[2]]],
+          z = pca.transformed[[dimensions.requested[3]]],
+          color = palette.colors[as.numeric(pca.transformed$color)],
+          pch = palette.shapes[as.numeric(pca.transformed$shape)],
+          xlab = pc.lab(dimensions.requested[1]),
+          ylab = pc.lab(dimensions.requested[2]),
+          zlab = pc.lab(dimensions.requested[3]),
+          xlim = xaxislimit,
+          ylim = yaxislimit,
+          zlim = zaxislimit,
+          type = "h",
+          main = title,
+          sub = subtitle
+        )
+        
+        # Print legends outside of plot. Who thought that taking the plot API from S language is a good idea?
+        par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+        plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+        
+        legend("topleft",
+               legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
+               col = palette.colors,
+               pch = 16,
+               bty = "n",
+               xpd = T,
+               title = label.color,
+               title.adj = 0) # wtf?
+        legend("bottomleft",
+               legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
+               col = "black",
+               pch = palette.shapes,
+               bty = "n",
+               xpd = T,
+               title = label.shape,
+               title.adj = 0)
+      })
+    }
+    else if(plot3dprovider == "perspective") {
+      saveRPlot(width, height, dpi, scale, filename, format, expr = function() {
+      points3D(x = pca.transformed[[dimensions.requested[1]]],
+               y = pca.transformed[[dimensions.requested[2]]],
+               z = pca.transformed[[dimensions.requested[3]]],
+               xlab = pc.lab(dimensions.requested[1]),
+               ylab = pc.lab(dimensions.requested[2]),
+               zlab = pc.lab(dimensions.requested[3]),
+               xlim = xaxislimit,
+               ylim = yaxislimit,
+               zlim = zaxislimit,
+               pch = palette.shapes[as.numeric(pca.transformed$shape)],
+               colvar = as.numeric(pca.transformed$color),
+               col = palette.colors,
+               theta = plot3d.theta,
+               phi = plot3d.phi,
+               colkey = F,
+               type = "p",
+               main = title,
+               sub = subtitle)
+        
+        legend("topleft",
+               legend = conditionName(visuals.conditions, levels(pca.transformed$color)),
+               col = palette.colors,
+               pch = 16,
+               bty = "n",
+               xpd = T,
+               title = label.color,
+               title.adj = 0) # wtf?
+        legend("bottomleft",
+               legend = conditionName(visuals.conditions, levels(pca.transformed$shape)),
+               col = "black",
+               pch = palette.shapes,
+               bty = "n",
+               xpd = T,
+               title = label.shape,
+               title.adj = 0)
+      })
+    }
+    else {
+      stop("Unknown plot3d provider!")
+    }
+    
   }
   
   return(plot.settings)
@@ -340,6 +389,9 @@ plotSamplePlot.saveMovie <- function(filename,
                                  pca.relative,
                                  axislimits,
                                  stabilizeplot,
+                                 plot3dprovider,
+                                 plot3d.theta,
+                                 plot3d.phi,
                                  updateProgress = NULL) {
   
   if(!is.character(filename) ||!is.character(axes) || missing(visuals.conditions) || missing(visuals.sample) ||
@@ -371,6 +423,9 @@ plotSamplePlot.saveMovie <- function(filename,
                         axislimits = axislimits,
                         stabilizeplot = stabilizeplot,
                         format = "png",
+                        plot3dprovider = plot3dprovider,
+                        plot3d.theta = plot3d.theta,
+                        plot3d.phi = plot3d.phi,
                         filename = plot.filename)
     
   }
@@ -509,6 +564,9 @@ plotSamplePlot_ <- function(input,
                               axislimits = axislimits(),
                               stabilizeplot = input$stabilizeplot,
                               format = format,
+                              plot3dprovider = input$plot3dprovider,
+                              plot3d.phi = input$plot3d.phi,
+                              plot3d.theta = input$plot3d.theta,
                               filename = filename))
   })
   
@@ -541,6 +599,9 @@ plotSamplePlot_ <- function(input,
             pca.center = pca.center(),
             pca.scale = pca.scale(),
             pca.relative = pca.relative(),
+            plot3dprovider = input$plot3dprovider,
+            plot3d.phi = input$plot3d.phi,
+            plot3d.theta = input$plot3d.theta,
             updateProgress = updateProgress
           )
 
