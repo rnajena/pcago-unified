@@ -56,6 +56,12 @@ Following packages are required to install PCAGO if the required libraries have 
 * openssl dev package (Debian/Ubuntu: `libssl-dev`)
 * mariadb dev package (Debian/Ubuntu: `libmariadb-client-lgpl-dev`)
 * cairo2 dev package (Debian/Ubuntu: `libcairo2-dev`)
+* GTK2 dev package (Debian/Ubuntu: `libgtk2.0-dev`)
+* XVFB package (Debian/Ubuntu: `xvfb`)
+* xAuth package (Debian/Ubuntu: `xauth`)
+* xfonts dev package (Debian/Ubuntu: `xfonts-baselibgtk2.0-dev`)
+* xfonts base package (Debian/Ubuntu: `xfonts-base`)
+* libxt dev package (Debian/Ubuntu: `libxt-dev`)
 
 PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the 
 package management system packrat.
