@@ -213,7 +213,8 @@ gradientEditorValue_ <- function(input, output, session, default.gradient) {
     
     
     newdata <- data.frame(value = newvalues,
-                          color = newcolors) 
+                          color = newcolors,
+                          stringsAsFactors = F) 
     
     variables$visuals.table <- newdata
     update.gradientstops()
