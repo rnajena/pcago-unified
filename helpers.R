@@ -247,7 +247,7 @@ saveRPlot <- function(width, height, dpi, scale, filename, format, expr) {
         pointsize = 12 * scale)
   }
   else if(format == "pdf") {
-    pdf(filename = filename,
+    pdf(file = filename,
         width = width / dpi,
         height = height / dpi,
         pointsize = 12 * scale)
