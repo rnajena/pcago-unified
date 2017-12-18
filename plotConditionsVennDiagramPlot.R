@@ -7,6 +7,7 @@ library(ggplot2)
 library(VennDiagram)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
+source("defaultParameters.R")
 
 plotConditionsVennDiagramPlotUI <- function(id) {
   
@@ -56,9 +57,9 @@ plotConditionsVennDiagramPlot.save <- function(selected.conditions, conditions, 
   names(x) <- selected.conditions
   
   plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(
-    width = 640,
-    height = 480,
-    dpi = 96,
+    width = default.plot.width,
+    height = default.plot.height,
+    dpi = default.plot.dpi,
     scale = 1,
     title = "Conditions",
     subtitle = ""

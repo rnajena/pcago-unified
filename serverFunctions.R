@@ -184,6 +184,7 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
   xautovars$export.plot.variances.readcounts.processed <- list(filename = paste0(export.directory, "/variances_readcounts_processed.svg"), format = "svg")
   xautovars$export.plot.variances.readcounts.filtered <- list(filename = paste0(export.directory, "/variances_readcounts_filtered.svg"), format = "svg")
   xautovars$export.plot.pca.variance <- list(filename = paste0(export.directory, "/pca_variances.svg"), format = "svg")
+  xautovars$export.plot.pca.loadings <- list(filename = paste0(export.directory, "/pca_loadings.svg"), format = "svg")
   
   for(target in export.targets) {
     observeEvent(target(), {
@@ -224,6 +225,7 @@ serverQuickSave <- function(input, output, dataset.pca, xautovars, export.target
       xautovars$export.plot.variances.readcounts.processed <- NULL
       xautovars$export.plot.variances.readcounts.filtered <- NULL
       xautovars$export.plot.pca.variance <- NULL
+      xautovars$export.plot.pca.loadings <- NULL
       
       # Reset notification
       shinyjs::enable("quickio.save")

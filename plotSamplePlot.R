@@ -12,6 +12,7 @@ source("widgetDownloadablePlot.R")
 source("widgetInPlaceHelp.R")
 source("widgetNumericRangeInput.R")
 source("environment.R")
+source("defaultParameters.R")
 
 plotSamplePlotSettingsUI.axisLimitModes <- c("Auto" = "auto", "Auto (All genes)" = "allgenes", "Manual" = "manual")
 
@@ -98,9 +99,9 @@ plotSamplePlot.save <- function(pca,
                                 filename ){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
-                                     PlotSettings(width = 640, 
-                                                  height = 480,
-                                                  dpi = 96,
+                                     PlotSettings(width = default.plot.width, 
+                                                  height = default.plot.height,
+                                                  dpi = default.plot.dpi,
                                                   scale = 1,
                                                   title = "PCA samples plot",
                                                   subtitle = "",

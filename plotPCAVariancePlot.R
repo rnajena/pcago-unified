@@ -7,6 +7,7 @@ library(ggplot2)
 library(scatterplot3d)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
+source("defaultParameters.R")
 
 plotPCAVariancePlotUI <- function(id) {
   
@@ -32,9 +33,9 @@ plotPCAVariancePlotSettingsUI <- function(id) {
 plotPCAVariancePlot.save <- function(pca, plot.settings, format, filename){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
-                                     PlotSettings(width = 640, 
-                                                  height = 480,
-                                                  dpi = 96,
+                                     PlotSettings(width = default.plot.width, 
+                                                  height = default.plot.height,
+                                                  dpi = default.plot.dpi,
                                                   scale = 1,
                                                   title = "Principal component variances",
                                                   subtitle = ""))

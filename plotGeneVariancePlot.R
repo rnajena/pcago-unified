@@ -7,6 +7,7 @@ library(ggplot2)
 library(scatterplot3d)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
+source("defaultParameters.R")
 
 plotGeneVariancePlotUI <- function(id) {
   
@@ -39,9 +40,9 @@ plotGeneVariancePlotSettingsUI <- function(id) {
 plotGeneVariancePlot.save <- function(gene.variances, plot.settings, format, filename, logarithmic = F){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
-                                     PlotSettings(width = 640, 
-                                                  height = 480,
-                                                  dpi = 96,
+                                     PlotSettings(width = default.plot.width, 
+                                                  height = default.plot.height,
+                                                  dpi = default.plot.dpi,
                                                   scale = 1,
                                                   title = "Gene variances",
                                                   subtitle = ""))

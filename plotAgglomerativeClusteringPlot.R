@@ -10,6 +10,7 @@ library(gplots)
 source("widgetVisualsEditor.R")
 source("widgetDownloadablePlot.R")
 source("widgetGradientEditor.R")
+source("defaultParameters.R")
 
 plotAgglomerativeClusteringPlotUI.dist.methodsSelection <- c(
   "Euclidean" = "euclidean",
@@ -125,9 +126,9 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
            need(sample.visuals(), "No sample visuals available!"))
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
-                                     PlotSettings(width = 640, 
-                                                  height = 480,
-                                                  dpi = 96,
+                                     PlotSettings(width = default.plot.width, 
+                                                  height = default.plot.height,
+                                                  dpi = default.plot.dpi,
                                                   scale = 1,
                                                   title = "Hierarchical Clustering",
                                                   subtitle = ""))
@@ -268,7 +269,7 @@ plotAgglomerativeClusteringPlot_ <- function(input,
     validate(need(is.matrix(readcounts()) || is.SummarizedExperiment(readcounts()), "No data to build plot settings from!"))
     
     settings <- plotSettingsSetNA(plot.settings(),
-                                  PlotSettings(dpi = 96,
+                                  PlotSettings(dpi = default.plot.dpi,
                                                scale = 1))
     
     # Calculate the plot size based on the count of samples
