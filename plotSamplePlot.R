@@ -41,8 +41,8 @@ plotSamplePlotSettingsUI <- function(id) {
                     conditionalPanel(conditionalPanel.equals(ns("plottype"), "'default'"),
                                      selectizeInput(ns("3dplotprovider"), "3D plot type", choices = plotSamplePlotSettingsUI.3dplotProvider),
                                      conditionalPanel(conditionalPanel.equals(ns("3dplotprovider"), "'perspective'"),
-                                                      numericInput(ns("plot3d.theta"), "Viewing angle (Azimuth)"),
-                                                      numericInput(ns("plot3d.phi"), "Viewing angle (Colatitude)")))
+                                                      numericInput(ns("plot3d.theta"), "Rotation (Degree)", value = 0),
+                                                      numericInput(ns("plot3d.phi"), "Viewing angle (Degree)", value = 0)))
                     ),
     bsCollapsePanel(recommendedDataText("Axes"),
                     value = "axes",
