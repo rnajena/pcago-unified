@@ -152,7 +152,7 @@ withProgressCustom <- function(expr, message) {
 #' @export
 #'
 #' @examples
-withParallel <- function(session, input, expr, exprsuccess = function() {}, exprfailed = function() {}, exprfinally = function(){}, withProgress = F, message = "The calculation is currently running. Please wait.") {
+withParallel <- function(session, input, expr, exprsuccess = function() {}, exprfailed = function() {}, exprfinally = function(){}, message = "The calculation is currently running. Please wait.") {
  
   vars <- reactiveValues(status = "calculating")
   
@@ -170,6 +170,7 @@ withParallel <- function(session, input, expr, exprsuccess = function() {}, expr
   observeEvent(input$parallel.cancel, {
     
     vars$status <- "canceled"
+    print(paste("[Parallel] canceled by user. Ending PID", process$pid))
     pskill(process$pid)
     removeModal()
     exprfailed()
@@ -184,6 +185,8 @@ withParallel <- function(session, input, expr, exprsuccess = function() {}, expr
     
     if(!is.null(process.result)) {
       vars$status <- "finished"
+      print("[Parallel] finished. Process returned:")
+      print(process.result)
       removeModal()
       exprsuccess()
       exprfinally()

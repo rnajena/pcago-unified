@@ -407,6 +407,8 @@ plotSamplePlot.saveMovie <- function(filename,
   
   pca.full <- applyPCA(readcounts.filtered, center = pca.center, scale = pca.scale, relative = pca.relative)
   
+  imagefiles <- c()
+  
   for(i in 1:length(genecounts)) {
     
     if(is.function(updateProgress)) {
@@ -415,6 +417,7 @@ plotSamplePlot.saveMovie <- function(filename,
     
     readcounts.top.variant <- selectTopVariantGeneReadcounts(readcounts.filtered, gene.variances, genecounts[i])
     plot.filename <- paste0(basefile, "_", i, ".png", collapse = "")
+    imagefiles <- c(imagefiles, plot.filename)
     
     pca <- applyPCA(readcounts.top.variant, center = pca.center, scale = pca.scale, relative = pca.relative)
     plotSamplePlot.save(pca = pca,
@@ -451,6 +454,7 @@ plotSamplePlot.saveMovie <- function(filename,
   #              filename,
   #              "'"))
   system2(ffmpeg.path, c("-framerate", fps, "-i", paste0(basefile, "_%d.png"), "-c:v", "libx264", filename))
+  file.remove(imagefiles)
   
   showNotification("Your video file has been successfully rendered.", type = "message")
 }
@@ -589,8 +593,7 @@ plotSamplePlot_ <- function(input,
       progress$set(value = value, detail = detail)
     }
     
-    withParallel(session, input, expr = {
-      
+    parallel.expr <- function() {
       plotSamplePlot.saveMovie(
         filename = movie.file,
         animation.params = animation.params(),
@@ -611,8 +614,10 @@ plotSamplePlot_ <- function(input,
         plot3d.nticks = input$plot3d.nticks,
         updateProgress = updateProgress
       )
-      
-    },
+      return("done")
+    }
+    
+    withParallel(session, input, expr = parallel.expr(),
     exprsuccess = function() {
       showModal(modalDialog(
             "The movie is ready for download!",

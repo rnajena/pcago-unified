@@ -121,10 +121,10 @@ applyReadcountNormalization.DESeq2 <- function(readcounts, transform = "none", b
            need(sampleAnnotationHasConditions(sample.annotation), "Sample annotation has no condition table!"),
            need(is.integer(assay(readcounts)), "Read counts need to be integers!"))
   
-  progress <- progressNotification("Building DESeq2 data. This will take some time ...")
-  on.exit({
-    removeNotification(progress)
-  })
+  # progress <- progressNotification("Building DESeq2 data. This will take some time ...")
+  # on.exit({
+  #   removeNotification(progress)
+  # })
   
   condition.table <- sample.annotation@conditions
   
