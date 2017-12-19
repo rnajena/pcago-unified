@@ -132,12 +132,23 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
                                                   scale = 1,
                                                   title = "Hierarchical Clustering",
                                                   subtitle = ""))
+  
+  if(plottype == "cor.pearson") {
+    plot.settings <- plotSettingsSetNA(plot.settings,
+                                       PlotSettings(legend.color = "Pearson correlation"))
+  }
+  else if(plottype == "cor.spearman") {
+    plot.settings <- plotSettingsSetNA(plot.settings,
+                                       PlotSettings(legend.color = "Spearman correlation"))
+  }
+  
   width <- plot.settings@width
   height <- plot.settings@height
   dpi <- plot.settings@dpi
   scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
+  legend.color <- plot.settings@legend.color
   
   palette.colors <- sample.visuals()$palette.colors
   palette.shapes <- sample.visuals()$palette.shapes
@@ -208,6 +219,7 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
       }
       
       color.breaks <- unique(color.breaks)
+      print(legend.color)
       
       heatmap.2(cor(X, method = cor.method),
                 hclustfun = function(x) hclust(x, method = method.cluster),
@@ -221,7 +233,8 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
                 trace = heatmap.trace,
                 tracecol = heatmap.tracecol,
                 col = palette,
-                breaks = color.breaks)
+                breaks = color.breaks,
+                key.xlab = legend.color)
       
     }
     
