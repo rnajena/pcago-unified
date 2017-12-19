@@ -46,6 +46,7 @@ source("plotGeneVarianceRangePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
 source("processingReports.R")
 source("classDataSet.R")
+source("plotLoadingsPlot.R")
 
 options(shiny.maxRequestSize=30*1024^2) 
 
@@ -75,6 +76,7 @@ shinyServer(function(input, output, session) {
                               export.plot.venn.conditions = NULL,
                               export.plot.pca.sampleplot = NULL,
                               export.plot.pca.variance = NULL,
+                              export.plot.pca.loadings = NULL,
                               export.plot.variances.readcounts.processed = NULL,
                               export.plot.variances.readcounts.filtered = NULL,
                               export.count = 0)
@@ -262,6 +264,13 @@ shinyServer(function(input, output, session) {
   
   xauto.export.plot.pca.variance <- plotPCAVariancePlot("pca.variance.plot", pca, xauto = reactive({ xautovars$export.plot.pca.variance }))
   
+  xauto.export.plot.pca.loadings <- plotLoadingsPlot("pca.loadings.plot",
+                                                   dataset = dataset.pca,
+                                                   pca.center = reactive({input$pca.pca.settings.center}),
+                                                   pca.scale = reactive({input$pca.pca.settings.scale}),
+                                                   pca.relative = reactive({input$pca.pca.settings.relative}),
+                                                   xauto = reactive({ xautovars$export.plot.pca.loadings }))
+  
   xauto.export.plot.clustering.readcounts.pca.transformed <- plotAgglomerativeClusteringPlot("pca.transformed.hclust.plot", 
                                   conditions, 
                                   reactive({ t(pca()$transformed) }),
@@ -304,6 +313,7 @@ shinyServer(function(input, output, session) {
     xauto.export.plot.pca.sampleplot,
     xauto.export.plot.variances.readcounts.processed,
     xauto.export.plot.variances.readcounts.filtered,
-    xauto.export.plot.pca.variance
+    xauto.export.plot.pca.variance,
+    xauto.export.plot.pca.loadings
   ))
 })

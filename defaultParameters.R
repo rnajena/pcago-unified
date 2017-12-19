@@ -22,3 +22,8 @@ default.pca.settings.scaling <- F
 
 # Additional output transformations
 default.pca.settings.relative <- "none"
+
+## Plots
+default.plot.width <- 1024
+default.plot.height <- 768
+default.plot.dpi <- 96

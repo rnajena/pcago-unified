@@ -16,6 +16,7 @@ source("plotGeneVariancePlot.R")
 source("plotConditionsVennDiagramPlot.R")
 source("plotPCAVariancePlot.R")
 source("plotAgglomerativeClusteringPlot.R")
+source("plotLoadingsPlot.R")
 
 #' Creates the PCA analysis page for the UI
 #'
@@ -81,8 +82,9 @@ uiPCAPage <- function() {
                                     "Principal components",
                                     tabPanel("Principal components", value = "pca.pc.pc",
                                              processingStepsWidgetUI("pca.pc.processing", "Processing overview"),
+                                             plotLoadingsPlotUI("pca.loadings.plot"),
                                              downloadableDataTableOutput("pca.pc")),
-                                    tabPanel("Importance", value = "pca.pc.importance",
+                                    tabPanel("Scree plot", value = "pca.pc.importance",
                                              processingStepsWidgetUI("pca.variance.processing", "Processing overview"),
                                              plotPCAVariancePlotUI("pca.variance.plot"),
                                              downloadableDataTableOutput("pca.variance")),

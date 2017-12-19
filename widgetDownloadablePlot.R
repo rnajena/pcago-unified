@@ -91,13 +91,13 @@ downloadablePlot_ <- function(input,
   
   # If the user didn't set any output sizes, overwrite them here
   plot.settings.defaults <- reactive({
-    return(plotSettingsSetNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = 96, scale = 1) ))
+    return(plotSettingsSetNA(plot.settings(), PlotSettings(width = out.width(), height = out.height(), dpi = default.plot.dpi, scale = 1) ))
     })
   
   output$plot.container <- renderUI({
     
     width <- "100%"
-    height <- "400px"
+    height <- "700px"
     
     if(!is.na(plot.settings()@width)) {
       width <- paste0(plot.settings()@width, "px")

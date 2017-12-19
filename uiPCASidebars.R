@@ -26,6 +26,7 @@ source("plotAgglomerativeClusteringPlot.R")
 source("widgetRelevantGenes.R")
 source("widgetReadCountPostprocessing.R")
 source("defaultParameters.R")
+source("plotLoadingsPlot.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -143,6 +144,8 @@ uiPCASidebarPlot <- function() {
     # Gene variances plot (filtered genes)
     conditionalPanel("input['pca.nav'] == 'genes.variances.filtered'", plotGeneVariancePlotSettingsUI("genes.variances.filtered.plot")),
     # PCA PC variances
-    conditionalPanel("input['pca.nav'] == 'pca.pc.importance'", plotPCAVariancePlotSettingsUI("pca.variance.plot"))
+    conditionalPanel("input['pca.nav'] == 'pca.pc.importance'", plotPCAVariancePlotSettingsUI("pca.variance.plot")),
+    # PCA PC loadings
+    conditionalPanel("input['pca.nav'] == 'pca.pc.pc'", plotLoadingsPlotSettingsUI("pca.loadings.plot"))
   ))
 }

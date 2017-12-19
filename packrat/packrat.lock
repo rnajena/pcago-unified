@@ -335,6 +335,13 @@ Version: 1.6.0
 Hash: 50bf0ea216594426a3bd8729d74c485e
 Requires: fpc, ggplot2, magrittr, viridis, whisker
 
+Package: devtools
+Source: CRAN
+Version: 1.13.4
+Hash: 80a77b22f641002c7ce0343baeaee300
+Requires: digest, git2r, httr, jsonlite, memoise, rstudioapi, whisker,
+    withr
+
 Package: dichromat
 Source: CRAN
 Version: 2.0-0
@@ -416,11 +423,26 @@ Version: 1.56.0
 Hash: b259e76f477da46c0c2191dbe4ef4dc3
 Requires: AnnotationDbi, Biobase, BiocGenerics, RColorBrewer, annotate
 
+Package: ggbiplot
+Source: github
+Version: 0.55
+Hash: 5bebbf96df3e900f54d0579b59527fc8
+Requires: ggplot2, plyr, scales
+GithubRepo: ggbiplot
+GithubUsername: vqv
+GithubRef: master
+GithubSha1: 7325e880485bea4c07465a0304c470608fffb5d9
+
 Package: ggplot2
 Source: CRAN
 Version: 2.2.1
 Hash: 46e5cb78836848aa44655e577433f54b
 Requires: digest, gtable, lazyeval, plyr, reshape2, scales, tibble
+
+Package: git2r
+Source: CRAN
+Version: 0.20.0
+Hash: 11747e2b4c91ecd101150d7f44027670
 
 Package: glue
 Source: CRAN
@@ -577,6 +599,11 @@ Version: 0.1.1
 Hash: e85626581f80b1fe6c92a96ec348efc5
 Requires: htmltools, shiny
 
+Package: misc3d
+Source: CRAN
+Version: 0.8-4
+Hash: 44836021ee460c4176d6e070e931f488
+
 Package: modeltools
 Source: CRAN
 Version: 0.2-21
@@ -618,6 +645,12 @@ Package: plogr
 Source: CRAN
 Version: 0.1-1
 Hash: fb19215402e2d9f1c7f803dcaa806fc2
+
+Package: plot3D
+Source: CRAN
+Version: 1.1.1
+Hash: 3d5dee438be3fc8bb1c8c14ae41be8a7
+Requires: misc3d
 
 Package: plyr
 Source: CRAN
