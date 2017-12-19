@@ -6,6 +6,8 @@ library(shiny)
 library(reshape2)
 library(SummarizedExperiment)
 library(Cairo)
+library(parallel)
+library(tools)
 source("classImporterParameter.R")
 
 #' Returns TRUE if all data in x are integers
@@ -137,6 +139,60 @@ withProgressCustom <- function(expr, message) {
   
   return(expr(updateProgress))
   
+}
+
+#' Runs expr in parallel environment
+#'
+#' @param expr Expression to run
+#' @param exprsuccess Expression to run if the task was successful (not canceled)
+#' @param exprfailed Expression to run if the task was unsuccessful (canceled)
+#' @param exprfinally Expression to run after parallel
+#'
+#' @return
+#' @export
+#'
+#' @examples
+withParallel <- function(session, input, expr, exprsuccess = function() {}, exprfailed = function() {}, exprfinally = function(){}, withProgress = F, message = "The calculation is currently running. Please wait.") {
+ 
+  vars <- reactiveValues(status = "calculating")
+  
+  showModal(modalDialog(
+    iconText(icon("circle-o-notch", class = "fa-spin"), message),
+    footer = tagList(
+      actionButton(session$ns("parallel.cancel"), "Cancel")
+    )
+  ))
+  
+  # Start the task
+  process <- mcparallel(expr)
+  
+  # User can click cancel
+  observeEvent(input$parallel.cancel, {
+    
+    vars$status <- "canceled"
+    pskill(process$pid)
+    removeModal()
+    exprfailed()
+    exprfinally()
+    
+  })
+  
+  # Always check every 1s
+  observe({
+    
+    process.result <- mccollect(process, wait = F)
+    
+    if(!is.null(process.result)) {
+      vars$status <- "finished"
+      removeModal()
+      exprsuccess()
+      exprfinally()
+    }
+    else if(isolate(vars$status) == "calculating") {
+      invalidateLater(1000)
+    }
+  })
+   
 }
 
 #' Creates a notification that indicates progress without a progress bar

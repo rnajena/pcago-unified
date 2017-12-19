@@ -575,60 +575,120 @@ plotSamplePlot_ <- function(input,
                               filename = filename))
   })
   
-  # It seems that for long processes, downloadHandler can time out for some reason
-  # Use a modal approach
   observeEvent(input$export.mp4, {
     
     validate(need(readcounts.filtered(), "No filtered read counts!"))
-    
     shinyjs::disable("export.mp4")
-    on.exit({
-      shinyjs::enable("export.mp4")
-    })
     
     movie.file <- tempfile(pattern = "samples-plot-mp4", fileext = ".mp4")
+    progress <- shiny::Progress$new()
+    progress$set(message = "Creating movie ...", value = 0)
     
-    withProgressCustom(function(updateProgress) {
-
-          plotSamplePlot.saveMovie(
-            filename = movie.file,
-            animation.params = animation.params(),
-            axes = input$axes,
-            plot.settings = plot.settings(),
-            axislimits = axislimits(),
-            stabilizeplot = input$stabilizeplot,
-            visuals.conditions = visuals.conditions(),
-            visuals.sample = visuals.sample(),
-            readcounts.filtered = readcounts.filtered(),
-            gene.variances = gene.variances(),
-            pca.center = pca.center(),
-            pca.scale = pca.scale(),
-            pca.relative = pca.relative(),
-            plot3dprovider = input$plot3dprovider,
-            plot3d.phi = input$plot3d.phi,
-            plot3d.theta = input$plot3d.theta,
-            plot3d.nticks = input$plot3d.nticks,
-            updateProgress = updateProgress
-          )
-
-        }, message = "Creating movie")
+    # Status callback function
+    updateProgress <- function(detail = NULL, value = NULL) {
+      progress$set(value = value, detail = detail)
+    }
     
-    # Use a modal to download the plot
-    showModal(modalDialog(
-      "The movie is ready for download!",
-      footer = tagList(
-        modalButton("Close"),
-        downloadButton(session$ns("export.mp4.download"), "Download now")
+    withParallel(session, input, expr = {
+      
+      plotSamplePlot.saveMovie(
+        filename = movie.file,
+        animation.params = animation.params(),
+        axes = input$axes,
+        plot.settings = plot.settings(),
+        axislimits = axislimits(),
+        stabilizeplot = input$stabilizeplot,
+        visuals.conditions = visuals.conditions(),
+        visuals.sample = visuals.sample(),
+        readcounts.filtered = readcounts.filtered(),
+        gene.variances = gene.variances(),
+        pca.center = pca.center(),
+        pca.scale = pca.scale(),
+        pca.relative = pca.relative(),
+        plot3dprovider = input$plot3dprovider,
+        plot3d.phi = input$plot3d.phi,
+        plot3d.theta = input$plot3d.theta,
+        plot3d.nticks = input$plot3d.nticks,
+        updateProgress = updateProgress
       )
-    ))
-    
-    output$export.mp4.download <- downloadHandler("pcago-pca-movie.mp4",
+      
+    },
+    exprsuccess = function() {
+      showModal(modalDialog(
+            "The movie is ready for download!",
+            footer = tagList(
+              modalButton("Close"),
+              downloadButton(session$ns("export.mp4.download"), "Download now")
+            )
+          ))
+      output$export.mp4.download <- downloadHandler("pcago-pca-movie.mp4",
                                                     content = function(filename) {
                                                       file.copy(movie.file, filename, overwrite = T)
                                                     },
                                                     contentType = "video/mp4")
+    },
+    exprfinally = function() {
+      progress$close()
+      shinyjs::enable("export.mp4")
+    })
     
   })
+  
+  
+  # # It seems that for long processes, downloadHandler can time out for some reason
+  # # Use a modal approach
+  # observeEvent(input$export.mp4, {
+  #   
+  #   validate(need(readcounts.filtered(), "No filtered read counts!"))
+  #   
+  #   shinyjs::disable("export.mp4")
+  #   on.exit({
+  #     shinyjs::enable("export.mp4")
+  #   })
+  #   
+  #   movie.file <- tempfile(pattern = "samples-plot-mp4", fileext = ".mp4")
+  #   
+  #   withProgressCustom(function(updateProgress) {
+  # 
+  #         plotSamplePlot.saveMovie(
+  #           filename = movie.file,
+  #           animation.params = animation.params(),
+  #           axes = input$axes,
+  #           plot.settings = plot.settings(),
+  #           axislimits = axislimits(),
+  #           stabilizeplot = input$stabilizeplot,
+  #           visuals.conditions = visuals.conditions(),
+  #           visuals.sample = visuals.sample(),
+  #           readcounts.filtered = readcounts.filtered(),
+  #           gene.variances = gene.variances(),
+  #           pca.center = pca.center(),
+  #           pca.scale = pca.scale(),
+  #           pca.relative = pca.relative(),
+  #           plot3dprovider = input$plot3dprovider,
+  #           plot3d.phi = input$plot3d.phi,
+  #           plot3d.theta = input$plot3d.theta,
+  #           plot3d.nticks = input$plot3d.nticks,
+  #           updateProgress = updateProgress
+  #         )
+  # 
+  #       }, message = "Creating movie")
+  #   
+  #   # Use a modal to download the plot
+  #   showModal(modalDialog(
+  #     "The movie is ready for download!",
+  #     footer = tagList(
+  #       modalButton("Close"),
+  #       downloadButton(session$ns("export.mp4.download"), "Download now")
+  #     )
+  #   ))
+  #   
+  #   output$export.mp4.download <- downloadHandler("pcago-pca-movie.mp4",
+  #                                                   content = function(filename) {
+  #                                                     file.copy(movie.file, filename, overwrite = T)
+  #                                                   },
+  #                                                   contentType = "video/mp4")
+  #   
+  # })
   
   # xauto exporter that allows triggering of exporting data from code
   xautovars <- reactiveValues(xautocounter = 1)
