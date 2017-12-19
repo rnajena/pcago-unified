@@ -146,7 +146,7 @@ plotLoadingsPlot.save <- function(pca,
       scale_color_gradientn(name = label.color, colors = color$color, values = rescale(color$value), limits = c(min(color$value), max(color$value))) +
       coord_cartesian(xlim = xaxislimit, ylim = yaxislimit) +
       geom_segment(aes_string(x = 0, y = 0, xend = dimensions.requested[1], yend = dimensions.requested[2], colour = "norm"), arrow = arrow()) +
-      geom_text(aes_string(x = paste(dimensions.requested[1], "+0.05"), y = paste(dimensions.requested[2], "+0.05"), colour = "norm", label = "rownames(loadings)"))
+      geom_text(aes_string(x = paste(dimensions.requested[1], "*1.1"), y = paste(dimensions.requested[2], "*1.1"), colour = "norm", label = "rownames(loadings)"))
     
     #p <- p + theme_classic()
     
@@ -220,9 +220,9 @@ plotLoadingsPlot.save <- function(pca,
                  ticktype = if(plot3d.nticks < 1) "simple" else "detailed",
                  main = title,
                  sub = subtitle)
-        text3D(x = loadings[[dimensions.requested[1]]] + 0.05,
-               y = loadings[[dimensions.requested[2]]] + 0.05,
-               z = loadings[[dimensions.requested[3]]] + 0.05,
+        text3D(x = loadings[[dimensions.requested[1]]] *1.1,
+               y = loadings[[dimensions.requested[2]]] *1.1,
+               z = loadings[[dimensions.requested[3]]] *1.1,
                labels = rownames(loadings),
                add = T)
       })
