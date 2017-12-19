@@ -343,7 +343,7 @@ plotLoadingsPlot_ <- function(input,
       
       validate(need(pca(), "No PCA results to plot!"))
       
-      plot.settings <- plotSettingsSetNA(plot.settings(), PlotSettings(subtitle = paste(nrow("PCA calculated on", readcounts.top.variant()), "genes")))
+      plot.settings <- plotSettingsSetNA(plot.settings(), PlotSettings(subtitle = paste("PCA calculated on", nrow(readcounts.top.variant()), "genes")))
       
       return(plotLoadingsPlot.save(pca = pca(),
                                  pca.full = pca.full(),
