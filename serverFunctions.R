@@ -69,7 +69,7 @@ serverAutoNavigation <- function(input, session) {
   })
 }
 
-#' Fills PCAGO with some sample data
+#' Fills PCAGO with some example data
 #'
 #' @param variables
 #'
@@ -270,7 +270,7 @@ serverQuickIO <- function(input, output, session, xautovars, dataset.preprocesse
     }
     else {
       showModal(modalDialog(
-        "Do you really want to load sample data?",
+        "Do you really want to load example data?",
         footer = tagList(
           modalButton("No"),
           actionButton("quickio.load.yes", "Yes")

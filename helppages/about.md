@@ -17,7 +17,7 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 ## Quick usage
 
 1. Go to the `Analyze` page
-2. Upload your read counts in `Sidebar > Data > Import read counts` or choose sample data
-3. Upload the sample annotation `Sidebar > Data > Import samples annotation` or choose sample data
+2. Upload your read counts in `Sidebar > Data > Import read counts` or choose example data
+3. Upload the sample annotation `Sidebar > Data > Import samples annotation` or choose example data
 
 <div class="video-embed"><div><div><iframe src="https://www.youtube.com/embed/WBFXJ0USuec" frameborder="0" allowfullscreen></iframe></div></div></div>

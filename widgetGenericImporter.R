@@ -39,7 +39,7 @@ genericImporterInput <- function(id,
     conditionalPanel(paste(conditionalPanel.equals(ns("source"), "'manual'"), "||", conditionalPanel.equals(ns("source"), "'upload'")), 
                      selectInput(ns("importer"), "Importer", c())),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'sample'"), 
-                     selectInput(ns("sample"), "Sample data", c())),
+                     selectInput(ns("sample"), "Example data", c())),
     conditionalPanel(conditionalPanel.equals(ns("source"), "'generate'"), 
                      selectInput(ns("generator"), "Generator", c())),
     subSubBox(uiOutput(ns("parameter.slot1")),
@@ -243,7 +243,7 @@ genericImporterData_ <- function(input,
     
     # Update generator list
     if(length(samples()) > 0) {
-      sources <- c(sources, "sample data" = "sample")
+      sources <- c(sources, "example data" = "sample")
       
       choices <- lapply(samples(), function(x) { x@name })
       names(choices) <- lapply(samples(), function(x) { x@label })
@@ -362,12 +362,12 @@ genericImporterData_ <- function(input,
         
         if(!is.null(data)) {
           
-          addData(data, paste0("Sample: ", sample))
+          addData(data, paste0("Example: ", sample))
           
-          showNotification(paste("Loaded sample", sample), type = "message")
+          showNotification(paste("Loaded example", sample), type = "message")
         } 
         else {
-          showNotification("Error while importing sample!", type = "error")
+          showNotification("Error while importing example!", type = "error")
         }
       }
       else {
@@ -486,12 +486,12 @@ genericImporterData_ <- function(input,
       
       if(!is.null(data)) {
         
-        addData(data, paste0("Sample: ", sample))
+        addData(data, paste0("Example: ", sample))
         
-        showNotification(paste("Loaded sample", sample), type = "message")
+        showNotification(paste("Loaded example", sample), type = "message")
       } 
       else {
-        showNotification("Error while importing sample!", type = "error")
+        showNotification("Error while importing example!", type = "error")
       }
       
     }

@@ -1,7 +1,7 @@
 # Read counts
 
 To provide read counts, go to `Sidebar > Data > Import read counts` and choose
-a sample data set or upload a file. You can find more information about the
+an example data set or upload a file. You can find more information about the
 upload widget in `Importing > Upload widget` help section.
 
 Read counts are provided in tabular form where a column represents a sample

@@ -22,7 +22,7 @@ source of the data:
 
 1. **uploaded file.** Imports the data from an imported file.
 2. **manual input.** Imports the data by manual input or copy paste.
-3. **sample data.** Imports a sample data set.
+3. **example data.** Imports an example data set.
 4. **generate data.** Generates data from online resources or from already loaded data.
 
 Below the data source selection, there are always additional parameters that belong to
