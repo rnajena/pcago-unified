@@ -6,14 +6,18 @@ library(shiny)
 library(ggplot2)
 library(scatterplot3d)
 library(plot3D)
+library(scales)
 
 source("widgetDownloadablePlot.R")
 source("widgetInPlaceHelp.R")
 source("widgetNumericRangeInput.R")
 source("environment.R")
 source("defaultParameters.R")
+source("widgetGradientEditor.R")
 
 plotLoadingsPlotSettingsUI.3dplotProvider <- c("Isometric" = "isometric", "Perspective" = "perspective")
+
+plotLoadingsPlot.defaultGradient <- importGradientSample("Gradients/LoadingPlotDefault.csv", list())
 
 plotLoadingsPlotUI <- function(id) {
   
@@ -45,6 +49,9 @@ plotLoadingsPlotSettingsUI <- function(id) {
     bsCollapsePanel(recommendedDataText("Principal components"),
                     value = "pc",
                     numericInput(ns("top"), helpIconText("Displayed principal components", includeMarkdown("helptooltips/pca-pca-plot-loadings-top.md")), value = 100)),
+    bsCollapsePanel(optionalDataText("Visualization"),
+                    value = "visualization",
+                    gradientEditorUI(ns("color"))),
     bsCollapsePanel(optionalDataText("General settings"), 
                     value = "generalsettings",
                     generalPlotSettingsInput(ns("plot.settings")))
@@ -62,6 +69,7 @@ plotLoadingsPlot.save <- function(pca,
                                 plot3d.phi,
                                 plot3d.nticks,
                                 top,
+                                color,
                                 filename ){
   
   plot.settings <- plotSettingsSetNA(plot.settings, 
@@ -70,7 +78,8 @@ plotLoadingsPlot.save <- function(pca,
                                                   dpi = default.plot.dpi,
                                                   scale = 1,
                                                   title = "PCA loadings plot",
-                                                  subtitle = ""))
+                                                  subtitle = "",
+                                                  legend.color = ""))
   
   width <- plot.settings@width
   height <- plot.settings@height
@@ -78,12 +87,17 @@ plotLoadingsPlot.save <- function(pca,
   scale <- plot.settings@scale
   title <- plot.settings@title
   subtitle <- plot.settings@subtitle
+  customlabel.color <- plot.settings@legend.color
+  
+  label.color <- if(customlabel.color == "") "Vector length" else customlabel.color
   
   # Soft and hard parameter checking
   validate(
     need(pca, "No PCA results available!"),
     need(axes, "No axes to draw!"),
+    need(color, "No colors defined!"),
     need(is.integer(plot3d.nticks), "Invalid number of ticks!"))
+  validate(need(nrow(color) > 1, "Too few colors defined!"))
   validate(need(plot3d.nticks >= 0, "Invalid number of ticks!"))
   validate(need(is.integer(top), "Invalid number of displayed principal components!"))
   validate(need(top > 0, "Invalid number of displayed principal components!"))
@@ -129,9 +143,10 @@ plotLoadingsPlot.save <- function(pca,
     
     p <- ggplot(loadings, aes_string(x = dimensions.requested[1],
                                      y = dimensions.requested[2])) +
-    coord_cartesian(xlim = xaxislimit, ylim = yaxislimit) +
-    geom_segment(aes_string(x = 0, y = 0, xend = dimensions.requested[1], yend = dimensions.requested[2]), arrow = arrow()) +
-      geom_text(aes_string(x = paste(dimensions.requested[1], "*1.1"), y = paste(dimensions.requested[2], "*1.1"), label = "rownames(loadings)"))
+      scale_color_gradientn(name = label.color, colors = color$color, values = rescale(color$value), limits = c(min(color$value), max(color$value))) +
+      coord_cartesian(xlim = xaxislimit, ylim = yaxislimit) +
+      geom_segment(aes_string(x = 0, y = 0, xend = dimensions.requested[1], yend = dimensions.requested[2], colour = "norm"), arrow = arrow()) +
+      geom_text(aes_string(x = paste(dimensions.requested[1], "+0.05"), y = paste(dimensions.requested[2], "+0.05"), colour = "norm", label = "rownames(loadings)"))
     
     #p <- p + theme_classic()
     
@@ -195,14 +210,19 @@ plotLoadingsPlot.save <- function(pca,
                  zlim = zaxislimit,
                  theta = plot3d.theta,
                  phi = plot3d.phi,
-                 colkey = F,
+                 
+                 colkey = list(at = c(min(color$value), max(color$value))),
+                 colvar = loadings$norm,
+                 col = color$color,
+                 breaks = approx(color$value, n = nrow(color) + 1)$y,
+                 
                  nticks = if(plot3d.nticks < 1) 1 else plot3d.nticks,
                  ticktype = if(plot3d.nticks < 1) "simple" else "detailed",
                  main = title,
                  sub = subtitle)
-        text3D(x = loadings[[dimensions.requested[1]]] * 1.1,
-               y = loadings[[dimensions.requested[2]]] * 1.1,
-               z = loadings[[dimensions.requested[3]]] * 1.1,
+        text3D(x = loadings[[dimensions.requested[1]]] + 0.05,
+               y = loadings[[dimensions.requested[2]]] + 0.05,
+               z = loadings[[dimensions.requested[3]]] + 0.05,
                labels = rownames(loadings),
                add = T)
       })
@@ -272,6 +292,8 @@ plotLoadingsPlot_ <- function(input,
 
   plot.settings <- generalPlotSettings("plot.settings")
   
+  color <- gradientEditorValue("color", plotLoadingsPlot.defaultGradient)
+  
   # Update the axis selectize
   observeEvent(readcounts.top.variant(), {
     
@@ -294,7 +316,7 @@ plotLoadingsPlot_ <- function(input,
     
     validate(need(pca(), "No PCA results to plot!"))
     
-    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
+    plot.settings <- plotSettingsSetNA(plot.settings, PlotSettings(subtitle = paste("PCA calculated on", nrow(readcounts.top.variant()), "genes")))
     
     return(plotLoadingsPlot.save(pca = pca(),
                                pca.full = pca.full(),
@@ -306,6 +328,7 @@ plotLoadingsPlot_ <- function(input,
                                plot3d.theta = input$plot3d.theta,
                                plot3d.nticks = input$plot3d.nticks,
                                top = input$top,
+                               color = color(),
                                filename = filename))
   })
   
@@ -320,7 +343,7 @@ plotLoadingsPlot_ <- function(input,
       
       validate(need(pca(), "No PCA results to plot!"))
       
-      plot.settings <- plotSettingsSetNA(plot.settings(), PlotSettings(subtitle = paste(nrow(readcounts.top.variant()), "genes")))
+      plot.settings <- plotSettingsSetNA(plot.settings(), PlotSettings(subtitle = paste(nrow("PCA calculated on", readcounts.top.variant()), "genes")))
       
       return(plotLoadingsPlot.save(pca = pca(),
                                  pca.full = pca.full(),
@@ -332,6 +355,7 @@ plotLoadingsPlot_ <- function(input,
                                  plot3d.theta = input$plot3d.theta,
                                  plot3d.nticks = input$plot3d.nticks,
                                  top = input$top,
+                                 color = color(),
                                  filename = filename))
       
       xautovars$xautocounter <- xautovars$xautocounter + 1

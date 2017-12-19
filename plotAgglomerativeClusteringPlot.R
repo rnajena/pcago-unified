@@ -59,7 +59,7 @@ plotAgglomerativeClusteringPlotUI.heatmapTrace <- c(
   "Column only" = "column"
 )
 
-plotAgglomerativeClusteringPlot.defaultGradient <- data.frame(value = c(-1, 0, 1), color = c("#ef8a62", "#f7f7f7", "#67a9cf"), stringsAsFactors = F)
+plotAgglomerativeClusteringPlot.defaultGradient <- importGradientSample("Gradients/HeatmapRdBu.csv", list())
 
 plotAgglomerativeClusteringPlotUI <- function(id) {
   

@@ -11,7 +11,8 @@ supportedGradientImporters <- list(
 )
 supportedGradientGenerators <- list()
 availableGradientSamples <- list(
-  ImporterEntry(name = "Gradients/RdBu.csv", label = "RdBu"))
+  ImporterEntry(name = "Gradients/HeatmapRdBu.csv", label = "Heatmap RdBu"),
+  ImporterEntry(name = "Gradients/LoadingPlotDefault.csv", label = "PCA Loading plot default"))
 
 importGradient.CSV <- function(filehandle, parameters) {
   
