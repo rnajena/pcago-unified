@@ -345,3 +345,102 @@ ImporterParameter.csv <- ImporterParameter(name = "separator",
                                              "Tab" = "\t",
                                              "Whitespace" = " "
                                            ))
+
+#' Importer parameters that handles comments + line selection + column selection
+ImporterParameter.csv.comment <- ImporterParameter(name = "comment.char",
+                                           label = "Comment character",
+                                           type = "select",
+                                           select.values = c(
+                                             "None" = "none",
+                                             "#" = "#"
+                                           ))
+
+ImporterParameter.csv.selectrows <- ImporterParameter(name = "selected.rows",
+                                                   label = "Restrict rows (e.g. 1,3-5,9)",
+                                                   type = "lineedit",
+                                                   lineedit.default = "")
+
+ImporterParameter.csv.selectcolumns <- ImporterParameter(name = "selected.columns",
+                                                       label = "Restrict columns (e.g. 1,3-5,9)",
+                                                       type = "lineedit",
+                                                       lineedit.default = "")
+
+#' Parses the "restrict rows"/"restrict columns" input
+#' 
+#'
+#' @param input String of format 1,2,10,20-30,41
+#'
+#' @return NULL if all numbers are selected, NA if there is an error, otherwise a vector of selected numbers
+#' @export
+#'
+#' @examples
+parse.selectIntegers <- function(input) {
+  
+  input <- gsub(" ", "", input, fixed = T)
+  
+  if(input == "") {
+    return(NULL)
+  }
+  if(!grepl(",", input, fixed = T)) {
+    if(grepl("-", input, fixed = T)) {
+      cell2 <- unlist(strsplit(input, "-", fixed = T))
+      
+      if(length(cell2) != 2) {
+        return(NA)
+      }
+      
+      w1 <- suppressWarnings(as.integer(cell2[1]))
+      w2 <- suppressWarnings(as.integer(cell2[2]))
+      
+      if(is.na(w1) || is.na(w2)) {
+        return(NA)
+      }
+      if(w1 > w2) {
+        return(NA)
+      }
+      
+      data <- c(data, w1:w2)
+    }
+    else {
+      return(suppressWarnings(as.integer(input)))
+    }
+  }
+  
+  cell <- unlist(strsplit(input, ",", fixed = T))
+  data <- c()
+  
+  for(i in seq_along(cell)) {
+    num <- suppressWarnings(as.integer(cell[i]))
+    
+    if(is.na(num)) {
+      if(grepl("-", cell[i], fixed = T)) {
+        cell2 <- unlist(strsplit(cell[i], "-", fixed = T))
+        
+        if(length(cell2) != 2) {
+          return(NA)
+        }
+        
+        w1 <- suppressWarnings(as.integer(cell2[1]))
+        w2 <- suppressWarnings(as.integer(cell2[2]))
+        
+        if(is.na(w1) || is.na(w2)) {
+          return(NA)
+        }
+        if(w1 > w2) {
+          return(NA)
+        }
+        
+        data <- c(data, w1:w2)
+        
+      }
+      else {
+        return(NA)
+      }
+    }
+    else {
+      data <- c(data, num)
+    }
+  }
+  
+  return(data)
+}

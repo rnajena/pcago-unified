@@ -13,7 +13,10 @@ source("helpers.R")
 #' The user selects one of those types, which will then invoke the corresponding importer
 
 supportedReadcountImporters <- list(
-  ImporterEntry(name = "csv", label = "Read count table (*.csv)", parameters = list(ImporterParameter.csv))
+  ImporterEntry(name = "csv", label = "Read count table (*.csv)", parameters = list(ImporterParameter.csv,
+                                                                                    ImporterParameter.csv.comment,
+                                                                                    ImporterParameter.csv.selectrows,
+                                                                                    ImporterParameter.csv.selectcolumns))
 )
 
 supportedReadcountGenerators <- list()
@@ -51,12 +54,38 @@ importReadcount <- function(filehandle, importer, parameters) {
   }
   
   sep <- parameters$separator
-  data <- read.csv(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F)
+  selected.rows <- parse.selectIntegers(parameters$selected.rows)
+  selected.columns <- parse.selectIntegers(parameters$selected.columns)
+  comment.char <- if(parameters$comment.char == "none") "" else parameters$comment.char
+ 
+  if(!is.null(selected.rows) && is.na(selected.rows)) {
+    stop("Invalid row selection parameter!")
+  }
+  if(!is.null(selected.columns) && is.na(selected.columns)) {
+    stop("Invalid column selection parameter!")
+  }
+  
+  data <- read.delim(filehandle, sep = sep, row.names = 1, stringsAsFactors = F, check.names = F, comment.char = comment.char)
 
   if(nrow(data) == 0 || ncol(data) == 0) {
     stop("Read count table is empty!")
   }
   
+  # Restrict
+  if(!is.null(selected.rows)) {
+    selected.rows <- selected.rows[selected.rows > 0 & selected.rows <= nrow(data)]
+    data <- data[selected.rows, ]
+  }
+  if(!is.null(selected.columns)) {
+    selected.columns <- selected.columns[selected.columns > 0 & selected.columns <= ncol(data)]
+    data <- data[, selected.columns]
+  }
+  
+  if(nrow(data) == 0 || ncol(data) == 0) {
+    stop("Read count table is empty!")
+  }
+  
+  # Create matrix
   counts <- as.matrix(data)
   
   if(!all(is.numeric(counts))) {
@@ -89,6 +118,9 @@ importReadcountSample <- function(sample, parameters) {
   on.exit({ close(con) })
   
   parameters$separator <- ","
+  parameters$comment.char <- "none"
+  parameters$selected.rows <- ""
+  parameters$selected.columns <- ""
   data <- importReadcount(con, "csv", parameters)
   
   return(data)

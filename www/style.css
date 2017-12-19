@@ -536,6 +536,15 @@ Style for generic importer
 }
 
 /*
+Hard override for generic importer. Sub-labels should be always italic
+*/
+.generic-importer .sub-sub-box label {
+	color: #555;
+	font-weight: normal;
+	font-style: italic;
+}
+
+/*
 Style for the size rows in general plot settings
 */
 .general-plot-settings-size .shiny-input-container label {
