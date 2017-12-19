@@ -618,7 +618,7 @@ plotSamplePlot_ <- function(input,
     }
     
     withParallel(session, input, expr = parallel.expr(),
-    exprsuccess = function() {
+    exprsuccess = function(result) {
       showModal(modalDialog(
             "The movie is ready for download!",
             footer = tagList(

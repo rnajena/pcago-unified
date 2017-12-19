@@ -188,7 +188,7 @@ withParallel <- function(session, input, expr, exprsuccess = function() {}, expr
       print("[Parallel] finished. Process returned:")
       print(process.result)
       removeModal()
-      exprsuccess()
+      exprsuccess(process.result[[1]])
       exprfinally()
     }
     else if(isolate(vars$status) == "calculating") {
