@@ -187,7 +187,7 @@ shinyServer(function(input, output, session) {
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
                                              value.default = reactive({ nrow(readcounts.filtered()) }))
   
-  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances, animation.top.variant = animation.top.variant)
+  dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances, animation.top.variant = animation.top.variant, input = input)
   readcounts.top.variant <- reactive({
     validate(need(dataset.top.variant(), "No top variant read counts available!")) 
     return(dataset.top.variant()$readcounts.top.variant)

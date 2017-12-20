@@ -36,17 +36,20 @@ relevantGenesValue_ <- function(input,
   values <- reactiveValues(threshold = NULL)
   
   observeEvent(input$calculate, {
-    shinyjs::disable("calculate")
-    progress <- progressNotification("Calculating minimal set of genes ...")
-    on.exit({
-      removeNotification(progress) 
-      shinyjs::enable("calculate")
-      })
+    
     if(is.null(readcounts())) {
       showNotification("No read counts to process!", type = "error")
       return()
     }
     
+    shinyjs::disable("calculate")
+    progress <- shiny::Progress$new()
+    progress$set(message = "Running calculations ...", value = 0)
+    
+    # Status callback function
+    updateProgress <- function(detail = NULL, value = NULL) {
+      progress$set(value = value, detail = detail)
+    }
     values$threshold <- NULL
     
     data <- assay(readcounts())
@@ -58,14 +61,27 @@ relevantGenesValue_ <- function(input,
                                        pca.enable = input$pca.enable,
                                        pca.center = pca.center(),
                                        pca.scale = pca.scale())
+  
+    parallel.expr <- function() {
+      return(find.minimal.clustering.genes.index(data = data, 
+                                                 reference.clustering = reference.clustering,
+                                                 method.dist = input$fdistance, 
+                                                 method.link = input$flink,
+                                                 pca.enable = input$pca.enable,
+                                                 pca.center = pca.center(),
+                                                 pca.scale = pca.scale(),
+                                                 updateProgress = updateProgress))
+    }
     
-    values$threshold <- find.minimal.clustering.genes.index(data = data, 
-                                                            reference.clustering = reference.clustering,
-                                                            method.dist = input$fdistance, 
-                                                            method.link = input$flink,
-                                                            pca.enable = input$pca.enable,
-                                                            pca.center = pca.center(),
-                                                            pca.scale = pca.scale())
+    withParallel(session, input,
+                 expr = parallel.expr(),
+                 exprsuccess = function(result) {
+                   values$threshold <- result
+                 },
+                 exprfinally = function() {
+                   progress$close()
+                   shinyjs::enable("calculate")
+                 })
       })
   
   return(reactive({ values$threshold }))

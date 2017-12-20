@@ -105,15 +105,25 @@ clustering <- compiler::cmpfun(clustering_)
 #' @export
 #'
 #' @examples
-find.minimal.clustering.genes.index_ <- function(data, reference.clustering, method.dist, method.link, pca.enable, pca.center, pca.scale, f.clustering.equal = clustering.order.equal) {
+find.minimal.clustering.genes.index_ <- function(data, reference.clustering, method.dist, method.link, pca.enable, pca.center, pca.scale, f.clustering.equal = clustering.order.equal, updateProgress = NULL) {
   
   data <- data[order(rowVars(data), decreasing = T),]
   top <- NA
   
   for(i in 2:nrow(data)) {
     
-    if(i %% 1000 == 0) {
+    if(i %% 100 == 0) {
       print(i)
+      
+      if(is.function(updateProgress)) {
+        if(is.na(top)) {
+          updateProgress(value = i / nrow(data), detail = paste("Testing gene subsets. No best solution so far"))  
+        }
+        else {
+          updateProgress(value = i / nrow(data), detail = paste("Testing gene subsets. Current best solution is", top))  
+        }
+      }
+      
     }
     
     test.data <- data[1:i,] # Select the top i most variant genes

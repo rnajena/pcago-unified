@@ -345,14 +345,15 @@ serverFilterReadcountsByAnnotation <- function(dataset) {
         gene.criteria[["Biotype"]][["No data"]] <- unused.genes
       }
     }
-    {
-      unused.genes <- setdiff(all.genes, (annotation@gene.go.terms$get_genes()))
-      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms$data
-      
-      if(length(unused.genes) > 0) {
-        gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
-      }
-    }
+    # Will be moved to its own widget
+    # {
+    #   unused.genes <- setdiff(all.genes, (annotation@gene.go.terms$get_genes()))
+    #   gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms$data
+    #   
+    #   if(length(unused.genes) > 0) {
+    #     gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
+    #   }
+    # }
     {
       unused.genes <- setdiff(all.genes, (annotation@gene.scaffold$get_genes()))
       gene.criteria[["Scaffold"]] <- annotation@gene.scaffold$data
@@ -403,7 +404,7 @@ serverFilterReadcountsByAnnotation <- function(dataset) {
 #' @export
 #'
 #' @examples
-serverFilterReadCountsByVariance <- function(dataset, animation.top.variant) {
+serverFilterReadCountsByVariance <- function(dataset, input, animation.top.variant) {
   
   readcounts.filtered <- reactive({
     validate(need(dataset(), "No filtered read counts available!"))
