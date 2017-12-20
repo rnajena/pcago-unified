@@ -219,7 +219,6 @@ readcountProcessing.step.remove.constant <- function(dataset) {
 #'
 #' @param readcounts.processed 
 #' @param readcounts.filtered 
-#' @param genes.filtered 
 #'
 #' @return
 #' @export
@@ -231,7 +230,7 @@ readcountProcessing.step.filter <- function(dataset) {
     validate(need(dataset(), "No data available"))
     validate(need(dataset()$readcounts.processed, "No data available"))
     validate(need(dataset()$readcounts.filtered, "No data available"))
-    validate(need(dataset()$readcounts.filtered.parameters.genes, "No data available"))
+    validate(need(dataset()$readcounts.filtered.keywords.parameters.genes, "No data available"))
     
     # Summary of selected genes
     genesinfo <- tagList(
@@ -240,8 +239,8 @@ readcountProcessing.step.filter <- function(dataset) {
                                                               height = "200px"))
     )
     
-    # Give summary of the filters the user selected
-    genes.filtered <- dataset()$readcounts.filtered.parameters.genes
+    # Give summary of the filters the user selected #TODO: GO terms
+    genes.filtered <- dataset()$readcounts.filtered.keywords.parameters.genes
     keysinfo <- tagList()
     selectedkeys <- split(genes.filtered$keys, sapply(genes.filtered$keys, function(x){ unlist(strsplit(x, ".", fixed = T))[1] }))
     

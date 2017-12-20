@@ -138,9 +138,10 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, dataset
   
   data <- read.csv(filehandle, header = T, row.names = 1, sep = sep, stringsAsFactors = F)
   
+  # Restrict to genes and columns we want
+  data <- data[intersect(rownames(data), rownames(readcounts)), imported_data]
+  
   annot <- geneAnnotationFromTable(data)
-  annot <- geneAnnotationRestrictToGenes(annot, rownames(readcounts))
-  annot <- geneAnnotationRestrictContentTypes(annot, imported_data)
   
   return(annot)
 }
@@ -238,11 +239,11 @@ importSampleGeneInformation <- function(sample, dataset, parameters) {
     close(con)
   })
   
-  if(sample == "vitamins.gff3") {
+  if(sample == "Monocytes/geneannotation.gff3") {
     data <- importGeneInformationFromAnnotation(con, "gff_ensembl", dataset, parameters)
     return(data)
   }
-  else if(sample == "genes.annotation.vitamins.csv") {
+  else if(sample == "Monocytes/geneannotation.csv") {
     parameters$separator <- ","
     data <- importGeneInformationFromAnnotation(con, "pcago_csv", dataset, parameters)
     return(data)

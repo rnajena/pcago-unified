@@ -313,7 +313,7 @@ serverReactiveNavigation <- function(session, observed, target.nav) {
 #' @export
 #'
 #' @examples
-serverFilterReadcountsByAnnotation <- function(dataset) {
+serverFilterReadcountsByAnnotationKeywords <- function(dataset) {
   
   readcounts.processed <- reactive({ 
     validate(need(dataset(), "[Gene filtering] No readcounts to process!"))
@@ -389,8 +389,8 @@ serverFilterReadcountsByAnnotation <- function(dataset) {
     keep.readcounts <- readcounts.processed()[keep.genes,]
     
     dataset <- dataset()
-    dataset$readcounts.filtered.parameters.genes <- genes.filtered()
-    dataset$readcounts.filtered <- keep.readcounts
+    dataset$readcounts.filtered.keywords.parameters.genes <- genes.filtered()
+    dataset$readcounts.filtered.keywords <- keep.readcounts
     
     return(dataset)
   }))

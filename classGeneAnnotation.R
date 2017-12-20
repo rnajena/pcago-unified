@@ -154,6 +154,7 @@ setMethod(f = "geneAnnotationFromTable",
             genes <- rownames(table)
             
             # Load sequence info
+            print("Loading sequence info from table ...")
             sequence.info <- data.frame(row.names = genes)
             
             for(col in c("start_position", "end_position", "length", "exon_length")) {
@@ -167,6 +168,7 @@ setMethod(f = "geneAnnotationFromTable",
             }
             
             # Build gene filters
+            print("Building standard gene filters ...")
             
             gene.biotype = GeneFilter$new()
             gene.scaffold = GeneFilter$new()
@@ -177,6 +179,7 @@ setMethod(f = "geneAnnotationFromTable",
             if("custom" %in% colnames(table)) gene.custom$load_from(setNames(rownames(table), table$custom))
             
             # GO terms are special: The annotation stores a list of GO terms, so we cannot use the handy build function
+            print("Building GO term gene filter ...")
             gene.go.ids <- GeneFilter$new()
             
             if("go_ids" %in% colnames(table)) {
@@ -199,6 +202,9 @@ setMethod(f = "geneAnnotationFromTable",
               gene.go.ids <- GeneFilter$new(data = data)$invert()
 
             }
+            
+            
+            print("Building custom gene filter ...")
             if("custom" %in% colnames(table)) {
               
               data <- list()

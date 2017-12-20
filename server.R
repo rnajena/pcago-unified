@@ -149,14 +149,23 @@ shinyServer(function(input, output, session) {
   
   # Obtain the list of genes the user wants to use
   # The filtered read counts just intersects the list of genes returned by each filter
-  dataset.filtered <- serverFilterReadcountsByAnnotation(dataset.postprocessed)
-  genes.filtered <- reactive({
-    validate(need(dataset.filtered(), "No filtered read counts available!"))
-    return(dataset.filtered()$readcounts.filtered.parameters.genes)
+  dataset.filtered.keywords <- serverFilterReadcountsByAnnotationKeywords(dataset.postprocessed)
+  
+  genes.filtered.keywords <- reactive({
+    validate(need(dataset.filtered.keywords(), "No filtered read counts available!"))
+    return(dataset.filtered()$readcounts.filtered.keywords.parameters.genes)
   })
+  
   readcounts.filtered <- reactive({
     validate(need(dataset.filtered(), "No filtered read counts available!"))
     return(dataset.filtered()$readcounts.filtered)
+  })
+  
+  # Final filtered data set (just link it together nicely)
+  dataset.filtered <- reactive({
+    dataset <- dataset.filtered.keywords()
+    dataset$readcounts.filtered <- dataset$readcounts.filtered.keywords
+    return(dataset)
   })
   
   # Annotate gene variances

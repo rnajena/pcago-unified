@@ -9,6 +9,7 @@ source("geneAnnotationBioMart.R")
 source("geneAnnotationGRanges.R")
 source("geneAnnotationHub.R")
 source("uiHelper.R")
+source("environment.R")
 
 #' Creates a widget that allows the user to select a method of extracting gene annotations
 #'
@@ -55,7 +56,7 @@ geneAnnotationImporterValue_ <- function(input, output, session, dataset) {
                              importers = reactive(supportedGeneAnnotationImporters),
                              samples = reactive(availableGeneAnnotationSamples),
                              generators = reactive(supportedGeneAnnotationGenerators),
-                             parallel = T,
+                             parallel = parallelized.gene.annotation.importer,
                              exprimport = function(con, importer, parameters) {
                                return(importGeneInformationFromAnnotation(con, importer, dataset(), parameters))
                              },

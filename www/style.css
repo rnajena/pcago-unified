@@ -585,3 +585,10 @@ Style for optional color input
   margin-top: 25px;
   width: 100%;
 }
+
+/*
+Style for GO term filter widget
+*/
+.go-term-filter .drilldown label {
+  display: none;
+}
