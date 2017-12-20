@@ -219,7 +219,6 @@ plotAgglomerativeClusteringPlot.save <- function(readcounts,
       }
       
       color.breaks <- unique(color.breaks)
-      print(legend.color)
       
       heatmap.2(cor(X, method = cor.method),
                 hclustfun = function(x) hclust(x, method = method.cluster),
