@@ -7,7 +7,6 @@ library(shinyjs)
 library(GO.db)
 source("classGeneAnnotation.R")
 source("classGeneFilter.R")
-source("widgetFilterSelection.R")
 
 goTermFilterUI <- function(id) {
   
@@ -22,10 +21,8 @@ goTermFilterUI <- function(id) {
                       fluidPage(fluidRow( 
                         actionButton(ns("drilldown.visit"), "List subterms", icon = icon("code-fork")),
                         actionButton(ns("drilldown.add"), "Add to filter", icon = icon("plus"))))
-                      ),
-             hDivider(),
-             filterSelectionInput(ns("filter"), helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md")))
-  )))
+                      ))
+  ))
 }
 
 goTermFilterValue_ <- function(input, output, session) {
@@ -38,7 +35,7 @@ goTermFilterValue_ <- function(input, output, session) {
     }
   })
   
-  return(filterSelectionValues("filter", reactive({ vars$selected.terms })))
+  return(reactive({ vars$selected.terms }))
   
 }
 

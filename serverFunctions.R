@@ -325,7 +325,7 @@ serverFilterReadcountsByAnnotationKeywords <- function(dataset) {
   })
   
   # Get the list of genes we want
-  genes.filtered <- (filterSelectionValues("pca.pca.genes.set",  reactive({
+  genes.filtered <- (geneAnnotationKeywordFilterValues("pca.pca.genes.set",  reactive({
     
     validate(need(readcounts.processed(), "[Gene filtering] No readcounts to process!"),
              need(gene.annotation(), "[Gene filtering] No gene annotation available!"))
@@ -345,15 +345,14 @@ serverFilterReadcountsByAnnotationKeywords <- function(dataset) {
         gene.criteria[["Biotype"]][["No data"]] <- unused.genes
       }
     }
-    # Will be moved to its own widget
-    # {
-    #   unused.genes <- setdiff(all.genes, (annotation@gene.go.terms$get_genes()))
-    #   gene.criteria[["Associated GO terms"]] <- annotation@gene.go.terms$data
-    #   
-    #   if(length(unused.genes) > 0) {
-    #     gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
-    #   }
-    # }
+    {
+      unused.genes <- setdiff(all.genes, (annotation@gene.go.ids$get_genes()))
+      gene.criteria[["Associated GO terms"]] <- annotation@gene.go.ids$data
+
+      if(length(unused.genes) > 0) {
+        gene.criteria[["Associated GO terms"]][["No data"]] <- unused.genes
+      }
+    }
     {
       unused.genes <- setdiff(all.genes, (annotation@gene.scaffold$get_genes()))
       gene.criteria[["Scaffold"]] <- annotation@gene.scaffold$data

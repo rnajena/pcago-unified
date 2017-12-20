@@ -7,7 +7,7 @@ library(shinyBS)
 
 source("uiHelper.R")
 source("widgetInPlaceHelp.R")
-source("widgetFilterSelection.R")
+source("widgetGeneAnnotationKeywordFilter.R")
 source("widgetVisualsEditor.R")
 source("widgetGeneralPlotSettings.R")
 source("widgetGeneAnnotationImporter.R")
@@ -72,7 +72,7 @@ uiPCASidebarFilterGenes <- function() {
   return(bsCollapse(
     bsCollapsePanel(optionalDataText("by gene annotation keywords"),
                     value = "pca.filter.bygenes",
-                    filterSelectionInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
+                    geneAnnotationKeywordFilterInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
                     hDivider(),
                     textOutput("pca.pca.genes.set.count")),
     bsCollapsePanel(optionalDataText("by gene annotation GO terms"),
