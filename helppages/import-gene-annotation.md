@@ -31,7 +31,7 @@ Deselect a checkbox to exclude the associated annotation data from being importe
 
 ### General format of PCAGO gene annotation table
 
-| ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_terms | custom |
+| ID    | scaffold | start_position | end_position | length | exonlength | biotype | go_ids | custom |
 |-------|----------|----------------|--------------|--------|------------|---------|----------|--------|
 | Gene1 | ...      | ...            | ...          | ...    | ...        | ...     | term1&#124;term2&#124;... | custom1&#124;custom2&#124;...      |
 | ...   | ...      | ...            | ...          | ...    | ...        | ...     | ...      | ... |

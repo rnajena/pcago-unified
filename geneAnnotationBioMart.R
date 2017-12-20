@@ -82,28 +82,24 @@ getBioMartGOTerms <- function(mart, genes) {
   }
   
   bm <- bm[bm$go_id != "",] # Seems to sometimes return empty GO-IDs
-  go.terms <- AnnotationDbi::select(GO.db, bm$go_id, c("TERM"))
-  
-  bm$go_term <- go.terms$TERM
-  bm <- na.omit(bm) # If the term wasn't found
   
   # We have to transform the table with columns gene_id, term to term -> list of gene ids
-  go.terms.filter <- list()
+  go.ids.filter <- list()
   
-  for(term in unique(bm$go_term)) {
+  for(id in unique(bm$go_id)) {
     
-    if(term == "") {
+    if(id == "") {
       next()
     }
     
-    gene.indices <- term == bm$go_term
+    gene.indices <- id == bm$go_id
     genes <- bm$ensembl_gene_id[gene.indices]
     
-    go.terms.filter[[term]] <- genes
+    go.ids.filter[[id]] <- genes
     
   }
   
-  return(GeneAnnotation(gene.go.terms = GeneFilter$new(data = go.terms.filter)))
+  return(GeneAnnotation(gene.go.ids = GeneFilter$new(data = go.ids.filter)))
 }
 
 #' Returns a table with gene and biotype 
@@ -232,7 +228,7 @@ generateGeneInformation.EnsemblBioMart <- function(database, species, imported_d
   
   output <- GeneAnnotation()
   
-  if("go_terms" %in% imported_data) {
+  if("go_ids" %in% imported_data) {
     output <- mergeGeneAnnotation(output, getBioMartGOTerms(bio.mart, genes))
   }
   

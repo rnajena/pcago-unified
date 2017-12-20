@@ -183,16 +183,18 @@ withParallel <- function(session, input, expr, exprsuccess = function() {}, expr
     
     process.result <- mccollect(process, wait = F)
     
-    if(!is.null(process.result)) {
-      vars$status <- "finished"
-      print("[Parallel] finished. Process returned:")
-      print(process.result)
-      removeModal()
-      exprsuccess(process.result[[1]])
-      exprfinally()
-    }
-    else if(isolate(vars$status) == "calculating") {
-      invalidateLater(1000)
+    if(isolate(vars$status) == "calculating") {
+      if(!is.null(process.result)) {
+        vars$status <- "finished"
+        print("[Parallel] finished. Process returned:")
+        print(process.result)
+        removeModal()
+        exprsuccess(process.result[[1]])
+        exprfinally()
+      }
+      else {
+        invalidateLater(1000) 
+      }
     }
   })
    

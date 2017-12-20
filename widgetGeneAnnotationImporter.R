@@ -55,6 +55,7 @@ geneAnnotationImporterValue_ <- function(input, output, session, dataset) {
                              importers = reactive(supportedGeneAnnotationImporters),
                              samples = reactive(availableGeneAnnotationSamples),
                              generators = reactive(supportedGeneAnnotationGenerators),
+                             parallel = T,
                              exprimport = function(con, importer, parameters) {
                                return(importGeneInformationFromAnnotation(con, importer, dataset(), parameters))
                              },

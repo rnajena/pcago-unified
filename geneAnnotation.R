@@ -47,10 +47,10 @@ supportedGeneAnnotationImporters <- list(ImporterEntry(name = "gff_ensembl",
 supportedGeneAnnotationGenerators <- list(annotationHub.importerEntry,
                                       bioMart.importerEntry)
                                       
-availableGeneAnnotationSamples <- list(ImporterEntry(name = "genes.annotation.vitamins.csv",
+availableGeneAnnotationSamples <- list(ImporterEntry(name = "Monocytes/geneannotation.csv",
                                                  label = "Monocytes (PCAGO annotation table CSV)",
                                                  parameters = list(geneAnnotationImporterParameter.imported_data.pcago_csv)),
-                                   ImporterEntry(name = "vitamins.gff3",
+                                   ImporterEntry(name = "Monocytes/geneannotation.gff3",
                                                  label = "Monocytes (Ensembl GFF)",
                                                  parameters = list(geneAnnotationImporterParameter.imported_data.gff_ensembl)))
 
