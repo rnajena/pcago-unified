@@ -27,7 +27,9 @@ geneAnnotationKeywordFilterInput <- function(id, header = "") {
   ns  <- NS(id)
   
   return(tagList(
-    fluidPage(fluidRow(bsButton(ns("toggle.gobrowser"), "GO browser", icon = icon("code-fork"), type = "toggle"))),
+    fluidPage(tags$div(class = "row", bsButton(ns("toggle.gobrowser"), "GO browser", icon = icon("code-fork"), type = "toggle"))),
+    vSkip(5),
+    uiOutput(ns("gobrowser.warning")),
     conditionalPanel(conditionalPanel.equals(ns("toggle.gobrowser"), "false"),
                      tags$div(class = "filter-selection-input",
                               tags$div(class = "filter-values", selectizeInput(ns("values"), 
@@ -71,8 +73,7 @@ geneAnnotationKeywordFilterInput <- function(id, header = "") {
 #' @examples
 geneAnnotationKeywordFilterValues_ <- function(input, output, session, values) {
   
-  observeEvent(values(), {
-    
+  all.choices <- reactive({
     choices <- list()
     
     # We generate the values as CATEGORY.NAME (which matches the output of unlist(,recursive = F)) )
@@ -92,7 +93,46 @@ geneAnnotationKeywordFilterValues_ <- function(input, output, session, values) {
     }
     
     choices[["Misc"]] <- append(choices[["Misc"]], list("All (*)" = "*"))
-    updateSelectizeInput(session, "values", choices = choices, selected = c("*"))
+    return(choices)
+  })
+  
+  selected.goterms <- goTermFilterValue("gobrowser", goterms = reactive({
+    validate(need(all.choices(), "No GO terms loaded"))
+    
+    goterms <- all.choices()[["Associated GO terms"]]
+    
+    return(goterms[goterms != "Associated GO terms.No data"])
+  }))
+  
+  filtered.choices <- reactive({
+    validate(need(all.choices(), "No filter keys available!"))
+    
+    choices <- all.choices()
+    gotermchoices <- choices[["Associated GO terms"]]
+    
+    choices[["Associated GO terms"]] <- c(gotermchoices[match(selected.goterms(), gotermchoices)], gotermchoices[gotermchoices == "Associated GO terms.No data"])
+    
+    return(choices)
+  })
+  
+  output$gobrowser.warning <- renderUI({
+    validate(need(all.choices(), "No filter keys loaded"))
+    validate(need(filtered.choices(), "No filter keys loaded"))
+    
+    goterms <- all.choices()[["Associated GO terms"]]
+    goterms.filtered <- filtered.choices()[["Associated GO terms"]]
+    
+    if(length(goterms) > 1 && length(goterms.filtered) <= 1) {
+      return(tagList(iconText(icon("exclamation-triangle"), "To filter for GO terms, you have to use the GO term browser to select the terms you want to filter for."),
+                     vSkip(5)))
+    }
+    else {
+      return(tagList())
+    }
+  })
+  
+  observeEvent(filtered.choices(), {
+    updateSelectizeInput(session, "values", choices = filtered.choices(), selected = c("*")) #TODO: More intelligent selecting
   })
   
   available.values <- reactive({

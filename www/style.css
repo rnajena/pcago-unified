@@ -592,3 +592,7 @@ Style for GO term filter widget
 .go-term-filter .drilldown label {
   display: none;
 }
+
+.go-term-filter .drilldown select option {
+  padding: 5px;
+}

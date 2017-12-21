@@ -69,7 +69,7 @@ uiPCASidebarData <- function() {
 #' @examples
 uiPCASidebarFilterGenes <- function() {
   return(bsCollapse(
-    bsCollapsePanel(optionalDataText("by gene annotation keywords"),
+    bsCollapsePanel(optionalDataText("by gene annotation"),
                     value = "pca.filter.bygenes",
                     geneAnnotationKeywordFilterInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
                     hDivider(),

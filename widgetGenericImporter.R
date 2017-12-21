@@ -214,7 +214,8 @@ genericImporterData_ <- function(input,
                                  exprgenerator,
                                  exprintegrate = NULL,
                                  xauto = NULL,
-                                 parallel = F) {
+                                 parallel = F,
+                                 parallel.message = "Currently importing the data. Please wait.") {
   
   if(!is.reactive(importers) || !is.reactive(samples) || !is.reactive(generators)) {
     stop("Invalid arguments!")
@@ -543,7 +544,8 @@ genericImporterData_ <- function(input,
                      else {
                        showNotification("Error while importing data!", type = "error")
                      }
-                   })
+                   },
+                   message = parallel.message)
     }
 
   })
@@ -675,7 +677,8 @@ genericImporterData <- function(id,
                                 exprgenerator,
                                 exprintegrate = NULL,
                                 xauto = NULL,
-                                parallel = F) {
+                                parallel = F,
+                                parallel.message = "Currently importing the data. Please wait.") {
   
   return(callModule(genericImporterData_, 
                     id, 
@@ -687,6 +690,7 @@ genericImporterData <- function(id,
                     exprgenerator = exprgenerator,
                     exprintegrate = exprintegrate,
                     xauto = xauto,
-                    parallel = parallel))
+                    parallel = parallel,
+                    parallel.message = parallel.message))
   
 }

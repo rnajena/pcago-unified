@@ -70,6 +70,17 @@ hDivider <- function() {
   return(tags$div(class = "hdivider"))
 }
 
+#' Creates a vertical skip
+#'
+#' @return Shiny UI element
+#' @export
+#'
+#' @examples
+vSkip <- function(h = 5) {
+  return(tags$div(style = paste0("height: ", h, "px;")))
+}
+
+
 subSubBox <- function(...) {
   return(tags$div(class = "sub-sub-box", ...))
 }
