@@ -9,3 +9,9 @@ if(!exists("ffmpeg.path")) {
 
 # If enabled, the gene annotation importing runs in a different thread
 parallelized.gene.annotation.importer <- T
+
+# How many GO terms can be viewed in detail in GO browser?
+go.browser.detailed.maxterms <- 50
+
+# How many read count samples are supported
+readcounts.maxsamples <- 100

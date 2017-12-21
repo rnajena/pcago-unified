@@ -9,6 +9,7 @@ library(GO.db)
 source("classGeneAnnotation.R")
 source("classGeneFilter.R")
 source("uiHelper.R")
+source("environment.R")
 
 ########### TODO: Export/import list #########!
 
@@ -126,6 +127,11 @@ goTermFilterValue_ <- function(input, output, session, goterms) {
     
     if(length(terms) == 0) {
       showModal(modalDialog("Please select some GO terms from the list.", size = "l", footer = tagList(
+        modalButton("OK"))
+      ))
+    }
+    else if(length(terms) > go.browser.detailed.maxterms) {
+      showModal(modalDialog(paste("You can only view up to", go.browser.detailed.maxterms, "GO terms."), size = "l", footer = tagList(
         modalButton("OK"))
       ))
     }

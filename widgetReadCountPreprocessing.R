@@ -8,6 +8,7 @@ source("uiHelper.R")
 source("helpers.R")
 source("readcounts.R")
 source("defaultParameters.R")
+source("environment.R")
 
 readCountPreprocessingUI <- function(id) {
   
@@ -41,8 +42,8 @@ readCountPreprocessingData_ <- function(input,
     }
     
     # Prevent too many samples
-    if(ncol(dataset$readcounts.preprocessed) > 100) {
-      showNotification("There are over 100 samples! I won't calculate with that! Maybe you need to transpose your data?", type = "error")
+    if(ncol(dataset$readcounts.preprocessed) > readcounts.maxsamples) {
+      showNotification(paste("There are only up to", readcounts.maxsamples, "samples supported! If your data stores the samples row-wise, transpose the read count data."), type = "error")
       dataset()$readcounts.preprocessed <- NULL
       return(dataset)
     }
