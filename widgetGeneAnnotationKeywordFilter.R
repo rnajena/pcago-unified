@@ -100,8 +100,10 @@ geneAnnotationKeywordFilterValues_ <- function(input, output, session, values) {
     validate(need(all.choices(), "No GO terms loaded"))
     
     goterms <- all.choices()[["Associated GO terms"]]
+    goterms <- sapply(goterms, function(x) unlist(strsplit(x, ".", fixed = T))[2])
+    names(goterms) <- names(all.choices()[["Associated GO terms"]])
     
-    return(goterms[goterms != "Associated GO terms.No data"])
+    return(goterms[goterms != "No data"])
   }))
   
   filtered.choices <- reactive({
@@ -110,7 +112,10 @@ geneAnnotationKeywordFilterValues_ <- function(input, output, session, values) {
     choices <- all.choices()
     gotermchoices <- choices[["Associated GO terms"]]
     
-    choices[["Associated GO terms"]] <- c(gotermchoices[match(selected.goterms(), gotermchoices)], gotermchoices[gotermchoices == "Associated GO terms.No data"])
+    selected.terms <- selected.goterms()
+    selected.terms <- sapply(selected.terms, function(x) paste0("Associated GO terms.", x))
+    
+    choices[["Associated GO terms"]] <- c(gotermchoices[match(selected.terms, gotermchoices)], gotermchoices[gotermchoices == "Associated GO terms.No data"])
     
     return(choices)
   })

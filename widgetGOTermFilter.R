@@ -38,10 +38,67 @@ goTermFilterUI <- function(id) {
   ))
 }
 
+goTermFilter.buildGOInfoUI <- function(goids) {
+  
+  output <- tagList()
+  
+  for(goid in goids) {
+    
+    info <- GO.db::GOTERM[[goid]]
+    
+    if(is.null(info)) {
+      output <- tagAppendChild(output, tags$div(
+        class = "go-term-details",
+        tags$h2("Unknown GO ID"),
+        vSkip(5),
+        tags$a(href=paste0("http://amigo.geneontology.org/amigo/medial_search?q=", info@GOID), target = "_blank", "Search on AmiGO 2"),
+        
+        hDivider()
+      ))
+    }
+    else {
+      ontology <- "Unknown"
+      
+      if(info@Ontology == "BP") {
+        ontology <- "Biological Process (BP)"
+      }
+      else if(info@Ontology == "CC") {
+        ontology <- "Cellular Component (CC)"
+      }
+      else if(info@Ontology == "MF") {
+        ontology <- "Molecular Function (MF)"
+      }
+      
+      alternative.ids <- if(length(info@Secondary) > 0) paste(info@Secondary, collapse = ", ") else "None"
+      synonyms <- if(length(info@Synonym) > 0) paste(info@Synonym, collapse = ", ") else "None"
+      
+      output <- tagAppendChild(output, tags$div(
+        class = "go-term-details",
+        tags$h2(info@GOID),
+        tags$h3(info@Term),
+        tags$div(class = "goterm-info-entry", tags$span(class = "key", "Ontology"), tags$span(class = "value", ontology)),
+        tags$div(class = "goterm-info-entry", tags$span(class = "key", "Alternate IDs"), tags$span(class = "value", alternative.ids)),
+        tags$div(class = "goterm-info-entry", tags$span(class = "key", "Synonyms"), tags$span(class = "value", synonyms)),
+        vSkip(10),
+        tags$div(class = "definition", info@Definition),
+        vSkip(5),
+        tags$a(href=paste0("http://amigo.geneontology.org/amigo/term/", info@GOID), target = "_blank", "View on AmiGO 2"),
+        
+        hDivider()
+      ))
+    }
+    
+  }
+  
+  return(output)
+  
+}
+
 goTermFilterValue_ <- function(input, output, session, goterms) {
   
   vars <- reactiveValues(selected.terms = c())
   
+  # Define button actions
   observeEvent(input$drilldown.add, {
     if(!is.null(input$drilldown.term)) {
       vars$selected.terms <- unique(c(vars$selected.terms, input$drilldown.term))
@@ -62,6 +119,39 @@ goTermFilterValue_ <- function(input, output, session, goterms) {
     updateTextInput(session, "search", value = "+")
   })
   
+  
+  observeEvent(input$drilldown.info, {
+    terms <- input$drilldown.term
+    #terms <- c("GO:0009987") # for debugging
+    
+    if(length(terms) == 0) {
+      showModal(modalDialog("Please select some GO terms from the list.", size = "l", footer = tagList(
+        modalButton("OK"))
+      ))
+    }
+    else {
+      ui <- goTermFilter.buildGOInfoUI(terms)
+      showModal(modalDialog(ui, size = "l", title = tagList(
+        modalButton(label = "", icon = icon("times-circle")),
+        dropdownButton(session$ns("goterm.details.export"), "Export report", tagList(
+          downloadButton(session$ns("goterm.details.export.html"), label = "as *.html")
+        ), icon = icon("download"))
+      ),
+      footer = tagList(modalButton("Close"))))
+      
+      output$goterm.details.export.html <- downloadHandler("goterm-report.html", function(filename) {
+        conn <- file(filename)
+        on.exit({
+          close(conn)
+        })
+        
+        writeLines(paste(ui), conn)
+      })
+    }
+    
+  })
+  
+  # Update drilldown + selections etc
   observeEvent(goterms(), {
     updateSelectInput(session, "drilldown.term", choices = c())
     vars$selected.terms <- c()

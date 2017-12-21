@@ -596,3 +596,11 @@ Style for GO term filter widget
 .go-term-filter .drilldown select option {
   padding: 5px;
 }
+
+/*
+Style for GO detail view
+*/
+.go-term-details .goterm-info-entry .key {
+  font-weight: bold;
+  margin-right: 8px;
+}
