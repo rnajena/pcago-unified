@@ -589,12 +589,67 @@ Style for optional color input
 /*
 Style for GO term filter widget
 */
-.go-term-filter .drilldown label {
+
+.go-term-filter .drilldown .form-group > label {
   display: none;
 }
 
 .go-term-filter .drilldown select option {
   padding: 5px;
+}
+
+.go-term-filter .drilldown .drilldown-selection .radio {
+	display: inline-block;
+}
+
+.go-term-filter .drilldown .drilldown-selection input {
+	display: none;
+}
+
+.go-term-filter .drilldown .drilldown-selection label {
+	padding: 0;
+}
+
+.go-term-filter .drilldown .drilldown-selection input[type="radio"]+span {
+	padding: 5px 5px;
+	border-radius: 3px;
+
+}
+
+.go-term-filter .drilldown .drilldown-selection input[type="radio"]:checked+span {
+	font-weight: bold;
+	color: #fff;
+	background-color: #337ab7!important;
+}
+
+.go-term-filter .drilldown .drilldown-selection input[type="radio"]:hover+span {
+	background-color: #ddd;
+}
+
+.go-term-filter .drilldown {
+	border: 1px solid #ccc;
+	border-radius: 3px;
+}
+
+.go-term-filter .drilldown .drilldown-selection {
+	margin-left: 5px;
+	margin-top: 8px;
+}
+
+.go-term-filter .drilldown .form-group {
+	margin-bottom: 0;
+	margin-top: 0
+}
+
+.go-term-filter .drilldown select {
+	border-left: 0;
+	border-right: 0;
+	border-bottom: 0;
+	border-radius: 0;
+}
+
+.go-term-filter > .shiny-input-container label {
+	display: none;
 }
 
 /*
