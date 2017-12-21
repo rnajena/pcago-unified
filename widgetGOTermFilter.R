@@ -8,6 +8,8 @@ library(GO.db)
 source("classGeneAnnotation.R")
 source("classGeneFilter.R")
 
+########### TODO: Export/import list #########!
+
 goTermFilterUI <- function(id) {
   
   ns <- NS(id)
@@ -20,7 +22,8 @@ goTermFilterUI <- function(id) {
                       selectInput(ns("drilldown.term"), "", choices = c("a", "b", "c", "d"), multiple = T, selectize = F, size = 10),
                       fluidPage(fluidRow( 
                         actionButton(ns("drilldown.visit"), "List subterms", icon = icon("code-fork")),
-                        actionButton(ns("drilldown.add"), "Add to filter", icon = icon("plus"))))
+                        actionButton(ns("drilldown.add"), "Add to filter", icon = icon("plus")),
+                        actionButton(ns("drilldown.info"), "Show details", icon = icon("search"))))
                       ))
   ))
 }

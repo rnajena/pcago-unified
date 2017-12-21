@@ -27,7 +27,6 @@ source("widgetRelevantGenes.R")
 source("widgetReadCountPostprocessing.R")
 source("defaultParameters.R")
 source("plotLoadingsPlot.R")
-source("widgetGOTermFilter.R")
 
 #' Creates UI definition for the "data" sidebar
 #' This sidebar allows the user to upload necessary data and transform them for later processing
@@ -75,9 +74,6 @@ uiPCASidebarFilterGenes <- function() {
                     geneAnnotationKeywordFilterInput("pca.pca.genes.set", helpIconText("Limit set of genes", includeText("helptooltips/pca-pca-gene-set.md"))),
                     hDivider(),
                     textOutput("pca.pca.genes.set.count")),
-    bsCollapsePanel(optionalDataText("by gene annotation GO terms"),
-                    value = "pca.filter.bygoterms",
-                    goTermFilterUI("pca.pca.genes.goterms")),
     bsCollapsePanel(optionalDataText("by gene variance"),
                     value = "pca.filter.byvariance",
                     plotGeneVarianceRangePlotUI("pca.pca.genes.count.variance.plot", height = "120px"),

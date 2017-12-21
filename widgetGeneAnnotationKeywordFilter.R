@@ -6,6 +6,7 @@
 #' 
 
 library(shiny)
+library(shinyBS)
 source("widgetGOTermFilter.R")
 
 #' Creates a widget that lets the user select list entries based on the label
@@ -25,23 +26,29 @@ geneAnnotationKeywordFilterInput <- function(id, header = "") {
   
   ns  <- NS(id)
   
-  return(tags$div(class = "filter-selection-input",
-                  tags$div(class = "filter-values", selectizeInput(ns("values"), 
-                                                                   label = header, 
-                                                                   multiple = T,
-                                                                   choices = c("All (*)" = "*"),
-                                                                   selected = c("*"),
-                                                                   options = list(
-                                                                     render = I(includeText("scripts/geneAnnotationKeywordFilterInputSelectizeRender.js")),
-                                                                     plugins = list("remove_button", "drag_drop"),
-                                                                     maxOptions = 1000000
-                                                                   ))),
-                  tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
-                                                                     label = "Filter settings", 
-                                                                     choices = c("AND", "OR"),
-                                                                     selected = "OR")),
-                  checkboxInput(ns("invert.selection"), "Invert selection")
-  ))
+  return(tagList(
+    fluidPage(fluidRow(bsButton(ns("toggle.gobrowser"), "GO browser", icon = icon("code-fork"), type = "toggle"))),
+    conditionalPanel(conditionalPanel.equals(ns("toggle.gobrowser"), "false"),
+                     tags$div(class = "filter-selection-input",
+                              tags$div(class = "filter-values", selectizeInput(ns("values"), 
+                                                                               label = header, 
+                                                                               multiple = T,
+                                                                               choices = c("All (*)" = "*"),
+                                                                               selected = c("*"),
+                                                                               options = list(
+                                                                                 render = I(includeText("scripts/geneAnnotationKeywordFilterInputSelectizeRender.js")),
+                                                                                 plugins = list("remove_button", "drag_drop"),
+                                                                                 maxOptions = 1000000
+                                                                               ))),
+                              tags$div(class = "filter-operation",selectizeInput(ns("operation"), 
+                                                                                 label = "Filter settings", 
+                                                                                 choices = c("AND", "OR"),
+                                                                                 selected = "OR")),
+                              checkboxInput(ns("invert.selection"), "Invert selection")
+                     )),
+    conditionalPanel(conditionalPanel.equals(ns("toggle.gobrowser"), "true"),
+                     goTermFilterUI(ns("gobrowser")))
+    ))
   
 }
 
