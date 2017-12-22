@@ -88,10 +88,14 @@ goTermFilterValue_ <- function(input, output, session, goterms) {
     if(length(drilldown.term()) == 1) {
       
       # The drilldown discards all options after the current selected one
-      index <- match(input$drilldown.selection, vars$drilldown)
+      index <- 1 
       
-      if(is.na(index)) {
-        index <- 1
+      if(is.null(input$search) || input$search == "") {
+        index <- match(input$drilldown.selection, vars$drilldown)
+        
+        if(is.na(index)) {
+          index <- 1
+        }
       }
       
       newdrill <- c(vars$drilldown[1:index], goterms()[goterms() == drilldown.term()])
