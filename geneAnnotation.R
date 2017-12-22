@@ -139,7 +139,7 @@ importGeneInformationFromAnnotation.PCAGOTabular <- function(filehandle, dataset
   data <- read.csv(filehandle, header = T, row.names = 1, sep = sep, stringsAsFactors = F)
   
   # Restrict to genes and columns we want
-  data <- data[intersect(rownames(data), rownames(readcounts)), imported_data]
+  data <- data[intersect(rownames(data), rownames(readcounts)), imported_data, drop = F]
   
   annot <- geneAnnotationFromTable(data)
   

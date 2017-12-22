@@ -161,6 +161,9 @@ setMethod(f = "geneAnnotationFromTable",
               if(col %in% colnames(table)) {
                 sequence.info[,col] <- table[,col]
               }
+              else {
+                sequence.info[,col] <- rep(NA, nrow(table))
+              }
             }
             
             if(ncol(sequence.info) == 0) {
