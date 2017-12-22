@@ -17,7 +17,7 @@ gene annotation and various visualization options.
 
 You have following options to run PCAGO:
 
-* Use our online server (In development)
+* Use our servers ([PCAGO Stable](http://pcago.bioinf.uni-jena.de/) or [PCAGO Development Version](http://pcago.bioinf.uni-jena.de/unstable))
 * Use a standalone desktop application
 * Run the PCAGO server on one of your servers or your local computer
 
