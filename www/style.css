@@ -524,6 +524,11 @@ Style for the about page
 	margin-top: 15px;
 }
 
+.about-page .footer {
+	margin-top: 64px;
+	font-size: 12px;
+}
+
 /*
 Style for generic importer
 */

@@ -5,6 +5,7 @@
 library(shiny)
 library(shinyBS)
 source("uiHelper.R")
+source("environment.R")
 
 #' Creates the about page for the UI
 #'
@@ -33,6 +34,9 @@ uiAboutPage <- function() {
                column(width = 2, tags$div(class = "feature-column", 
                                           tags$img(src = "aboutpage/quickfeatures_pca.svg"),
                                           includeMarkdown("aboutpage/quickfeatures_pca.md")))
-             )))
+             )),
+    tags$div(class = "footer",
+             paste("PCAGO version", pcago.version),
+             includeMarkdown("startPageFooter.md")))
   )
 }

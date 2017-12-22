@@ -21,3 +21,8 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 3. Upload the sample annotation `Sidebar > Data > Import samples annotation` or choose example data
 
 <div class="video-embed"><div><div><iframe src="https://www.youtube.com/embed/WBFXJ0USuec" frameborder="0" allowfullscreen></iframe></div></div></div>
+
+## Additional info
+
+The source code of PCAGO is available on [GitLab](https://gitlab.com/rumangerst/pcago) and [GitHub](https://github.com/rumangerst/pcago).
+If you want to use PCAGO as desktop application, you can use [PCAGO-Electron](https://github.com/rumangerst/pcago-electron/).
