@@ -11,8 +11,7 @@ source("classGeneFilter.R")
 source("uiHelper.R")
 source("environment.R")
 source("goTerms.R")
-
-########### TODO: Export/import list #########!
+source("widgetGenericImporter.R")
 
 goTermFilterUI <- function(id) {
   
@@ -46,7 +45,8 @@ goTermFilterUI <- function(id) {
                )),
                vSkip(5),
                textOutput(ns("selected.count")))),
-    conditionalPanel(conditionalPanel.equals(ns("import"), "true"))
+    conditionalPanel(conditionalPanel.equals(ns("import"), "true"),
+                     genericImporterInput(ns("importer")))
   )))
 }
 
@@ -97,6 +97,7 @@ goTermFilterValue_ <- function(input, output, session, goterms) {
       newdrill <- c(vars$drilldown[1:index], goterms()[goterms() == drilldown.term()])
       vars$drilldown <- newdrill
       updateRadioButtons(session, "drilldown.selection", choices = newdrill, selected = newdrill[length(newdrill)])
+      updateTextInput(session, "search", value = "")
       
     }
     else {
@@ -177,6 +178,39 @@ goTermFilterValue_ <- function(input, output, session, goterms) {
     validate(need(goterms(), "No terms available"))
     return(paste(length(vars$selected.terms), "terms selected"))
   })
+  
+  # Import / export
+  output$export.csv <- downloadHandler("selected_goterms.csv",
+                                       contentType = "text/csv",
+                                       content = function(filename) {
+                                         exportSelectedGOTerms.CSV(filename, vars$selected.terms)
+                                       })
+  
+  selected.ids.imported <- genericImporterData("importer", 
+                                               importers = reactive(supportedSelectedGOTermsImporters),
+                                               samples = reactive(availableSelectedGOTermsSamples),
+                                               generators = reactive(supportedSelectedGOTermsGenerators),
+                                               exprimport = function(con, importer, parameters) {
+                                                 return(importSelectedGOTerms(filehandle = con, 
+                                                                               importer = importer, 
+                                                                               parameters = parameters, 
+                                                                               available.terms = goterms()))
+                                               },
+                                               exprsample = function(sample, parameters) {
+                                                 return(importSampleAnnotationSample(sample = sample, 
+                                                                                     parameters = parameters,
+                                                                                     available.terms = goterms()))
+                                               })
+  
+  #' When the user imports a visual table, apply it
+  observeEvent(selected.ids.imported(), {
+    
+    if(!is.null(selected.ids.imported())) {
+      vars$selected.terms <- selected.ids.imported()
+    }
+    
+  })
+  
   
   return(reactive({ vars$selected.terms }))
   

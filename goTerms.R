@@ -6,6 +6,102 @@ library(shiny)
 library(GO.db)
 library(AnnotationDbi)
 
+# Importers for condition visuals
+supportedSelectedGOTermsImporters <- list(
+  ImporterEntry(name = "csv", label = "PCAGO Selected GO Terms CSV (*.csv)", parameters = list(ImporterParameter.csv))
+)
+supportedSelectedGOTermsGenerators <- list()
+availableSelectedGOTermsSamples <- list()
+
+importSelectedGOTerms.CSV <- function(filehandle, parameters, available.terms) {
+  
+  data <- read.csv(filehandle, sep = parameters$separator, row.names = NULL, stringsAsFactors = F, check.names = F)
+  return(data)
+}
+
+#' Imports visual definitions from filehandle with importer defined by datatype
+#'
+#' @param filehandle Either a filename or a connection
+#' @param datatype One value in supportedReadcountDataTypes
+#' @param conditions Vector of condition names
+#'
+#' @return Data frame containing the visual parameters for each condition
+#' @export
+#'
+#' @examples
+importSelectedGOTerms <- function(filehandle, importer, parameters, available.terms) {
+  
+  if(length(available.terms) == 0) {
+    stop("There are no available GO terms!")
+  }
+  
+  data <- NULL
+  
+  if(importer == "csv") {
+    data <- importSelectedGOTerms.CSV(filehandle, parameters, available.terms)
+  }
+  else {
+    stop(paste("Unknown importer", importer))
+  }
+  
+  if(nrow(data) == 0) {
+    stop("Imported data has no rows!")
+  }
+  if(ncol(data) == 0) {
+    stop("Imported data has no columns!")
+  }
+  if(!("goid" %in% names(data)) ) {
+    stop("Imported data must contain a column 'goid'!")
+  }
+  
+  matching.indices <- match(data$goid, available.terms)
+  
+  if(length(matching.indices) == 0) {
+    stop("The file does not contain any of the available GO IDs!")
+  }
+  
+  return(unique(data$goid[matching.indices]))
+}
+
+#' Imports sample with given sample id
+#'
+#' @param sample 
+#'
+#' @return Data frame containing the read data
+#' @export
+#'
+#' @examples
+importSelectedGOTermsSample <- function(sample, parameters, available.terms) {
+  
+  if(!is.character(sample)) {
+    stop("Invalid arguments!")
+  }
+  
+  con <- file(paste0("sampledata/", sample), "r")
+  on.exit({ close(con) })
+  
+  parameters$separator <- ","
+  
+  data <- importSelectedGOTerms(filehandle = con, 
+                                importer = "csv", 
+                                parameters = parameters, 
+                                available.terms = available.terms)
+  
+  return(data)
+  
+}
+
+exportSelectedGOTerms.CSV <- function(filename, goids) {
+  
+  if(length(goids) > 0) {
+    frame <- AnnotationDbi::select(GO.db, goids, columns = c("TERM", "DEFINITION"))
+    names(frame) <- c("goid", "goterm", "definition")
+    
+    write.csv(frame, file = filename, sep = ",", row.names = F)
+  }
+  
+}
+
 #' Builds UI that describes GO terms of given IDs
 #'
 #' @param goids 
