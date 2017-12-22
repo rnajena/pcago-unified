@@ -137,7 +137,15 @@ geneAnnotationKeywordFilterValues_ <- function(input, output, session, values) {
   })
   
   observeEvent(filtered.choices(), {
-    updateSelectizeInput(session, "values", choices = filtered.choices(), selected = c("*")) #TODO: More intelligent selecting
+    
+    current.choices <- input$values
+    rescue <- intersect(current.choices, unlist(filtered.choices()))
+    
+    if(length(rescue) == 0) {
+      rescue <- c("*")
+    }
+    
+    updateSelectizeInput(session, "values", choices = filtered.choices(), selected = rescue)
   })
   
   available.values <- reactive({
