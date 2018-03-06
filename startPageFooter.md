@@ -1,1 +1,0 @@
-[Bioinformatics/High-Throughput Analysis](http://www.rna.uni-jena.de/), [Faculty of Mathematics and Computer Science](http://www.fmi.uni-jena.de/), [Friedrich Schiller University Jena](http://www.uni-jena.de/).

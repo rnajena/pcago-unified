@@ -529,6 +529,10 @@ Style for the about page
 	font-size: 12px;
 }
 
+.about-page .footer h1 {
+  font-size: 12px;
+}
+
 /*
 Style for generic importer
 */

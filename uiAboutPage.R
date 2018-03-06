@@ -36,7 +36,6 @@ uiAboutPage <- function() {
                                           includeMarkdown("aboutpage/quickfeatures_pca.md")))
              )),
     tags$div(class = "footer",
-             paste("PCAGO version", pcago.version),
-             includeMarkdown("startPageFooter.md")))
+             paste("PCAGO version", pcago.version)))
   )
 }

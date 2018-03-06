@@ -16,6 +16,7 @@ library(colourpicker)
 source("uiAboutPage.R")
 source("uiPCAPage.R")
 source("uiHelpPage.R")
+source("uiLegalPage.R")
 
 shinyUI(tags$div(useShinyjs(),
                   list(tags$head(HTML('<link rel="icon", href="icon.png",
@@ -29,6 +30,7 @@ shinyUI(tags$div(useShinyjs(),
                    tabPanel("About", value = "about", uiAboutPage()),
                    tabPanel("Analyze", value = "analyze", uiPCAPage()),
                    tabPanel("Help", value = "help", uiHelpPage()),
+                   tabPanel("Impressum", value = "legal", uiLegalPage()),
                    id = "main.nav",
                    theme = "style.css"),
                  tags$script(I(includeText("scripts/globalBody.js")))))
