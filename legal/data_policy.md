@@ -3,7 +3,7 @@
 Our website may be used without entering personal information. Different rules may apply to certain services on our site, however, and are explained separately below. We collect personal information from you (gene annotations, read count tables, etc.) in accordance with the provisions of German data protection statutes. Information is considered personal if it can be associated exclusively to a specific natural person. The legal framework for data protection may be found in the German Federal Data Protection Act (BDSG) and the Telemedia Act (TMG). The provisions below serve to provide information as to the manner, extent and purpose for collecting, using and processing personal information by the provider.
 
 
-Manja Marz
+Martin Hölzer
 
 [Bioinformatics/High-Throughput Analysis](http://www.rna.uni-jena.de/)
 

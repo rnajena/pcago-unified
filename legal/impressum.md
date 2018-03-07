@@ -1,6 +1,6 @@
 # Contact info / Impressum
 
-Manja Marz
+Martin Hölzer
 
 [Bioinformatics/High-Throughput Analysis](http://www.rna.uni-jena.de/)
 
