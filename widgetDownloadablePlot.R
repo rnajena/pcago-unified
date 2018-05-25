@@ -53,9 +53,10 @@ downloadablePlotOutput <- function(id,
                                                   conditionalPanel(conditionalPanel.equals(ns("settings"), "true"),
                                                                    tags$div(class = "settings-panel",
                                                                             hDivider(),
-                                                                            settings.panel))
+                                                                            settings.panel)),
+                                                  bsButton(ns("collapse"), "Collapse", icon = icon("eye-slash"), type = "toggle")
                                                   ),
-                               uiOutput(ns("plot.container"))
+                               conditionalPanel(conditionalPanel.equals(ns("collapse"), "false"), uiOutput(ns("plot.container")))
                                # plotOutput(ns("plot"))
                                )))
 }

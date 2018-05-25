@@ -48,8 +48,9 @@ downloadableDataTableOutput <- function(id,
                                         conditionalPanel(conditionalPanel.equals(ns("settings"), "true"),
                                                          tags$div(class = "settings-panel",
                                                                   hDivider(),
-                                                                  settings.panel))),
-                     DT::dataTableOutput(ns("table"))))
+                                                                  settings.panel)),
+                                        bsButton(ns("collapse"), "Collapse", icon = icon("eye-slash"), type = "toggle")),
+                     conditionalPanel(conditionalPanel.equals(ns("collapse"), "false"), DT::dataTableOutput(ns("table")))))
 }
 
 #' Fills the data table with given data output.
