@@ -6,7 +6,7 @@ pcago_dir=$1
 # Initialize packrat (Will install everything)
 echo "[1/3] Bootstrapping packrat package management system ..."
 cd $pcago_dir
-R --vanilla -f packrat/init.R --args --bootstrap-packrat &
+./R --vanilla -f packrat/init.R --args --bootstrap-packrat &
 
 pid=$!
 trap "kill $pid" TERM
@@ -21,7 +21,7 @@ cd $pcago_dir
 echo "
 source('packrat/init.R')
 packrat::restore()
-" | R --vanilla &
+" | ./R --vanilla &
 
 pid=$!
 trap "kill $pid" TERM
@@ -55,7 +55,7 @@ print(paste('Path of ffmpeg is', ffmpeg.path))
 
 shiny::runApp()
 
-" | R --vanilla &
+" | ./R --vanilla &
 
 pid=$!
 trap "kill $pid" TERM
