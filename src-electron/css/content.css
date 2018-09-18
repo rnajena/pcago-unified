@@ -1,0 +1,60 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.parent {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    resize: both;
+    overflow: auto;
+    height: 100%;
+}
+
+.parent > div {
+    resize: vertical;
+    overflow: auto;
+    text-align: center;
+}
+
+.parent > div > div {
+    width: 50%;
+    display: block;
+    margin: 0 auto;
+}
+
+#loading-ui .logo {
+    width: 75%;
+}
+
+#loading-ui #progress {
+
+}
+
+#error-log {
+    min-height: 200px;
+    width: 100%;
+}
+
+.status-text {
+    font-size: small;
+    color: gray;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.explanation-text {
+    font-size: small;
+}
+
+webview {
+    height: 0%;
+}
