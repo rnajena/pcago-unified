@@ -8,6 +8,7 @@ PACKRAT_DEPENDENCIES_URL="https://github.com/rumangerst/pcago-unified/releases/d
 CURRENT_DIR=$(pwd)
 
 read -p "Please enter the folder where PCAGO will be installed: " installation_folder
+installation_folder=$(realpath $installation_folder)
 echo "PCAGO will be installed into $installation_folder"
 read -p "Press enter to continue"
 
