@@ -6,7 +6,7 @@
 
 echo ">>>>>>> Checking build dependencies ..."
 
-dependencies=(build-essential)
+dependencies=(build-essential gfortran)
 uninstalled_dependencies=()
 debian_check=$(which apt)
 
