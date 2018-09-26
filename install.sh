@@ -117,6 +117,7 @@ npm start
 EOL
 
 chmod +x $installation_folder/pcago-electron.sh
+chmod +x $installation_folder/pcago-server.sh
 
 
 cp icon.svg $installation_folder
