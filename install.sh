@@ -5,6 +5,7 @@
 # 
 
 PACKRAT_DEPENDENCIES_URL="https://github.com/rumangerst/pcago-unified/releases/download/dependencies/packrat.zip"
+PACKRAT_BINARIES_UBUNTU1804_URL="https://github.com/rumangerst/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip"
 CURRENT_DIR=$(pwd)
 
 read -p "Please enter the folder where PCAGO will be installed: " installation_folder
@@ -25,6 +26,18 @@ if [ "" == "$($installation_folder/R/R --version | grep '3.4.3')" ]; then
 	echo "Something seems to be wrong with the R installation in $installation_folder/R/R"
 	echo "Canceling."
 	exit
+fi
+
+# For later: Use precompiled packrat dependencies
+if [ -e "/etc/lsb-release" ]; then
+  source /etc/lsb-release
+  if [ "$DISTRIB_ID" == "Ubuntu" ] && [ "$DISTRIB_RELEASE" == "18.04" ]; then
+    read -p "You are using Ubuntu 18.04. We offer precompiled R packages. Use the precompiled packages? [Y/N]" -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      PACKRAT_DEPENDENCIES_URL=$PACKRAT_BINARIES_UBUNTU1804_URL
+    fi
+  fi
 fi
 
 # Automated part
