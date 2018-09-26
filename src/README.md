@@ -7,10 +7,6 @@ clustering. The tool also includes features like read count
 normalization, filtering read counts by gene annotation and various
 visualization options.
 
-[PCAGO on GitLab](https://gitlab.com/rumangerst/pcago) | [PCAGO on
-GitHub](https://github.com/rumangerst/pcago-electron) | [PCAGO-Electron
-on GitHub](https://github.com/rumangerst/pcago-electron/)
-
 ## Running
 
 You have following options to run PCAGO:
@@ -24,7 +20,7 @@ You have following options to run PCAGO:
 ### Using the standalone application
 
 Download the PCAGO-Electron
-[here](https://github.com/rumangerst/pcago-electron). This application
+[here](https://github.com/rumangerst/pcago-unified). This application
 wraps a PCAGO-server within an [Electron](https://electronjs.org/)
 application.
 

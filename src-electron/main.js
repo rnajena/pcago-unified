@@ -29,11 +29,11 @@ menu_exit = function(menuItem, currentWindow) {
 };
 
 menu_report_issue = function(menuItem, currentWindow) {
-    require('electron').shell.openExternal("https://github.com/rumangerst/pcago-electron/issues");
+    require('electron').shell.openExternal("https://github.com/rumangerst/pcago-unified/issues");
 };
 
 menu_report_source_code = function(menuItem, currentWindow) {
-    require('electron').shell.openExternal("https://github.com/rumangerst/pcago-electron");
+    require('electron').shell.openExternal("https://github.com/rumangerst/pcago-unified");
 };
 
 menu_show_devtools = function(menuItem, currentWindow) {
