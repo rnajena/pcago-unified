@@ -60,23 +60,23 @@ if [ "" != $(which R) ]; then
 	fi 
 fi
 
-# If Ubuntu 18.04, offer precompiled packages
-if [ -e "/etc/lsb-release" ]; then
-  source /etc/lsb-release
-  if [ "$DISTRIB_ID" == "Ubuntu" ] && [ "$DISTRIB_RELEASE" == "18.04" ]; then
-    read -p "You are using Ubuntu 18.04. We offer a precompiled package of R 3.4.3. Use the precompiled package? [Y/N]" -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      FOLDER=$(pwd)
-      cd $installation_folder
-      wget -nc $r_343_ubuntu1804_bin_url
-      unzip R-3.4.3-Ubuntu-1804.zip
-      ln -s ./R-3.4.3/bin/R R
-      cd $FOLDER
-      exit
-    fi
-  fi
-fi
+# If Ubuntu 18.04, offer precompiled packages (TODO: Does not work due to hardcoded paths)
+# if [ -e "/etc/lsb-release" ]; then
+#   source /etc/lsb-release
+#   if [ "$DISTRIB_ID" == "Ubuntu" ] && [ "$DISTRIB_RELEASE" == "18.04" ]; then
+#     read -p "You are using Ubuntu 18.04. We offer a precompiled package of R 3.4.3. Use the precompiled package? [Y/N]" -n 1 -r
+#     echo    # (optional) move to a new line
+#     if [[ $REPLY =~ ^[Yy]$ ]]; then
+#       FOLDER=$(pwd)
+#       cd $installation_folder
+#       wget -nc $r_343_ubuntu1804_bin_url
+#       unzip R-3.4.3-Ubuntu-1804.zip
+#       ln -s ./R-3.4.3/bin/R R
+#       cd $FOLDER
+#       exit
+#     fi
+#   fi
+# fi
 
 # Try to compile R
 read -p "Do you want to compile R version 3.4.3? [Y/N]" -n 1 -r
