@@ -181,11 +181,16 @@ goTermsFindRootGOIds <- function(goids) {
   roots <- c()
   
   info <- AnnotationDbi::select(GO.db, goids, columns = c("ONTOLOGY"))
+  info <- na.omit(info)
+  
+  # Remove all goids not known to Go.db
+  goids <- goids[which(goids %in% info$GOID)]
   
   # Biological Process (BP)
   goids.bp <- goids[info$ONTOLOGY == "BP"]
   if(length(goids.bp) > 0) {
-    roots <- c(roots, goids.bp[sapply(as.list(GOBPPARENTS[goids.bp]), function(x) "is_a" %in% names(x) && x["is_a"] == "all")])
+    parents <- sapply(as.list(GOBPPARENTS[goids.bp]), function(x) "is_a" %in% names(x) && x["is_a"] == "all")
+    roots <- c(roots, goids.bp[parents])
   }
   
   # Cellular Component (CC)
