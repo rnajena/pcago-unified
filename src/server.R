@@ -18,6 +18,9 @@ library(shinyBS)
 library(shinyjs)
 library(colourpicker)
 library(svglite)
+
+options(shiny.maxRequestSize=30*1024^2)
+
 source("readcounts.R")
 source("geneAnnotation.R")
 source("sampleAnnotation.R")
@@ -47,8 +50,6 @@ source("plotAgglomerativeClusteringPlot.R")
 source("processingReports.R")
 source("classDataSet.R")
 source("plotLoadingsPlot.R")
-
-options(shiny.maxRequestSize=30*1024^2) 
 
 shinyServer(function(input, output, session) {
   
