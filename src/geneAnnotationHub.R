@@ -90,7 +90,7 @@ generateGeneInformation.AnnotationHub <- function(database, species, dataset, im
   genes <- rownames(readcounts)
   
   output <- GeneAnnotation()
-  gr <- annotationHub.hub()[[dataset]]
+  gr <- suppressWarnings(annotationHub.hub()[[dataset]])
   
   if("biotype" %in% imported_data) {
     output <- mergeGeneAnnotation(output, GRanges.extractBiotypeAnnotation(gr, genes))
