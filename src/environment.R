@@ -16,7 +16,7 @@ go.browser.detailed.maxterms <- 50
 readcounts.maxsamples <- 100
 
 # Set to non-null value to disable reading the version from git
-pcago.version <- NULL
+pcago.version <- "1.0.0"
 
 ############
 # End of Config section
