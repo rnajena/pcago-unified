@@ -23,11 +23,6 @@ readCountNormalizationUI <- function(id) {
                      checkboxInput(ns("normalization.tpm.effectivelength"), "Use effective fragment length", value = T),
                      checkboxInput(ns("normalization.tpm.exonlength"), "Use feature exon length", value = T)),
     conditionalPanel(conditionalPanel.equals(ns("normalization"), "'deseq2'"),
-                     selectizeInput(ns("normalization.deseq2.conditions"), 
-                                    helpIconText("Considered conditions", includeText('helptooltips/pca-data-readcounts-normalization-deseq2-conditions.md')), 
-                                    choices = c(),
-                                    multiple = T,
-                                    options = list(plugins = list("remove_button", "drag_drop"))),
                      checkboxInput(ns("normalization.deseq2.rlog"), "rlog transformation", value = F),
                      actionButton(ns("normalization.deseq2.submit"), "Calculate"))
   ))
@@ -59,23 +54,12 @@ readCountNormalizationData_ <- function(input,
     return(sample.annotation()@conditions)
   })
   
-  # Use the conditions to update the DESeq normalization UI
-  observeEvent(conditions(), {
-    
-    validate(need(conditions(), "No sample conditions available!"))
-    
-    updateSelectizeInput(session, 
-                         "normalization.deseq2.conditions",
-                         choices = colnames(conditions()),
-                         selected = colnames(conditions()))
-  })
-  
   # Reset the cache if anything changes
   observeEvent({ readcounts() 
     gene.annotation() 
     sample.annotation() 
     input$normalization
-    input$normalization.deseq2.conditions 
+    conditions() 
     input$normalization.deseq2.rlog}, {
       stored.values$readcounts.normalized.cache <- NULL
     })
@@ -120,7 +104,7 @@ readCountNormalizationData_ <- function(input,
       showNotification("No read counts to process!", type = "error", duration = NULL)
       return()
     }
-    if(length(input$normalization.deseq2.conditions) == 0) {
+    if(length(conditions()) == 0) {
       showNotification("No conditions selected!", type = "error", duration = NULL)
       return()
     }
@@ -140,7 +124,7 @@ readCountNormalizationData_ <- function(input,
           return(applyReadcountNormalization.DESeq2(readcounts = readcounts(),
                                                     transform = transform,
                                                     sample.annotation = sample.annotation(),
-                                                    selected.conditions = input$normalization.deseq2.conditions))
+                                                    selected.conditions = colnames(conditions())))
           },
         error = function(e){
           showNotification(paste(e), type = "error", duration = NULL)
