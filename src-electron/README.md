@@ -1,14 +1,12 @@
 PCAGO-Electron
 ================
 
-Runs [PCAGO](https://gitlab.com/rumangerst/pcago) as standalone desktop application
+Runs [PCAGO](https://github.com/rumangerst/pcago-unified) as standalone desktop application
 using the [Electron](https://electronjs.org/) framework.
-
-[PCAGO on GitLab](https://gitlab.com/rumangerst/pcago) | [PCAGO on GitHub](https://github.com/rumangerst/pcago-electron) | [PCAGO-Electron on GitHub](https://github.com/rumangerst/pcago-electron/)
 
 ## Download
 
-You can find prepackaged versions of PCAGO-Electron [here](https://github.com/rumangerst/pcago-electron/releases).
+You can find prepackaged versions of PCAGO-Electron [here](https://github.com/rumangerst/pcago-unified/releases).
 
 Following versions are available:
 
@@ -24,11 +22,11 @@ same operating system.
 ## Requirements
 
 * libgconf2 (Debian/Ubuntu: libgconf2-4)
-* Dependencies that are required by [PCAGO](https://gitlab.com/rumangerst/pcago)
+* Dependencies that are required by [PCAGO](https://github.com/rumangerst/pcago-unified/blob/master/src/README.md)
 
 ## Running
 
-We provide prepacked versions of PCAGO-Electron that you can download [here](https://github.com/rumangerst/pcago-electron/releases).
+We provide prepacked versions of PCAGO-Electron that you can download [here](https://github.com/rumangerst/pcago-unified/releases).
 Download the appropriate version and run the included starter or just `electron.exe` (Windows)
 / `./electron` (Linux).
 
@@ -37,13 +35,7 @@ Download the appropriate version and run the included starter or just `electron.
 PCAGO-Electron requires PCAGO that has to be placed into the `pcago` folder.
 If you are cloning the repository, you can run:
 ```
-git clone --recursive https://github.com/rumangerst/pcago-electron.git
-```
-
-If you already cloned the PCAGO-Electron repository, you can let git automatically
-download all submodules:
-```
-git submodule update --init --recursive
+git clone --recursive https://github.com/rumangerst/pcago-unified.git
 ```
 
 ## Running from source
