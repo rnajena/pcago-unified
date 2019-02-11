@@ -25,6 +25,7 @@ uiHelpPage <- function() {
   return(navlistPanel(
     uiHelpPageEntry("About", "helppages/about.md"),
     uiHelpPageEntry("Overview", "helppages/overview.md"),
+    uiHelpPageEntry("Step by step example", "helppages/stepbystep.md"),
     "Importing ",
     uiHelpPageEntry("Read counts", "helppages/import-readcounts.md"),
     uiHelpPageEntry("Sample annotation", "helppages/import-samples-annotation.md"),
