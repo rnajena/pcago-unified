@@ -279,6 +279,20 @@ serverQuickIO <- function(input, output, session, xautovars, dataset.preprocesse
     }
   })
   
+  output$quickio.download.examples.yes <- downloadHandler("example_data.zip", contentType = "application/zip", content = function(file) {
+      file.copy("www/example_data.zip", file)
+  });
+  
+  observeEvent(input$quickio.download.examples, {
+    showModal(modalDialog(
+      "Your download is ready",
+      footer = tagList(
+        modalButton("Cancel"),
+        downloadButton("quickio.download.examples.yes", "Download")
+      )
+    ))
+  })
+  
   observeEvent(input$quickio.load.yes, {
     removeModal()
     serverQuickLoad(xautovars, dataset.preprocessed, dataset.pca)

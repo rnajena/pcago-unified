@@ -36,6 +36,7 @@ uiPCAPage <- function() {
     ),
     hDivider(),
     tags$p(actionLink("quickio.load", "Load example data", icon = icon("folder-open"))),
+    tags$p(actionLink("quickio.download.examples", iconText(icon("download"), "Download example data"))),
     tags$p(actionLink("quickio.save", iconText(icon("download"), "Download all data")))
     ),
     mainPanel(tags$div(class = "pca-page", navbarPage(title = "",
