@@ -34,9 +34,9 @@ The feature length / exon length is provided by the gene annotation, while the
 mean fragment length is provided by the sample annotation. See the respective help pages `Data > Gene annotation` and
 `Data > Sample annotation` help page for more information.
 
-We use the following formula to calculate the TPM value for one feature (gene) ``i``: 
+We use the following formula to calculate the TPM value for one feature (gene) i: 
 
-![Srry, the formula can not be shown in your browser, please check the paper!](tpm.png)
+![Srry, the formula can not be shown in your browser, please check the paper!](tpm.png =100x)
 
 where c<sub>i</sub> is the raw read count of gene i, l<sub>i</sub> is the effective length of
 gene i and N is the number of all genes in the given annotation. The effective length of a gene i is calculated as: 
