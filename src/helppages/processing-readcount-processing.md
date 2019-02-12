@@ -36,7 +36,7 @@ mean fragment length is provided by the sample annotation. See the respective he
 
 We use the following formula to calculate the TPM value for one feature (gene) i: 
 
-<img src="tpm.png" alt="Srry, the formula can not be shown in your browser, please check the paper!" width="100px">
+<img src="tpm.png" alt="Srry, the formula can not be shown in your browser, please check the paper!" width="300px">
 
 where c<sub>i</sub> is the raw read count of gene i, l<sub>i</sub> is the effective length of
 gene i and N is the number of all genes in the given annotation. The effective length of a gene i is calculated as: 
