@@ -34,6 +34,17 @@ The feature length / exon length is provided by the gene annotation, while the
 mean fragment length is provided by the sample annotation. See the respective help pages `Data > Gene annotation` and
 `Data > Sample annotation` help page for more information.
 
+We use the following TPM formula: 
+
+````
+TPM = 
+````
+
+This equation was initially defined by <a href="https://www.ncbi.nlm.nih.gov/pubmed/20022975">Li _et al_., 2010</a> and 
+exemplarily applied in the publications of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5240108/pdf/srep40599.pdf">Klassert _et al_., 2017</a> 
+and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5240112/pdf/srep40598.pdf">Riege _et al_., 2017</a> 
+from which one of our example data sets (``Monocytes``) is derived.
+
 <div class="well help-box">
 <label>Info</label>  We chose to not include normalization via RPKM/FPKM. See <a href="http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/" target="\_blank">here</a> and <a href="http://blog.nextgenetics.net/?e=51" target="\_blank">here</a> for great articles that give a summary about read count normalization and the issues with RPKM/FPKM.
 </div>
