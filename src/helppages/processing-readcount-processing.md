@@ -34,6 +34,25 @@ The feature length / exon length is provided by the gene annotation, while the
 mean fragment length is provided by the sample annotation. See the respective help pages `Data > Gene annotation` and
 `Data > Sample annotation` help page for more information.
 
+We use the following formula to calculate the TPM value for one feature (gene) i: 
+
+<img src="tpm.png" alt="Srry, the formula can not be shown in your browser, please check the paper!" width="300px">
+
+where c<sub>i</sub> is the raw read count of gene i, l<sub>i</sub> is the effective length of
+gene i and N is the number of all genes in the given annotation. The effective length of a gene i is calculated as: 
+
+````
+feature_length - mean_fragment_length + 1
+````
+
+if a mean fragment length is provided within the sample annotation, otherwise the effective length is simply the length of the feature obtained from 
+the gene annotation.
+
+This TPM equation was initially defined by <a href="https://www.ncbi.nlm.nih.gov/pubmed/20022975">Li _et al_., 2010</a> and 
+exemplarily applied in the publications of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5240108/pdf/srep40599.pdf">Klassert _et al_., 2017</a> 
+and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5240112/pdf/srep40598.pdf">Riege _et al_., 2017</a> 
+from which one of our example data sets (``Monocytes``) is derived.
+
 <div class="well help-box">
 <label>Info</label>  We chose to not include normalization via RPKM/FPKM. See <a href="http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/" target="\_blank">here</a> and <a href="http://blog.nextgenetics.net/?e=51" target="\_blank">here</a> for great articles that give a summary about read count normalization and the issues with RPKM/FPKM.
 </div>
