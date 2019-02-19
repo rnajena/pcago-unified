@@ -195,7 +195,7 @@ shinyServer(function(input, output, session) {
   animation.top.variant <- extendedSliderInputValue("pca.genes.count", 
                                              value.min = reactive({ 1 }),
                                              value.max = reactive({ nrow(readcounts.filtered()) }),
-                                             value.default = reactive({ nrow(readcounts.filtered()) }))
+                                             value.default = reactive({ min(500, nrow(readcounts.filtered())) }))
   
   dataset.top.variant <- serverFilterReadCountsByVariance(dataset.variances, animation.top.variant = animation.top.variant, input = input)
   readcounts.top.variant <- reactive({
