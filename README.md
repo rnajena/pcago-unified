@@ -20,13 +20,13 @@ Big thanks go out to Lasse Faber!
 
 ### Local machine
 ```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:latest ./run_packrat.sh
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:1.0--8c5dd42 ./run_packrat.sh
 ```
 
 ### Server
 Run the docker container in the same way.
 ```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:latest ./run_packrat.sh
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:1.0--8c5dd42 ./run_packrat.sh
 ```
 Connect to the server with port forwarding.
 ```
