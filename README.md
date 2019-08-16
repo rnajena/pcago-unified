@@ -16,6 +16,8 @@ If you want to run PCAGO in RStudio or plain R, you find instructions
 
 ## Run via Docker
 
+Big thanks go out to Lasse Faber!
+
 ### Local machine
 ```
 docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it pcago:latest ./run_packrat.sh
