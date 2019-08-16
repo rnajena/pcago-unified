@@ -11,11 +11,33 @@ visualization options.
 
 You have following options to run PCAGO:
 
-  - Use our servers ([PCAGO Stable](http://pcago.bioinf.uni-jena.de/) or
+  - Use our servers ([PCAGO Stable](https://pcago.bioinf.uni-jena.de/) or
     [PCAGO Development
     Version](http://pcago.bioinf.uni-jena.de/unstable))
   - Use a standalone desktop application
   - Run the PCAGO server on one of your servers or your local computer
+  - Use our Docker Image (__recommended__)
+
+### Run via Docker
+
+Big thanks go out to Lasse Faber!
+
+#### Local machine
+```
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it pcago:latest ./run_packrat.sh
+```
+
+#### Server
+Run the docker container in the same way.
+```
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it pcago:latest ./run_packrat.sh
+```
+Connect to the server with port forwarding.
+```
+ssh -L 8000:127.0.0.1:8000 your@your.server.com
+```
+
+In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
 
 ### Using the standalone application
 
