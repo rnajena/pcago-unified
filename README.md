@@ -12,7 +12,7 @@ You can use our server on https://pcago.bioinf.uni-jena.de or run
 PCAGO on your Linux computer via a server or as standalone application.
 
 If you want to run PCAGO in RStudio or plain R, you find instructions
-[here](https://github.com/rumangerst/pcago-unified/blob/master/src/README.md).
+[here](https://github.com/hoelzer-lab/pcago-unified/blob/master/src/README.md).
 
 ## Run via Docker
 
@@ -20,13 +20,13 @@ Big thanks go out to Lasse Faber!
 
 ### Local machine
 ```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it pcago:latest ./run_packrat.sh
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:latest ./run_packrat.sh
 ```
 
 ### Server
 Run the docker container in the same way.
 ```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it pcago:latest ./run_packrat.sh
+docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:latest ./run_packrat.sh
 ```
 Connect to the server with port forwarding.
 ```
