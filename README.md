@@ -35,6 +35,8 @@ ssh -L 8000:127.0.0.1:8000 your@your.server.com
 
 In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
 
+__Attention__: currently the Docker image seems not to work under Mac. 
+
 # Installation
 
 We offer an installation script designed for Ubuntu 18.04 that builds the
