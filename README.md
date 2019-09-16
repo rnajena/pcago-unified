@@ -20,23 +20,16 @@ Big thanks go out to Lasse Faber!
 
 ### Local machine
 ```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:1.0--8c5dd42 ./run_packrat.sh
+docker run -p 8000:8000 --user $(id -u):$(id -g) --rm -it mhoelzer/pcago:1.0--c1e506c ./run_packrat.sh
 ```
 
 ### Server
-Run the docker container in the same way.
-```
-docker run --rm --network="host" -expose=8000 --user $(id -u):$(id -g) -it mhoelzer/pcago:1.0--8c5dd42 ./run_packrat.sh
-```
-Connect to the server with port forwarding.
+Run the docker container in the same way like above and additionally connect to the server with port forwarding.
 ```
 ssh -L 8000:127.0.0.1:8000 your@your.server.com
 ```
 
-In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
-
-__Attention__: currently the Docker image is only working under Linux. We are working on a version for Windows and Mac.  
- 
+In both cases you will then be able to access the PCAGO-Server via the following address in your browser: [127.0.0.1:8000](http://127.0.0.1:8000/).
 
 # Installation
 
