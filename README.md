@@ -29,7 +29,7 @@ Run the docker container in the same way like above and additionally connect to 
 ssh -L 8000:127.0.0.1:8000 your@your.server.com
 ```
 
-In both cases you will then be able to access the PCAGO-Server via the following address in your browser: [127.0.0.1:8000](http://127.0.0.1:8000/).
+In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
 
 # Installation
 
