@@ -16,7 +16,7 @@
   "author": "Ruman Gerst",
   "license": "GPL-3.0-only",
   "devDependencies": {
-    "electron": "^2.0.9"
+    "electron": "^9.1.0"
   },
   "dependencies": {
     "bootstrap": "^4.1.3",
