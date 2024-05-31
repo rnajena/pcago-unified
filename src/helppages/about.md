@@ -24,5 +24,6 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 
 ## Additional info
 
-The source code of PCAGO is available on [GitHub](https://github.com/rumangerst/pcago-unified).
-If you want to use PCAGO as desktop application, you can use [PCAGO-Electron](https://github.com/rumangerst/pcago-unified).
+The source code of PCAGO is available at [GitHub](https://github.com/hoelzer-lab/pcago).
+If you want to use PCAGO as desktop application, you can use [PCAGO-Electron](https://github.com/hoelzer-lab/pcago) or execute a Docker 
+container (recommended). See [GitHub](https://github.com/hoelzer-lab/pcago) for further instructions.  
