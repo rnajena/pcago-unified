@@ -1,12 +1,12 @@
 PCAGO-Electron
 ================
 
-Runs [PCAGO](https://github.com/rumangerst/pcago-unified) as standalone desktop application
+Runs [PCAGO](https://github.com/rnajena/pcago-unified) as standalone desktop application
 using the [Electron](https://electronjs.org/) framework.
 
 ## Download
 
-You can find prepackaged versions of PCAGO-Electron [here](https://github.com/rumangerst/pcago-unified/releases).
+You can find prepackaged versions of PCAGO-Electron [here](https://github.com/rnajena/pcago-unified/releases).
 
 Following versions are available:
 
@@ -14,19 +14,19 @@ Following versions are available:
 * Standard: Contains Electron and ffmpeg
 * Ubuntu: Contains Electron, ffmpeg and compiled dependencies for Ubuntu 16.04 LTS (with R 3.4.3)
 
-If a version does *not* contain compiled dependencies, PCAGO-Electron will automatically compile 
+If a version does *not* contain compiled dependencies, PCAGO-Electron will automatically compile
 the dependencies on first start. Please check if all required packages are installed.
-Compilation will take a couple of minutes. The compiled dependencies can be re-used on other computers with the 
+Compilation will take a couple of minutes. The compiled dependencies can be re-used on other computers with the
 same operating system.
 
 ## Requirements
 
 * libgconf2 (Debian/Ubuntu: libgconf2-4)
-* Dependencies that are required by [PCAGO](https://github.com/rumangerst/pcago-unified/blob/master/src/README.md)
+* Dependencies that are required by [PCAGO](https://github.com/rnajena/pcago-unified/blob/master/src/README.md)
 
 ## Running
 
-We provide prepacked versions of PCAGO-Electron that you can download [here](https://github.com/rumangerst/pcago-unified/releases).
+We provide prepacked versions of PCAGO-Electron that you can download [here](https://github.com/rnajena/pcago-unified/releases).
 Download the appropriate version and run the included starter or just `electron.exe` (Windows)
 / `./electron` (Linux).
 
@@ -35,7 +35,7 @@ Download the appropriate version and run the included starter or just `electron.
 PCAGO-Electron requires PCAGO that has to be placed into the `pcago` folder.
 If you are cloning the repository, you can run:
 ```
-git clone --recursive https://github.com/rumangerst/pcago-unified.git
+git clone --recursive https://github.com/rnajena/pcago-unified.git
 ```
 
 ## Running from source
@@ -56,8 +56,8 @@ more information.
 
 PCAGO-Electron uses and distributes [Electron](https://electronjs.org/) (Licensed under [MIT](https://github.com/electron/electron/blob/master/LICENSE))
 and various dependency libraries located in `node_modules`. See the `license` file located each of the subfolders
-for license information. 
-PCAGO-Electron distributes [static ffmpeg builds](https://www.johnvansickle.com/ffmpeg/) licensed under 
+for license information.
+PCAGO-Electron distributes [static ffmpeg builds](https://www.johnvansickle.com/ffmpeg/) licensed under
 [GPL-v3](http://www.gnu.org/licenses/gpl-3.0.en.html) and [ffmpeg for Windows](http://ffmpeg.zeranoe.com/builds/)
 licensed under [GPL](http://www.gnu.org/licenses/).
 Also included are sources of dependencies required by R that are located in `resources/app/pcago/packrat/src`.

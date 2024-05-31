@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/rumangerst/pcago-unified",
+  "repository": "https://github.com/rnajena/pcago-unified",
   "keywords": [
     "Electron",
     "PCAGO",

@@ -2,10 +2,10 @@
 
 #
 # Installs PCAGO and PCAGO-electron into some folder
-# 
+#
 
-PACKRAT_DEPENDENCIES_URL="https://github.com/rumangerst/pcago-unified/releases/download/dependencies/packrat.zip"
-PACKRAT_BINARIES_UBUNTU1804_URL="https://github.com/rumangerst/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip"
+PACKRAT_DEPENDENCIES_URL="https://github.com/rnajena/pcago-unified/releases/download/dependencies/packrat.zip"
+PACKRAT_BINARIES_UBUNTU1804_URL="https://github.com/rnajena/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip"
 CURRENT_DIR=$(pwd)
 
 read -p "Please enter the folder where PCAGO will be installed: " installation_folder
@@ -95,7 +95,7 @@ cd $CURRENT_DIR
 cat > $installation_folder/pcago-server.sh <<EOL
 #!/bin/bash
 
-# 
+#
 # Runs a PCAGO server in terminal
 #
 
@@ -107,7 +107,7 @@ EOL
 cat > $installation_folder/pcago-electron.sh <<EOL
 #!/bin/bash
 
-# 
+#
 # Runs a PCAGO electron application
 #
 

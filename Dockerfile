@@ -23,10 +23,10 @@ RUN apt-get install -y npm build-essential
 
 WORKDIR /home
 
-RUN git clone https://github.com/hoelzer-lab/pcago.git
+RUN git clone https://github.com/rnajena/pcago-unified.git
 
 WORKDIR /home/pcago
-RUN wget --quiet https://github.com/rumangerst/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip -O packrat.zip
+RUN wget --quiet https://github.com/rnajena/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip -O packrat.zip
 RUN unzip -o -qq packrat.zip -d /home/pcago/src/packrat && rm packrat.zip
 
 RUN mv /home/pcago/src/packrat/lib/x86_64-pc-linux-gnu/3.4.3 /home/pcago/src/packrat/lib/x86_64-pc-linux-gnu/3.4.4

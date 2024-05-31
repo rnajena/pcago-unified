@@ -39,7 +39,7 @@ In both cases you will then be able to access the PCAGO-Server via the following
 ### Using the standalone application
 
 Download the PCAGO-Electron
-[here](https://github.com/rumangerst/pcago-unified). This application
+[here](https://github.com/rnajena/pcago-unified). This application
 wraps a PCAGO-server within an [Electron](https://electronjs.org/)
 application.
 
@@ -90,7 +90,7 @@ development of the application. This prevents breakage introduced by
 newer library versions. To use packrat, follow these steps:
 
 1.  Download the [package
-    sources](https://github.com/rumangerst/pcago/releases)
+    sources](https://github.com/rnajena/pcago/releases)
 2.  Unpack them into the `packrat` directory within the PCAGO project
     folder
 3.  Start R within the project directory
@@ -121,7 +121,7 @@ functionality. Following command installs all dependencies:
 
     # CRAN packages
     install.packages(c("svglite", "scales", "fastcluster", "gplots", "amap", "dendextend", "VennDiagram", "futile.logger", "plot3D", "scatterplot3d", "ggplot2", "RColorBrewer", "openxlsx", "Cairo", "reshape2", "R6", "matrixStats", "colourpicker", "shinyjs", "shinyBS", "DT", "htmltools", "markdown", "shiny"))
-    
+
     # BioConductor packages. Install them from source, so known bugs with newer R versions can be avoided.
     source("https://bioconductor.org/biocLite.R")
     biocLite(c("ctc", "GO.db", "GenomicFeatures", "AnnotationDbi", "AnnotationHub", "biomaRt", "rtracklayer", "DESeq2", "SummarizedExperiment", "DelayedArray", "Biobase", "GenomicRanges", "GenomeInfoDb", "IRanges", "S4Vectors", "BiocGenerics"), type = "source")

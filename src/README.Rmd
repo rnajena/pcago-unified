@@ -8,10 +8,10 @@ knitr::opts_chunk$set(echo = F)
 ```
 
 PCAGO is an interactive web service that allows analysis of RNA-Seq read count data with principal component analysis (PCA)
-and agglomerative clustering. The tool also includes features like read count normalization, filtering read counts by 
+and agglomerative clustering. The tool also includes features like read count normalization, filtering read counts by
 gene annotation and various visualization options.
 
-[PCAGO on GitLab](https://gitlab.com/rumangerst/pcago) | [PCAGO on GitHub](https://github.com/rumangerst/pcago-electron) | [PCAGO-Electron on GitHub](https://github.com/rumangerst/pcago-electron/)
+[PCAGO on GitHub](https://github.com/rnajena/pcago) | [PCAGO-Electron on GitHub](https://github.com/rnajena/pcago-electron/)
 
 ## Running
 
@@ -23,7 +23,7 @@ You have following options to run PCAGO:
 
 ### Using the standalone application
 
-Download the PCAGO-Electron [here](https://github.com/rumangerst/pcago-electron). This application wraps a
+Download the PCAGO-Electron [here](https://github.com/rnajena/pcago-electron). This application wraps a
 PCAGO-server within an [Electron](https://electronjs.org/) application.
 
 ### Running manually
@@ -63,7 +63,7 @@ Following packages are required to install PCAGO if the required libraries have 
 * xfonts base package (Debian/Ubuntu: `xfonts-base`)
 * libxt dev package (Debian/Ubuntu: `libxt-dev`)
 
-PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the 
+PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the
 package management system packrat.
 
 ### Using packrat
@@ -72,7 +72,7 @@ package management system packrat.
 of the libraries used for development of the application. This prevents breakage introduced by newer library versions.
 To use packrat, follow these steps:
 
-1. Download the [package sources](https://github.com/rumangerst/pcago/releases)
+1. Download the [package sources](https://github.com/rnajena/pcago/releases)
 2. Unpack them into the `packrat` directory within the PCAGO project folder
 3. Start R within the project directory
 4. Run `source('packrat/init.R')`
