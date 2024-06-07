@@ -31,6 +31,17 @@ ssh -L 8000:127.0.0.1:8000 your@your.server.com
 
 In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
 
+### Server 2.0
+
+We have created a new docker container with the PCAGO app and a running shiny server.
+Run the docker container with e.g.
+
+```
+docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/pcago/logs trichterhub/pcago-server:1.0
+```
+
+This is the Docker container that powers our server at https://pcago.bioinf.uni-jena.de.
+
 # Installation
 
 We offer an installation script designed for Ubuntu 18.04 that builds the
