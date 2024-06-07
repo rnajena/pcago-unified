@@ -1,0 +1,100 @@
+# docker build -t pcago-server:1.0 -f ./Dockerfile_server .
+
+FROM ubuntu:18.04
+
+# Avoid interaction when installing npm
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+	unzip \
+	r-base \
+	wget \
+	ffmpeg \
+	libcurl4-gnutls-dev \
+	libxml2-dev \
+	libssl-dev \
+	libmysqlclient-dev \
+	libcairo2-dev \
+	libgtk2.0-dev \
+	xvfb \
+	xauth \
+	xfonts-base \
+	libxt-dev \
+	libgconf2-4 \
+    git
+RUN apt-get install -y npm build-essential
+
+### from https://github.com/rocker-org/shiny/tree/3.4.3
+RUN apt-get install -y \
+    sudo \
+    gdebi-core \
+    pandoc \
+    pandoc-citeproc \
+    libcurl4-gnutls-dev \
+    libcairo2-dev \
+    libxt-dev \
+    xtail \
+    wget
+
+# Download and install shiny server
+RUN wget --no-verbose https://download3.rstudio.org/ubuntu-18.04/x86_64/VERSION -O "version.txt" && \
+    VERSION=$(cat version.txt)  && \
+    wget --no-verbose "https://download3.rstudio.org/ubuntu-18.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
+    gdebi -n ss-latest.deb && \
+    rm -f version.txt ss-latest.deb && \
+    . /etc/environment
+    #&& \
+    #R -e "install.packages(c('shiny', 'rmarkdown'), repos='$MRAN')" && \
+    #cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/
+
+EXPOSE 8000
+
+RUN wget https://raw.githubusercontent.com/rocker-org/shiny/3.4.3/shiny-server.sh -O shiny-server.sh
+RUN chmod +x shiny-server.sh
+RUN mv -f shiny-server.sh /usr/bin/shiny-server.sh
+###
+
+RUN git clone https://github.com/rnajena/pcago-unified.git /home/pcago
+
+WORKDIR /home/pcago
+
+RUN wget --quiet https://github.com/rnajena/pcago-unified/releases/download/ubuntu-18.04/packrat-Ubuntu-1804.zip -O packrat.zip
+RUN unzip -o -qq packrat.zip -d /home/pcago/src/packrat && rm packrat.zip
+RUN mv /home/pcago/src/packrat/lib/x86_64-pc-linux-gnu/3.4.3 /home/pcago/src/packrat/lib/x86_64-pc-linux-gnu/3.4.4
+# Alternatively we can use a local copy, because the mv command takes long
+#COPY packrat-Ubuntu-1804-R-3.4.4.zip ./
+#RUN unzip -o -qq packrat-Ubuntu-1804-R-3.4.4.zip -d /home/pcago/src/packrat && rm packrat-Ubuntu-1804-R-3.4.4.zip
+
+RUN mkdir -p /home/pcago/src/packrat/lib-R && mkdir -p /home/pcago/src/packrat/lib-ext
+
+#WORKDIR /home/pcago/src
+#COPY shiny-server.conf /etc/shiny-server/
+
+RUN useradd -s /bin/bash pcago
+CMD ["/usr/bin/shiny-server.sh"]
+
+RUN echo "source('packrat/init.R')" > .Rprofile
+RUN cat >/etc/shiny-server/shiny-server.conf <<EOF
+# Instruct Shiny Server to run applications as the user "pcago"
+run_as pcago;
+
+# Magical config settings to prevent bugs with Apache reverse proxy
+disable_protocols websocket xdr-streaming xhr-streaming iframe-eventsource iframe-htmlfile;
+
+# Prevent insanely low disconnect time
+http_keepalive_timeout 1800;
+
+server {
+  run_as pcago;
+  listen 8000;
+  app_init_timeout 1800;
+  app_idle_timeout 1800;
+
+  # Define a location at the base URL
+  location / {
+    app_dir /home/pcago/src;
+    log_dir /home/pcago/logs;
+  }
+}
+EOF
+
+
