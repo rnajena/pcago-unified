@@ -37,10 +37,13 @@ We have created a new docker container with the PCAGO app and a running shiny se
 Run the docker container with e.g.
 
 ```
-docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/pcago/logs trichterhub/pcago-server:1.0
+docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:1.1
 ```
 
 This is the Docker container that powers our server at https://pcago.bioinf.uni-jena.de.
+Processes inside docker are started by the shiny user, id 999. User id 999 should have access to the
+logs directory on the host machine.
+Alternatively, you may start docker with the root user with the ``--user`` flag.
 
 # Installation
 
