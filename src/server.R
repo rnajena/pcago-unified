@@ -53,6 +53,9 @@ source("plotLoadingsPlot.R")
 
 shinyServer(function(input, output, session) {
   
+  # Keep validation errors intact when passed through the app's S4 generics (see global.R)
+  pcago.wrap.app.generics()
+  
   # xautovars used for automatic i/o
   xautovars <- reactiveValues(import.readcounts.raw = NULL,
                               import.sample.annotation = NULL,

@@ -95,7 +95,7 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   
   # Guarding (against reaction loops)
   observeEvent(input$play, {
-    if(input$play) {
+    if(isTRUE(input$play)) {
       shinyjs::disable("count")
       shinyjs::disable("exact.value")
     }
@@ -153,7 +153,7 @@ extendedSliderInputValue_ <- function(input, output, session, value.min, value.m
   #' changing the animation parameters without renderUI; which is slow and fragile due to missing inputs
   observe({
     
-    if(input$play) {
+    if(isTRUE(input$play)) {
       # Separate the actual animation from the environment
       isolate({
         
