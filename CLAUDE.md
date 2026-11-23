@@ -47,6 +47,7 @@ requires a secure, supported stack (Ubuntu ≥ 24.04 LTS). License: GPL-3.
 | `docker/shiny-server.conf` | Shiny Server config used by the image (port 8000, timeouts, proxy settings) |
 | `.dockerignore` | Keeps `.git`, docs etc. out of the build context |
 | `docker/smoketest.R` | Pipeline smoke test run against the image (sample data, 16 steps) |
+| `docker/browsertest.mjs` | Headless-Chrome UI test (Node ≥ 22 + Chrome, no npm deps): "Load example data", visit all tabs |
 | `CLAUDE.md`, `NEXT.md`, `docs/sessions/` | Claude Code onboarding / state / history |
 
 Inside `src/`:
@@ -99,22 +100,34 @@ Inside `src/`:
 ## Common commands
 
 ```bash
-# Build the server image (repo root, amd64 emulation on Apple Silicon)
-docker build --platform linux/amd64 --build-arg PCAGO_VERSION=$(git describe --always --dirty) \
-  -t trichterhub/pcago-server:2.0-dev -f Dockerfile_server .
-# Run it
-docker run --rm -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:2.0-dev
+# Build the server image (repo root, amd64 emulation on Apple Silicon; ~12 min first time, cached afterwards)
+docker build --platform linux/amd64 --build-arg PCAGO_VERSION=2.0-$(git rev-parse --short HEAD) \
+  -t trichterhub/pcago-server:2.0 -t trichterhub/pcago-server:latest -f Dockerfile_server .
+# Run it (container name used by the tests below)
+docker run -d --name pcago-test --platform linux/amd64 -p 8000:8000 trichterhub/pcago-server:2.0
+# Fast iteration on app code: mount src/ instead of rebuilding (restart container after R changes)
+docker run -d --name pcago-test --platform linux/amd64 -p 8000:8000 -v "$(pwd)/src":/srv/pcago:ro trichterhub/pcago-server:2.0
 # R console inside the image
-docker run --rm -it --platform linux/amd64 --entrypoint R trichterhub/pcago-server:2.0-dev
+docker run --rm -it --platform linux/amd64 --entrypoint R trichterhub/pcago-server:2.0
 # Pipeline smoke test (R functions) and headless-Chrome UI test (needs Node >= 22 + Chrome)
 docker run --rm --platform linux/amd64 -v "$(pwd)"/docker/smoketest.R:/tmp/smoketest.R:ro \
-  --entrypoint Rscript trichterhub/pcago-server:2.0-dev /tmp/smoketest.R
+  --entrypoint Rscript trichterhub/pcago-server:2.0 /tmp/smoketest.R
 node docker/browsertest.mjs http://127.0.0.1:8000
-# Fast iteration on app code: mount src/ instead of rebuilding
-docker run -d --name pcago-test --platform linux/amd64 -p 8000:8000 -v "$(pwd)/src":/srv/pcago:ro trichterhub/pcago-server:2.0-dev
+# Server/app errors (Shiny Server log goes to stderr)
+docker logs pcago-test 2>&1 | grep "Warning: Error"
 # Issues
 gh issue view 9 --repo rnajena/pcago-unified   # Docker modernization (moved from rnajena/pcago#10)
 ```
+
+### Release process
+
+1. Clean working tree on the commit to release (`git status`), so the version string is meaningful.
+2. Build with tags `X.Y` and `latest` and `PCAGO_VERSION=X.Y-<short sha>` (see above).
+3. Run `docker/smoketest.R` and `docker/browsertest.mjs` against the **built image** (no mounted `src/`),
+   check `docker logs` for `Warning: Error` and the health status.
+4. `docker push trichterhub/pcago-server:X.Y` and `:latest` — requires `docker login` with an account
+   that has push rights to `trichterhub` (Martin's Docker Desktop login did not, 2026-11-23).
+5. KSZ deploys a pinned tag (`X.Y`, not `latest`).
 
 ### Updating R dependencies
 
@@ -147,6 +160,8 @@ today's date is usually not published yet). Keep the `renv` install URL in `Dock
   `src/global.R` wraps those generics so arguments are forced first (base-name generics at load time,
   app generics via `pcago.wrap.app.generics()` at session start in `server.R`). New S4 generics that
   shadow base functions must be added to `pcago.generics.forced`.
+- The main user flow is the **"Load example data"** link (`quickio.load`, `serverQuickLoad()` in
+  `serverFunctions.R`), which imports read counts and then sample annotation with explicit parameters.
 - Observers must not fail on `NULL` inputs (an error in an observer closes the session) — use `isTRUE()` etc.
 - BioMart / AnnotationHub need network access at runtime.
 
