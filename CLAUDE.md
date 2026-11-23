@@ -45,8 +45,7 @@ requires a secure, supported stack (Ubuntu ≥ 24.04 LTS). License: GPL-3.
 | `src/renv.lock` | **Pinned R dependencies** (R 4.6.2, Bioconductor 3.23, CRAN snapshot from Posit Package Manager) |
 | `Dockerfile_server` | **Production server image** (`trichterhub/pcago-server`), rocker/shiny + Shiny Server |
 | `docker/shiny-server.conf` | Shiny Server config used by the image (port 8000, timeouts, proxy settings) |
-| `.dockerignore` | Keeps `.git`, `src-electron`, docs etc. out of the build context |
-| `src-electron/` | Electron desktop wrapper (Node.js; starts R via `src/pcago.R`). **Unsupported**: still references the removed packrat setup |
+| `.dockerignore` | Keeps `.git`, docs etc. out of the build context |
 | `docker/smoketest.R` | Pipeline smoke test run against the image (sample data, 16 steps) |
 | `CLAUDE.md`, `NEXT.md`, `docs/sessions/` | Claude Code onboarding / state / history |
 
@@ -55,7 +54,7 @@ Inside `src/`:
 | Path | Purpose |
 |---|---|
 | `ui.R`, `server.R` | Shiny entry points |
-| `pcago.R` | Starts the app on `$SHINY_PORT` (Electron) |
+| `global.R` | Loaded by Shiny first: wrappers that keep validation errors intact through S4 generics (see below) |
 | `environment.R` | Config: ffmpeg/git paths, parallel importer, limits, version (`PCAGO_VERSION` env var) |
 | `defaultParameters.R` | Default UI parameter values |
 | `widget*.R` / `plot*.R` | Shiny modules (widgets / plots) |
@@ -85,7 +84,7 @@ Inside `src/`:
   Bioconductor: DESeq2, AnnotationHub, AnnotationDbi, biomaRt, GenomicRanges, GenomicFeatures,
   txdbmaker, rtracklayer, GO.db, SummarizedExperiment.
 - System tools: ffmpeg (movies). Git is not in the image; version comes from `PCAGO_VERSION`.
-- Electron desktop app: `src-electron/` (Node.js, out of scope for issue #10).
+- The Electron desktop app was removed (no longer supported); Docker is the way to run PCAGO locally.
 
 ## Coding conventions and style
 
@@ -107,6 +106,12 @@ docker build --platform linux/amd64 --build-arg PCAGO_VERSION=$(git describe --a
 docker run --rm -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:2.0-dev
 # R console inside the image
 docker run --rm -it --platform linux/amd64 --entrypoint R trichterhub/pcago-server:2.0-dev
+# Pipeline smoke test (R functions) and headless-Chrome UI test (needs Node >= 22 + Chrome)
+docker run --rm --platform linux/amd64 -v "$(pwd)"/docker/smoketest.R:/tmp/smoketest.R:ro \
+  --entrypoint Rscript trichterhub/pcago-server:2.0-dev /tmp/smoketest.R
+node docker/browsertest.mjs http://127.0.0.1:8000
+# Fast iteration on app code: mount src/ instead of rebuilding
+docker run -d --name pcago-test --platform linux/amd64 -p 8000:8000 -v "$(pwd)/src":/srv/pcago:ro trichterhub/pcago-server:2.0-dev
 # Issues
 gh issue view 9 --repo rnajena/pcago-unified   # Docker modernization (moved from rnajena/pcago#10)
 ```
@@ -133,8 +138,16 @@ today's date is usually not published yet). Keep the `renv` install URL in `Dock
 - rocker/shiny 4.5.3+ images are **amd64 only**.
 - Shiny Server does **not** forward container env vars to apps → values go into `$R_HOME/etc/Renviron.site`.
 - The KSZ Apache reverse proxy needs websockets disabled (`disable_protocols` in `docker/shiny-server.conf`).
-- No automated test suite; verify manually with `src/sampledata/` (import, normalize, filter, PCA, plots,
-  movie export, BioMart/AnnotationHub import, GO browser).
+- Tests: `docker/smoketest.R` (pipeline functions) and `docker/browsertest.mjs` (headless Chrome: "Load example
+  data" + visit all tabs, fails on disconnect or real output errors). Not covered: uploads, downloads, movie
+  export, BioMart/AnnotationHub import, GO browser → test manually.
+- **S4 generics swallow Shiny validation errors (R 4.x + Bioconductor):** a reactive that fails `validate()`
+  inside an argument of an S4 generic (`colnames(conditions())`, app generics like `mergeSampleAnnotation`)
+  is re-raised as a plain error → Shiny closes the session ("Disconnected from the server").
+  `src/global.R` wraps those generics so arguments are forced first (base-name generics at load time,
+  app generics via `pcago.wrap.app.generics()` at session start in `server.R`). New S4 generics that
+  shadow base functions must be added to `pcago.generics.forced`.
+- Observers must not fail on `NULL` inputs (an error in an observer closes the session) — use `isTRUE()` etc.
 - BioMart / AnnotationHub need network access at runtime.
 
 ## Important architectural decisions
@@ -145,6 +158,8 @@ today's date is usually not published yet). Keep the `renv` install URL in `Dock
   build context instead of `git clone master`; dependencies via **renv** instead of a downloaded packrat zip.
 - 2026-11-23: No separate Node.js in the server image; image stays `trichterhub/pcago-server` on Docker Hub.
 - 2026-11-23: Legacy Ubuntu 18.04 / R 3.4 tooling removed (`Dockerfile`, `install.sh`, `check_*.sh`, `src/packrat/`,
-  `run_packrat.sh`, `extract_packrat_licenses.sh`). Electron app left in place but unsupported.
+  `run_packrat.sh`, `extract_packrat_licenses.sh`). Electron desktop app (`src-electron/`, `src/pcago.R`) removed as no longer supported.
 - 2026-11-23: Images are tagged `X.Y` **and** `latest` on Docker Hub.
+- 2026-11-23: Validation-vs-S4 problem solved centrally in `src/global.R` (forcing wrappers) instead of
+  editing ~50 call sites.
 - 2026-11-23: `shiny` user kept at uid 999 (gid stays 996; gid 999 is systemd-journal) for compatibility with existing host log volumes.

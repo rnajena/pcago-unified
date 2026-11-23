@@ -56,7 +56,7 @@ The former Ubuntu 18.04 installation script (`install.sh`, R 3.4 + packrat) has 
 Use the Docker image above, or install R and the packages from `src/renv.lock` as described in the
 [R-specific manual](https://github.com/rnajena/pcago-unified/blob/master/src/README.md).
 
-The Electron desktop application in `src-electron/` depended on the removed packrat setup and is
-currently not supported.
+The PCAGO-Electron desktop application is **no longer supported** and has been removed. To run PCAGO
+locally, please use the Docker image (see above).
 
 For credits and more detailed information, see [our R-specific manual](https://github.com/rnajena/pcago-unified/blob/master/src/README.md)

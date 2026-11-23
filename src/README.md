@@ -28,8 +28,8 @@ and for building the image yourself (`Dockerfile_server`).
 
 ### Using the standalone application
 
-The Electron desktop application in [`src-electron`](../src-electron) depended on the former
-packrat setup (R 3.4) and is currently **not supported**.
+The PCAGO-Electron desktop application is **no longer supported** and has been removed.
+To run PCAGO locally, please use the Docker image (see above).
 
 ### Running manually
 
