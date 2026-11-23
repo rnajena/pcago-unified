@@ -43,7 +43,8 @@ GRanges.extractSequenceInfoAnnotation <- function(gr, genes, imported_data) {
   if("exon_length" %in% imported_data) {
     # For normalization we need the exonic length
     # https://www.biostars.org/p/83901/
-    txdb <- suppressWarnings(makeTxDbFromGRanges(gr))
+    # makeTxDbFromGRanges moved from GenomicFeatures to txdbmaker (Bioconductor >= 3.19)
+    txdb <- suppressWarnings(txdbmaker::makeTxDbFromGRanges(gr))
     exons.list.per.gene <- exonsBy(txdb,by="gene")
     exonic.gene.sizes <- sum(width(reduce(exons.list.per.gene)))
     

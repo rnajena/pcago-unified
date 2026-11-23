@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Run this script if you installed all depencencies into your local library
-# If you use packrat, use run_packrat.sh
+# Run this script if you installed all dependencies into your local library (see renv.lock)
 
 echo "shiny::runApp()" | R --vanilla

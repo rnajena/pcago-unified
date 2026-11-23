@@ -1,0 +1,12 @@
+# Only src/, docker/ and the lockfile are needed to build the server image
+.git
+src-electron
+docs
+*.md
+!src/**/*.md
+src/.Rprofile
+src/.Rproj.user
+src/.Rhistory
+src/.RData
+src/renv/library
+**/.DS_Store

@@ -15,8 +15,9 @@ go.browser.detailed.maxterms <- 50
 # How many read count samples are supported
 readcounts.maxsamples <- 100
 
-# Set to non-null value to disable reading the version from git
-pcago.version <- "1.0.0"
+# Set to non-null value to disable reading the version from git.
+# The Docker image sets PCAGO_VERSION at build time (git is not available there).
+pcago.version <- Sys.getenv("PCAGO_VERSION", unset = "1.0.0")
 
 ############
 # End of Config section

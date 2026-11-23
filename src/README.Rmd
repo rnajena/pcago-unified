@@ -11,103 +11,45 @@ PCAGO is an interactive web service that allows analysis of RNA-Seq read count d
 and agglomerative clustering. The tool also includes features like read count normalization, filtering read counts by
 gene annotation and various visualization options.
 
-[PCAGO on GitHub](https://github.com/rnajena/pcago) | [PCAGO-Electron on GitHub](https://github.com/rnajena/pcago-electron/)
+[PCAGO on GitHub](https://github.com/rnajena/pcago-unified)
 
 ## Running
 
 You have following options to run PCAGO:
 
 * Use our servers ([PCAGO Stable](http://pcago.bioinf.uni-jena.de/) or [PCAGO Development Version](http://pcago.bioinf.uni-jena.de/unstable))
-* Use a standalone desktop application
+* Use our Docker image (recommended)
 * Run the PCAGO server on one of your servers or your local computer
 
 ### Using the standalone application
 
-Download the PCAGO-Electron [here](https://github.com/rnajena/pcago-electron). This application wraps a
-PCAGO-server within an [Electron](https://electronjs.org/) application.
+The Electron desktop application in [`src-electron`](../src-electron) depended on the former
+packrat setup (R 3.4) and is currently **not supported**.
 
 ### Running manually
 
-Open a R console in the PCAGO folder and run
+Open an R console in the PCAGO folder (`src`) and run
 
-```
-shiny::runApp()
-```
-
-**Note: ** If you use packrat (see below), you have to run
-
-```
-source('packrat/init.R')
-shiny::runApp()
-```
+    shiny::runApp()
 
 ## Requirements
 
-Following packages are required to run PCAGO if the dependencies are already installed:
+  - R 4.6 (see `renv.lock` for the exact version) and Bioconductor 3.23
+  - ffmpeg (Debian/Ubuntu: `ffmpeg`)
+  - Tcl/Tk runtime (Debian/Ubuntu: `libtcl8.6 libtk8.6`)
 
-* `r sessionInfo()$R.version$version.string` or higher
-* ffmpeg (Debian/Ubuntu: `ffmpeg`)
-* libmariadb (Debian/Ubuntu: `libmariadb2`)
+Following system packages are required to build the R packages (Debian/Ubuntu names):
+`cmake make libbz2-dev libcairo2-dev libcurl4-openssl-dev libfontconfig1-dev libfreetype6-dev
+libfribidi-dev libharfbuzz-dev libicu-dev liblzma-dev libpng-dev libssl-dev libuv1-dev libxml2-dev zlib1g-dev`
 
-Following packages are required to install PCAGO if the required libraries have to be installed
+### Installing the R packages with renv
 
-* libcurl dev package (Debian/Ubuntu: `libcurl4-openssl-dev`)
-* xml2-config dev package (Debian/Ubuntu: `libxml2-dev`)
-* openssl dev package (Debian/Ubuntu: `libssl-dev`)
-* mariadb dev package (Debian/Ubuntu: `libmariadb-client-lgpl-dev`)
-* cairo2 dev package (Debian/Ubuntu: `libcairo2-dev`)
-* GTK2 dev package (Debian/Ubuntu: `libgtk2.0-dev`)
-* XVFB package (Debian/Ubuntu: `xvfb`)
-* xAuth package (Debian/Ubuntu: `xauth`)
-* xfonts dev package (Debian/Ubuntu: `xfonts-baselibgtk2.0-dev`)
-* xfonts base package (Debian/Ubuntu: `xfonts-base`)
-* libxt dev package (Debian/Ubuntu: `libxt-dev`)
+The exact versions of all R packages are pinned in `renv.lock`
+([renv](https://rstudio.github.io/renv/)). To install them into your R library, run in the `src` folder:
 
-PCAGO also requires several R packages (see table below). You can either install those packages manually or by using the
-package management system packrat.
-
-### Using packrat
-
-[Packrat](https://rstudio.github.io/packrat/) is a package management system that allows creating snapshots
-of the libraries used for development of the application. This prevents breakage introduced by newer library versions.
-To use packrat, follow these steps:
-
-1. Download the [package sources](https://github.com/rnajena/pcago/releases)
-2. Unpack them into the `packrat` directory within the PCAGO project folder
-3. Start R within the project directory
-4. Run `source('packrat/init.R')`
-
-**Important note: ** `source('packrat/init.R')` must be always called before starting PCAGO to enable packrat. If you want to automate this
-process or want to deploy a server using [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/), create a file `.Rprofile` that contains `source('packrat/init.R')` in the PCAGO directory.
-
-**Important note: ** If the installation of the dependencies failed for any reason `source('packrat/init.R')` will **not** continue the installation of the library. Additionally run `packrat::restore()` to continue the dependency installation.
-
-**Tip: ** You can copy the packrat directory to other computers running the same operating system to skip the building times. This will likely not work if you copy data between different distributions or different versions of the same distribution.
-
-### Installing requirements manually
-
-If you do not want to use packrat, you can install the dependencies manually.
-Please note that newer library versions might break functionality.
-Following command installs all dependencies:
-
-```{r, comment=""}
-
-r.packages.cran <- Filter(function(x) { "Repository" %in% names(x) && x$Repository == "CRAN" }, sessionInfo()$otherPkgs)
-r.packages.bioc <- Filter(function(x) { !("Repository" %in% names(x)) }, sessionInfo()$otherPkgs)
-r.packages.cran.install <- paste0("install.packages(c(",
-                             paste(as.vector(sapply(r.packages.cran, function(x) { paste0("\"", x$Package, "\"") }))
-                             ,collapse = ", "), "))")
-r.packages.bioc.install <-  paste0("biocLite(c(", paste(as.vector(sapply(r.packages.bioc, function(x) { paste0("\"", x$Package, "\"") })), collapse = ", ") ,
-                                   "), type = \"source\")")
-
-cat("# CRAN packages",
-  r.packages.cran.install,
-  "",
-  "# BioConductor packages. Install them from source, so known bugs with newer R versions can be avoided.",
-  "source(\"https://bioconductor.org/biocLite.R\")",
-  r.packages.bioc.install,
-  sep = "\n")
-
+```
+install.packages(c("renv", "BiocManager"))
+renv::restore(lockfile = "renv.lock", library = .libPaths()[1], prompt = FALSE)
 ```
 
 ## R packages
