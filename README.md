@@ -9,7 +9,7 @@ visualization options.
 # Running PCAGO
 
 You can use our server on https://pcago.bioinf.uni-jena.de or run
-PCAGO on your Linux computer via a server or as standalone application.
+PCAGO on your own computer or server via Docker.
 
 If you want to run PCAGO in RStudio or plain R, you find instructions
 [here](https://github.com/rnajena/pcago-unified/blob/master/src/README.md).
@@ -18,18 +18,10 @@ If you want to run PCAGO in RStudio or plain R, you find instructions
 
 Big thanks go out to Lasse Faber!
 
-### Local machine
-```
-docker run -p 8000:8000 --user $(id -u):$(id -g) --rm -it mhoelzer/pcago:1.0--c1e506c ./run_packrat.sh
-```
-
-### Server
-Run the docker container in the same way like above and additionally connect to the server with port forwarding.
+When running PCAGO on a remote server, connect with port forwarding and open 127.0.0.1:8000 in your browser:
 ```
 ssh -L 8000:127.0.0.1:8000 your@your.server.com
 ```
-
-In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
 
 ### Server 2.0
 
@@ -37,27 +29,34 @@ We have created a new docker container with the PCAGO app and a running shiny se
 Run the docker container with e.g.
 
 ```
-docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:1.1
+docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:latest
 ```
 
 This is the Docker container that powers our server at https://pcago.bioinf.uni-jena.de.
 Processes inside docker are started by the shiny user, id 999. User id 999 should have access to the
 logs directory on the host machine.
 Alternatively, you may start docker with the root user with the ``--user`` flag.
+Shiny Server's own log goes to the container output (`docker logs`), the app logs to `/home/shiny/logs`.
+
+The image (`Dockerfile_server`) is based on [rocker/shiny](https://rocker-project.org/images/versioned/shiny.html)
+(R 4.6.2, Ubuntu 26.04 LTS). R package versions are pinned in `src/renv.lock`.
+To build it yourself (amd64 only; works under emulation on Apple Silicon, but slowly):
+
+```
+docker build --platform linux/amd64 --build-arg PCAGO_VERSION=$(git describe --always --dirty) \
+  -t trichterhub/pcago-server:2.0 -t trichterhub/pcago-server:latest -f Dockerfile_server .
+# Optional: run the pipeline smoke test against the image
+docker run --rm --platform linux/amd64 -v "$(pwd)"/docker/smoketest.R:/tmp/smoketest.R:ro \
+  --entrypoint Rscript trichterhub/pcago-server:2.0 /tmp/smoketest.R
+```
 
 # Installation
 
-We offer an installation script designed for Ubuntu 18.04 that builds the
-final server and standalone application including installation of dependency
-packages.
+The former Ubuntu 18.04 installation script (`install.sh`, R 3.4 + packrat) has been removed.
+Use the Docker image above, or install R and the packages from `src/renv.lock` as described in the
+[R-specific manual](https://github.com/rnajena/pcago-unified/blob/master/src/README.md).
 
-1. Clone or [download](https://github.com/rnajena/pcago-unified/archive/master.zip) our PCAGO repository
-2. If needed, extract the \*.zip file
-3. Open a terminal in the downloaded PCAGO folder
-4. Run `./install.sh` and follow the instructions
-
-When the installation is finished, you can navigate to the installation directory and
-either start `pcago-electron.sh` to run the standalone application or run `./pcago-server.sh`
-in a terminal to start the server.
+The PCAGO-Electron desktop application is **no longer supported** and has been removed. To run PCAGO
+locally, please use the Docker image (see above).
 
 For credits and more detailed information, see [our R-specific manual](https://github.com/rnajena/pcago-unified/blob/master/src/README.md)

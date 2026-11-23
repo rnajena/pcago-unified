@@ -14,119 +14,53 @@ You have following options to run PCAGO:
   - Use our servers ([PCAGO Stable](https://pcago.bioinf.uni-jena.de/) or
     [PCAGO Development
     Version](http://pcago.bioinf.uni-jena.de/unstable))
-  - Use a standalone desktop application
   - Run the PCAGO server on one of your servers or your local computer
   - Use our Docker Image (__recommended__)
 
-### Run via Docker
+### Run via Docker (recommended)
 
-Big thanks go out to Lasse Faber!
-
-#### Local machine
 ```
-docker run -p 8000:8000 --user $(id -u):$(id -g) --rm -it mhoelzer/pcago:1.0--c1e506c ./run_packrat.sh
+docker run -it -p 8000:8000 -v "$(pwd)"/logs:/home/shiny/logs trichterhub/pcago-server:latest
 ```
 
-#### Server
-Run the docker container in the same way like above and additionally connect to the server with port forwarding.
-```
-ssh -L 8000:127.0.0.1:8000 your@your.server.com
-```
-
-In both cases you will then be able to access the PCAGO-Server via the following address in your browser: 127.0.0.1:8000.
-
+Then open http://127.0.0.1:8000 in your browser. See the [main README](../README.md) for details
+and for building the image yourself (`Dockerfile_server`).
 
 ### Using the standalone application
 
-Download the PCAGO-Electron
-[here](https://github.com/rnajena/pcago-unified). This application
-wraps a PCAGO-server within an [Electron](https://electronjs.org/)
-application.
+The PCAGO-Electron desktop application is **no longer supported** and has been removed.
+To run PCAGO locally, please use the Docker image (see above).
 
 ### Running manually
 
-Open a R console in the PCAGO folder and run
+Open an R console in the PCAGO folder (`src`) and run
 
-    shiny::runApp()
-
-**Note: ** If you use packrat (see below), you have to run
-
-    source('packrat/init.R')
     shiny::runApp()
 
 ## Requirements
 
-Following packages are required to run PCAGO if the dependencies are
-already installed:
-
-  - R version 3.4.3 (2017-11-30) or higher
+  - R 4.6 (see `renv.lock` for the exact version) and Bioconductor 3.23
   - ffmpeg (Debian/Ubuntu: `ffmpeg`)
-  - libmariadb (Debian/Ubuntu: `libmariadb2`)
+  - Tcl/Tk runtime (Debian/Ubuntu: `libtcl8.6 libtk8.6`)
 
-Following packages are required to install PCAGO if the required
-libraries have to be installed
+Following system packages are required to build the R packages (Debian/Ubuntu names):
+`cmake make libbz2-dev libcairo2-dev libcurl4-openssl-dev libfontconfig1-dev libfreetype6-dev
+libfribidi-dev libharfbuzz-dev libicu-dev liblzma-dev libpng-dev libssl-dev libuv1-dev libxml2-dev zlib1g-dev`
 
-  - libcurl dev package (Debian/Ubuntu: `libcurl4-openssl-dev`)
-  - xml2-config dev package (Debian/Ubuntu: `libxml2-dev`)
-  - openssl dev package (Debian/Ubuntu: `libssl-dev`)
-  - mariadb dev package (Debian/Ubuntu: `libmariadb-client-lgpl-dev`)
-  - cairo2 dev package (Debian/Ubuntu: `libcairo2-dev`)
-  - GTK2 dev package (Debian/Ubuntu: `libgtk2.0-dev`)
-  - XVFB package (Debian/Ubuntu: `xvfb`)
-  - xAuth package (Debian/Ubuntu: `xauth`)
-  - xfonts dev package (Debian/Ubuntu: `xfonts-baselibgtk2.0-dev`)
-  - xfonts base package (Debian/Ubuntu: `xfonts-base`)
-  - libxt dev package (Debian/Ubuntu: `libxt-dev`)
+### Installing the R packages with renv
 
-PCAGO also requires several R packages (see table below). You can either
-install those packages manually or by using the package management
-system packrat.
+The exact versions of all R packages are pinned in `renv.lock`
+([renv](https://rstudio.github.io/renv/)). To install them into your R library, run in the `src` folder:
 
-### Using packrat
-
-[Packrat](https://rstudio.github.io/packrat/) is a package management
-system that allows creating snapshots of the libraries used for
-development of the application. This prevents breakage introduced by
-newer library versions. To use packrat, follow these steps:
-
-1.  Download the [package
-    sources](https://github.com/rnajena/pcago/releases)
-2.  Unpack them into the `packrat` directory within the PCAGO project
-    folder
-3.  Start R within the project directory
-4.  Run `source('packrat/init.R')`
-
-**Important note: ** `source('packrat/init.R')` must be always called
-before starting PCAGO to enable packrat. If you want to automate this
-process or want to deploy a server using [Shiny
-Server](https://www.rstudio.com/products/shiny/shiny-server/), create a
-file `.Rprofile` that contains `source('packrat/init.R')` in the PCAGO
-directory.
-
-**Important note: ** If the installation of the dependencies failed for
-any reason `source('packrat/init.R')` will **not** continue the
-installation of the library. Additionally run `packrat::restore()` to
-continue the dependency installation.
-
-**Tip: ** You can copy the packrat directory to other computers running
-the same operating system to skip the building times. This will likely
-not work if you copy data between different distributions or different
-versions of the same distribution.
-
-### Installing requirements manually
-
-If you do not want to use packrat, you can install the dependencies
-manually. Please note that newer library versions might break
-functionality. Following command installs all dependencies:
-
-    # CRAN packages
-    install.packages(c("svglite", "scales", "fastcluster", "gplots", "amap", "dendextend", "VennDiagram", "futile.logger", "plot3D", "scatterplot3d", "ggplot2", "RColorBrewer", "openxlsx", "Cairo", "reshape2", "R6", "matrixStats", "colourpicker", "shinyjs", "shinyBS", "DT", "htmltools", "markdown", "shiny"))
-
-    # BioConductor packages. Install them from source, so known bugs with newer R versions can be avoided.
-    source("https://bioconductor.org/biocLite.R")
-    biocLite(c("ctc", "GO.db", "GenomicFeatures", "AnnotationDbi", "AnnotationHub", "biomaRt", "rtracklayer", "DESeq2", "SummarizedExperiment", "DelayedArray", "Biobase", "GenomicRanges", "GenomeInfoDb", "IRanges", "S4Vectors", "BiocGenerics"), type = "source")
+```
+install.packages(c("renv", "BiocManager"))
+renv::restore(lockfile = "renv.lock", library = .libPaths()[1], prompt = FALSE)
+```
 
 ## R packages
+
+**Note:** The table below was generated for the former R 3.4 setup. The current
+package versions are listed in `renv.lock`.
 
 | Package              | Author                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | URL                                                                                                                                                                                                                                                                | License                        | Version |
 | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------ |

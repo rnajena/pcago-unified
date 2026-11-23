@@ -25,5 +25,5 @@ PCAGO provides additional features that lets you do your tasks easier, like ...
 ## Additional info
 
 The source code of PCAGO is available at [GitHub](https://github.com/rnajena/pcago-unified).
-If you want to use PCAGO as desktop application, you can use [PCAGO-Electron](https://github.com/rnajena/pcago-unified) or execute a Docker
-container (recommended). See [GitHub](https://github.com/rnajena/pcago-unified) for further instructions.
+If you want to run PCAGO on your own computer, use our Docker container. The former desktop application
+(PCAGO-Electron) is no longer supported. See [GitHub](https://github.com/rnajena/pcago-unified) for instructions.

@@ -1,2 +1,0 @@
- This folder must contain a build of ffmpeg for Windows.
- The ffmpeg executable (ffmpeg.exe) must be in bin/
