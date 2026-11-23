@@ -39,12 +39,14 @@ Issue pcago-unified#9 — PR #10 open; Martin re-tests in the browser (container
 4. [x] Commit + PR.
 5. [ ] Regenerate `src/legal/licenses.md` for the new package versions (old list is from packrat).
 6. [ ] Investigate recurring server crashes on the production host (memory limits? check `docker logs` + app logs after deployment).
-7. [ ] Push `trichterhub/pcago-server:2.0` + `:latest` and coordinate deployment with KSZ.
+7. [ ] Push `trichterhub/pcago-server:2.0` + `:latest` — image built from `ac96d9f` and tested (smoke test,
+       browser test, healthy); **push denied** (`insufficient_scope`): needs `docker login` with an account that
+       can push to `trichterhub`. Then coordinate deployment with KSZ.
 8. [ ] Optional: GitHub Actions workflow to build the image (+ smoke test) on native amd64; Trivy/Grype scan for KSZ.
 9. [ ] Check manual import via "Example data" source of the sample annotation importer: fails with
        "No data to be imported selected!" (no parameter checkboxes for sample source). Probably pre-existing;
        "Load example data" link works.
-10. [ ] Rebuild the image (current `2.0-dev` image predates the global.R fix; test container mounts `src/`).
+10. [x] Release image rebuilt as `trichterhub/pcago-server:2.0` / `:latest` (version string `2.0-ac96d9f`).
 
 # Open Questions
 
