@@ -19,7 +19,7 @@ _Last updated: 2026-11-23_
 - README "Server 2.0" section updated (tag 2.0, build + smoke test instructions).
 - Tracked as **rnajena/pcago-unified#9** (old rnajena/pcago#10 closed with a link; transfer was not permitted).
 - Legacy Ubuntu 18.04 / R 3.4 tooling removed (`Dockerfile`, `install.sh`, `check_*.sh`, `src/packrat/`, packrat scripts); READMEs updated.
-- Committed and PR opened (see PR for #9).
+- Committed and PR opened: **rnajena/pcago-unified#10** (fixes #9).
 
 # Current Focus
 
